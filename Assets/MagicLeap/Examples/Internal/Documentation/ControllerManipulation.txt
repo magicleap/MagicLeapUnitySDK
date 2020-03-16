@@ -1,0 +1,11 @@
+﻿Controller Manipulation
+
+Description:
+This sample verifies controller interaction with objects in the scene.
+
+Expected Behavior:
+In this scene you will be able to test controller interaction with objects of the scene. 
+First, calibrate the controller by pressing the bumper. Controller model will now follow 
+your controller movements and position. Placing the controller in an object in the scene 
+will change the color of this object. Pressing the trigger when the controller is inside 
+an object will make the object expand.

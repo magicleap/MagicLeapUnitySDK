@@ -1,0 +1,16 @@
+# Example Scene: Selection
+
+This example scene demonstrates and prescribes preferred methods for combining
+physical world raycast with virtual raycast, as well as interacting with
+virtual objects when the raycast hits.
+
+The ray is emitted from the correct position that intersects both the physical
+world and virtual objects. When a virtual object is hit, the object changes
+colors.
+
+## Bumper/Move
+Press the Bumper to cycle raycast modes: controller, head, and eyes.
+
+## Trigger/App
+When you squeeze the trigger, an expanding visual effect is activated if the
+ray is pointed at a virtual object.
