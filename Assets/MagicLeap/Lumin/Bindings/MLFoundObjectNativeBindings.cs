@@ -49,7 +49,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <summary>
             /// Initializes a new instance of the <see cref="NativeBindings"/> class.
             /// </summary>
-            protected NativeBindings()
+            private NativeBindings()
             {
             }
 

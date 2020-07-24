@@ -12,8 +12,6 @@
 
 namespace UnityEngine.XR.MagicLeap
 {
-    using System.Collections.Generic;
-
     #if PLATFORM_LUMIN
     using UnityEngine.XR.MagicLeap.Native;
     #endif
@@ -25,29 +23,9 @@ namespace UnityEngine.XR.MagicLeap
     {
         #if PLATFORM_LUMIN
         /// <summary>
-        /// Contains all pending queries.
-        /// </summary>
-        private readonly Dictionary<ulong, OnRaycastResultDelegate> pendingQueries = new Dictionary<ulong, OnRaycastResultDelegate>();
-
-        /// <summary>
-        /// Tracks the latest query added.
-        /// </summary>
-        private NativeBindings.MLRaycastQueryNative currentQuery = NativeBindings.MLRaycastQueryNative.Create();
-
-        /// <summary>
         /// Stores the ray cast system tracker.
         /// </summary>
         private ulong trackerHandle = MagicLeapNativeBindings.InvalidHandle;
-
-        /// <summary>
-        /// Keeps the queries that were completed on a specific frame.
-        /// </summary>
-        private Dictionary<ulong, NativeBindings.MLRaycastResultNative> completedQueries = new Dictionary<ulong, NativeBindings.MLRaycastResultNative>();
-
-        /// <summary>
-        /// Keeps the queries that failed on a specific frame.
-        /// </summary>
-        private List<ulong> errorQueries = new List<ulong>();
 
         /// <summary>
         /// Delegate used to convey the result of a ray cast.
@@ -124,24 +102,95 @@ namespace UnityEngine.XR.MagicLeap
                         return MLResult.Create(MLResult.Code.InvalidParam);
                     }
 
-                    _instance.currentQuery.Position = MLConvert.FromUnity(query.Position);
-                    _instance.currentQuery.Direction = MLConvert.FromUnity(query.Direction, true, false);
-                    _instance.currentQuery.UpVector = MLConvert.FromUnity(query.UpVector, true, false);
-                    _instance.currentQuery.Width = query.Width;
-                    _instance.currentQuery.Height = query.Height;
-                    _instance.currentQuery.HorizontalFovDegrees = query.HorizontalFovDegrees;
-                    _instance.currentQuery.CollideWithUnobserved = query.CollideWithUnobserved;
-
-                    ulong queryHandle = MagicLeapNativeBindings.InvalidHandle;
-                    MLResult.Code resultCode = NativeBindings.MLRaycastRequest(_instance.trackerHandle, ref _instance.currentQuery, ref queryHandle);
-                    if (resultCode != MLResult.Code.Ok)
+                    bool RequestRaycast()
                     {
-                        MLResult result = MLResult.Create(resultCode);
-                        MLPluginLog.ErrorFormat("MLRaycast.Raycast failed to request a new ray cast. Reason: {0}", result);
-                        return result;
+                        if (MLRaycast.IsValidInstance())
+                        {
+                            NativeBindings.MLRaycastQueryNative queryNative = new NativeBindings.MLRaycastQueryNative()
+                            {
+                                Position = MLConvert.FromUnity(query.Position),
+                                Direction = MLConvert.FromUnity(query.Direction, true, false),
+                                UpVector = MLConvert.FromUnity(query.UpVector, true, false),
+                                Width = query.Width,
+                                Height = query.Height,
+                                HorizontalFovDegrees = query.HorizontalFovDegrees,
+                                CollideWithUnobserved = query.CollideWithUnobserved,
+                            };
+
+                            ulong requestHandle = MagicLeapNativeBindings.InvalidHandle;
+
+                            MLResult.Code resultCode = NativeBindings.MLRaycastRequest(_instance.trackerHandle, ref queryNative, ref requestHandle);
+
+                            if (resultCode != MLResult.Code.Ok)
+                            {
+                                MLPluginLog.ErrorFormat("MLRaycast.Raycast failed to request a new ray cast. Reason: {0}", MLResult.CodeToString(resultCode));
+                                return true;
+                            }
+
+                            if (requestHandle == MagicLeapNativeBindings.InvalidHandle)
+                            {
+                                MLPluginLog.Error("MLRaycast.Raycast failed to request a new ray cast. Reason: Request handle is invalid.");
+                                return true;
+                            }
+
+                            bool GetRaycastResults()
+                            {
+                                if (MLRaycast.IsValidInstance())
+                                {
+                                    NativeBindings.MLRaycastResultNative raycastResult = NativeBindings.MLRaycastResultNative.Create();
+
+                                    resultCode = NativeBindings.MLRaycastGetResult(_instance.trackerHandle, requestHandle, ref raycastResult);
+                                    if (resultCode == MLResult.Code.Pending)
+                                    {
+                                        return false;
+                                    }
+
+                                    if (resultCode == MLResult.Code.Ok)
+                                    {
+                                        // Check if there is a valid hit result.
+                                        bool didHit = raycastResult.State != ResultState.RequestFailed && raycastResult.State != ResultState.NoCollision;
+
+                                        MLThreadDispatch.ScheduleMain(() =>
+                                        {
+                                            if (MLRaycast.IsValidInstance())
+                                            {
+                                                callback(
+                                                    raycastResult.State,
+                                                    didHit ? MLConvert.ToUnity(raycastResult.Hitpoint) : Vector3.zero,
+                                                    didHit ? MLConvert.ToUnity(raycastResult.Normal, true, false) : Vector3.zero,
+                                                    raycastResult.Confidence);
+                                            }
+                                            else
+                                            {
+                                                MLPluginLog.ErrorFormat("MLRaycast.Raycast failed. Reason: No Instance for MLRaycast");
+                                            }
+                                        });
+                                    }
+                                    else
+                                    {
+                                        MLPluginLog.ErrorFormat("MLRaycast.Raycast failed to get raycast result. Reason: {0}", MLResult.CodeToString(resultCode));
+                                    }
+                                }
+                                else
+                                {
+                                    MLPluginLog.ErrorFormat("MLRaycast.Raycast failed. Reason: No Instance for MLRaycast");
+                                }
+
+                                return true;
+                            }
+
+                            MLThreadDispatch.ScheduleWork(GetRaycastResults);
+                        }
+                        else
+                        {
+                            MLPluginLog.ErrorFormat("MLRaycast.Raycast failed. Reason: No Instance for MLRaycast");
+                        }
+
+                        return true;
                     }
 
-                    _instance.pendingQueries.Add(queryHandle, callback);
+                    MLThreadDispatch.ScheduleWork(RequestRaycast);
+
                     return MLResult.Create(MLResult.Code.Ok);
                 }
                 else
@@ -193,52 +242,6 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         protected override void Update()
         {
-            try
-            {
-                if (_instance.pendingQueries.Count > 0)
-                {
-                    foreach (ulong handle in _instance.pendingQueries.Keys)
-                    {
-                        NativeBindings.MLRaycastResultNative raycastResult = NativeBindings.MLRaycastResultNative.Create();
-
-                        MLResult.Code resultCode = NativeBindings.MLRaycastGetResult(_instance.trackerHandle, handle, ref raycastResult);
-                        if (resultCode == MLResult.Code.Ok)
-                        {
-                            _instance.completedQueries.Add(handle, raycastResult);
-                        }
-                        else if(resultCode != MLResult.Code.Pending)
-                        {
-                            MLPluginLog.ErrorFormat("MLRaycast.Update failed to get raycast result. Reason: {0}", MLResult.CodeToString(resultCode));
-                            _instance.errorQueries.Add(handle);
-                        }
-                    }
-
-                    foreach (ulong handle in _instance.errorQueries)
-                    {
-                        _instance.pendingQueries.Remove(handle);
-                    }
-                    _instance.errorQueries.Clear();
-
-                    foreach (KeyValuePair<ulong, NativeBindings.MLRaycastResultNative> handle in _instance.completedQueries)
-                    {
-                        // Check if there is a valid hit result.
-                        bool didHit = handle.Value.State != ResultState.RequestFailed && handle.Value.State != ResultState.NoCollision;
-
-                        _instance.pendingQueries[handle.Key](
-                             handle.Value.State,
-                            didHit ? MLConvert.ToUnity(handle.Value.Hitpoint) : Vector3.zero,
-                            didHit ? MLConvert.ToUnity(handle.Value.Normal, true, false) : Vector3.zero,
-                             handle.Value.Confidence);
-
-                        _instance.pendingQueries.Remove(handle.Key);
-                    }
-                    _instance.completedQueries.Clear();
-                }
-            }
-            catch (System.EntryPointNotFoundException)
-            {
-                MLPluginLog.Error("MLRaycast.Update failed. Reason: API symbols not found");
-            }
         }
 
         /// <summary>
@@ -247,11 +250,6 @@ namespace UnityEngine.XR.MagicLeap
         /// <param name="isSafeToAccessManagedObjects">Allow complete cleanup of the API.</param>
         protected override void CleanupAPI(bool isSafeToAccessManagedObjects)
         {
-            if (isSafeToAccessManagedObjects)
-            {
-                _instance.pendingQueries.Clear();
-            }
-
             _instance.DestroyNativeTracker();
         }
 

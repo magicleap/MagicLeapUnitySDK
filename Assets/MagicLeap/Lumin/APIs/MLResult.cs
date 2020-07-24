@@ -811,6 +811,8 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             SecureStorageIOFailure,
 
+            // MLAppConnectResult
+
             /// <summary>
             /// Unsupported operation.
             /// </summary>
@@ -1019,7 +1021,19 @@ namespace UnityEngine.XR.MagicLeap
             /// <summary>
             /// Friend Picker Invalid argument.
             /// </summary>
-            AppConnectFriendPickerInvalidArg
+            AppConnectFriendPickerInvalidArg,
+
+            // MLPerceptionResult
+
+            /// <summary>
+            /// Perception System not started.
+            /// </summary>
+            MLPerceptionNotStarted = (CodePrefix.MLPerceptionResult << 16),
+
+            /// <summary>
+            /// Invalid PCF Root.
+            /// </summary>
+            MLPerceptionInvalidPCFRoot,
         }
 
         /// <summary>
@@ -1136,7 +1150,12 @@ namespace UnityEngine.XR.MagicLeap
             /// <summary>
             /// Code for app connect related MLResults.
             /// </summary>
-            MLAppConnect = 0xebf7
+            MLAppConnect = 0xebf7,
+
+            /// <summary>
+            /// Code for app perception related MLResults.
+            /// </summary>
+            MLPerceptionResult = 0x5525
         }
 
         #if PLATFORM_LUMIN

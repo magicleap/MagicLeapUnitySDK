@@ -36,7 +36,7 @@ namespace UnityEngine.XR.MagicLeap
         [Obsolete("Please use MLPersistentCoordinateFrames.OnLocalized event instead.")]
         public static event System.Action<MLResult> OnInitialized = delegate { };
 
-        [Obsolete("Please use MLPersistentCoordinateFrames.Update instead.", true)]
+        [Obsolete("Please directly call Update() using a reference to an MLPersistentCoordinateFrames.PCF object instead.", true)]
         public static MLResult GetPCFPosition(MLPCF pcf, Action<MLResult, MLPCF> callback)
         {
             return MLResult.Create(MLResult.Code.UnspecifiedFailure, "Please use MLPersistentCoordinateFrames.Update instead.");
@@ -51,27 +51,8 @@ namespace UnityEngine.XR.MagicLeap
         [Obsolete("Please use the most recent FindClosestPCF that uses the MLPersistentCoordinateFrames.PCF class instead.")]
         public static MLResult FindClosestPCF(Vector3 position, Action<MLResult, MLPCF> callback)
         {
-            if (callback == null)
-            {
-                MLResult result = MLResult.Create(MLResult.Code.InvalidParam);
-                callback(result, null);
-                return result;
-            }
+            return MLResult.Create(MLResult.Code.UnspecifiedFailure, "No longer used.");
 
-            else
-            {
-                MLResult result = FindClosestPCF(position, out PCF pcf);
-                if (result.IsOk)
-                {
-                    callback(result, (MLPCF)pcf);
-                }
-                else
-                {
-                    callback(result, null);
-                }
-
-                return result;
-            }
         }
 
         [Obsolete("Please directly call Update() using a reference to an MLPersistentCoordinateFrames.PCF object instead.")]
@@ -96,17 +77,8 @@ namespace UnityEngine.XR.MagicLeap
         [Obsolete("Please use MLPersistentCoordinateFrames.FindAllPCFs instead.")]
         public static MLResult GetAllPCFs(out List<MLPCF> pcfList, int maxResults = int.MaxValue)
         {
-            MLResult result = FindAllPCFs(out List<PCF> list, maxResults: (uint)maxResults);
-            if (result.IsOk)
-            {
-                pcfList = list.Cast<MLPCF>().ToList();
-            }
-            else
-            {
-                pcfList = new List<MLPCF>();
-            }
-
-            return result;
+            pcfList = new List<MLPCF>();
+            return MLResult.Create(MLResult.Code.UnspecifiedFailure, "No longer used.");
         }
 
         [Obsolete("Please use MLResult.CodeToString(MLResult.Code) instead.")]

@@ -177,13 +177,15 @@ namespace MagicLeap
                 return;
             }
 
-            MLPersistentCoordinateFrames.FindClosestPCF(transform.position, out MLPersistentCoordinateFrames.PCF pcf);
+            MLPersistentCoordinateFrames.FindClosestPCF(transform.position, (MLResult.Code resultCode, MLPersistentCoordinateFrames.PCF pcf) =>
+            {
+                _visualTransformBinding = new TransformBinding(isPersistent: false);
+                _visualTransformBinding.Bind(pcf, transform);
 
-            _visualTransformBinding = new TransformBinding(isPersistent: false);
-            _visualTransformBinding.Bind(pcf, transform);
+                _visualTextBinding = new TextMeshBinding();
+                _visualTextBinding.Bind(pcf, _statusText);
+            });
 
-            _visualTextBinding = new TextMeshBinding();
-            _visualTextBinding.Bind(pcf, _statusText);
             #endif
         }
 
