@@ -259,23 +259,24 @@ namespace MagicLeap
             foreach (TransformBinding storedBinding in allBindings)
             {
                 // Try to find the PCF with the stored CFUID.
-                MLResult result = MLPersistentCoordinateFrames.FindPCFByCFUID(storedBinding.PCF.CFUID, out MLPersistentCoordinateFrames.PCF pcf);
-
-                if (pcf != null && MLResult.IsOK(pcf.CurrentResultCode))
+                MLResult result = MLPersistentCoordinateFrames.FindPCFByCFUID(storedBinding.PCF.CFUID, (MLResult.Code resultCode, MLPersistentCoordinateFrames.PCF pcf) =>
                 {
-                    GameObject gameObj = Instantiate(_content, Vector3.zero, Quaternion.identity);
-                    PersistentBall persistentContent = gameObj.GetComponent<PersistentBall>();
-                    persistentContent.BallTransformBinding = storedBinding;
-                    persistentContent.BallTransformBinding.Bind(pcf, gameObj.transform, true);
-                    ContentTap contentTap = persistentContent.GetComponent<ContentTap>();
-                    contentTap.OnContentTap += OnContentDestroy;
-                    ++numPersistentContentRegained;
-                    _persistentContentMap.Add(persistentContent, "Regained");
-                }
-                else
-                {
-                    deleteBindings.Add(storedBinding);
-                }
+                    if (pcf != null && MLResult.IsOK(pcf.CurrentResultCode))
+                    {
+                        GameObject gameObj = Instantiate(_content, Vector3.zero, Quaternion.identity);
+                        PersistentBall persistentContent = gameObj.GetComponent<PersistentBall>();
+                        persistentContent.BallTransformBinding = storedBinding;
+                        persistentContent.BallTransformBinding.Bind(pcf, gameObj.transform, true);
+                        ContentTap contentTap = persistentContent.GetComponent<ContentTap>();
+                        contentTap.OnContentTap += OnContentDestroy;
+                        ++numPersistentContentRegained;
+                        _persistentContentMap.Add(persistentContent, "Regained");
+                    }
+                    else
+                    {
+                        deleteBindings.Add(storedBinding);
+                    }
+                });
             }
 
             foreach (TransformBinding storedBinding in deleteBindings)
@@ -297,14 +298,16 @@ namespace MagicLeap
         {
             GameObject gameObj = Instantiate(_content, position, rotation);
             #if PLATFORM_LUMIN
-            MLPersistentCoordinateFrames.FindClosestPCF(position, out MLPersistentCoordinateFrames.PCF pcf);
-            PersistentBall persistentContent = gameObj.GetComponent<PersistentBall>();
-            persistentContent.BallTransformBinding = new TransformBinding(gameObj.GetInstanceID().ToString(), "Ball");
-            persistentContent.BallTransformBinding.Bind(pcf, gameObj.transform);
-            ContentTap contentTap = persistentContent.GetComponent<ContentTap>();
-            contentTap.OnContentTap += OnContentDestroy;
-            ++numPersistentContentCreated;
-            _persistentContentMap.Add(persistentContent, "Created");
+            MLPersistentCoordinateFrames.FindClosestPCF(position, (MLResult.Code resultCode, MLPersistentCoordinateFrames.PCF pcf) =>
+            {
+                PersistentBall persistentContent = gameObj.GetComponent<PersistentBall>();
+                persistentContent.BallTransformBinding = new TransformBinding(gameObj.GetInstanceID().ToString(), "Ball");
+                persistentContent.BallTransformBinding.Bind(pcf, gameObj.transform);
+                ContentTap contentTap = persistentContent.GetComponent<ContentTap>();
+                contentTap.OnContentTap += OnContentDestroy;
+                ++numPersistentContentCreated;
+                _persistentContentMap.Add(persistentContent, "Created");
+            });
             #endif
         }
 
