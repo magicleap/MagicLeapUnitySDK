@@ -534,11 +534,11 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         /// <param name="resultCode">The MLResult.Code to be requested.</param>
         /// <returns>The result string.</returns>
-        internal static string GetResultString(MLResult.Code resultCode)
+        internal static IntPtr GetResultString(MLResult.Code resultCode)
         {
             try
             {
-                return Marshal.PtrToStringAnsi(NativeBindings.MLPersistentCoordinateFrameGetResultString(resultCode));
+                return NativeBindings.MLPersistentCoordinateFrameGetResultString(resultCode);
             }
             catch (System.DllNotFoundException)
             {
@@ -549,7 +549,7 @@ namespace UnityEngine.XR.MagicLeap
                 MLPluginLog.Error("MLPersistentCoordinateFrames.GetResultString failed. Reason: API symbols not found");
             }
 
-            return string.Empty;
+            return IntPtr.Zero;
         }
 
         /// <summary>
