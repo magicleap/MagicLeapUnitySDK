@@ -51,25 +51,6 @@ namespace UnityEngine.XR.MagicLeap.Native
         }
 
         /// <summary>
-        /// Converts a Vector3 to Unity coordinate space and scale.
-        /// </summary>
-        /// <param name="vec">Vector to convert</param>
-        /// <param name="transformToRUF">If coordinate space should change.</param>
-        /// <param name="applyScale">If world scale should be applied.</param>
-        /// <returns>Converted Vector</returns>
-        public static Vector3 ToUnity(Vector3 vec, bool transformToRUF = true, bool applyScale = true)
-        {
-            Vector3 result = new Vector3(vec.x, vec.y, (transformToRUF) ? -vec.z : vec.z);
-
-            if (applyScale)
-            {
-                result *= MLDevice.WorldScale;
-            }
-
-            return result;
-        }
-
-        /// <summary>
         /// Creates a Unity 3D vector from a x, y and z parameters.
         /// </summary>
         /// <param name="x">X component</param>

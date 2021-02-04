@@ -13,6 +13,8 @@
 namespace UnityEngine.XR.MagicLeap
 {
     using System;
+    using System.Collections.Generic;
+    using System.Runtime.InteropServices;
 
     #if PLATFORM_LUMIN
     using UnityEngine.XR.MagicLeap.Native;
@@ -21,9 +23,24 @@ namespace UnityEngine.XR.MagicLeap
     /// <summary>
     /// Creates planes requests and delegates their result.
     /// </summary>
-    public partial class MLPlanes : MLAPISingleton<MLPlanes>
+    public partial class MLPlanes : MLAutoAPISingleton<MLPlanes>
     {
         #if PLATFORM_LUMIN
+        /// <summary>
+        /// Stores all pending plane queries.
+        /// </summary>
+        private readonly Dictionary<ulong, NativeBindings.Query> pendingQueries = new Dictionary<ulong, NativeBindings.Query>();
+
+        /// <summary>
+        /// Keeps the queries that were completed on a specific frame.
+        /// </summary>
+        private Dictionary<ulong, NativeBindings.Query> completedQueries = new Dictionary<ulong, NativeBindings.Query>();
+
+        /// <summary>
+        /// Keeps the queries that failed on a specific frame.
+        /// </summary>
+        private List<ulong> errorQueries = new List<ulong>();
+
         /// <summary>
         /// Stores the planes system tracker.
         /// </summary>
@@ -115,19 +132,6 @@ namespace UnityEngine.XR.MagicLeap
         public QueryFlags DefaultQueryFlags { get; set; } = QueryFlags.AllOrientations;
 
         /// <summary>
-        /// Starts the MLPlanes API.
-        /// </summary>
-        /// <returns>
-        /// MLResult.Result will be MLResult.Code.Ok if successful.
-        /// MLResult.Result will be MLResult.Code.UnspecifiedFailure if failed due to internal error.
-        /// </returns>
-        public static MLResult Start()
-        {
-            CreateInstance();
-            return MLPlanes.BaseStart(true);
-        }
-
-        /// <summary>
         /// Request real world quad surfaces.
         /// Callback will never be called while request is still pending.
         /// </summary>
@@ -143,30 +147,38 @@ namespace UnityEngine.XR.MagicLeap
         /// </returns>
         public static MLResult GetPlanes(QueryParams queryParams, QueryResultsDelegate callback)
         {
-            if (MLPlanes.IsValidInstance())
+            Instance.ValidateQueryParams(ref queryParams);
+
+            // Required flag by the CAPI, has to be set or errors will occur.
+            queryParams.Flags |= QueryFlags.Polygons;
+
+            // Planes can't have MinHoleLength less than 0.0.
+            queryParams.MinHoleLength = Mathf.Clamp(queryParams.MinHoleLength, 0.0f, queryParams.MinHoleLength);
+
+            // Planes can't have MinPlaneArea less than 0.04.
+            queryParams.MinPlaneArea = Mathf.Clamp(queryParams.MinPlaneArea, 0.04f, queryParams.MinPlaneArea);
+
+            // Don't allow null callbacks to be registered.
+            if (callback == null)
             {
-                _instance.ValidateQueryParams(ref queryParams);
-
-                // Required flag by the CAPI, has to be set or errors will occur.
-                queryParams.Flags |= QueryFlags.Polygons;
-
-                // Don't allow null callbacks to be registered.
-                if (callback == null)
-                {
-                    MLPluginLog.Error("MLPlanes.GetPlanes failed. Reason: Passed input callback is null.");
-                    return MLResult.Create(MLResult.Code.InvalidParam);
-                }
-
-                return _instance.BeginPlaneQuery(queryParams, callback);
+                MLPluginLog.Error("MLPlanes.GetPlanes failed. Reason: Passed input callback is null.");
+                return MLResult.Create(MLResult.Code.InvalidParam);
             }
-            else
-            {
-                MLPluginLog.ErrorFormat("MLPlanes.GetPlanes failed. Reason: No Instance for MLPlanes");
-                return MLResult.Create(MLResult.Code.UnspecifiedFailure, "MLPlanes.GetPlanes failed. Reason: No Instance for MLPlanes");
-            }
+
+            return Instance.BeginPlaneQuery(queryParams, callback);
         }
 
-        #if !DOXYGEN_SHOULD_SKIP_THIS
+        /// <summary>
+        /// Utility function used to determine if some MLPlanes.Plane object contains a certain flag.
+        /// </summary>
+        /// <param name="plane">The MLPlanes.Plane object to be checked.</param>
+        /// <param name="flag">The MLPlanes.QueryFlags to be checked.</param>
+        public static bool DoesPlaneHaveFlag(MLPlanes.Plane plane, MLPlanes.QueryFlags flag)
+        {
+            return (plane.Flags & (uint)flag) == (uint)flag;
+        }
+
+#if !DOXYGEN_SHOULD_SKIP_THIS
         /// <summary>
         /// Starts the plane object requests, Must be called to start receiving plane results from
         /// the underlying system.
@@ -175,21 +187,27 @@ namespace UnityEngine.XR.MagicLeap
         /// MLResult.Result will be <c>MLResult.Code.Ok</c> if successful.
         /// MLResult.Result will be <c>MLResult.Code.UnspecifiedFailure</c> if failed due to internal error.
         /// </returns>
-        protected override MLResult StartAPI()
+        protected override MLResult.Code StartAPI()
         {
-            _instance.planesTracker = MagicLeapNativeBindings.InvalidHandle;
-
-            return _instance.CreatePlanesTracker();
+            this.planesTracker = MagicLeapNativeBindings.InvalidHandle;
+            return this.CreatePlanesTracker().Result;
         }
         #endif // DOXYGEN_SHOULD_SKIP_THIS
 
         /// <summary>
         /// Cleans up unmanaged memory.
         /// </summary>
-        /// <param name="isSafeToAccessManagedObjects">Allow complete cleanup of the API.</param>
-        protected override void CleanupAPI(bool isSafeToAccessManagedObjects)
+        protected override MLResult.Code StopAPI()
         {
-            _instance.DestroyNativeTracker();
+            foreach (var query in this.pendingQueries.Values)
+            {
+                query.Dispose();
+            }
+
+            this.pendingQueries.Clear();
+            this.DestroyNativeTracker();
+
+            return MLResult.Code.Ok;
         }
 
         /// <summary>
@@ -197,17 +215,7 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         protected override void Update()
         {
-        }
-
-        /// <summary>
-        /// static instance of the MLPlanes class
-        /// </summary>
-        private static void CreateInstance()
-        {
-            if (!MLPlanes.IsValidInstance())
-            {
-                MLPlanes._instance = new MLPlanes();
-            }
+            this.ProcessPendingQueries();
         }
 
         /// <summary>
@@ -219,22 +227,9 @@ namespace UnityEngine.XR.MagicLeap
         /// </returns>
         private MLResult CreatePlanesTracker()
         {
-            try
-            {
-                MLResult.Code resultCode = NativeBindings.MLPlanesCreate(ref _instance.planesTracker);
-                if (resultCode != MLResult.Code.Ok || !MagicLeapNativeBindings.MLHandleIsValid(_instance.planesTracker))
-                {
-                    MLResult result = MLResult.Create(resultCode);
-                    MLPluginLog.ErrorFormat("MLPlanes.CreatePlanesTracker failed to initialize native planes tracking. Reason: {0}", result);
-                }
-
-                return MLResult.Create(MLResult.Code.Ok);
-            }
-            catch (System.EntryPointNotFoundException)
-            {
-                MLPluginLog.Error("MLPlanes.CreatePlanesTracker failed. Reason: API symbols not found");
-                return MLResult.Create(MLResult.Code.UnspecifiedFailure, "MLPlanes.CreatePlanesTracker failed. Reason: API symbols not found");
-            }
+            MLResult.Code resultCode = NativeBindings.MLPlanesCreate(ref this.planesTracker);
+            DidNativeCallSucceed(resultCode, "MLPlanesCreate");
+            return MLResult.Create(resultCode);
         }
 
         /// <summary>
@@ -242,25 +237,90 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         private void DestroyNativeTracker()
         {
-            try
+            if (!MagicLeapNativeBindings.MLHandleIsValid(this.planesTracker))
             {
-                if (!MagicLeapNativeBindings.MLHandleIsValid(_instance.planesTracker))
+                return;
+            }
+
+            MLResult.Code resultCode = NativeBindings.MLPlanesDestroy(this.planesTracker);
+            if (resultCode != MLResult.Code.Ok)
+            {
+                MLPluginLog.ErrorFormat("MLPlanes.DestroyNativeTracker failed to destroy planes tracker. Reason: {0}", NativeBindings.MLGetResultString(resultCode));
+            }
+
+            this.planesTracker = MagicLeapNativeBindings.InvalidHandle;
+        }
+
+        /// <summary>
+        /// Process pending requests and call the callback specified in the startup config.
+        /// </summary>
+        private void ProcessPendingQueries()
+        {
+            if (this.pendingQueries.Count > 0)
+            {
+                // Process each individual pending query to get updated status.
+                foreach (ulong handle in this.pendingQueries.Keys)
                 {
-                    return;
+                    NativeBindings.Query query = this.pendingQueries[handle];
+
+                    // Request the update.
+                    MLResult.Code resultCode = NativeBindings.MLPlanesQueryGetResultsWithBoundaries(this.planesTracker, handle, query.PlanesResultsUnmanaged, out uint numResults, ref query.PlaneBoundariesList);
+
+                    // If it is no longer in pending state, continue to process further.
+                    if (resultCode != MLResult.Code.Pending)
+                    {
+                        if (resultCode == MLResult.Code.Ok)
+                        {
+                            query.ExtractPlanesFromQueryResults(numResults);
+
+                            resultCode = NativeBindings.MLPlanesReleaseBoundariesList(this.planesTracker, ref query.PlaneBoundariesList);
+                            if (resultCode != MLResult.Code.Ok)
+                            {
+                                MLPluginLog.ErrorFormat("MLPlanes.ProcessPendingQueries failed to release boundaries list. Reason: {0}", resultCode);
+                            }
+                            else
+                            {
+                                query.Result = MLResult.Create(resultCode);
+
+                                if (query.Planes == null)
+                                {
+                                    query.Planes = new Plane[] { };
+                                }
+
+                                if (query.PlaneBoundaries == null)
+                                {
+                                    query.PlaneBoundaries = new Boundaries[] { };
+                                }
+
+                                this.completedQueries.Add(handle, query);
+                            }
+                        }
+                        else
+                        {
+                            MLPluginLog.ErrorFormat("MLPlanes.ProcessPendingQueries failed to query planes. Reason: {0}", resultCode);
+                            this.errorQueries.Add(handle);
+                        }
+                    }
                 }
 
-                MLResult.Code resultCode = NativeBindings.MLPlanesDestroy(_instance.planesTracker);
-                if (resultCode != MLResult.Code.Ok)
+                foreach (ulong handle in this.errorQueries)
                 {
-                    MLPluginLog.ErrorFormat("MLPlanes.DestroyNativeTracker failed to destroy planes tracker. Reason: {0}", MLResult.CodeToString(resultCode));
+                    this.pendingQueries.Remove(handle);
                 }
 
-                _instance.planesTracker = MagicLeapNativeBindings.InvalidHandle;
+                this.errorQueries.Clear();
+
+                foreach (KeyValuePair<ulong, NativeBindings.Query> handle in this.completedQueries)
+                {
+                    handle.Value.Callback(handle.Value.Result, handle.Value.Planes, handle.Value.PlaneBoundaries);
+
+                    this.pendingQueries[handle.Key].Dispose();
+                    this.pendingQueries.Remove(handle.Key);
+                }
+
+                this.completedQueries.Clear();
             }
-            catch (System.EntryPointNotFoundException)
-            {
-                MLPluginLog.Error("MLPlanes.DestroyNativeTracker failed. Reason: API symbols not found");
-            }
+
         }
 
         /// <summary>
@@ -275,114 +335,30 @@ namespace UnityEngine.XR.MagicLeap
         /// </returns>
         private MLResult BeginPlaneQuery(QueryParams queryParams, QueryResultsDelegate callback)
         {
-            try
+            if (!NativeBindings.MLHandleIsValid(this.planesTracker))
             {
-                if (!NativeBindings.MLHandleIsValid(_instance.planesTracker))
-                {
-                    MLPluginLog.Error("MLPlanes.BeginPlaneQuery failed to request planes. Reason: Tracker handle is invalid");
-                    return MLResult.Create(MLResult.Code.InvalidParam);
-                }
-
-                bool BeginQuery()
-                {
-                    if (MLPlanes.IsValidInstance())
-                    {
-                        NativeBindings.QueryParamsNative planeQuery = new NativeBindings.QueryParamsNative()
-                        {
-                            Data = queryParams
-                        };
-
-                        ulong queryHandle = MagicLeapNativeBindings.InvalidHandle;
-
-                        MLResult.Code resultCode = NativeBindings.MLPlanesQueryBegin(_instance.planesTracker, ref planeQuery, ref queryHandle);
-                        if (resultCode != MLResult.Code.Ok)
-                        {
-                            MLPluginLog.ErrorFormat("MLPlanes.BeginPlaneQuery failed to request planes. Reason: {0}", MLResult.CodeToString(resultCode));
-                            return true;
-                        }
-
-                        // Create query object to prepresent this newly registered plane query.
-                        NativeBindings.Query query = new NativeBindings.Query((QueryResultsDelegate)callback, planeQuery.MaxResults, _instance.IsRequestingBoundaries(planeQuery.Flags));
-
-                        bool GetPlanesResults()
-                        {
-                            if (MLPlanes.IsValidInstance())
-                            {
-                                // Request the update.
-                                resultCode = NativeBindings.MLPlanesQueryGetResultsWithBoundaries(_instance.planesTracker, queryHandle, query.PlanesResultsUnmanaged, out uint numResults, ref query.PlaneBoundariesList);
-
-                                if (resultCode == MLResult.Code.Pending)
-                                {
-                                    return false;
-                                }
-
-                                if (resultCode == MLResult.Code.Ok)
-                                {
-                                    query.ExtractPlanesFromQueryResults(numResults);
-
-                                    resultCode = NativeBindings.MLPlanesReleaseBoundariesList(_instance.planesTracker, ref query.PlaneBoundariesList);
-                                    if (resultCode == MLResult.Code.Ok)
-                                    {
-                                        query.Result = MLResult.Create(resultCode);
-
-                                        if (query.Planes == null)
-                                        {
-                                            query.Planes = new Plane[] { };
-                                        }
-
-                                        if (query.PlaneBoundaries == null)
-                                        {
-                                            query.PlaneBoundaries = new Boundaries[] { };
-                                        }
-
-                                        MLThreadDispatch.ScheduleMain(() =>
-                                        {
-                                            if (MLPlanes.IsValidInstance())
-                                            {
-                                                callback(query.Result, query.Planes, query.PlaneBoundaries);
-                                            }
-                                            else
-                                            {
-                                                MLPluginLog.ErrorFormat("MLPlanes.BeginPlaneQuery failed. Reason: No Instance for MLPlanes");
-                                            }
-                                        });
-                                    }
-                                    else
-                                    {
-                                        MLPluginLog.ErrorFormat("MLPlanes.BeginPlaneQuery failed to release boundaries list. Reason: {0}", MLResult.CodeToString(resultCode));
-                                    }
-                                }
-                                else
-                                {
-                                    MLPluginLog.ErrorFormat("MLPlanes.BeginPlaneQuery failed to query planes. Reason: {0}", MLResult.CodeToString(resultCode));
-                                }
-                            }
-                            else
-                            {
-                                MLPluginLog.ErrorFormat("MLPlanes.BeginPlaneQuery failed. Reason: No Instance for MLPlanes");
-                            }
-
-                            return true;
-                        }
-
-                        MLThreadDispatch.ScheduleWork(GetPlanesResults);
-                    }
-                    else
-                    {
-                        MLPluginLog.ErrorFormat("MLPlanes.BeginPlaneQuery failed. Reason: No Instance for MLPlanes");
-                    }
-
-                    return true;
-                }
-
-                MLThreadDispatch.ScheduleWork(BeginQuery);
-                return MLResult.Create(MLResult.Code.Ok);
+                MLPluginLog.Error("MLPlanes.BeginPlaneQuery failed to request planes. Reason: Tracker handle is invalid");
+                return MLResult.Create(MLResult.Code.InvalidParam);
             }
-            catch (System.EntryPointNotFoundException)
+
+            // Convert to native plane query parameters.
+            NativeBindings.QueryParamsNative planeQuery = NativeBindings.QueryParamsNative.Create();
+            planeQuery.Data = queryParams;
+
+            // Register the query with the native library and store native handle.
+            ulong handle = MagicLeapNativeBindings.InvalidHandle;
+            MLResult.Code resultCode = NativeBindings.MLPlanesQueryBegin(this.planesTracker, ref planeQuery, ref handle);
+            if (resultCode != MLResult.Code.Ok)
             {
-                MLPluginLog.Error("MLPlanes.BeginPlaneQuery failed. Reason: API symbols not found");
-                return MLResult.Create(MLResult.Code.UnspecifiedFailure, "MLPlanes.BeginPlaneQuery failed. Reason: API symbols not found");
+                MLResult result = MLResult.Create(resultCode);
+                MLPluginLog.ErrorFormat("MLPlanes.BeginPlaneQuery failed to request planes. Reason: {0}", result);
+                return result;
             }
+
+            // Create query object to prepresent this newly registered plane query.
+            NativeBindings.Query query = new NativeBindings.Query((QueryResultsDelegate)callback, planeQuery.MaxResults, this.IsRequestingBoundaries(planeQuery.Flags));
+            this.pendingQueries.Add(handle, query);
+            return MLResult.Create(MLResult.Code.Ok);
         }
 
         /// <summary>
@@ -510,6 +486,16 @@ namespace UnityEngine.XR.MagicLeap
             /// could be different.
             /// </summary>
             public ulong Id;
+
+            /// <summary>
+            /// Used to determine if some MLPlanes.Plane object contains a certain flag.
+            /// </summary>
+            /// <param name="plane">The MLPlanes.Plane object to be checked.</param>
+            /// <param name="flag">The MLPlanes.QueryFlags to be checked.</param>
+            public bool ContainsFlag(MLPlanes.QueryFlags flag)
+            {
+                return (this.Flags & (uint)flag) == (uint)flag;
+            }
         }
 
         /// <summary>

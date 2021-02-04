@@ -15,17 +15,24 @@ namespace UnityEngine.XR.MagicLeap
     using System;
     using System.Collections.Generic;
     using System.Runtime.InteropServices;
+    using System.Threading.Tasks;
 
-    #if PLATFORM_LUMIN
+#if PLATFORM_LUMIN
     using UnityEngine.XR.MagicLeap.Native;
-    #endif
+#endif
 
     /// <summary>
     /// Magic Leap API return value.
     /// </summary>
     public partial struct MLResult
     {
-        #if PLATFORM_LUMIN
+
+        /// <summary>
+        /// Enables asynchronous native calls to use the same interface as synchronous ones
+        /// </summary>
+        public static implicit operator Task<MLResult>(MLResult r) => Task.FromResult(r);
+
+#if PLATFORM_LUMIN
         /// <summary>
         /// The code of this MLResult.
         /// Indicates the result status.
@@ -104,12 +111,6 @@ namespace UnityEngine.XR.MagicLeap
             /// Operation failed because it is not currently implemented.
             /// </summary>
             NotImplemented,
-
-            /// <summary>
-            /// Functionality not available.
-            /// </summary>
-            [Obsolete("Please use MLResult.Code.NotImplemented instead.", false)]
-            NotCompatible = NotImplemented,
 
             // MLAudioResult
 
@@ -435,6 +436,11 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             MediaGenericUnexpectedNull,
 
+            /// <summary>
+            /// Media not available.
+            /// </summary>
+            MediaGenericResult_NotAvailable,
+
             // MLDispatchResult
 
             /// <summary>
@@ -568,26 +574,6 @@ namespace UnityEngine.XR.MagicLeap
             /// User has not enabled shared world in settings. Operation not available.
             /// </summary>
             PassableWorldSharedWorldNotEnabled,
-
-            // MLScreensResult
-
-            /// <summary>
-            /// Service was not available.
-            /// </summary>
-            [Obsolete("Deprecated and scheduled for removal.", true)]
-            ScreensServiceNotAvailable = (CodePrefix.MLScreensResult << 16),
-
-            /// <summary>
-            /// Application does not have permission for the operation.
-            /// </summary>
-            [Obsolete("Deprecated and scheduled for removal.", true)]
-            ScreensPermissionDenied,
-
-            /// <summary>
-            /// Invalid screen id.
-            /// </summary>
-            [Obsolete("Deprecated and scheduled for removal.", true)]
-            ScreensInvalidScreenId,
 
             // MLTokenAgentResult
 
@@ -811,8 +797,6 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             SecureStorageIOFailure,
 
-            // MLAppConnectResult
-
             /// <summary>
             /// Unsupported operation.
             /// </summary>
@@ -1023,17 +1007,40 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             AppConnectFriendPickerInvalidArg,
 
-            // MLPerceptionResult
+            /// <summary>
+            /// Instance not created.
+            /// </summary>
+            WebRTCResultInstanceNotCreated = (CodePrefix.MLWebRTC << 16),
 
             /// <summary>
-            /// Perception System not started.
+            /// Mismatching handle.
             /// </summary>
-            MLPerceptionNotStarted = (CodePrefix.MLPerceptionResult << 16),
+            WebRTCResultMismatchingHandle,
 
             /// <summary>
-            /// Invalid PCF Root.
+            /// Invalid frame format.
             /// </summary>
-            MLPerceptionInvalidPCFRoot,
+            WebRTCResultInvalidFrameFormat,
+
+            /// <summary>
+            /// Invalid frame plane count.
+            /// </summary>
+            WebRTCResultInvalidFramePlaneCount,
+
+            /// <summary>
+            /// Data channel is closed.
+            /// </summary>
+            WebRTCResultDataChannelIsClosed,
+
+            /// <summary>
+            /// APIDLLNotFound.
+            /// </summary>
+            APIDLLNotFound = int.MaxValue - 0,
+
+            /// <summary>
+            /// APIDLLSymbolsNotFound.
+            /// </summary>
+            APISymbolsNotFound = int.MaxValue - 1
         }
 
         /// <summary>
@@ -1127,12 +1134,6 @@ namespace UnityEngine.XR.MagicLeap
             MLPurchaseResult = 0xdf1d,
 
             /// <summary>
-            /// Code for screens related MLResults.
-            /// </summary>
-            [Obsolete("Deprecated and scheduled for removal.", true)]
-            MLScreensResult = 0xFB4E,
-
-            /// <summary>
             /// Code for secure storage related MLResults.
             /// </summary>
             MLSecureStorageResult = 0xba5c,
@@ -1153,9 +1154,9 @@ namespace UnityEngine.XR.MagicLeap
             MLAppConnect = 0xebf7,
 
             /// <summary>
-            /// Code for app perception related MLResults.
+            /// Code for web rtc related MLResults.
             /// </summary>
-            MLPerceptionResult = 0x5525
+            MLWebRTC = 0xefc7
         }
 
         #if PLATFORM_LUMIN
@@ -1263,6 +1264,9 @@ namespace UnityEngine.XR.MagicLeap
                     break;
                 case CodePrefix.MLAppConnect:
                     codeString = Marshal.PtrToStringAnsi(MLAppConnectNativeBindings.MLAppConnectGetResultString(resultCode));
+                    break;
+                case CodePrefix.MLWebRTC:
+                    codeString = Marshal.PtrToStringAnsi(MLWebRTC.NativeBindings.MLWebRTCGetResultString(resultCode));
                     break;
                 default:
                     // This will catch any unknown/invalid return values.

@@ -16,9 +16,7 @@ namespace UnityEngine.XR.MagicLeap
 {
     using System;
     using System.Collections.Generic;
-    using System.Runtime.InteropServices;
     using UnityEngine.XR.MagicLeap.Native;
-    using Unity.Jobs;
 
     /// <summary>
     /// MLPersistentCoordinateFrames class contains the API to interface with the
@@ -48,18 +46,9 @@ namespace UnityEngine.XR.MagicLeap
         private Dictionary<MagicLeapNativeBindings.MLCoordinateFrameUID, PCF> mapUpdatedPCFsThisFrame = new Dictionary<MagicLeapNativeBindings.MLCoordinateFrameUID, PCF>();
 
         /// <summary>
-        /// Delegate used for when a user wants to request multiple PCFs from the MLPersistentCoordinateFrames API.
+        /// Timer used to wait for Unity to get a perception snapshot at the start of the app.
         /// </summary>
-        /// <param name="resultCode">The result code of the query call for multiple PCFs.</param>
-        /// <param name="pcfList">The list of PCFs returned by the query.</param>
-        public delegate void OnFoundMultiPCFDelegate(MLResult.Code resultCode, List<PCF> pcfList);
-
-        /// <summary>
-        /// Delegate used for when a user wants to request a single PCF from the MLPersistentCoordinateFrames API.
-        /// </summary>
-        /// <param name="resultCode">The result code of the query call for a single PCF.</param>
-        /// <param name="pcf">The PCF returned by the query.</param>
-        public delegate void OnFoundSinglePCFDelegate(MLResult.Code resultCode, PCF pcf);
+        private Timer unityPerceptionSnapshotTimer = new Timer(1.0f);
 
         /// <summary>
         /// Delegate for the OnLocalizedDelegate event used for notifying when the user has localized to a map or has lost localization.
@@ -97,86 +86,6 @@ namespace UnityEngine.XR.MagicLeap
         }
 
         /// <summary>
-        /// Sets the offset position/rotation values from the current Perception root and can also set the PCF to be used as the new Perception root to which all MLSnapshotGetTransform will be relative to.
-        /// </summary>
-        /// <param name="offsetPosition">The offset to set from the root's position.</param>
-        /// <param name="offsetRotation">The offset to set from the root's rotation.</param>
-        /// <param name="pcf">The PCF to set the root to.</param>
-        /// <returns>
-        /// MLResult.Result will be <c>MLResult.Code.Ok</c> if operation completed successfully.
-        /// MLResult.Result will be <c>MLResult.Code.MLPerceptionNotStarted</c> if unable to retrieve the Perception System.
-        /// MLResult.Result will be <c>MLResult.Code.MLPerceptionInvalidPCFRoot</c> if the provided CFUID is not associated with a valid PCF.
-        /// MLResult.Result will be <c>MLResult.Code.UnspecifiedFailure</c> if the CFUID is not valid.
-        /// </returns>
-        public static MLResult SetPerceptionRoot(Vector3 offsetPosition, Quaternion offsetRotation, PCF pcf = null)
-        {
-            if (MLPersistentCoordinateFrames.IsValidInstance())
-            {
-                MLResult.Code resultCode = NativeBindings.SetPerceptionRoot(offsetPosition, offsetRotation, pcf);
-
-                if (!MLResult.IsOK(resultCode))
-                {
-                    MLPluginLog.ErrorFormat("MLPersistentCoordinateFrames.SetPerceptionRoot failed. Reason: {0}", MLResult.CodeToString(resultCode));
-                    return MLResult.Create(MLResult.Code.UnspecifiedFailure, string.Format("MLPersistentCoordinateFrames.SetPerceptionRoot failed. Reason: {0}", MLResult.CodeToString(resultCode)));
-                }
-
-                return MLResult.Create(resultCode);
-            }
-            else
-            {
-                MLPluginLog.ErrorFormat("MLPersistentCoordinateFrames.SetPerceptionRoot failed. Reason: No Instance for MLPersistentCoordinateFrames.");
-                return MLResult.Create(MLResult.Code.UnspecifiedFailure, "MLPersistentCoordinateFrames.SetPerceptionRoot failed. Reason: No Instance for MLPersistentCoordinateFrames.");
-            }
-        }
-
-        /// <summary>
-        /// Gets the offset position/rotation values and the PCF of the current Perception root.
-        /// </summary>
-        /// <param name="offsetPosition">Stores the value of the current offset from the root's position.</param>
-        /// <param name="offsetRotation">Stores the value of the current offset from the root's rotation.</param>
-        /// <param name="pcf">Stores the reference to the current root PCF.</param>
-        /// <returns>
-        /// MLResult.Result will be <c>MLResult.Code.Ok</c> if operation completed successfully.
-        /// MLResult.Result will be <c>MLResult.Code.MLPerceptionNotStarted</c> if unable to retrieve the Perception System.
-        /// MLResult.Result will be <c>MLResult.Code.UnspecifiedFailure</c> if failed due to other internal error.
-        /// </returns>
-        public static MLResult GetPerceptionRoot(out Vector3 offsetPosition, out Quaternion offsetRotation, out PCF pcf)
-        {
-            offsetPosition = Vector3.zero;
-            offsetRotation = Quaternion.identity;
-            pcf = new PCF(new MagicLeapNativeBindings.MLCoordinateFrameUID());
-
-            if (MLPersistentCoordinateFrames.IsValidInstance())
-            {
-                try
-                {
-                    MLResult.Code resultCode = NativeBindings.MLPerceptionGetRootCoordinateFrame(out MagicLeapNativeBindings.MLCoordinateFrameUID cfuid, out MagicLeapNativeBindings.MLTransform mlTransform);
-                    if (MLResult.IsOK(resultCode))
-                    {
-                        offsetPosition = MLConvert.ToUnity(mlTransform.Position);
-                        offsetRotation = MLConvert.ToUnity(mlTransform.Rotation);
-                        return MLResult.Create(MLResult.Code.Ok);
-                    }
-                    else
-                    {
-                        MLPluginLog.ErrorFormat("MLPersistentCoordinateFrames.GetPerceptionRoot failed. Reason: {0}", MLResult.CodeToString(resultCode));
-                        return MLResult.Create(resultCode);
-                    }
-                }
-                catch (EntryPointNotFoundException)
-                {
-                    MLPluginLog.Error("MLPersistentCoordinateFrames.GetPerceptionRoot failed. Reason: API symbols not found.");
-                    return MLResult.Create(MLResult.Code.UnspecifiedFailure, "MLPersistentCoordinateFrames.GetPerceptionRoot failed. Reason: API symbols not found.");
-                }
-            }
-            else
-            {
-                MLPluginLog.ErrorFormat("MLPersistentCoordinateFrames.GetPerceptionRoot failed. Reason: No Instance for MLPersistentCoordinateFrames.");
-                return MLResult.Create(MLResult.Code.UnspecifiedFailure, "MLPersistentCoordinateFrames.GetPerceptionRoot failed. Reason: No Instance for MLPersistentCoordinateFrames.");
-            }
-        }
-
-        /// <summary>
         /// Adds the given PCF to the map of PCFs that are updated every frame as well as the map of all PCFs.
         /// </summary>
         /// <param name="pcf">PCF to be updated.</param>
@@ -210,6 +119,9 @@ namespace UnityEngine.XR.MagicLeap
         /// MLResult.Result will be <c>MLResult.Code.InvalidParam</c> if failed due to an invalid input parameter.
         /// MLResult.Result will be <c>MLResult.Code.PrivilegeDenied</c> if necessary privilege is missing.
         /// MLResult.Result will be <c>MLResult.Code.UnspecifiedFailure</c> if failed due to other internal error.
+        /// MLResult.Result will be <c>MLResult.Code.PassableWorldLowMapQuality</c> if map quality is too low for content persistence. Continue building the map.
+        /// MLResult.Result will be <c>MLResult.Code.PassableWorldNotFound</c> if the passed CFUID is not available.
+        /// MLResult.Result will be <c>MLResult.Code.PassableWorldUnableToLocalize</c> if currently unable to localize into any map. Continue building the map.
         /// </returns>
         public static MLResult GetPCFTypeByCFUID(MagicLeapNativeBindings.MLCoordinateFrameUID cfuid, out PCF.Types type)
         {
@@ -257,63 +169,67 @@ namespace UnityEngine.XR.MagicLeap
         /// Retrieves the PCF associated with the given CFUID.
         /// </summary>
         /// <param name="cfuid">The CFUID to look up the PCF type with.</param>
-        /// <param name="callback">Delegate used to return the resulting MLResult.Result and the closest found PCF.</param>
+        /// <param name="pcf">Stores the resulting PCF.</param>
         /// <param name="update">Determines if the PCF should have it's pose and state updated.</param>
         /// <returns>
         /// MLResult.Result will be <c>MLResult.Code.Ok</c> if a valid PCF was found.
-        /// MLResult.Result will be <c>MLResult.Code.UnspecifiedFailure</c> if failed due to no API instance being found.
+        /// MLResult.Result will be <c>MLResult.Code.InvalidParam</c> if failed due to an invalid input parameter.
+        /// MLResult.Result will be <c>MLResult.Code.PrivilegeDenied</c> if necessary privilege is missing.
+        /// MLResult.Result will be <c>MLResult.Code.UnspecifiedFailure</c> if failed due to other internal error.
+        /// MLResult.Result will be <c>MLResult.Code.PassableWorldLowMapQuality</c> if map quality is too low for content persistence. Continue building the map.
+        /// MLResult.Result will be <c>MLResult.Code.PassableWorldUnableToLocalize</c> if currently unable to localize into any map. Continue building the map.
         /// </returns>
-        public static MLResult FindPCFByCFUID(MagicLeapNativeBindings.MLCoordinateFrameUID cfuid, OnFoundSinglePCFDelegate callback, bool update = true)
+        public static MLResult FindPCFByCFUID(MagicLeapNativeBindings.MLCoordinateFrameUID cfuid, out PCF pcf, bool update = true)
         {
+            pcf = null;
             if (MLPersistentCoordinateFrames.IsValidInstance())
             {
                 if (_instance.mapAllPCFs.ContainsKey(cfuid))
                 {
-                    PCF pcf = _instance.mapAllPCFs[cfuid];
+                    pcf = _instance.mapAllPCFs[cfuid];
                     if (update)
                     {
                         MLResult updateResult = pcf.Update();
                         if (!updateResult.IsOk)
                         {
                             MLPluginLog.ErrorFormat("MLPersistentCoordinateFrames.FindPCFByCFUID failed to update the found PCF. Reason: {0}", updateResult);
-                            callback(MLResult.Code.PassableWorldNotFound, pcf);
-                            return updateResult;
                         }
+
+                        return updateResult;
                     }
 
-                    callback(MLResult.Code.Ok, pcf);
                     return MLResult.Create(MLResult.Code.Ok);
                 }
                 else
                 {
-                    QueryFilter queryFilter = QueryFilter.Create();
-                    queryFilter.TypesMask = PCF.Types.SingleUserSingleSession | PCF.Types.SingleUserMultiSession | PCF.Types.MultiUserMultiSession;
-                    queryFilter.MaxResults = int.MaxValue;
-                    queryFilter.Sorted = false;
-
-                    FindPCFsByFilter(queryFilter, update: update, callback: (MLResult.Code resultCode, List<PCF> pcfList) =>
+                    MLResult result = FindAllPCFs(out List<PCF> list, update: false);
+                    if (result.IsOk)
                     {
-                        PCF pcfWithCFUID = pcfList.Find(pcf => pcf.CFUID == cfuid);
-                        if(pcfWithCFUID != null)
+                        pcf = list.Find(PCF => PCF.CFUID == cfuid);
+                        if (update && pcf != null)
                         {
-                            if (update)
+                            MLResult updateResult = pcf.Update();
+                            if (!updateResult.IsOk)
                             {
-                                MLResult updateResult = pcfWithCFUID.Update();
-                                if (!updateResult.IsOk)
-                                {
-                                    MLPluginLog.ErrorFormat("MLPersistentCoordinateFrames.FindPCFByCFUID failed to update the found PCF. Reason: {0}", updateResult);
-                                    callback(MLResult.Code.PassableWorldNotFound, pcfWithCFUID);
-                                }
+                                MLPluginLog.ErrorFormat("MLPersistentCoordinateFrames.FindPCFByCFUID failed to update the found PCF. Reason: {0}", updateResult);
                             }
-                            callback(MLResult.Code.Ok, pcfWithCFUID);
+
+                            return updateResult;
+                        }
+                    }
+                    else
+                    {
+                        if (result.Result == MLResult.Code.PassableWorldLowMapQuality || result.Result == MLResult.Code.PassableWorldUnableToLocalize)
+                        {
+                            MLPluginLog.WarningFormat("Map quality not sufficient enough for MLPersistentCoordinateFrames.FindPCFByCFUID. Reason: {0}", result);
                         }
                         else
                         {
-                            callback(resultCode, null);
+                            MLPluginLog.ErrorFormat("MLPersistentCoordinateFrames.FindPCFByCFUID failed. Reason: {0}", result);
                         }
-                    });
+                    }
 
-                    return MLResult.Create(MLResult.Code.Ok);
+                    return result;
                 }
             }
             else
@@ -327,15 +243,21 @@ namespace UnityEngine.XR.MagicLeap
         /// Retrieves the closest known PCF of the types provided by the typesMask to the given position.
         /// </summary>
         /// <param name="position">The position of the object we want to anchor.</param>
-        /// <param name="callback">Delegate used to return the resulting MLResult.Result and the closest found PCF.</param>
+        /// <param name="pcf">Stores the resulting PCF.</param>
         /// <param name="typesMask">The bitmask of which PCF types to consider.</param>
         /// <param name="update">Determines if the PCF should have it's pose and state updated.</param>
         /// <returns>
         /// MLResult.Result will be <c>MLResult.Code.Ok</c> if a valid PCF was found.
-        /// MLResult.Result will be <c>MLResult.Code.UnspecifiedFailure</c> if failed due to no API instance being found.
+        /// MLResult.Result will be <c>MLResult.Code.InvalidParam</c> if failed due to an invalid input parameter.
+        /// MLResult.Result will be <c>MLResult.Code.PrivilegeDenied</c> if necessary privilege is missing.
+        /// MLResult.Result will be <c>MLResult.Code.UnspecifiedFailure</c> if failed due to other internal error.
+        /// MLResult.Result will be <c>MLResult.Code.PassableWorldLowMapQuality</c> if map quality is too low for content persistence. Continue building the map.
+        /// MLResult.Result will be <c>MLResult.Code.PassableWorldUnableToLocalize</c> if currently unable to localize into any map. Continue building the map.
         /// </returns>
-        public static MLResult FindClosestPCF(Vector3 position, OnFoundSinglePCFDelegate callback, PCF.Types typesMask = PCF.Types.SingleUserSingleSession | PCF.Types.SingleUserMultiSession | PCF.Types.MultiUserMultiSession, bool update = true)
+        public static MLResult FindClosestPCF(Vector3 position, out PCF pcf, PCF.Types typesMask = PCF.Types.SingleUserSingleSession | PCF.Types.SingleUserMultiSession | PCF.Types.MultiUserMultiSession, bool update = true)
         {
+            pcf = null;
+
             if (MLPersistentCoordinateFrames.IsValidInstance())
             {
                 QueryFilter queryFilter = QueryFilter.Create();
@@ -343,12 +265,25 @@ namespace UnityEngine.XR.MagicLeap
                 queryFilter.TypesMask = typesMask;
                 queryFilter.Sorted = true;
 
-                FindPCFsByFilter(queryFilter, update: update, callback: (MLResult.Code resultCode, List<PCF> pcfList) =>
-                {
-                    callback?.Invoke(resultCode, pcfList[0]);
-                });
+                MLResult result = FindPCFsByFilter(queryFilter, out List<PCF> pcfList, update);
 
-                return MLResult.Create(MLResult.Code.Ok);
+                if (!result.IsOk || pcfList.Count == 0)
+                {
+                    if (result.Result == MLResult.Code.PassableWorldLowMapQuality || result.Result == MLResult.Code.PassableWorldUnableToLocalize)
+                    {
+                        MLPluginLog.WarningFormat("Map quality not sufficient enough for MLPersistentCoordinateFrames.FindClosestPCF. Reason: {0}", result);
+                    }
+                    else
+                    {
+                        MLPluginLog.ErrorFormat("MLPersistentCoordinateFrames.FindClosestPCF failed. Reason: {0}", result);
+                    }
+                }
+                else
+                {
+                    pcf = pcfList[0];
+                }
+
+                return result;
             }
             else
             {
@@ -360,16 +295,20 @@ namespace UnityEngine.XR.MagicLeap
         /// <summary>
         /// Returns a list of all the PCFs of the types provided by the typesMask inside the current map.
         /// </summary>
-        /// <param name="callback">Delegate used to return the resulting MLResult.Result and list of found PCFs.</param>
+        /// <param name="pcfList">Stores the resulting list of PCFs.</param>
         /// <param name="maxResults">The max number of PCFs to get.</param>
         /// <param name="typesMask">The bitmask of which PCF types to consider.</param>
         /// <param name="update">Determines if the PCFs should have their pose updated.</param>
         /// <returns>
         /// MLResult.Result will be <c>MLResult.Code.Ok</c> if all the PCFs from the current map have been found successfully.
-        /// MLResult.Result will be <c>MLResult.Code.UnspecifiedFailure</c> if failed due to no API instance being found.
+        /// MLResult.Result will be <c>MLResult.Code.PrivilegeDenied</c> if necessary privilege is missing.
+        /// MLResult.Result will be <c>MLResult.Code.UnspecifiedFailure</c> if failed due to other internal error.
+        /// MLResult.Result will be <c>MLResult.Code.PassableWorldLowMapQuality</c> if map quality is too low for content persistence. Continue building the map.
+        /// MLResult.Result will be <c>MLResult.Code.PassableWorldUnableToLocalize</c> if currently unable to localize into any map. Continue building the map.
         /// </returns>
-        public static MLResult FindAllPCFs(OnFoundMultiPCFDelegate callback, uint maxResults = int.MaxValue, PCF.Types typesMask = PCF.Types.SingleUserSingleSession | PCF.Types.SingleUserMultiSession | PCF.Types.MultiUserMultiSession, bool update = true)
+        public static MLResult FindAllPCFs(out List<PCF> pcfList, uint maxResults = int.MaxValue, PCF.Types typesMask = PCF.Types.SingleUserSingleSession | PCF.Types.SingleUserMultiSession | PCF.Types.MultiUserMultiSession, bool update = true)
         {
+            pcfList = new List<PCF>();
 
             if (MLPersistentCoordinateFrames.IsValidInstance())
             {
@@ -378,8 +317,21 @@ namespace UnityEngine.XR.MagicLeap
                 queryFilter.MaxResults = maxResults;
                 queryFilter.Sorted = false;
 
-                FindPCFsByFilter(queryFilter, callback, update);
-                return MLResult.Create(MLResult.Code.Ok);
+                MLResult result = FindPCFsByFilter(queryFilter, out pcfList, update);
+
+                if (!result.IsOk)
+                {
+                    if (result.Result == MLResult.Code.PassableWorldLowMapQuality || result.Result == MLResult.Code.PassableWorldUnableToLocalize)
+                    {
+                        MLPluginLog.Warning("Map quality not sufficient enough for MLPersistentCoordinateFrames.FindAllPCFs.");
+                    }
+                    else
+                    {
+                        MLPluginLog.ErrorFormat("MLPersistentCoordinateFrames.FindAllPCFs failed. Reason: {0}", result);
+                    }
+                }
+
+                return result;
             }
             else
             {
@@ -392,164 +344,118 @@ namespace UnityEngine.XR.MagicLeap
         /// Returns filtered list of PCFs based on the parameters of the given queryFilter.
         /// </summary>
         /// <param name="queryFilter">Parameters used to curate the returned values.</param>
-        /// <param name="callback">Delegate used to return the resulting MLResult.Result and list of found PCFs.</param>
+        /// <param name="pcfList">Stores the resulting list of PCFs.</param>
         /// <param name="update">Determines if the PCFs should have their pose updated.</param>
         /// <returns>
         /// MLResult.Result will be <c>MLResult.Code.Ok</c> if all the PCFs from the current map have been found successfully.
-        /// MLResult.Result will be <c>MLResult.Code.UnspecifiedFailure</c> if failed due to no API instance being found.
+        /// MLResult.Result will be <c>MLResult.Code.PrivilegeDenied</c> if necessary privilege is missing.
+        /// MLResult.Result will be <c>MLResult.Code.UnspecifiedFailure</c> if failed due to other internal error.
+        /// MLResult.Result will be <c>MLResult.Code.PassableWorldLowMapQuality</c> if map quality is too low for content persistence. Continue building the map.
+        /// MLResult.Result will be <c>MLResult.Code.PassableWorldUnableToLocalize</c> if currently unable to localize into any map. Continue building the map.
         /// </returns>
-        public static MLResult FindPCFsByFilter(QueryFilter queryFilter, OnFoundMultiPCFDelegate callback, bool update = true)
+        public static MLResult FindPCFsByFilter(QueryFilter queryFilter, out List<PCF> pcfList, bool update = true)
         {
-            List<PCF> pcfList = new List<PCF>();
+            pcfList = new List<PCF>();
 
             if (MLPersistentCoordinateFrames.IsValidInstance())
             {
-                NativeBindings.QueryFilterNative queryFilterNative = NativeBindings.QueryFilterNative.Create();
-                queryFilterNative.Data = queryFilter;
-
-                MLThreadDispatch.ScheduleWork(() =>
+                try
                 {
-                    if (MLPersistentCoordinateFrames.IsValidInstance())
+                    uint numPCFs = 0;
+                    MLResult.Code resultCode = NativeBindings.MLPersistentCoordinateFrameGetCount(_instance.nativeTracker, ref numPCFs);
+
+                    if (MLResult.IsOK(resultCode) && numPCFs > 0)
                     {
-                        try
+                        MagicLeapNativeBindings.MLCoordinateFrameUID[] cfuidArray = new MagicLeapNativeBindings.MLCoordinateFrameUID[numPCFs];
+                        NativeBindings.QueryFilterNative queryFilterNative = NativeBindings.QueryFilterNative.Create();
+                        queryFilterNative.Data = queryFilter;
+
+                        uint cfuidCount = 0;
+
+                        //// With these conditions the user is asking for all PCFs, no need to use the slower filtered query call.
+                        if (queryFilter.TypesMask == (PCF.Types.SingleUserSingleSession | PCF.Types.SingleUserMultiSession | PCF.Types.MultiUserMultiSession) &&
+                            queryFilter.Radius <= 0 && !queryFilter.Sorted)
                         {
-                            uint numPCFs = 0;
-                            MLResult.Code resultCode = NativeBindings.MLPersistentCoordinateFrameGetCount(MLPersistentCoordinateFrames._instance.nativeTracker, ref numPCFs);
-                            MagicLeapNativeBindings.MLCoordinateFrameUID[] cfuidArray = new MagicLeapNativeBindings.MLCoordinateFrameUID[numPCFs];
+                            resultCode = NativeBindings.MLPersistentCoordinateFrameGetAllEx(_instance.nativeTracker, numPCFs, cfuidArray);
+                            cfuidCount = (uint)cfuidArray.Length;
+                        }
+                        else
+                        {
+                            resultCode = NativeBindings.MLPersistentCoordinateFrameQuery(_instance.nativeTracker, in queryFilterNative, cfuidArray, out cfuidCount);
+                        }
 
-                            if (MLResult.IsOK(resultCode) && numPCFs > 0)
+                        if (MLResult.IsOK(resultCode))
+                        {
+                            for (int i = 0; i < cfuidCount; ++i)
                             {
-                                //// With these conditions the user is asking for all PCFs, no need to use the slower thised query call.
-                                if (queryFilter.TypesMask == (PCF.Types.SingleUserSingleSession | PCF.Types.SingleUserMultiSession | PCF.Types.MultiUserMultiSession) &&
-                                    queryFilter.Radius <= 0 && !queryFilter.Sorted)
+                                MagicLeapNativeBindings.MLCoordinateFrameUID pcfCFUID = cfuidArray[i];
+                                if (!pcfCFUID.Equals(MagicLeapNativeBindings.MLCoordinateFrameUID.EmptyFrame))
                                 {
-                                    resultCode = NativeBindings.MLPersistentCoordinateFrameGetAllEx(_instance.nativeTracker, numPCFs, cfuidArray);
-                                }
-                                else
-                                {
-                                    resultCode = NativeBindings.MLPersistentCoordinateFrameQuery(_instance.nativeTracker, in queryFilterNative, cfuidArray, out uint cfuidCount);
-                                }
-
-                                if (!MLResult.IsOK(resultCode))
-                                {
-                                    if (resultCode == MLResult.Code.PassableWorldLowMapQuality || resultCode == MLResult.Code.PassableWorldUnableToLocalize)
+                                    PCF pcf = null;
+                                    if (_instance.mapAllPCFs.ContainsKey(pcfCFUID))
                                     {
-                                        MLPluginLog.WarningFormat("Map quality not sufficient enough for MLPersistentCoordinateFrames.FindPCFsByFilter. Reason: {0}", MLResult.CodeToString(resultCode));
+                                        pcf = _instance.mapAllPCFs[pcfCFUID];
                                     }
                                     else
                                     {
-                                        MLPluginLog.ErrorFormat("MLPersistentCoordinateFrames.FindPCFsByFilter failed. Reason: {0}", MLResult.IsOK(resultCode) ? "No PCFs could be found." : MLResult.CodeToString(resultCode));
+                                        pcf = new PCF(pcfCFUID);
+                                        _instance.mapAllPCFs.Add(pcfCFUID, pcf);
                                     }
 
-                                    return false;
+                                    pcfList.Add(pcf);
+
+                                    if (update)
+                                    {
+                                        MLResult result = pcf.Update();
+                                        if (!result.IsOk)
+                                        {
+                                            MLPluginLog.ErrorFormat("MLPersistentCoordinateFrames.FindPCFsByFilter failed to update the found PCF with CFUID {0}, Reason: {1}", pcf.CFUID, result);
+                                        }
+                                    }
                                 }
+                            }
+
+                            return MLResult.Create(MLResult.Code.Ok);
+                        }
+                        else
+                        {
+                            if (resultCode == MLResult.Code.PassableWorldLowMapQuality || resultCode == MLResult.Code.PassableWorldUnableToLocalize)
+                            {
+                                MLPluginLog.WarningFormat("Map quality not sufficient enough for MLPersistentCoordinateFrames.FindPCFsByFilter. Reason: {0}", MLResult.CodeToString(resultCode));
                             }
                             else
                             {
-                                if (resultCode == MLResult.Code.PassableWorldLowMapQuality || resultCode == MLResult.Code.PassableWorldUnableToLocalize)
-                                {
-                                    MLPluginLog.WarningFormat("Map quality not sufficient enough for MLPersistentCoordinateFrames.FindPCFsByFilter. Reason: {0}", MLResult.CodeToString(resultCode));
-                                }
-                                else
-                                {
-                                    MLPluginLog.ErrorFormat("MLPersistentCoordinateFrames.FindPCFsByFilter failed. Reason: {0}", MLResult.IsOK(resultCode) ? "No PCFs could be found." : MLResult.CodeToString(resultCode));
-                                }
-
-                                return false;
+                                MLPluginLog.ErrorFormat("MLPersistentCoordinateFrames.FindPCFsByFilter failed. Reason: {0}", MLResult.CodeToString(resultCode));
                             }
 
-                            MLThreadDispatch.ScheduleMain(() =>
-                            {
-                                if (MLPersistentCoordinateFrames.IsValidInstance())
-                                {
-                                    if (MLResult.IsOK(resultCode) && MLPersistentCoordinateFrames.IsLocalized)
-                                    {
-                                        for (int i = 0; i < cfuidArray.Length; ++i)
-                                        {
-                                            MagicLeapNativeBindings.MLCoordinateFrameUID pcfCFUID = cfuidArray[i];
-                                            if (!pcfCFUID.Equals(MagicLeapNativeBindings.MLCoordinateFrameUID.EmptyFrame))
-                                            {
-                                                PCF pcf = null;
-                                                if (_instance.mapAllPCFs.ContainsKey(pcfCFUID))
-                                                {
-                                                    pcf = _instance.mapAllPCFs[pcfCFUID];
-                                                    if (update)
-                                                    {
-                                                        MLResult result = pcf.Update();
-                                                        if (!result.IsOk)
-                                                        {
-                                                            MLPluginLog.ErrorFormat("MLPersistentCoordinateFrames.FindPCFsByFilter failed to update the found PCF with CFUID {0}, Reason: {1}", pcf.CFUID, result);
-                                                        }
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    pcf = new PCF(pcfCFUID);
-                                                    _instance.mapAllPCFs.Add(pcfCFUID, pcf);
-                                                    pcf.Update();
-                                                }
-
-                                                pcfList.Add(pcf);
-                                            }
-                                        }
-                                    }
-
-                                    callback?.Invoke(resultCode, pcfList);
-                                }
-                                else
-                                {
-                                    MLPluginLog.ErrorFormat("MLPersistentCoordinateFrames.FindPCFsByFilter failed. Reason: No Instance for MLPersistentCoordinateFrames.");
-                                }
-                            });
-
-                            return true;
-                        }
-                        catch (EntryPointNotFoundException)
-                        {
-                            MLPluginLog.Error("MLPersistentCoordinateFrames.FindPCFsByFilter failed. Reason: API symbols not found.");
-                            callback?.Invoke(MLResult.Code.UnspecifiedFailure, pcfList);
-                            return true;
+                            return MLResult.Create(resultCode, string.Format("MLPersistentCoordinateFrames.FindPCFsByFilter failed. Reason: {0}", MLResult.CodeToString(resultCode)));
                         }
                     }
                     else
                     {
-                        MLPluginLog.ErrorFormat("MLPersistentCoordinateFrames.FindPCFsByFilter failed. Reason: No Instance for MLPersistentCoordinateFrames.");
-                        callback?.Invoke(MLResult.Code.UnspecifiedFailure, pcfList);
-                        return true;
-                    }
+                        if (resultCode == MLResult.Code.PassableWorldLowMapQuality || resultCode == MLResult.Code.PassableWorldUnableToLocalize)
+                        {
+                            MLPluginLog.WarningFormat("Map quality not sufficient enough for MLPersistentCoordinateFrames.FindPCFsByFilter. Reason: {0}", MLResult.CodeToString(resultCode));
+                        }
+                        else
+                        {
+                            MLPluginLog.ErrorFormat("MLPersistentCoordinateFrames.FindPCFsByFilter failed. Reason: {0}", MLResult.IsOK(resultCode) ? "No PCFs could be found." : MLResult.CodeToString(resultCode));
+                        }
 
-                });
-                return MLResult.Create(MLResult.Code.Ok);
+                        return MLResult.Create(resultCode, string.Format("MLPersistentCoordinateFrames.FindPCFsByFilter failed. Reason: {0}", MLResult.IsOK(resultCode) ? "No PCFs could be found." : MLResult.CodeToString(resultCode)));
+                    }
+                }
+                catch (EntryPointNotFoundException)
+                {
+                    MLPluginLog.Error("MLPersistentCoordinateFrames.FindPCFsByFilter failed. Reason: API symbols not found.");
+                    return MLResult.Create(MLResult.Code.UnspecifiedFailure, "MLPersistentCoordinateFrames.FindPCFsByFilter failed. Reason: API symbols not found.");
+                }
             }
             else
             {
                 MLPluginLog.ErrorFormat("MLPersistentCoordinateFrames.FindPCFsByFilter failed. Reason: No Instance for MLPersistentCoordinateFrames.");
-                callback?.Invoke(MLResult.Code.UnspecifiedFailure, pcfList);
                 return MLResult.Create(MLResult.Code.UnspecifiedFailure, "MLPersistentCoordinateFrames.FindPCFsByFilter failed. Reason: No Instance for MLPersistentCoordinateFrames.");
             }
-        }
-
-        /// <summary>
-        /// Gets the result string for a MLResult.Code.
-        /// </summary>
-        /// <param name="resultCode">The MLResult.Code to be requested.</param>
-        /// <returns>The result string.</returns>
-        internal static IntPtr GetResultString(MLResult.Code resultCode)
-        {
-            try
-            {
-                return NativeBindings.MLPersistentCoordinateFrameGetResultString(resultCode);
-            }
-            catch (System.DllNotFoundException)
-            {
-                MLPluginLog.Error("MLPersistentCoordinateFrames.GetResultString failed. Reason: MLPersistentCoordinateFrames API is currently available only on device.");
-            }
-            catch (System.EntryPointNotFoundException)
-            {
-                MLPluginLog.Error("MLPersistentCoordinateFrames.GetResultString failed. Reason: API symbols not found");
-            }
-
-            return IntPtr.Zero;
         }
 
         /// <summary>
@@ -557,22 +463,25 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         /// <param name="result">The MLResult.Code to be requested.</param>
         /// <returns>A pointer to the result string.</returns>
-        internal static string GetPerceptionResultString(MLResult.Code result)
+        internal static IntPtr GetResultString(MLResult.Code result)
         {
             try
             {
-                return Marshal.PtrToStringAnsi(NativeBindings.MLPerceptionGetResultString(result));
-            }
-            catch (System.DllNotFoundException)
-            {
-                MLPluginLog.Error("MLPersistentCoordinateFrames.GetPerceptionResultString failed. Reason: MLPersistentCoordinateFrames API is currently available only on device.");
+                if (MLPersistentCoordinateFrames.IsValidInstance())
+                {
+                    return NativeBindings.MLPersistentCoordinateFrameGetResultString(result);
+                }
+                else
+                {
+                    MLPluginLog.ErrorFormat("MLPersistentCoordinateFrames.GetResultString failed. Reason: No Instance for MLPersistentCoordinateFrames.");
+                }
             }
             catch (System.EntryPointNotFoundException)
             {
-                MLPluginLog.Error("MLPersistentCoordinateFrames.GetPerceptionResultString failed. Reason: API symbols not found");
+                MLPluginLog.Error("MLPersistentCoordinateFrames.GetResultString failed. Reason: API symbols not found.");
             }
 
-            return string.Empty;
+            return IntPtr.Zero;
         }
 
         /// <summary>
@@ -633,22 +542,42 @@ namespace UnityEngine.XR.MagicLeap
         }
 
         /// <summary>
-        /// Update loop used to schedule a SetLocalizationStatus that determines when the device has localized to some map.
+        /// Update loop used to check when the device has localized to some map.
         /// </summary>
         protected override void Update()
         {
-            MLPersistentCoordinateFrames._instance.SetLocalizationStatus();
+            uint numPCFs = 0;
+            MLResult.Code resultCode = NativeBindings.MLPersistentCoordinateFrameGetCount(this.nativeTracker, ref numPCFs);
+            bool foundPCFs = MLResult.IsOK(resultCode) && numPCFs > 0 && this.unityPerceptionSnapshotTimer.LimitPassed;
 
-            if (MLPersistentCoordinateFrames.IsLocalized)
+            if (!IsLocalized && foundPCFs)
             {
-                if (this.mapTrackedPCFs.Count > 0)
+                IsLocalized = true;
+                OnLocalized?.Invoke(IsLocalized);
+            }
+            else if(IsLocalized && !foundPCFs)
+            {
+                List<PCF> allPCFs = new List<PCF>(mapAllPCFs.Values);
+
+                this.mapTrackedPCFs.Clear();
+                this.mapAllPCFs.Clear();
+
+                IsLocalized = false;
+
+                foreach (PCF pcf in allPCFs)
                 {
-                    foreach (PCF pcf in this.mapTrackedPCFs.Values)
-                    {
-                        pcf.Update();
-                    }
+                    pcf.Update();
                 }
-                MLPersistentCoordinateFrames._instance.mapUpdatedPCFsThisFrame.Clear();
+
+                this.mapUpdatedPCFsThisFrame.Clear();
+
+                OnLocalized?.Invoke(IsLocalized);
+            }
+
+            if(IsLocalized)
+            {
+                this.UpdateTrackedPCFs();
+                this.mapUpdatedPCFsThisFrame.Clear();
             }
         }
 
@@ -664,66 +593,17 @@ namespace UnityEngine.XR.MagicLeap
         }
 
         /// <summary>
-        /// Sets the localization status based on if PCFs can currently be found
+        /// Update transforms of the PCFs that we're tracking.
         /// </summary>
-        private void SetLocalizationStatus()
+        private void UpdateTrackedPCFs()
         {
-            if (MLPersistentCoordinateFrames.IsValidInstance())
+            if (this.mapTrackedPCFs.Count > 0)
             {
-                try
+                foreach (PCF pcf in this.mapTrackedPCFs.Values)
                 {
-                    MLResult result = MLResult.Create(MLResult.Code.Ok);
-                    uint numPCFs = 0;
-                    MLResult.Code resultCode = NativeBindings.MLPersistentCoordinateFrameGetCount(MLPersistentCoordinateFrames._instance.nativeTracker, ref numPCFs);
-
-                    if (!MLResult.IsOK(resultCode))
-                    {
-                        if (resultCode == MLResult.Code.PassableWorldLowMapQuality || resultCode == MLResult.Code.PassableWorldUnableToLocalize)
-                        {
-                            MLPluginLog.WarningFormat("Map quality not sufficient enough for MLPersistentCoordinateFrames.SetLocalizationStatus. Reason: {0}", MLResult.CodeToString(resultCode));
-                        }
-                        else
-                        {
-                            MLPluginLog.ErrorFormat("MLPersistentCoordinateFrames.SetLocalizationStatus failed. Reason: {0}", MLResult.IsOK(resultCode) ? "No PCFs could be found." : MLResult.CodeToString(resultCode));
-                        }
-
-                        result = MLResult.Create(resultCode, string.Format("MLPersistentCoordinateFrames.SetLocalizationStatus failed. Reason: {0}", MLResult.IsOK(resultCode) ? "No PCFs could be found." : MLResult.CodeToString(resultCode)));
-                    }
-
-                    bool foundPCFs = result.IsOk && numPCFs > 0;
-                    if (!MLPersistentCoordinateFrames.IsLocalized && foundPCFs)
-                    {
-                        MLPersistentCoordinateFrames.IsLocalized = true;
-                        MLPersistentCoordinateFrames.OnLocalized?.Invoke(IsLocalized);
-                    }
-                    else if (MLPersistentCoordinateFrames.IsLocalized && !foundPCFs)
-                    {
-                        List<PCF> allPCFs = new List<PCF>(MLPersistentCoordinateFrames._instance.mapAllPCFs.Values);
-
-                        MLPersistentCoordinateFrames._instance.mapTrackedPCFs.Clear();
-                        MLPersistentCoordinateFrames._instance.mapAllPCFs.Clear();
-
-                        MLPersistentCoordinateFrames.IsLocalized = false;
-
-                        foreach (PCF pcf in allPCFs)
-                        {
-                            pcf.Update();
-                        }
-
-                        MLPersistentCoordinateFrames._instance.mapUpdatedPCFsThisFrame.Clear();
-                        MLPersistentCoordinateFrames.OnLocalized?.Invoke(MLPersistentCoordinateFrames.IsLocalized);
-                    }
-                }
-                catch (EntryPointNotFoundException)
-                {
-                    MLPluginLog.Error("MLPersistentCoordinateFrames.SetLocalizationStatus failed. Reason: API symbols not found.");
+                    pcf.Update();
                 }
             }
-            else
-            {
-                MLPluginLog.ErrorFormat("MLPersistentCoordinateFrames.SetLocalizationStatus failed. Reason: No Instance for MLPersistentCoordinateFrames.");
-            }
-
         }
 
         /// <summary>

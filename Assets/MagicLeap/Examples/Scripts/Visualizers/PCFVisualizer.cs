@@ -105,25 +105,22 @@ namespace MagicLeap
                     // MLPersistentCoordinateFrames.FindAllPCFs() returns the PCFs found in the current map.
                     // Calling this function is expensive and is only called repeatedly for demonstration purposes.
                     // This function will create new pcfs during a new headpose session.
-                    MLPersistentCoordinateFrames.FindAllPCFs((MLResult.Code resultCode, List<MLPersistentCoordinateFrames.PCF> allPCFs) =>
+                    MLResult result = MLPersistentCoordinateFrames.FindAllPCFs(out List<MLPersistentCoordinateFrames.PCF> allPCFs);
+                    if (!result.IsOk)
                     {
-                        if (!MLResult.IsOK(resultCode))
+                        if (result.Result == MLResult.Code.PassableWorldLowMapQuality || result.Result == MLResult.Code.PassableWorldUnableToLocalize)
                         {
-                            if (resultCode == MLResult.Code.PassableWorldLowMapQuality || resultCode == MLResult.Code.PassableWorldUnableToLocalize)
-                            {
-                                Debug.LogWarningFormat("Map quality not sufficient enough for PCFVisualizer to find all pcfs. Reason: {0}", MLResult.CodeToString(resultCode));
-                            }
-                            else
-                            {
-                                Debug.LogErrorFormat("Error: PCFVisualizer failed to find all PCFs because MLPersistentCoordinateFrames failed to get all PCFs. Reason: {0}", MLResult.CodeToString(resultCode));
-                            }
+                            Debug.LogWarningFormat("Map quality not sufficient enough for PCFVisualizer to find all pcfs. Reason: {0}", result);
                         }
                         else
                         {
-                            OnFindAllPCFs?.Invoke(allPCFs);
+                            Debug.LogErrorFormat("Error: PCFVisualizer failed to find all PCFs because MLPersistentCoordinateFrames failed to get all PCFs. Reason: {0}", result);
                         }
-                    });
-
+                    }
+                    else
+                    {
+                        OnFindAllPCFs?.Invoke(allPCFs);
+                    }
                     #endif
 
                    yield return new WaitForSeconds(_secondsToRequeue);

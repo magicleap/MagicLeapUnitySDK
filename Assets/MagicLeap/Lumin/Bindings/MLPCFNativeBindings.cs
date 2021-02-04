@@ -30,56 +30,6 @@ namespace UnityEngine.XR.MagicLeap
             }
 
             /// <summary>
-            /// Sets the offset position/rotation values from the current Perception root and can also set the PCF to be used as the new Perception root to which all MLSnapshotGetTransform will be relative to.
-            /// </summary>
-            /// <param name="offsetPosition">The offset to set from the root's position.</param>
-            /// <param name="offsetRotation">The offset to set from the root's rotation.</param>
-            /// <param name="pcf">The PCF to set the root to.</param>
-            /// <returns>
-            /// MLResult.Result will be <c>MLResult.Code.Ok</c> if operation completed successfully.
-            /// MLResult.Result will be <c>MLResult.Code.MLPerceptionNotStarted</c> if unable to retrieve the Perception System.
-            /// MLResult.Result will be <c>MLResult.Code.MLPerceptionInvalidPCFRoot</c> if the provided CFUID is not associated with a valid PCF.
-            /// MLResult.Result will be <c>MLResult.Code.UnspecifiedFailure</c> if the CFUID is not valid.
-            /// </returns>
-            public static MLResult.Code SetPerceptionRoot(Vector3 offsetPosition, Quaternion offsetRotation, PCF pcf)
-            {
-                IntPtr cfuidPointer = IntPtr.Zero;
-                IntPtr mlTransformPointer = IntPtr.Zero;
-
-                try
-                {
-                    if (pcf != null)
-                    {
-                        cfuidPointer = Marshal.AllocHGlobal(Marshal.SizeOf(pcf.CFUID));
-                        Marshal.StructureToPtr(pcf.CFUID, cfuidPointer, false);
-                    }
-
-                    MagicLeapNativeBindings.MLTransform rootOffset = new MagicLeapNativeBindings.MLTransform();
-                    rootOffset.Position = MLConvert.FromUnity(offsetPosition);
-                    rootOffset.Rotation = MLConvert.FromUnity(offsetRotation);
-
-                    mlTransformPointer = Marshal.AllocHGlobal(Marshal.SizeOf(rootOffset));
-                    Marshal.StructureToPtr(rootOffset, mlTransformPointer, false);
-
-                    MLResult.Code resultCode = NativeBindings.MLPerceptionSetRootCoordinateFrame(cfuidPointer, mlTransformPointer);
-
-                    Marshal.FreeHGlobal(cfuidPointer);
-                    Marshal.FreeHGlobal(mlTransformPointer);
-
-                    return resultCode;
-                }
-                catch (EntryPointNotFoundException)
-                {
-                    MLPluginLog.Error("MLPersistentCoordinateFrames.NativeBindings.SetPerceptionRoot failed. Reason: API symbols not found.");
-
-                    Marshal.FreeHGlobal(cfuidPointer);
-                    Marshal.FreeHGlobal(mlTransformPointer);
-
-                    return MLResult.Code.UnspecifiedFailure;
-                }
-            }
-
-            /// <summary>
             /// Creates a Persistent Coordinate Frame Tracker.
             /// </summary>
             /// <param name="handle">Pointer to an MLHandle.</param>
@@ -180,7 +130,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="cfuids">An array of QueryFilter.MaxResults size used for writing the PCF's MLCoordinateFrameUID.</param>
             /// <param name="cfuidCount">Number of entries populated in cfuidArray. Any number between 0 and QueryFilter.MaxResults.</param>
             /// <returns>
-            /// MLResult.Result will be <c>MLResult.Code.Ok</c> if operation completed successfully.
+            /// MLResult.Result will be <c>MLResult.Code.Ok</c> operation completed successfully.
             /// MLResult.Result will be <c>MLResult.Code.InvalidParam</c> if failed due to an invalid input parameter.
             /// MLResult.Result will be <c>MLResult.Code.PrivilegeDenied</c> if there was a lack of privileges.
             /// MLResult.Result will be <c>MLResult.Code.UnspecifiedFailure</c> if failed due to other internal error.
@@ -191,6 +141,7 @@ namespace UnityEngine.XR.MagicLeap
             [DllImport(MLPerceptionClientDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLPersistentCoordinateFrameQuery(ulong trackerHandle, in QueryFilterNative queryFilter, [In, Out] MLCoordinateFrameUID[] cfuids, out uint cfuidCount);
 
+
             /// <summary>
             /// Provides the string value for some PCF related MLResult.Code.
             /// </summary>
@@ -198,41 +149,6 @@ namespace UnityEngine.XR.MagicLeap
             /// <returns>Pointer to the string value of the given MLResult.Code.</returns>
             [DllImport(MLPerceptionClientDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern IntPtr MLPersistentCoordinateFrameGetResultString(MLResult.Code result);
-
-            /// <summary>
-            /// Sets the root to which all MLSnapshotGetTransform will be relative to.
-            /// </summary>
-            /// <param name="cfuid">Valid reference to a Persistent MLCoordinateFrameUID object to which all MLSnapshotGetTransform will be relative to or null.</param>
-            /// <param name="offset">Valid reference to a MLTransform object to set as reference or null.</param>
-            /// <returns>
-            /// MLResult.Result will be <c>MLResult.Code.Ok</c> if operation completed successfully.
-            /// MLResult.Result will be <c>MLResult.Code.MLPerceptionNotStarted</c> if unable to retrieve the Perception System.
-            /// MLResult.Result will be <c>MLResult.Code.MLPerceptionInvalidPCFRoot</c> if the provided CFUID is not associated with a valid PCF.
-            /// MLResult.Result will be <c>MLResult.Code.UnspecifiedFailure</c> if the CFUID is not valid.
-            /// </returns>
-            [DllImport(MLPerceptionClientDll, CallingConvention = CallingConvention.Cdecl)]
-            public static extern MLResult.Code MLPerceptionSetRootCoordinateFrame(IntPtr cfuidPointer, IntPtr mlTransformPointer);
-
-            /// <summary>
-            /// Gets the persistent coordinate frame id root to which all MLSnapshotGetTransform are relative to, and the transform offset root.
-            /// </summary>
-            /// <param name="cfuid">Valid pointer to a Persistent MLCoordinateFrameUID object or null.</param>
-            /// <param name="offset">Valid reference to a MLTransform object to set as reference or null.</param>
-            /// <returns>
-            /// MLResult.Result will be <c>MLResult.Code.Ok</c> if operation completed successfully.
-            /// MLResult.Result will be <c>MLResult.Code.MLPerceptionNotStarted</c> if unable to retrieve the Perception System.
-            /// MLResult.Result will be <c>MLResult.Code.UnspecifiedFailure</c> if failed due to other internal error.
-            /// </returns>
-            [DllImport(MLPerceptionClientDll, CallingConvention = CallingConvention.Cdecl)]
-            public static extern MLResult.Code MLPerceptionGetRootCoordinateFrame(out MLCoordinateFrameUID cfuid, out MLTransform offset);
-
-            /// <summary>
-            /// Provides the string value for some PCF related MLResult.Code.
-            /// </summary>
-            /// <param name="result">The MLResult.Code to get the string value for.</param>
-            /// <returns>Pointer to the string value of the given MLResult.Code.</returns>
-            [DllImport(MLPerceptionClientDll, CallingConvention = CallingConvention.Cdecl)]
-            public static extern IntPtr MLPerceptionGetResultString(MLResult.Code resultCode);
 
             /// <summary>
             /// The native structure for tracking the Persistent Coordinate Frame's state.

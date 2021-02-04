@@ -47,16 +47,6 @@ namespace UnityEngine.XR.MagicLeap.Native
         private static ConcurrentQueue<Func<bool>> itemizedWork = new ConcurrentQueue<Func<bool>>();
 
         /// <summary>
-        /// Request the worker thread to stop.
-        /// </summary>
-        private static bool requestThreadStop = false;
-
-        /// <summary>
-        /// Indicates if the thread has stopped or not.
-        /// </summary>
-        private static bool isThreadingStopped = false;
-
-        /// <summary>
         /// A method that schedules a callback on the worker thread.
         /// </summary>
         /// <param name="function">Function to call. Return TRUE when processing is done, FALSE to be placed back in the queue to be called again at a later time.</param>
@@ -71,7 +61,14 @@ namespace UnityEngine.XR.MagicLeap.Native
         /// <param name="callback">A callback function to be called when the action is invoked </param>
         public static void ScheduleMain(System.Action callback)
         {
-            mainActionQueue.Enqueue(callback);
+            if (MLDevice.MainThreadId != -1 && MLDevice.MainThreadId == System.Threading.Thread.CurrentThread.ManagedThreadId)
+            {
+                callback();
+            }
+            else
+            {
+                mainActionQueue.Enqueue(callback);
+            }
         }
 
         /// <summary>
@@ -195,8 +192,7 @@ namespace UnityEngine.XR.MagicLeap.Native
 
             if (thread == null && !itemizedWork.IsEmpty)
             {
-                thread = new Thread(ExecuteThread);
-
+                thread = new Thread(ExecuteBackgroundThread);
                 thread.Start();
             }
         }
@@ -232,14 +228,14 @@ namespace UnityEngine.XR.MagicLeap.Native
         }
 
         /// <summary>
-        /// Static method that executes the worker thread.
+        /// Static method that executes the background worker thread.
         /// </summary>
         /// <param name="obj">Optional object</param>
-        private static void ExecuteThread(object obj)
+        private static void ExecuteBackgroundThread(object obj)
         {
-            isThreadingStopped = false;
+            Thread.CurrentThread.IsBackground = true;
 
-            while (!requestThreadStop)
+            while (true)
             {
                 Func<bool> function;
 
@@ -259,8 +255,6 @@ namespace UnityEngine.XR.MagicLeap.Native
                     Thread.Sleep(5);
                 }
             }
-
-            isThreadingStopped = true;
         }
 
         /// <summary>
