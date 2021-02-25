@@ -413,10 +413,30 @@ namespace UnityEngine.XR.MagicLeap
                 [AOT.MonoPInvokeCallback(typeof(NativeBindings.OnTrackAddedDelegate))]
                 private static void OnTrackAdded(in MLWebRTC.Source.NativeBindings.MLWebRTCSource sourceNative, uint numStreamIds, IntPtr streamIdsPtr, IntPtr context)
                 {
+                    if (sourceNative.Handle == MagicLeapNativeBindings.InvalidHandle)
+                    {
+                        Debug.LogError("Received invalid source handle in NativeBindings.OnTrackAdded() callback");
+                        return;
+                    }
+
                     MLWebRTC.MediaStream.Track addedTrack = sourceNative.Data;
 
-                    IntPtr ptr = Marshal.ReadIntPtr(streamIdsPtr);
-                    string streamId = Marshal.PtrToStringAnsi(ptr); 
+                    const string defaultStreamId = "unknown_remote";
+
+                    int ptrSize = Marshal.SizeOf(typeof(IntPtr));
+                    // TODO : marshal directly as a string array instead of IntPtr.
+                    string[] streamIds = new string[numStreamIds];
+                    for (int i = 0; i < numStreamIds; ++i)
+                    {
+                        IntPtr ptr = Marshal.ReadIntPtr(streamIdsPtr, i * ptrSize);
+                        streamIds[i] = (ptr != IntPtr.Zero) ? Marshal.PtrToStringAnsi(ptr) : defaultStreamId;
+                    }
+
+                    if (streamIds.Length == 0)
+                    {
+                        streamIds = new string[1];
+                        streamIds[0] = defaultStreamId;
+                    }
 
                     MLThreadDispatch.ScheduleMain(() =>
                     {
@@ -424,28 +444,32 @@ namespace UnityEngine.XR.MagicLeap
                         PeerConnection connection = gcHandle.Target as PeerConnection;
                         addedTrack.ParentConnection = connection;
 
-                        MLWebRTC.MediaStream mediaStream = null;
-                        if (!connection.remoteMediaStreams.ContainsKey(streamId))
+                        foreach (string streamId in streamIds)
                         {
-                            mediaStream = MLWebRTC.MediaStream.Create(connection, streamId);
-                            connection.remoteMediaStreams.Add(mediaStream.Id, mediaStream);
-                        }
-                        else
-                        {
-                            mediaStream = connection.remoteMediaStreams[streamId];
-                        }
+                            MLWebRTC.MediaStream mediaStream = null;
+                            if (!connection.remoteMediaStreams.ContainsKey(streamId))
+                            {
+                                mediaStream = MLWebRTC.MediaStream.Create(connection, streamId);
+                                connection.remoteMediaStreams.Add(mediaStream.Id, mediaStream);
+                            }
+                            else
+                            {
+                                mediaStream = connection.remoteMediaStreams[streamId];
+                            }
 
-                        mediaStream.Tracks.Add(addedTrack);
-                        // Mark this track as "selected" if this is the first track of its type in this stream.
-                        if (addedTrack.TrackType == MediaStream.Track.Type.Audio && mediaStream.ActiveAudioTrack == null)
-                        {
-                            mediaStream.SelectTrack(addedTrack);
+                            mediaStream.Tracks.Add(addedTrack);
+                            // Mark this track as "selected" if this is the first track of its type in this stream.
+                            if (addedTrack.TrackType == MediaStream.Track.Type.Audio && mediaStream.ActiveAudioTrack == null)
+                            {
+                                mediaStream.SelectTrack(addedTrack);
+                            }
+                            else if (addedTrack.TrackType == MediaStream.Track.Type.Video && mediaStream.ActiveVideoTrack == null)
+                            {
+                                mediaStream.SelectTrack(addedTrack);
+                            }
+                            // TODO : add a new delegate that has the media stream list as the arg
+                            connection.OnTrackAdded?.Invoke(mediaStream, addedTrack);
                         }
-                        else if (addedTrack.TrackType == MediaStream.Track.Type.Video && mediaStream.ActiveVideoTrack == null)
-                        {
-                            mediaStream.SelectTrack(addedTrack);
-                        }
-                        connection.OnTrackAdded?.Invoke(mediaStream, addedTrack);
                     });
                 }
 
