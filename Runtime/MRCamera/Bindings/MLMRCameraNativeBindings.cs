@@ -184,7 +184,7 @@ namespace UnityEngine.XR.MagicLeap
                     ImagePlaneInfoNative planeNative = output.ImagePlanes[i];
                     if (byteArraysBuffers.Count <= i && marshalFrameData)
                     {
-                        byteArraysBuffers.Add(CircularBuffer<byte[]>.Create(new byte[planeNative.Size], 3));
+                        byteArraysBuffers.Add(CircularBuffer<byte[]>.Create(new byte[planeNative.Size], new byte[planeNative.Size], new byte[planeNative.Size]));
                     }
 
                     imagePlanes[i] = MLMRCamera.Frame.ImagePlane.Create(planeNative.Width, planeNative.Height, planeNative.Stride, planeNative.BytesPerPixel, planeNative.Size, planeNative.Data, (marshalFrameData) ? byteArraysBuffers[i].Get() : null);

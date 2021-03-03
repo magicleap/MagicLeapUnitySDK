@@ -35,7 +35,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <summary>
             /// Buffer for the image planes array to use to hold the image plane data.
             /// </summary>
-            private CircularBuffer<Frame.ImagePlane[]> imagePlanesBuffer = CircularBuffer<Frame.ImagePlane[]>.Create(new Frame.ImagePlane[Frame.ImagePlane.MaxImagePlanes], 3);
+            private CircularBuffer<Frame.ImagePlane[]> imagePlanesBuffer = CircularBuffer<Frame.ImagePlane[]>.Create(new Frame.ImagePlane[Frame.ImagePlane.MaxImagePlanes], new Frame.ImagePlane[Frame.ImagePlane.MaxImagePlanes], new Frame.ImagePlane[Frame.ImagePlane.MaxImagePlanes]);
 
             /// <summary>
             /// The newest frame that the video sink knows of.

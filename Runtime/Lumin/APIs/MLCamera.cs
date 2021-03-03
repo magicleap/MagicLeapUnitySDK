@@ -144,19 +144,39 @@ namespace UnityEngine.XR.MagicLeap
         private bool wasDeviceDisconnected = false;
 
         /// <summary>
-        /// Buffer used for copying Y buffer image memory to.
+        /// Buffer used for copying Y buffer video image memory to.
         /// </summary>
         private static CircularBuffer<byte[]> byteArraysYBuffer;
 
         /// <summary>
-        /// Buffer used for copying U buffer image memory to.
+        /// Buffer used for copying U buffer video image memory to.
         /// </summary>
         private static CircularBuffer<byte[]> byteArraysUBuffer;
 
         /// <summary>
-        /// Buffer used for copying V buffer image memory to.
+        /// Buffer used for copying V buffer video image memory to.
         /// </summary>
         private static CircularBuffer<byte[]> byteArraysVBuffer;
+
+        /// <summary>
+        /// Buffer used for copying Y buffer captured image memory to.
+        /// </summary>
+        private static CircularBuffer<byte[]> byteArraysYImageBuffer;
+
+        /// <summary>
+        /// Buffer used for copying U buffer captured image memory to.
+        /// </summary>
+        private static CircularBuffer<byte[]> byteArraysUImageBuffer;
+
+        /// <summary>
+        /// Buffer used for copying V buffer captured image memory to.
+        /// </summary>
+        private static CircularBuffer<byte[]> byteArraysVImageBuffer;
+
+        /// <summary>
+        /// Buffer used for copying JPEG buffer captured image memory to.
+        /// </summary>
+        private static CircularBuffer<byte[]> byteArraysJPEGImageBuffer;
 
         /// <summary>
         /// A delegate for device available events.
@@ -1499,7 +1519,11 @@ namespace UnityEngine.XR.MagicLeap
             if ((output.Format == OutputFormat.JPEG) &&
                 (output.PlaneCount == 1))
             {
-                byte[] jpegBytes = new byte[output.Planes[0].Size];
+                if (byteArraysJPEGImageBuffer == null)
+                {
+                    byteArraysJPEGImageBuffer = CircularBuffer<byte[]>.Create(new byte[output.Planes[0].Size], new byte[output.Planes[0].Size], new byte[output.Planes[0].Size]);
+                }
+                byte[] jpegBytes = byteArraysJPEGImageBuffer.Get();
                 Marshal.Copy(output.Planes[0].Data, jpegBytes, 0, jpegBytes.Length);
 
                 MLThreadDispatch.Call(jpegBytes, OnRawImageAvailable);
@@ -1508,9 +1532,27 @@ namespace UnityEngine.XR.MagicLeap
                 (output.PlaneCount == 3))
             {
                 YUVFrameInfo frameInfo = YUVFrameInfo.Create();
-                frameInfo.Y.CopyFromPlane(output.Planes[(int)MLCameraNativeBindings.YUVPlaneIndex.YPlane]);
-                frameInfo.U.CopyFromPlane(output.Planes[(int)MLCameraNativeBindings.YUVPlaneIndex.UPlane]);
-                frameInfo.V.CopyFromPlane(output.Planes[(int)MLCameraNativeBindings.YUVPlaneIndex.VPlane]);
+
+                PlaneInfo planeInfoY = output.Planes[(int)MLCameraNativeBindings.YUVPlaneIndex.YPlane];
+                if (byteArraysYImageBuffer == null)
+                {
+                    byteArraysYImageBuffer = CircularBuffer<byte[]>.Create(new byte[planeInfoY.Size], new byte[planeInfoY.Size], new byte[planeInfoY.Size]);
+                }
+                frameInfo.Y.CopyFromPlane(planeInfoY, byteArraysYImageBuffer.Get());
+
+                PlaneInfo planeInfoU = output.Planes[(int)MLCameraNativeBindings.YUVPlaneIndex.UPlane];
+                if (byteArraysUImageBuffer == null)
+                {
+                    byteArraysUImageBuffer = CircularBuffer<byte[]>.Create(new byte[planeInfoU.Size], new byte[planeInfoU.Size], new byte[planeInfoU.Size]);
+                }
+                frameInfo.U.CopyFromPlane(planeInfoU, byteArraysUImageBuffer.Get());
+
+                PlaneInfo planeInfoV = output.Planes[(int)MLCameraNativeBindings.YUVPlaneIndex.VPlane];
+                if (byteArraysVImageBuffer == null)
+                {
+                    byteArraysVImageBuffer = CircularBuffer<byte[]>.Create(new byte[planeInfoV.Size], new byte[planeInfoV.Size], new byte[planeInfoV.Size]);
+                }
+                frameInfo.V.CopyFromPlane(planeInfoV, byteArraysVImageBuffer.Get());
 
                 MLThreadDispatch.Call(frameInfo, OnRawImageAvailableYUV);
             }
@@ -1538,7 +1580,7 @@ namespace UnityEngine.XR.MagicLeap
                     PlaneInfo planeInfoY = output.Planes[(int)MLCameraNativeBindings.YUVPlaneIndex.YPlane];
                     if (byteArraysYBuffer == null)
                     {
-                        byteArraysYBuffer = CircularBuffer<byte[]>.Create(new byte[planeInfoY.Size], 3);
+                        byteArraysYBuffer = CircularBuffer<byte[]>.Create(new byte[planeInfoY.Size], new byte[planeInfoY.Size], new byte[planeInfoY.Size]);
                     }
                     frameInfo.Y.CopyFromPlane(planeInfoY, byteArraysYBuffer.Get());
 
@@ -1547,7 +1589,7 @@ namespace UnityEngine.XR.MagicLeap
                         PlaneInfo planeInfoU = output.Planes[(int)MLCameraNativeBindings.YUVPlaneIndex.UPlane];
                         if (byteArraysUBuffer == null)
                         {
-                            byteArraysUBuffer = CircularBuffer<byte[]>.Create(new byte[planeInfoU.Size], 3);
+                            byteArraysUBuffer = CircularBuffer<byte[]>.Create(new byte[planeInfoU.Size], new byte[planeInfoU.Size], new byte[planeInfoU.Size]);
                         }
 
                         frameInfo.U.CopyFromPlane(planeInfoU, byteArraysUBuffer.Get());
@@ -1555,7 +1597,7 @@ namespace UnityEngine.XR.MagicLeap
                         PlaneInfo planeInfoV = output.Planes[(int)MLCameraNativeBindings.YUVPlaneIndex.VPlane];
                         if (byteArraysVBuffer == null)
                         {
-                            byteArraysVBuffer = CircularBuffer<byte[]>.Create(new byte[planeInfoV.Size], 3);
+                            byteArraysVBuffer = CircularBuffer<byte[]>.Create(new byte[planeInfoV.Size], new byte[planeInfoV.Size], new byte[planeInfoV.Size]);
                         }
 
                         frameInfo.V.CopyFromPlane(planeInfoV, byteArraysVBuffer.Get());
@@ -1569,6 +1611,27 @@ namespace UnityEngine.XR.MagicLeap
                     });
                 }
             }
+        }
+
+        /// <summary>
+        /// Releases allocated memory for video capture circular buffers.
+        /// </summary>
+        private void ReleaseVideoCaptureBuffers()
+        {
+            byteArraysUBuffer = null;
+            byteArraysVBuffer = null;
+            byteArraysYBuffer = null;
+        }
+
+        /// <summary>
+        /// Releases allocated memory for image capture circular buffers.
+        /// </summary>
+        private void ReleaseImageCaptureBuffers()
+        {
+            byteArraysJPEGImageBuffer = null;
+            byteArraysUImageBuffer = null;
+            byteArraysVImageBuffer = null;
+            byteArraysYImageBuffer = null;
         }
 
         /// <summary>
@@ -1847,6 +1910,9 @@ namespace UnityEngine.XR.MagicLeap
                 // even if there is some failure disconnecting.
                 this.cameraConnectionEstablished = false;
             }
+
+            ReleaseImageCaptureBuffers();
+            ReleaseVideoCaptureBuffers();
 
             return result;
         }

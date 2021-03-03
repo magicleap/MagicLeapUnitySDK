@@ -135,7 +135,7 @@ namespace UnityEngine.XR.MagicLeap
                     /// <summary>
                     /// Buffer for native image plane arrays.
                     /// </summary>
-                    static CircularBuffer<ImagePlaneInfoNative[]> nativeImagePlanesBuffer = CircularBuffer<ImagePlaneInfoNative[]>.Create(new ImagePlaneInfoNative[MLWebRTC.VideoSink.Frame.ImagePlane.MaxImagePlanes], 3);
+                    static CircularBuffer<ImagePlaneInfoNative[]> nativeImagePlanesBuffer = CircularBuffer<ImagePlaneInfoNative[]>.Create(new ImagePlaneInfoNative[ImagePlane.MaxImagePlanes], new ImagePlaneInfoNative[ImagePlane.MaxImagePlanes], new ImagePlaneInfoNative[ImagePlane.MaxImagePlanes]);
 
                     /// <summary>
                     /// Representation of the native image plane structure.

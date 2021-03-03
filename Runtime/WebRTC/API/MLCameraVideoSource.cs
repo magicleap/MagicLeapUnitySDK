@@ -11,13 +11,16 @@
 // %BANNER_END%
 
 using System.Threading.Tasks;
+#if PLATFORM_LUMIN
+using static UnityEngine.XR.MagicLeap.MLWebRTC.VideoSink.Frame;
+#endif
 
 namespace UnityEngine.XR.MagicLeap
 {
     public class MLCameraVideoSource : MLWebRTC.AppDefinedVideoSource
     {
 #if PLATFORM_LUMIN
-        private CircularBuffer<MLWebRTC.VideoSink.Frame.ImagePlane[]> imagePlanesBuffer = CircularBuffer<MLWebRTC.VideoSink.Frame.ImagePlane[]>.Create(new MLWebRTC.VideoSink.Frame.ImagePlane[(int)MLWebRTC.VideoSink.Frame.NativeImagePlanesLength.YUV_420_888], 3);
+        private CircularBuffer<ImagePlane[]> imagePlanesBuffer = CircularBuffer<ImagePlane[]>.Create(new ImagePlane[(int)NativeImagePlanesLength.YUV_420_888], new ImagePlane[(int)NativeImagePlanesLength.YUV_420_888], new ImagePlane[(int)NativeImagePlanesLength.YUV_420_888]);
 
         private MLCamera.CaptureSettings captureSettings;
 
