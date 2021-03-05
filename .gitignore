@@ -372,3 +372,4 @@ FodyWeavers.xsd
 
 # Don't ignore Unity .meta files
 !Runtime/**/*.meta
+!Editor/**/*.meta
