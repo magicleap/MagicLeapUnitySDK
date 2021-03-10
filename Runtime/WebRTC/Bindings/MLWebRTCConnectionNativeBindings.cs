@@ -13,6 +13,7 @@
 namespace UnityEngine.XR.MagicLeap
 {
     using System;
+    using System.Collections.Generic;
     using System.Runtime.InteropServices;
 #if PLATFORM_LUMIN
     using UnityEngine.XR.MagicLeap.Native;
@@ -443,6 +444,7 @@ namespace UnityEngine.XR.MagicLeap
                         GCHandle gcHandle = GCHandle.FromIntPtr(context);
                         PeerConnection connection = gcHandle.Target as PeerConnection;
                         addedTrack.ParentConnection = connection;
+                        List<MediaStream> mediaStreams = new List<MediaStream>();
 
                         foreach (string streamId in streamIds)
                         {
@@ -467,9 +469,12 @@ namespace UnityEngine.XR.MagicLeap
                             {
                                 mediaStream.SelectTrack(addedTrack);
                             }
-                            // TODO : add a new delegate that has the media stream list as the arg
-                            connection.OnTrackAdded?.Invoke(mediaStream, addedTrack);
+
+                            mediaStreams.Add(mediaStream);
                         }
+                        
+                        connection.OnTrackAdded?.Invoke(mediaStreams[0], addedTrack);
+                        connection.OnTrackAddedMultipleStreams?.Invoke(mediaStreams, addedTrack);
                     });
                 }
 
@@ -491,7 +496,7 @@ namespace UnityEngine.XR.MagicLeap
                             return;
                         }
 
-                        MLWebRTC.MediaStream mediaStream = null;
+                        List<MLWebRTC.MediaStream> mediaStreams = new List<MediaStream>();
                         MLWebRTC.MediaStream.Track removedTrack = null;
 
                         foreach (MLWebRTC.MediaStream remoteMediaStream in connection.remoteMediaStreams.Values)
@@ -501,21 +506,17 @@ namespace UnityEngine.XR.MagicLeap
                                 if(track.Handle == remoteSourceHandle)
                                 {
                                     removedTrack = track;
+                                    remoteMediaStream.UnSelectTrack(removedTrack);
+                                    remoteMediaStream.Tracks.Remove(removedTrack);
+                                    mediaStreams.Add(remoteMediaStream);
                                     break;
                                 }
                             }
-
-                            if(removedTrack != null)
-                            {
-                                remoteMediaStream.UnSelectTrack(removedTrack);
-                                remoteMediaStream.Tracks.Remove(removedTrack);
-                                removedTrack.Cleanup();
-                                mediaStream = remoteMediaStream;
-                                break;
-                            }
                         }
+                        removedTrack.Cleanup();
 
-                        connection.OnTrackRemoved?.Invoke(mediaStream, removedTrack);
+                        connection.OnTrackRemoved?.Invoke(mediaStreams.Count == 0 ? null : mediaStreams[0], removedTrack);
+                        connection.OnTrackRemovedMultipleStreams?.Invoke(mediaStreams, removedTrack);
                     });
                 }
 

@@ -85,16 +85,16 @@ namespace UnityEngine.XR.MagicLeap
             /// <summary>
             /// A delegate that describes the requirements of the OnTrackAddedDelegate callback.
             /// </summary>
-            /// <param name="mediaStream">The media stream associated with the added track.</param>
+            /// <param name="mediaStreams">The media stream associated with the added track.</param>
             /// <param name="addedTrack">The track that was added to the connection.</param>
-            public delegate void OnTrackAddedDelegate(MLWebRTC.MediaStream mediaStream, MLWebRTC.MediaStream.Track addedTrack);
+            public delegate void OnTrackAddedMultipleStreamsDelegate(List<MLWebRTC.MediaStream> mediaStreams, MLWebRTC.MediaStream.Track addedTrack);
 
             /// <summary>
             /// A delegate that describes the requirements of the OnTrackRemovedDelegate callback.
             /// </summary>
-            /// <param name="mediaStream">The media stream associated with the removed track.</param>
+            /// <param name="mediaStreams">The media stream associated with the removed track.</param>
             /// <param name="removedTrack">The track that was removed from the connection.</param>
-            public delegate void OnTrackRemovedDelegate(MLWebRTC.MediaStream mediaStream, MLWebRTC.MediaStream.Track removedTrack);
+            public delegate void OnTrackRemovedMultipleStreamsDelegate(List<MLWebRTC.MediaStream> mediaStreams, MLWebRTC.MediaStream.Track removedTrack);
 
             /// <summary>
             /// A delegate that describes the requirements of the OnDataChannelReceivedDelegate callback.
@@ -148,12 +148,12 @@ namespace UnityEngine.XR.MagicLeap
             /// <summary>
             /// Event invoked for when a track is added to a connection.
             /// </summary>
-            public event OnTrackAddedDelegate OnTrackAdded = delegate { };
+            public event OnTrackAddedMultipleStreamsDelegate OnTrackAddedMultipleStreams = delegate { };
 
             /// <summary>
             /// Event invoked for when a track is removed from a connection.
             /// </summary>
-            public event OnTrackRemovedDelegate OnTrackRemoved = delegate { };
+            public event OnTrackRemovedMultipleStreamsDelegate OnTrackRemovedMultipleStreams = delegate { };
 
             /// <summary>
             /// Event invoked for when a data channel is received by a connection.
