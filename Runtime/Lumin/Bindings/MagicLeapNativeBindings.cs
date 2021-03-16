@@ -511,6 +511,44 @@ namespace UnityEngine.XR.MagicLeap.Native
             }
 
             /// <summary>
+            /// Constructor getting two ulongs as argument.
+            /// </summary>
+            /// <param name="first">First data value.</param>
+            /// <param name="second">Second data value.</param>
+            public MLCoordinateFrameUID(ulong first, ulong second)
+            {
+                First = first;
+                Second = second;
+            }
+
+            /// <summary>
+            /// Constructor getting GUID as argument.
+            /// </summary>
+            /// <param name="guid">GUID from which both values will be calculated.</param>
+            public MLCoordinateFrameUID(Guid guid)
+            {
+                First = 0;
+                Second = 0;
+                FromGuid(guid);
+            }
+
+            /// <summary>
+            /// Constructor getting GUID as argument in string form.
+            /// </summary>
+            /// <param name="guidString">GUID from which both values will be calculated.</param>
+            public MLCoordinateFrameUID(string guidString)
+            {
+                First = 0;
+                Second = 0;
+                Guid guid;
+
+                if(Guid.TryParse(guidString, out guid))
+                {
+                    FromGuid(guid);
+                }
+            }
+
+            /// <summary>
             /// The equality check to be used for comparing two MLCoordinateFrameUID structs.
             /// </summary>
             /// <param name="one">The first struct to compare with the second struct. </param>
@@ -578,6 +616,59 @@ namespace UnityEngine.XR.MagicLeap.Native
                 ulong newFirst = BitConverter.ToUInt64(toConvert, 0);
 
                 return new Guid((int)(newFirst >> 32 & 0x00000000FFFFFFFF), (short)(newFirst >> 16 & 0x000000000000FFFF), (short)(newFirst & 0x000000000000FFFF), newSecond);
+            }
+
+            /// <summary>
+            /// Sets First and Second data value based on given GUID.
+            /// </summary>
+            /// <param name="guid">GUID needed to calculate both data values.</param>
+            public void FromGuid(Guid guid)
+            {
+                byte[] guidBytes = guid.ToByteArray();
+
+                byte[] arrayInt = new byte[4];
+                Array.Copy(guidBytes, arrayInt, 4);
+                int firstPart =  (int)BitConverter.ToUInt32(arrayInt,0);
+
+                byte[] arrayShort = new byte[2];
+                Array.Copy(guidBytes,4, arrayShort, 0,2);
+                short secondPart =  (short)BitConverter.ToUInt16(arrayShort, 0);
+
+                Array.Copy(guidBytes,6, arrayShort, 0,2);
+                short thirdPart = (short)BitConverter.ToUInt16(arrayShort, 0);
+
+                ulong first = ((ulong)firstPart << 32) + ((ulong)secondPart << 16) + (ulong)thirdPart;
+
+                byte[] firstBytes = BitConverter.GetBytes(first);
+                FlipGuidComponents(firstBytes);
+
+                Second = BitConverter.ToUInt64(guidBytes, 8);
+                First = BitConverter.ToUInt64(firstBytes,0);
+            }
+
+            /// <summary>
+            /// Sets First and Second data value based on given GUID in stirng form.
+            /// </summary>
+            /// <param name="guidString">GUID needed to calculate both data values</param>
+            public void FromString(string guidString)
+            {
+                Guid guid;
+
+                if (Guid.TryParse(guidString, out guid))
+                {
+                    FromGuid(guid);
+                }
+            }
+
+            /// <summary>
+            /// Sets First and Second value.
+            /// </summary>
+            /// <param name="first">First data value.</param>
+            /// <param name="second">Second data value.</param>
+            public void FromULongPair(ulong first, ulong second)
+            {
+                First = first;
+                Second = second;
             }
 
             /// <summary>
