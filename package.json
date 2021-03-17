@@ -12,6 +12,6 @@
 		"reality"
 	],
 	"dependencies": {
-		"com.unity.xr.magicleap": "6.1.0-preview.2"
+		"com.unity.xr.magicleap": "6.2.2"
 	}
 }
