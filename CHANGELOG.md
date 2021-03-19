@@ -1,7 +1,17 @@
 # Changelog
 
 ## [Unreleased]
-- [New changes here]
+### Updates
+- Added extensions for `MLPlanes.QueryFlags` enum. You can now check which flags are set by calling convenience functions like `IsCeiling()`, `IsFloor()` etc to check which planes the flag represents.
+- Image capture now uses memory from a circular buffer to avoid over-allocations in case of multiple capture requests.
+- Added `OnTrackAddedMultipleStreams` & `OnTrackRemovedMultipleStreams` delegates to the `MLWebRTC.PeerConnection` class. These delegates are similar to the old `OnTrackAdded` & `OnTrackRemoved` delegates but report a full list of streams that added/removed track belongs to.
+- Upgraded Magic Leap XR Plugin support to 6.2.2.
+
+### Bug Fixes
+- Fixed a crash in MLWebRTC when the remote peer does not provide a stream ID for its media tracks. Use a default stream ID of "unknown_remote" in such cases.
+
+### Deprecations & Removals
+- `OnTrackAdded` & `OnTrackRemoved` delegates in the `MLWebRTC.PeerConnection` class have been deprecated in favor of `OnTrackAddedMultipleStreams` & `OnTrackRemovedMultipleStreams` delegates.
 
 ## [0.25.0]
 ### New Features

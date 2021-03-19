@@ -2,7 +2,7 @@
 	"name": "com.magicleap.sdk",
 	"displayName": "Magic Leap SDK",
 	"version": "0.25.0",
-	"unity": "2020.1",
+	"unity": "2020.2",
 	"description": "Magic Leap Unity SDK",
 	"keywords": [
 		"magicleap",
