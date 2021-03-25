@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.26.0]
 ### Updates
 - Added extensions for `MLPlanes.QueryFlags` enum. You can now check which flags are set by calling convenience functions like `IsCeiling()`, `IsFloor()` etc to check which planes the flag represents.
 - Image capture now uses memory from a circular buffer to avoid over-allocations in case of multiple capture requests.
