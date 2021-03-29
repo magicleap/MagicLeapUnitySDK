@@ -8,6 +8,4 @@ This SDK is provided in the form of an npm package, just like Unity's official a
 
 For a full list of features and documentation on how to use the Magic Leap Unity SDK, see [this page on the Magic Leap Developer Portal](https://developer.magicleap.com/en-us/learn/guides/unity-overview).
 
-Examples and a project template can be found at our [Example Project page](https://github.com/magicleap/MagicLeapUnityExamples).
-
-We also recommend the Magic Leap Zero-Iteration Unity Package to accelerate your development workflow.
+Examples and a project template for quick setup can be found at our [Example Project page](https://github.com/magicleap/MagicLeapUnityExamples).
