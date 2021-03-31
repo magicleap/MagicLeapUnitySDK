@@ -59,7 +59,9 @@ namespace UnityEngine.XR.MagicLeap
         public static MLEye RightEye { get => Instance.rightEye; }
 
         /// <summary>
-        ///     The timestamp for the last time eye data was updated (in microseconds)
+        ///     The timestamp for the last time eye data was updated (in microseconds). 
+        ///     Returns 0 if never updated. 
+        ///     Note that accessing Timestamp will NOT automatically initialize the eye tracking API.
         /// </summary>
         public static ulong Timestamp { get; private set; } = 0;
 
