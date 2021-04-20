@@ -271,7 +271,7 @@ namespace UnityEngine.XR.MagicLeap
                 /// </summary>
                 public uint Size;
 
-                public override string ToString() => $"Data: {Marshal.PtrToStringAuto(Data, (int) Size)}\nSize: {Size}";
+                public override string ToString() => $"Data: {Marshal.PtrToStringAuto(Data, (int) Size-1)}\nSize: {Size}"; // -1 is for null terminated C strings
             }
 
             /// <summary>

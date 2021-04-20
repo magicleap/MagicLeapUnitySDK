@@ -67,7 +67,7 @@ namespace UnityEngine.XR.MagicLeap
                 get
                 {
                     if (stringData == default)
-                        stringData = Marshal.PtrToStringAuto(DataPointer, (int)Length);
+                        stringData = Marshal.PtrToStringAuto(DataPointer, (int)Length-1); // -1 is for null terminated C strings
                     return stringData;
                 }
             }
