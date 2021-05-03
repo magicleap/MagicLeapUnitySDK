@@ -56,15 +56,12 @@ namespace MagicLeap
         private Texture2D[] rawVideoTexturesYUV = new Texture2D[(int)MLWebRTC.VideoSink.Frame.NativeImagePlanesLength.YUV_420_888];
         private Texture2D[] rawVideoTexturesRGB = new Texture2D[(int)MLWebRTC.VideoSink.Frame.NativeImagePlanesLength.RGBA_8888];
 
-        private bool isFrameFit = false;
-
         private static readonly string[] samplerNamesYUV = new string[] { "_MainTex", "_UTex", "_VTex" };
 
+        [System.Obsolete("No need to call this function anymore, GameObject is scaled automatically whenever video resolution changes.", false)]
         public void ResetFrameFit()
         {
-            isFrameFit = false;
         }
-
 
         void Awake()
         {
@@ -111,7 +108,7 @@ namespace MagicLeap
 
             }
 #endif
-            if (!isFrameFit && frame.ImagePlanes.Length > 1)
+            if (frame.ImagePlanes.Length > 1)
             {
                 float aspectRatio = frame.ImagePlanes[0].Width / (float)frame.ImagePlanes[0].Height;
                 float scaleWidth = transform.lossyScale.y * aspectRatio;
@@ -124,7 +121,6 @@ namespace MagicLeap
                     transform.localScale = new Vector3(scaleWidth, transform.localScale.y, transform.localScale.z);
                     transform.parent = parent;
                 }
-                isFrameFit = true;
             }
 
             switch (frame.Format)
