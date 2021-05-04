@@ -13,5 +13,9 @@
 	],
 	"dependencies": {
 		"com.unity.xr.magicleap": "6.2.2"
+	},
+	"author": {
+		"name": "Magic Leap",
+		"url": "https://developer.magicleap.com/"
 	}
 }
