@@ -19,12 +19,15 @@ namespace UnityEngine.XR.MagicLeap
         private MLMRCamera.InputContext inputContext;
         private MLWebRTC.VideoSink.Frame.ImagePlane[] imagePlanesRGB = new MLWebRTC.VideoSink.Frame.ImagePlane[(int)MLWebRTC.VideoSink.Frame.NativeImagePlanesLength.RGBA_8888];
 
-        public static MLMRCameraVideoSource CreateLocal(MLMRCamera.InputContext context, out MLResult result)
+        private MLMRCameraVideoSource(MLMRCamera.InputContext context, string trackId)
+            : base(trackId)
         {
-            MLMRCameraVideoSource mlMRCameraVideoSource = new MLMRCameraVideoSource()
-            {
-                inputContext = context
-            };
+            this.inputContext = context;
+        }
+
+        public static MLMRCameraVideoSource CreateLocal(MLMRCamera.InputContext context, out MLResult result, string trackId = "")
+        {
+            MLMRCameraVideoSource mlMRCameraVideoSource = new MLMRCameraVideoSource(context, trackId);
 #if PLATFORM_LUMIN
             result = MLWebRTC.AppDefinedVideoSource.InitializeLocal(mlMRCameraVideoSource);
             MLMRCamera.OnFrameCapture_NativeCallbackThread += mlMRCameraVideoSource.OnMLMRCameraFrameRGB;

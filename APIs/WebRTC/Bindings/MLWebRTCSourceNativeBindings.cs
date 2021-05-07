@@ -12,6 +12,7 @@
 
 namespace UnityEngine.XR.MagicLeap
 {
+    using System;
     using System.Runtime.InteropServices;
 #if PLATFORM_LUMIN
     using UnityEngine.XR.MagicLeap.Native;
@@ -72,6 +73,19 @@ namespace UnityEngine.XR.MagicLeap
                 public static extern MLResult.Code MLWebRTCSourceCreateLocalSourceForMicrophone(out ulong sourceHandle);
 
                 /// <summary>
+                /// Creates the local source with the specified track name that links to the user's microphone.
+                /// </summary>
+                /// <param name="trackName">Track name</param>
+                /// <param name="sourceHandle">The handle to the local source to return to the caller.</param>
+                /// <returns>
+                /// MLResult.Result will be <c>MLResult.Code.Ok</c> if the local source was successfully created.
+                /// MLResult.Result will be <c>MLResult.Code.PrivilegeDenied</c> if necessary privilege is missing.
+                /// MLResult.Result will be <c>MLResult.Code.UnspecifiedFailure</c> if failed due to other internal error.
+                /// </returns>
+                [DllImport(WebRTCDLL, CallingConvention = CallingConvention.Cdecl)]
+                public static extern MLResult.Code MLWebRTCSourceCreateLocalSourceForMicrophoneEx([MarshalAs(UnmanagedType.LPStr)] string trackName, out ulong sourceHandle);
+
+                /// <summary>
                 /// Checks if an audio source is currently enabled.
                 /// </summary>
                 /// <param name="sourceHandle">The handle of the source.</param>
@@ -109,6 +123,32 @@ namespace UnityEngine.XR.MagicLeap
                 /// </returns>
                 [DllImport(WebRTCDLL, CallingConvention = CallingConvention.Cdecl)]
                 public static extern MLResult.Code MLWebRTCSourceGetType(ulong sourceHandle, out MLWebRTC.MediaStream.Track.Type sourceType);
+
+                /// <summary>
+                /// Gets the track Id of a source, call MLWebRTCSourceReleaseTrackId after.
+                /// </summary>
+                /// <param name="sourceHandle">The handle of the media source.</param>
+                /// <param name="trackIdPtr">Double-pointer to the unmanaged trackId string.</param>
+                /// <returns>
+                /// MLResult.Result will be <c>MLResult.Code.Ok</c> if destroying all handles was successful.
+                /// MLResult.Result will be <c>MLResult.Code.MismatchingHandle</c> if an incorrect handle was sent.
+                /// MLResult.Result will be <c>MLResult.Code.UnspecifiedFailure</c> if failed due to other internal error.
+                /// </returns>
+                [DllImport(WebRTCDLL, CallingConvention = CallingConvention.Cdecl)]
+                public static extern MLResult.Code MLWebRTCSourceGetTrackId(ulong sourceHandle, out IntPtr trackIdPtr);
+
+                /// <summary>
+                /// Releases the memory created when calling MLWebRTCSourceGetTrackId.
+                /// </summary>
+                /// <param name="sourceHandle">The handle of the data channel.</param>
+                /// <param name="trackId">Pointer to the unmanaged trackId string.</param>
+                /// <returns>
+                /// MLResult.Result will be <c>MLResult.Code.Ok</c> if destroying all handles was successful.
+                /// MLResult.Result will be <c>MLResult.Code.MismatchingHandle</c> if an incorrect handle was sent.
+                /// MLResult.Result will be <c>MLResult.Code.UnspecifiedFailure</c> if failed due to other internal error.
+                /// </returns>
+                [DllImport(WebRTCDLL, CallingConvention = CallingConvention.Cdecl)]
+                public static extern MLResult.Code MLWebRTCSourceReleaseTrackId(ulong sourceHandle, IntPtr trackId);
 
                 /// <summary>
                 /// Destroys the local source.
@@ -150,7 +190,22 @@ namespace UnityEngine.XR.MagicLeap
                     {
                         get
                         {
-                            MLWebRTC.MediaStream.Track track = new MLWebRTC.MediaStream.Track()
+                            string trackId = string.Empty;
+
+#if PLATFORM_LUMIN
+                            MLResult.Code resultCode = NativeBindings.MLWebRTCSourceGetTrackId(this.Handle, out IntPtr trackIdPtr);
+                            if (MLResult.IsOK(resultCode))
+                            {
+                                if (trackIdPtr != IntPtr.Zero)
+                                {
+                                    trackId = Marshal.PtrToStringAnsi(trackIdPtr);
+                                    resultCode = NativeBindings.MLWebRTCSourceReleaseTrackId(this.Handle, trackIdPtr);
+                                    DidNativeCallSucceed(resultCode, "MLWebRTCSourceReleaseTrackId()");
+                                }
+                            }
+#endif
+
+                            MLWebRTC.MediaStream.Track track = new MLWebRTC.MediaStream.Track(trackId)
                             {
                                 Handle = this.Handle,
                                 TrackType = this.Type

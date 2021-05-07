@@ -95,7 +95,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="id">The id to give the media stream.</param>
             /// <param name="videoType">The type of video to use.</param>
             /// <returns> An initialized MediaStream object.</returns>
-            public static MediaStream CreateWithBuiltInTracks(string id, Track.VideoType videoType, Track.AudioType audioType)
+            public static MediaStream CreateWithBuiltInTracks(string id, Track.VideoType videoType, Track.AudioType audioType, string videoTrackId = "", string audioTrackId = "")
             {
 #if PLATFORM_LUMIN
                 MediaStream mediaStream = Create(id);
@@ -104,8 +104,8 @@ namespace UnityEngine.XR.MagicLeap
                     return null;
                 }
 
-                MediaStream.Track videoTrack = (videoType != Track.VideoType.None) ? MediaStream.Track.CreateVideoTrack(videoType, out MLResult result) : null;
-                MediaStream.Track audioTrack = (audioType != Track.AudioType.None) ? MediaStream.Track.CreateAudioTrackFromMicrophone(out result) : null;
+                MediaStream.Track videoTrack = (videoType != Track.VideoType.None) ? MediaStream.Track.CreateVideoTrack(videoType, out MLResult result, trackId: videoTrackId) : null;
+                MediaStream.Track audioTrack = (audioType != Track.AudioType.None) ? MediaStream.Track.CreateAudioTrackFromMicrophone(out result, audioTrackId) : null;
 
                 if (videoTrack != null)
                 {
@@ -131,7 +131,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="id">The id to give the media stream.</param>
             /// <param name="appDefinedVideoSource">The defined video source to use.</param>
             /// <returns> An initialized MediaStream object.</returns>
-            public static MediaStream CreateWithAppDefinedVideoTrack(string id, MLWebRTC.AppDefinedVideoSource appDefinedVideoSource, Track.AudioType audioType)
+            public static MediaStream CreateWithAppDefinedVideoTrack(string id, MLWebRTC.AppDefinedVideoSource appDefinedVideoSource, Track.AudioType audioType, string audioTrackId = "")
             {
 #if PLATFORM_LUMIN
                 MediaStream mediaStream = Create(id);
@@ -145,7 +145,7 @@ namespace UnityEngine.XR.MagicLeap
 
                 if (audioType != Track.AudioType.None)
                 {
-                    MediaStream.Track audioTrack = MediaStream.Track.CreateAudioTrackFromMicrophone(out MLResult result);
+                    MediaStream.Track audioTrack = MediaStream.Track.CreateAudioTrackFromMicrophone(out MLResult result, audioTrackId);
                     mediaStream.AddLocalTrack(audioTrack);
                     mediaStream.SelectTrack(audioTrack);
                 }

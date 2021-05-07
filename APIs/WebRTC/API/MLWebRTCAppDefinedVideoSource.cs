@@ -49,7 +49,8 @@ namespace UnityEngine.XR.MagicLeap
             /// <summary>
             /// Initializes a new instance of the <see cref="AppDefinedVideoSource" /> class.
             /// </summary>
-            protected internal AppDefinedVideoSource()
+            protected internal AppDefinedVideoSource(string trackId)
+                : base(trackId)
             {
                 this.TrackType = Type.Video;
             }

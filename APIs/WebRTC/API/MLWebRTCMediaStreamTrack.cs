@@ -46,13 +46,15 @@ namespace UnityEngine.XR.MagicLeap
                 /// <summary>
                 /// Initializes a new instance of the <see cref="Track" /> class.
                 /// </summary>
-                internal Track()
+                internal Track(string trackId)
                 {
 #if PLATFORM_LUMIN
                     UnityEngine.Lumin.Lifecycle.deviceStandbyEvent += this.HandleDeviceStandby;
                     UnityEngine.Lumin.Lifecycle.deviceRealityEvent += this.HandleDeviceReality;
                     UnityEngine.Lumin.Lifecycle.deviceActiveEvent += this.HandleDeviceActive;
                     MLDevice.RegisterApplicationPause(this.OnApplicationPause);
+
+                    Id = trackId;
 #endif
                 }
 
@@ -134,6 +136,11 @@ namespace UnityEngine.XR.MagicLeap
                 public MLWebRTC.PeerConnection ParentConnection { get; internal set; }
 
                 /// <summary>
+                /// Track name
+                /// </summary>
+                public string Id { get; private set; }
+
+                /// <summary>
                 /// Gets or sets the native handle of the track (source).
                 /// </summary>
                 internal ulong Handle { get; set; }
@@ -144,21 +151,21 @@ namespace UnityEngine.XR.MagicLeap
                 /// </summary>
                 /// <param name="result">The MLResult object of the inner platform call(s).</param>
                 /// <returns> An initialized Track object.</returns>
-                public static Track CreateAudioTrackFromMicrophone(out MLResult result)
+                public static Track CreateAudioTrackFromMicrophone(out MLResult result, string trackId = "")
                 {
                     Track track = null;
                     ulong handle = MagicLeapNativeBindings.InvalidHandle;
                     MLResult.Code resultCode = MLResult.Code.Ok;
 
-                    resultCode = Source.NativeBindings.MLWebRTCSourceCreateLocalSourceForMicrophone(out handle);
+                    resultCode = Source.NativeBindings.MLWebRTCSourceCreateLocalSourceForMicrophoneEx(trackId, out handle);
 
-                    if (!DidNativeCallSucceed(resultCode, "MLWebRTCSourceCreateLocalSourceForMicrophone()"))
+                    if (!DidNativeCallSucceed(resultCode, "MLWebRTCSourceCreateLocalSourceForMicrophoneEx()"))
                     {
                         result = MLResult.Create(resultCode);
                         return track;
                     }
 
-                    track = new Track()
+                    track = new Track(trackId)
                     {
                         Handle = handle,
                         TrackType = Type.Audio,
@@ -181,7 +188,7 @@ namespace UnityEngine.XR.MagicLeap
                 /// <param name="result">The MLResult object of the inner platform call(s).</param>
                 /// <param name="inputContext">The InputContext object to start the MLMRCamera API with.</param>
                 /// <returns> An initialized Track object.</returns>
-                public static Track CreateVideoTrack(VideoType videoType, out MLResult result, MLMRCamera.InputContext? inputContext = null)
+                public static Track CreateVideoTrack(VideoType videoType, out MLResult result, MLMRCamera.InputContext? inputContext = null, string trackId = "")
                 {
                     Track track = null;
                     ulong handle = MagicLeapNativeBindings.InvalidHandle;
@@ -214,7 +221,7 @@ namespace UnityEngine.XR.MagicLeap
                         return track;
                     }
 
-                    track = new Track()
+                    track = new Track(trackId)
                     {
                         Handle = handle,
                         TrackType = Type.Video,

@@ -323,7 +323,7 @@ namespace UnityEngine.XR.MagicLeap
                 /// <param name="connectionHandle">The handle to the connection to set the local source to.</param>
                 /// <param name="localSourceHandle">The handle to the local source to set onto the connection.</param>
                 /// <param name="streamCount">The number of streams this track belongs to.</param>
-                /// <param name="streams">The names of each stream this track belongs to (comma delimited).</param>
+                /// <param name="streams">The names of each stream this track belongs to.</param>
                 /// <returns>
                 /// MLResult.Result will be <c>MLResult.Code.Ok</c> if the source was successfully set on the connection.
                 /// MLResult.Result will be <c>MLResult.Code.PrivilegeDenied</c> if necessary privilege is missing.
@@ -331,6 +331,19 @@ namespace UnityEngine.XR.MagicLeap
                 /// </returns>
                 [DllImport(WebRTCDLL, CallingConvention = CallingConvention.Cdecl)]
                 public static extern MLResult.Code MLWebRTCConnectionAddLocalSourceTrack(ulong connectionHandle, ulong localSourceHandle, uint streamCount, [MarshalAsAttribute(UnmanagedType.LPArray, ArraySubType=UnmanagedType.LPStr)] string[] streams);
+
+                /// <summary>
+                /// Add a local source as a media track to the connection.
+                /// </summary>
+                /// <param name="connectionHandle">The handle to the connection to set the local source to.</param>
+                /// <param name="localSourceHandle">The handle to the local source to set onto the connection.</param>
+                /// <param name="trackInfo">Information about the track to be added</param>
+                /// <returns>
+                /// MLResult.Result will be <c>MLResult.Code.Ok</c> if the source was successfully set on the connection.
+                /// MLResult.Result will be <c>MLResult.Code.UnspecifiedFailure</c> if failed due to other internal error.
+                /// </returns>
+                [DllImport(WebRTCDLL, CallingConvention = CallingConvention.Cdecl)]
+                public static extern MLResult.Code MLWebRTCConnectionAddLocalSourceTrackEx(ulong connectionHandle, ulong localSourceHandle, [In] ref MLWebRTCTrackInfo trackInfo);
 
                 /// <summary>
                 /// Sets the local source of a connection.
@@ -874,6 +887,55 @@ namespace UnityEngine.XR.MagicLeap
                     /// </summary>
                     [MarshalAs(UnmanagedType.LPStr)]
                     public string BypassList;
+                }
+
+                [StructLayout(LayoutKind.Sequential)]
+                public struct MLWebRTCTrackInfo
+                {
+                    /// <summary>
+                    /// Struct version
+                    /// </summary>
+                    private readonly uint version;
+
+                    /// <summary>
+                    /// The names of each stream this track belongs to
+                    /// </summary>
+                    private readonly uint streamCount;
+
+                    /// <summary>
+                    /// Names of the streams this track belongs to.
+                    /// </summary>
+                    [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPStr)]
+                    private IntPtr[] streams;
+
+                    /// <summary>
+                    /// Id of the track.
+                    /// </summary>
+                    [MarshalAs(UnmanagedType.LPStr)]
+                    private readonly string trackId;
+
+                    public MLWebRTCTrackInfo(string[] streams, string trackId)
+                    {
+                        this.version = 1;
+                        this.streamCount = (streams != null) ? (uint)streams.Length : 0;
+                        this.trackId = trackId ?? string.Empty;
+
+                        // [MarshalAs(UnmanagedType.LPArray, ArraySubType=UnmanagedType.LPStr)] doesnt work when char** is in a struct instead of a func param.
+                        this.streams = (streams != null) ? new IntPtr[streams.Length] : null;
+                        for (int i = 0; i < streamCount; ++i)
+                        {
+                            this.streams[i] = Marshal.StringToHGlobalAnsi(streams[i]);
+                        }
+                    }
+
+                    public void FreeUnmanagedMemory()
+                    {
+                        foreach (IntPtr ptr in streams)
+                        {
+                            Marshal.FreeHGlobal(ptr);
+                        }
+                        streams = null;
+                    }
                 }
             }
         }

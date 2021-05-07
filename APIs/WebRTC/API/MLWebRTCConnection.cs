@@ -524,7 +524,9 @@ namespace UnityEngine.XR.MagicLeap
                     trackToAdd.Streams[i].ParentConnections.Add(this);
                 }
 
-                MLResult.Code resultCode = NativeBindings.MLWebRTCConnectionAddLocalSourceTrack(Handle, trackToAdd.Handle, (uint)streamIds.Length, streamIds);
+                NativeBindings.MLWebRTCTrackInfo trackInfo = new NativeBindings.MLWebRTCTrackInfo(streamIds, trackToAdd.Id);
+                MLResult.Code resultCode = NativeBindings.MLWebRTCConnectionAddLocalSourceTrackEx(Handle, trackToAdd.Handle, ref trackInfo);
+                trackInfo.FreeUnmanagedMemory();
                 if (DidNativeCallSucceed(resultCode, "MLWebRTCConnectionAddLocalSourceTrack()"))
                 {
                     localMediaStreamTracks.Add(trackToAdd);

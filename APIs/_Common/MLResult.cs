@@ -60,7 +60,7 @@ namespace UnityEngine.XR.MagicLeap
             this.Result = result;
             this.message = msg;
         }
-        #endif
+#endif
 
         /// <summary>
         /// Identifier of Magic Leap API results
@@ -1276,6 +1276,7 @@ namespace UnityEngine.XR.MagicLeap
 
             return codeString;
         }
+        #endif
 
         /// <summary>
         /// Indicates whether the result code is Code.Ok
@@ -1299,6 +1300,7 @@ namespace UnityEngine.XR.MagicLeap
             return (Code.Pending == result) || (Code.ConnectionsCancellationPending == result);
         }
 
+        #if PLATFORM_LUMIN
         /// <summary>
         /// The equality check to be used for comparing two MLResult structs.
         /// </summary>

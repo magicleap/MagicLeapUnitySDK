@@ -26,18 +26,26 @@ namespace UnityEngine.XR.MagicLeap
 
         private bool isCapturing = false;
 
-        public static MLCameraVideoSource CreateLocal(MLCamera.CaptureSettings settings, out MLResult result)
+        private MLCameraVideoSource(MLCamera.CaptureSettings settings, string trackId)
+            : base(trackId)
         {
-            MLCameraVideoSource mlCameraVideoSource = new MLCameraVideoSource()
-            {
-                captureSettings = settings
-            };
+            this.captureSettings = settings;
+        }
+
+        public static MLCameraVideoSource CreateLocal(MLCamera.CaptureSettings settings, out MLResult result, string trackId = "")
+        {
+            MLCameraVideoSource mlCameraVideoSource = new MLCameraVideoSource(settings, trackId);
 
             result = MLWebRTC.AppDefinedVideoSource.InitializeLocal(mlCameraVideoSource);
             mlCameraVideoSource.StartCapture();
             return mlCameraVideoSource;
         }
 #endif
+
+        private MLCameraVideoSource()
+            : base(string.Empty)
+        {
+        }
 
         protected override void OnSourceSetEnabled(bool enabled)
         {
