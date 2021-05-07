@@ -77,6 +77,11 @@ namespace UnityEngine.XR.MagicLeap
                 context.stabilization = stabilization;
                 return context;
             }
+
+            public override string ToString()
+            {
+                return $"{quality}, {blendType}, stabilization: {stabilization}";
+            }
         }
     }
 }
