@@ -56,7 +56,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <summary>
             /// Gets the handle of the sink.
             /// </summary>
-            internal ulong Handle { get; private set; }
+            internal ulong Handle { get; set; }
 
             /// <summary>
             /// Abstract method for destroying the sink.

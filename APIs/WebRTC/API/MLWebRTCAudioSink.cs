@@ -13,6 +13,7 @@
 namespace UnityEngine.XR.MagicLeap
 {
     using System.Collections.Generic;
+    using System.Runtime.InteropServices;
 
 #if PLATFORM_LUMIN
     using UnityEngine.XR.MagicLeap.Native;
@@ -30,6 +31,73 @@ namespace UnityEngine.XR.MagicLeap
         public partial class AudioSink : Sink
         {
             /// <summary>
+            /// Behavior of the sink if audio buffer data is provided to the app in a callback.
+            /// </summary>
+            public enum BufferNotifyMode : uint
+            {
+                /// <summary>
+                /// Don't provide app with audio buffers, consume them in the underlying
+                /// lib and play directly on the device.
+                /// </summary>
+                None,
+
+                /// <summary>
+                /// Provide the app with audio buffers in a callback, AND also play the
+                /// audio directly on the device. Ths is useful where apps want to use
+                /// the buffers to calculate something (like RMS) but not take the
+                /// responsibility of actually playing the audio.
+                /// </summary>
+                NotifyAndPlay,
+
+                /// <summary>
+                /// Provide the app with audio buffers in a callback. The underlyin
+                /// library will NOT play the audio. It is the app's responsibility
+                /// to submit the audio buffers to the device.
+                /// </summary>
+                NotifyOnly
+            }
+
+            /// <summary>
+            /// Delegate to provide audio buffer data received for this audio sink.
+            /// </summary>
+            /// <param name="bufferFormat">Format of the audio buffer</param>
+            /// <param name="buffer">Audio buffer</param>
+            public delegate void OnAudioDataAvailableDelegate(MLAudio.Buffer buffer);
+
+            /// <summary>
+            /// Audio buffer notification mode for this AudioSink
+            /// </summary>
+            public BufferNotifyMode Mode { get; private set; }
+
+            /// <summary>
+            /// Raw audio data received in the OnAudioDataAvailable_NativeCallbackThread delegate
+            /// should be converted to float samples and copied from unmanaged to managed memory.
+            /// Audio data received in OnAudioDataAvailable will always be available in managed memory.
+            /// This is set to true by default. Disable this flag if you experience too many
+            /// garbage collection invocations for MLAudio.Buffer.Samples & handle the audio data
+            /// conversion from the unmanaged to managed and from Int to Float yourself.
+            /// </summary>
+            public bool CopyRawAudioDataToManagedMemory { get; set; } = true;
+
+            /// <summary>
+            /// Delegate invoked on the native callback thread to provide the audio buffer data for this sink.
+            /// MLAudio.Buffer.NativeDataPtr is valid for this delegate.
+            /// </summary>
+            public event OnAudioDataAvailableDelegate OnAudioDataAvailable_NativeCallbackThread;
+
+            /// <summary>
+            /// Delegate invoked on the native callback thread to provide the audio buffer data for this sink.
+            /// MLAudio.Buffer.NativeDataPtr is NOT valid for this delegate.
+            /// Use the managed MLAudio.Buffer.Samples array instead.
+            /// </summary>
+            public event OnAudioDataAvailableDelegate OnAudioDataAvailable;
+
+            /// <summary>
+            /// The handle for this managed object.
+            /// </summary>
+            private GCHandle gcHandle;
+
+            /// <summary>
             /// Initializes a new instance of the <see cref="AudioSink" /> class.
             /// </summary>
             internal AudioSink()
@@ -40,9 +108,11 @@ namespace UnityEngine.XR.MagicLeap
             /// <summary>
             /// Initializes a new instance of the <see cref="AudioSink" /> class.
             /// </summary>
-            internal AudioSink(ulong handle) : base(handle)
+            internal AudioSink(ulong handle, BufferNotifyMode mode) : base(handle)
             {
                 this.Type = MediaStream.Track.Type.Audio;
+                this.Mode = mode;
+                this.gcHandle = GCHandle.Alloc(this);
             }
 
             /// <summary>
@@ -50,21 +120,30 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             /// <param name="result">The MLResult object of the inner platform call(s).</param>
             /// <returns> An initialized AudioSink object.</returns>
-            public static AudioSink Create(out MLResult result)
+            public static AudioSink Create(out MLResult result, BufferNotifyMode mode = BufferNotifyMode.None)
             {
                 AudioSink audioSink = null;
 
 #if PLATFORM_LUMIN
                 List<MLWebRTC.Sink> sinks = MLWebRTC.Instance.sinks;
                 ulong handle = MagicLeapNativeBindings.InvalidHandle;
-                MLResult.Code resultCode = NativeBindings.MLWebRTCAudioSinkCreate(out handle);
-                if (!DidNativeCallSucceed(resultCode, "MLWebRTCAudioSinkCreate()"))
+                // We have a chicken-and-egg problem here. We need the audioSink object in order to create the
+                // userContext ptr from it GCHandle, which will later be used in the audio data callback to
+                // invoke the delegate on this particular object.
+                // So, create the AudioSink obj with an invalid handle for now, and then update it if the 
+                // native sink creation is successful.
+                audioSink = new AudioSink(handle, mode);
+
+                NativeBindings.MLWebRTCAudioSinkParams sinkParams = new NativeBindings.MLWebRTCAudioSinkParams(audioSink);
+                MLResult.Code resultCode = NativeBindings.MLWebRTCAudioSinkCreateEx(ref sinkParams, out handle);
+                if (!DidNativeCallSucceed(resultCode, "MLWebRTCAudioSinkCreateEx()"))
                 {
                     result = MLResult.Create(resultCode);
-                    return audioSink;
+                    return null;
                 }
 
-                audioSink = new AudioSink(handle);
+                audioSink.Handle = handle;
+
                 if (MagicLeapNativeBindings.MLHandleIsValid(audioSink.Handle))
                 {
                     sinks.Add(audioSink);
@@ -187,6 +266,7 @@ namespace UnityEngine.XR.MagicLeap
                 this.InvalidateHandle();
 
                 MLWebRTC.Instance.sinks.Remove(this);
+                this.gcHandle.Free();
 
                 return MLResult.Create(resultCode);
 #else

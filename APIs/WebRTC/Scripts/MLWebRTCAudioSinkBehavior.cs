@@ -41,6 +41,7 @@ namespace MagicLeap
         }
 
         private MLWebRTC.AudioSink audioSink;
+
         void Awake()
         {
 #if PLATFORM_LUMIN
@@ -52,7 +53,7 @@ namespace MagicLeap
                 enabled = false;
             }
 
-            audioSink = MLWebRTC.AudioSink.Create(out  result);
+            audioSink = MLWebRTC.AudioSink.Create(out result);
             audioSink.SetPosition(transform.position);
 #endif
         }

@@ -12,6 +12,7 @@
 
 namespace UnityEngine.XR.MagicLeap
 {
+    using System;
     using System.Runtime.InteropServices;
 #if PLATFORM_LUMIN
     using UnityEngine.XR.MagicLeap.Native;
@@ -44,6 +45,18 @@ namespace UnityEngine.XR.MagicLeap
                 /// </returns>
                 [DllImport(WebRTCDLL, CallingConvention = CallingConvention.Cdecl)]
                 public static extern MLResult.Code MLWebRTCAudioSinkCreate(out ulong sinkHandle);
+
+                /// <summary>
+                /// Creates an audio sink with the provided params.
+                /// </summary>
+                /// <param name="sinkParams">Parameters to use to create the audio sink.</param>
+                /// <param name="sinkHandle">The handle to the audio sink to return to the caller.</param>
+                /// <returns>
+                /// MLResult.Result will be <c>MLResult.Code.Ok</c> if the audio sink was successfully created.
+                /// MLResult.Result will be <c>MLResult.Code.UnspecifiedFailure</c> if failed due to other internal error.
+                /// </returns>
+                [DllImport(WebRTCDLL, CallingConvention = CallingConvention.Cdecl)]
+                public static extern MLResult.Code MLWebRTCAudioSinkCreateEx([In] ref MLWebRTCAudioSinkParams sinkParams, out ulong sinkHandle);
 
                 /// <summary>
                 /// Sets the source of an audio sink.
@@ -115,6 +128,55 @@ namespace UnityEngine.XR.MagicLeap
                 /// </returns>
                 [DllImport(WebRTCDLL, CallingConvention = CallingConvention.Cdecl)]
                 public static extern MLResult.Code MLWebRTCAudioSinkDestroy(ulong sinkHandle);
+
+#if PLATFORM_LUMIN
+                private delegate void OnAudioSinkDataAvailableDelegate(in MLAudio.NativeBindings.MLAudioBuffer audioBuffer, in MLAudio.NativeBindings.MLAudioBufferFormat audioBufferFormat, IntPtr userContext);
+
+                [AOT.MonoPInvokeCallback(typeof(OnAudioSinkDataAvailableDelegate))]
+                private static void OnAudioSinkDataAvailable(in MLAudio.NativeBindings.MLAudioBuffer audioBuffer, in MLAudio.NativeBindings.MLAudioBufferFormat audioBufferFormat, IntPtr userContext)
+                {
+                    GCHandle gcHandle = GCHandle.FromIntPtr(userContext);
+                    AudioSink audioSink = gcHandle.Target as AudioSink;
+
+                    if (audioSink == null)
+                    {
+                        return;
+                    }
+
+                    MLAudio.Buffer buffer = new MLAudio.Buffer(audioBuffer, audioBufferFormat, audioSink.CopyRawAudioDataToManagedMemory || (audioSink.OnAudioDataAvailable != null));
+
+                    if (audioSink.OnAudioDataAvailable_NativeCallbackThread != null)
+                    {
+                        audioSink.OnAudioDataAvailable_NativeCallbackThread.Invoke(buffer);
+                    }
+
+                    MLThreadDispatch.ScheduleMain(() =>
+                    {
+                        audioSink.OnAudioDataAvailable?.Invoke(buffer);
+                    });
+                }
+#endif
+
+                [StructLayout(LayoutKind.Sequential)]
+                public struct MLWebRTCAudioSinkParams
+                {
+                    private readonly uint version;
+                    private readonly AudioSink.BufferNotifyMode mode;
+                    private readonly IntPtr userContext;
+#if PLATFORM_LUMIN
+                    private readonly OnAudioSinkDataAvailableDelegate audioSinkCallback;
+#endif
+
+                    public MLWebRTCAudioSinkParams(AudioSink audioSink)
+                    {
+                        this.version = 1;
+                        this.mode = audioSink.Mode;
+                        this.userContext = GCHandle.ToIntPtr(audioSink.gcHandle);
+#if PLATFORM_LUMIN
+                        this.audioSinkCallback = OnAudioSinkDataAvailable;
+#endif
+                    }
+                }
             }
         }
     }

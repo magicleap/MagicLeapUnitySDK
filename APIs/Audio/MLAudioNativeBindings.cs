@@ -27,7 +27,7 @@ namespace UnityEngine.XR.MagicLeap
         /// <summary>
         /// See ml_audio.h for additional comments.
         /// </summary>
-        private class NativeBindings : Native.MagicLeapNativeBindings
+        internal class NativeBindings : Native.MagicLeapNativeBindings
         {
             /// <summary>
             /// MLAudio library name.
@@ -138,6 +138,40 @@ namespace UnityEngine.XR.MagicLeap
             /// <returns>A pointer to the result string.</returns>
             [DllImport(AudioPlayerDLL, CallingConvention = CallingConvention.Cdecl)]
             public static extern IntPtr MLAudioGetResultString(MLResult.Code result);
+
+            [StructLayout(LayoutKind.Sequential)]
+            public struct MLAudioBufferFormat
+            {
+                public readonly uint ChannelCount;
+                public readonly uint SamplesPerSecond;
+                public readonly uint BitsPerSample;
+                public readonly uint ValidBitsPerSample;
+                public readonly MLAudio.SampleFormatType SampleFormat;
+                public readonly uint Reserved;
+
+                public MLAudioBufferFormat(MLAudio.BufferFormat bufferFormat)
+                {
+                    this.ChannelCount = bufferFormat.ChannelCount;
+                    this.SamplesPerSecond = bufferFormat.SamplesPerSecond;
+                    this.BitsPerSample = bufferFormat.BitsPerSample;
+                    this.ValidBitsPerSample = bufferFormat.ValidBitsPerSample;
+                    this.SampleFormat = bufferFormat.SampleFormat;
+                    this.Reserved = 0;
+                }
+            }
+
+            [StructLayout(LayoutKind.Sequential)]
+            public struct MLAudioBuffer
+            {
+                public readonly IntPtr Ptr;
+                public readonly uint Size;
+
+                public MLAudioBuffer(IntPtr ptr, uint size)
+                {
+                    this.Ptr = ptr;
+                    this.Size = size;
+                }
+            }
         }
     }
 }
