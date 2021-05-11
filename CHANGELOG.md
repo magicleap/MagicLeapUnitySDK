@@ -1,14 +1,22 @@
 # Changelog
 
 ## [0.26.0]
+### New Features
+- Exposed APIs to optionally set/get the Ids for WebRTC media tracks. Ids can be specified when creating the tracks and the `MLWebRTC.MediaStream.Track.Id` property is already set upon receiving a track from the remote peer.
+- Exposed callbacks in `MLWebRTC.AudioSink` to provide the app with the incoming audio buffers. Pass in the appropriate `BufferNotifyMode` to `MLWebRTC.AudioSink.Create()` to set whether the app will receive the audio buffers or not and whether the underlying WebRTC platform will play the audio or leave it to the app to do so.
+- Exposed functions in `MLWebRTC.AudioSink` to set various soundfield parameters (position, orientation, direct send levels, room send levels, distance & radiation properties and sound volume). These properties should only be set after `MLWebRTC.AudioSink.CurrentServiceStatus` is `ServiceStatus.Started` or `MLWebRTC.AudioSink.OnAudioServiceStatusChanged` delegate is fired with `ServiceStatus.Started`.
+
 ### Updates
 - Added extensions for `MLPlanes.QueryFlags` enum. You can now check which flags are set by calling convenience functions like `IsCeiling()`, `IsFloor()` etc to check which planes the flag represents.
 - Image capture now uses memory from a circular buffer to avoid over-allocations in case of multiple capture requests.
 - Added `OnTrackAddedMultipleStreams` & `OnTrackRemovedMultipleStreams` delegates to the `MLWebRTC.PeerConnection` class. These delegates are similar to the old `OnTrackAdded` & `OnTrackRemoved` delegates but report a full list of streams that added/removed track belongs to.
 - Upgraded Magic Leap XR Plugin support to 6.2.2.
+- Clarified the usage of `MLEyes.Timestamp` property that it won't automatically initialize the eye tracking api and returns 0 in that case.
 
 ### Bug Fixes
 - Fixed a crash in MLWebRTC when the remote peer does not provide a stream ID for its media tracks. Use a default stream ID of "unknown_remote" in such cases.
+- Fixed the string returned from the scanned QR-code. The string had a null-terminator in the end.
+- Fixed MLWebRTCVideoSinkBehavior to scale the game object according to dyamic changes in video resolution.
 
 ### Deprecations & Removals
 - `OnTrackAdded` & `OnTrackRemoved` delegates in the `MLWebRTC.PeerConnection` class have been deprecated in favor of `OnTrackAddedMultipleStreams` & `OnTrackRemovedMultipleStreams` delegates.

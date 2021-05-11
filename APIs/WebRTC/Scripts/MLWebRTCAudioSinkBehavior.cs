@@ -33,7 +33,7 @@ namespace MagicLeap
 #endif
                 }
                 audioSink = value;
-                if (audioSink != null)
+                if (audioSink != null && audioSink.CurrentServiceStatus == MLWebRTC.AudioSink.ServiceStatus.Started)
                 {
                     audioSink.SetPosition(transform.position);
                 }
@@ -54,13 +54,16 @@ namespace MagicLeap
             }
 
             audioSink = MLWebRTC.AudioSink.Create(out result);
-            audioSink.SetPosition(transform.position);
+            if (audioSink.CurrentServiceStatus == MLWebRTC.AudioSink.ServiceStatus.Started)
+            {
+                audioSink.SetPosition(transform.position);
+            }
 #endif
         }
 
         void Update()
         {
-            if (transform.hasChanged && audioSink != null)
+            if (transform.hasChanged && audioSink != null && audioSink.CurrentServiceStatus == MLWebRTC.AudioSink.ServiceStatus.Started)
             {
                 audioSink.SetPosition(transform.position);
                 transform.hasChanged = false;

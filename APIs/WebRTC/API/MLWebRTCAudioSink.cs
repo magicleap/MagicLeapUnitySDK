@@ -30,6 +30,12 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public partial class AudioSink : Sink
         {
+            private NativeBindings.MLWebRTCAudioSinkPosition nativePosition;
+            private NativeBindings.MLWebRTCAudioSinkOrientation nativeOrientation;
+            private NativeBindings.MLWebRTCAudioSinkSoundLevels nativeSoundLevels;
+            private NativeBindings.MLWebRTCAudioSinkSoundDistance nativeDistance;
+            private NativeBindings.MLWebRTCAudioSinkSoundRadiation nativeRadiation;
+
             /// <summary>
             /// Behavior of the sink if audio buffer data is provided to the app in a callback.
             /// </summary>
@@ -58,6 +64,38 @@ namespace UnityEngine.XR.MagicLeap
             }
 
             /// <summary>
+            /// Status of the underlying Audio Service the buffers are submitted & soundfield attributes applied to.
+            /// </summary>
+            public enum ServiceStatus : uint
+            {
+                /// <summary>
+                /// The audio service has been initialized but not ready to accept updates to any attributes (soundfield or volume).
+                /// </summary>
+                Initial,
+
+                /// <summary>
+                /// The audio service has started. It is now safe to update the audio attributes (soundfield and volume).
+                /// </summary>
+                Started,
+
+                /// <summary>
+                /// Audio service has failed. This will cause disruption in audio playback. Audio attributes (soundfield or volume)
+                /// should not be set after receiving this status update.
+                /// </summary>
+                Failed,
+
+                /// <summary>
+                /// Audio service has stopped. Audio attributes (soundfield or volume) should not be set after receiving this status update.
+                /// </summary>
+                Stopped,
+
+                /// <summary>
+                /// Audio service status is unknown. Audio attributes (soundfield or volume) should not be set after receiving this status update.
+                /// </summary>
+                Unknown
+            }
+
+            /// <summary>
             /// Delegate to provide audio buffer data received for this audio sink.
             /// </summary>
             /// <param name="bufferFormat">Format of the audio buffer</param>
@@ -65,9 +103,25 @@ namespace UnityEngine.XR.MagicLeap
             public delegate void OnAudioDataAvailableDelegate(MLAudio.Buffer buffer);
 
             /// <summary>
+            /// Delegate to provide the current audio service status. Apps should use
+            /// this status to determine whether its safe to set the audio attriutes
+            /// like soundfield parameters and volume.
+            /// </summary>
+            /// <param name="status">The current status of the audio service</param>
+            public delegate void OnAudioServiceStatusChangedDelegate(ServiceStatus status);
+
+            /// <summary>
             /// Audio buffer notification mode for this AudioSink
             /// </summary>
             public BufferNotifyMode Mode { get; private set; }
+
+            /// <summary>
+            /// Current status of the underlying audio service.
+            /// Apps should use this status to determine whether
+            /// its safe to set the audio attriutes like soundfield
+            /// parameters and volume.
+            /// </summary>
+            public ServiceStatus CurrentServiceStatus { get; private set; }
 
             /// <summary>
             /// Raw audio data received in the OnAudioDataAvailable_NativeCallbackThread delegate
@@ -86,11 +140,19 @@ namespace UnityEngine.XR.MagicLeap
             public event OnAudioDataAvailableDelegate OnAudioDataAvailable_NativeCallbackThread;
 
             /// <summary>
-            /// Delegate invoked on the native callback thread to provide the audio buffer data for this sink.
+            /// Delegate invoked on the main thread to provide the audio buffer data for this sink.
             /// MLAudio.Buffer.NativeDataPtr is NOT valid for this delegate.
             /// Use the managed MLAudio.Buffer.Samples array instead.
             /// </summary>
             public event OnAudioDataAvailableDelegate OnAudioDataAvailable;
+
+            /// <summary>
+            /// Delegate invoked on the main thread to notify the app about the current
+            /// status of the underlying audio service. Apps should use this tatus
+            /// to determine whether its safe to set the audio attriutes like soundfield
+            /// parameters and volume.
+            /// </summary>
+            public event OnAudioServiceStatusChangedDelegate OnAudioServiceStatusChanged;
 
             /// <summary>
             /// The handle for this managed object.
@@ -112,6 +174,7 @@ namespace UnityEngine.XR.MagicLeap
             {
                 this.Type = MediaStream.Track.Type.Audio;
                 this.Mode = mode;
+                this.CurrentServiceStatus = ServiceStatus.Unknown;
                 this.gcHandle = GCHandle.Alloc(this);
             }
 
@@ -184,20 +247,159 @@ namespace UnityEngine.XR.MagicLeap
             }
 
             /// <summary>
-            /// Sets the world position of the audio sink for <c>spatialized</c> audio.
+            /// Sets the volume of the audio sink for the specified channel.
+            /// The range of the volume is 0 to 8, with 0 for silence, 1 for unity gain, and 8 for 8x gain.
             /// </summary>
-            /// <param name="position">The position to set the audio sink to.</param>
+            /// <param name="volume">The volume of the audio sink.</param>
             /// <returns>
             /// MLResult.Result will be <c>MLResult.Code.Ok</c> if destroying all handles was successful.
             /// MLResult.Result will be <c>MLResult.Code.WebRTCResultInstanceNotCreated</c> if MLWebRTC instance was not created.
             /// MLResult.Result will be <c>MLResult.Code.WebRTCResultMismatchingHandle</c> if an incorrect handle was sent.
             /// MLResult.Result will be <c>MLResult.Code.InvalidParam</c> if an invalid parameter was passed.
             /// </returns>
-            public MLResult SetPosition(Vector3 position)
+            public MLResult SetVolume(float volume)
             {
 #if PLATFORM_LUMIN
-                MLResult.Code resultCode = NativeBindings.MLWebRTCAudioSinkSetPosition(this.Handle, MLConvert.FromUnity(position));
-                DidNativeCallSucceed(resultCode, "MLWebRTCAudioSinkSetPosition()");
+                MLResult.Code resultCode = NativeBindings.MLWebRTCAudioSinkSetSoundVolume(this.Handle, volume);
+                DidNativeCallSucceed(resultCode, "MLWebRTCAudioSinkSetSoundVolume()");
+                return MLResult.Create(resultCode);
+#else
+                return new MLResult();
+#endif
+            }
+
+            /// <summary>
+            /// Sets the world position of the audio sink for the specified channel.
+            /// </summary>
+            /// <param name="position">The position to set the audio sink to.</param>
+            /// <param name="channel">Channel to set this spatialization property for. Passing -1 sets it for all available channels.</param>
+            /// <returns>
+            /// MLResult.Result will be <c>MLResult.Code.Ok</c> if destroying all handles was successful.
+            /// MLResult.Result will be <c>MLResult.Code.WebRTCResultInstanceNotCreated</c> if MLWebRTC instance was not created.
+            /// MLResult.Result will be <c>MLResult.Code.WebRTCResultMismatchingHandle</c> if an incorrect handle was sent.
+            /// MLResult.Result will be <c>MLResult.Code.InvalidParam</c> if an invalid parameter was passed.
+            /// </returns>
+            public MLResult SetPosition(Vector3 position, int channel = -1)
+            {
+#if PLATFORM_LUMIN
+                nativePosition.Update(position, channel);
+                MLResult.Code resultCode = NativeBindings.MLWebRTCAudioSinkSetPositionEx(this.Handle, ref nativePosition);
+                DidNativeCallSucceed(resultCode, "MLWebRTCAudioSinkSetPositionEx()");
+                return MLResult.Create(resultCode);
+#else
+                return new MLResult();
+#endif
+            }
+
+            /// <summary>
+            /// Sets the world orientation of the audio sink for the specified channel.
+            /// </summary>
+            /// <param name="orientation">The orientation of the audio sink.</param>
+            /// <param name="channel">Channel to set this spatialization property for. Passing -1 sets it for all available channels.</param>
+            /// <returns>
+            /// MLResult.Result will be <c>MLResult.Code.Ok</c> if destroying all handles was successful.
+            /// MLResult.Result will be <c>MLResult.Code.WebRTCResultInstanceNotCreated</c> if MLWebRTC instance was not created.
+            /// MLResult.Result will be <c>MLResult.Code.WebRTCResultMismatchingHandle</c> if an incorrect handle was sent.
+            /// MLResult.Result will be <c>MLResult.Code.InvalidParam</c> if an invalid parameter was passed.
+            /// </returns>
+            public MLResult SetOrientation(Quaternion orientation, int channel = -1)
+            {
+#if PLATFORM_LUMIN
+                nativeOrientation.Update(orientation, channel);
+                MLResult.Code resultCode = NativeBindings.MLWebRTCAudioSinkSetSoundOrientation(this.Handle, ref nativeOrientation);
+                DidNativeCallSucceed(resultCode, "MLWebRTCAudioSinkSetSoundOrientation()");
+                return MLResult.Create(resultCode);
+#else
+                return new MLResult();
+#endif
+            }
+
+            /// <summary>
+            /// Sets the direct send levels of the audio sink for the specified channel.
+            /// </summary>
+            /// <param name="sendLevels">The send levels of the audio sink.</param>
+            /// <param name="channel">Channel to set this spatialization property for. Passing -1 sets it for all available channels.</param>
+            /// <returns>
+            /// MLResult.Result will be <c>MLResult.Code.Ok</c> if destroying all handles was successful.
+            /// MLResult.Result will be <c>MLResult.Code.WebRTCResultInstanceNotCreated</c> if MLWebRTC instance was not created.
+            /// MLResult.Result will be <c>MLResult.Code.WebRTCResultMismatchingHandle</c> if an incorrect handle was sent.
+            /// MLResult.Result will be <c>MLResult.Code.InvalidParam</c> if an invalid parameter was passed.
+            /// </returns>
+            public MLResult SetDirectSendLevels(MLAudio.SpatialSound.SendLevels sendLevels, int channel = -1)
+            {
+#if PLATFORM_LUMIN
+                nativeSoundLevels.Update(sendLevels, channel);
+                MLResult.Code resultCode = NativeBindings.MLWebRTCAudioSinkSetDirectSoundLevels(this.Handle, ref nativeSoundLevels);
+                DidNativeCallSucceed(resultCode, "MLWebRTCAudioSinkSetDirectSoundLevels()");
+                return MLResult.Create(resultCode);
+#else
+                return new MLResult();
+#endif
+            }
+
+            /// <summary>
+            /// Sets the room send levels of the audio sink for the specified channel.
+            /// </summary>
+            /// <param name="sendLevels">The send levels of the audio sink.</param>
+            /// <param name="channel">Channel to set this spatialization property for. Passing -1 sets it for all available channels.</param>
+            /// <returns>
+            /// MLResult.Result will be <c>MLResult.Code.Ok</c> if destroying all handles was successful.
+            /// MLResult.Result will be <c>MLResult.Code.WebRTCResultInstanceNotCreated</c> if MLWebRTC instance was not created.
+            /// MLResult.Result will be <c>MLResult.Code.WebRTCResultMismatchingHandle</c> if an incorrect handle was sent.
+            /// MLResult.Result will be <c>MLResult.Code.InvalidParam</c> if an invalid parameter was passed.
+            /// </returns>
+            public MLResult SetRoomSendLevels(MLAudio.SpatialSound.SendLevels sendLevels, int channel = -1)
+            {
+#if PLATFORM_LUMIN
+                nativeSoundLevels.Update(sendLevels, channel);
+                MLResult.Code resultCode = NativeBindings.MLWebRTCAudioSinkSetRoomSoundLevels(this.Handle, ref nativeSoundLevels);
+                DidNativeCallSucceed(resultCode, "MLWebRTCAudioSinkSetRoomSoundLevels()");
+                return MLResult.Create(resultCode);
+#else
+                return new MLResult();
+#endif
+            }
+
+            /// <summary>
+            /// Sets the distance properties of the audio sink for the specified channel.
+            /// </summary>
+            /// <param name="distanceProperties">The distance properties of the audio sink.</param>
+            /// <param name="channel">Channel to set this spatialization property for. Passing -1 sets it for all available channels.</param>
+            /// <returns>
+            /// MLResult.Result will be <c>MLResult.Code.Ok</c> if destroying all handles was successful.
+            /// MLResult.Result will be <c>MLResult.Code.WebRTCResultInstanceNotCreated</c> if MLWebRTC instance was not created.
+            /// MLResult.Result will be <c>MLResult.Code.WebRTCResultMismatchingHandle</c> if an incorrect handle was sent.
+            /// MLResult.Result will be <c>MLResult.Code.InvalidParam</c> if an invalid parameter was passed.
+            /// </returns>
+            public MLResult SetDistanceProperties(MLAudio.SpatialSound.DistanceProperties distanceProperties, int channel = -1)
+            {
+#if PLATFORM_LUMIN
+                nativeDistance.Update(distanceProperties, channel);
+                MLResult.Code resultCode = NativeBindings.MLWebRTCAudioSinkSetSoundDistanceProperties(this.Handle, ref nativeDistance);
+                DidNativeCallSucceed(resultCode, "MLWebRTCAudioSinkSetSoundDistanceProperties()");
+                return MLResult.Create(resultCode);
+#else
+                return new MLResult();
+#endif
+            }
+
+            /// <summary>
+            /// Sets the radiation properties of the audio sink for the specified channel.
+            /// </summary>
+            /// <param name="radiationProperties">The radiation properties of the audio sink.</param>
+            /// <param name="channel">Channel to set this spatialization property for. Passing -1 sets it for all available channels.</param>
+            /// <returns>
+            /// MLResult.Result will be <c>MLResult.Code.Ok</c> if destroying all handles was successful.
+            /// MLResult.Result will be <c>MLResult.Code.WebRTCResultInstanceNotCreated</c> if MLWebRTC instance was not created.
+            /// MLResult.Result will be <c>MLResult.Code.WebRTCResultMismatchingHandle</c> if an incorrect handle was sent.
+            /// MLResult.Result will be <c>MLResult.Code.InvalidParam</c> if an invalid parameter was passed.
+            /// </returns>
+            public MLResult SetRadiationProperties(MLAudio.SpatialSound.RadiationProperties radiationProperties, int channel = -1)
+            {
+#if PLATFORM_LUMIN
+                nativeRadiation.Update(radiationProperties, channel);
+                MLResult.Code resultCode = NativeBindings.MLWebRTCAudioSinkSetSoundRadiationProperties(this.Handle, ref nativeRadiation);
+                DidNativeCallSucceed(resultCode, "MLWebRTCAudioSinkSetSoundRadiationProperties()");
                 return MLResult.Create(resultCode);
 #else
                 return new MLResult();
@@ -267,6 +469,12 @@ namespace UnityEngine.XR.MagicLeap
 
                 MLWebRTC.Instance.sinks.Remove(this);
                 this.gcHandle.Free();
+
+                nativeRadiation.FreeUnmanagedMemory();
+                nativeDistance.FreeUnmanagedMemory();
+                nativeSoundLevels.FreeUnmanagedMemory();
+                nativeOrientation.FreeUnmanagedMemory();
+                nativePosition.FreeUnmanagedMemory();
 
                 return MLResult.Create(resultCode);
 #else

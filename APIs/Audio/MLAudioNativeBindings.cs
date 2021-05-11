@@ -10,8 +10,6 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-#if PLATFORM_LUMIN
-
 // Disable warnings about missing documentation for native interop.
 #pragma warning disable 1591
 namespace UnityEngine.XR.MagicLeap
@@ -27,7 +25,7 @@ namespace UnityEngine.XR.MagicLeap
         /// <summary>
         /// See ml_audio.h for additional comments.
         /// </summary>
-        internal class NativeBindings : Native.MagicLeapNativeBindings
+        internal class NativeBindings
         {
             /// <summary>
             /// MLAudio library name.
@@ -172,8 +170,117 @@ namespace UnityEngine.XR.MagicLeap
                     this.Size = size;
                 }
             }
+
+            /// <summary>
+            /// Properties specifying send levels for a spatial sound.
+            /// </summary>
+            [StructLayout(LayoutKind.Sequential)]
+            public struct MLAudioSpatialSoundSendLevels
+            {
+                /// <summary>
+                /// Volume scale (0-1) for all freqs.
+                /// </summary>
+                private readonly float gain;
+
+                /// <summary>
+                /// Volume scale (0-1) for low freqs.
+                /// </summary>
+                private readonly float gainLF;
+
+                /// <summary>
+                /// Volume scale (0-1) for mid freqs.
+                /// </summary>
+                private readonly float gainMF;
+
+                /// <summary>
+                /// Volume scale (0-1) for high freqs.
+                /// </summary>
+                private readonly float gainHF;
+
+                public MLAudioSpatialSoundSendLevels(SpatialSound.SendLevels sendLevels)
+                {
+                    this.gain = sendLevels.Gain;
+                    this.gainLF = sendLevels.GainLF;
+                    this.gainMF = sendLevels.GainMF;
+                    this.gainHF = sendLevels.GainHF;
+                }
+            }
+
+            /// <summary>
+            /// Properties specifying the distance response of a spatial sound.
+            /// </summary>
+            [StructLayout(LayoutKind.Sequential)]
+            public struct MLAudioSpatialSoundDistanceProperties
+            {
+                /// <summary>
+                /// Distance where sound is at full volume.
+                /// </summary>
+                private readonly float minDistance;
+
+                /// <summary>
+                /// Distance beyond which sound gets no quieter.
+                /// </summary>
+                private readonly float maxDistance;
+
+                /// <summary>
+                /// Modification to real-world distance response.
+                /// </summary>
+                private readonly float rolloffFactor;
+
+                public MLAudioSpatialSoundDistanceProperties(SpatialSound.DistanceProperties distanceProperties)
+                {
+                    this.minDistance = distanceProperties.MinDistance;
+                    this.maxDistance = distanceProperties.MaxDistance;
+                    this.rolloffFactor = distanceProperties.RolloffFactor;
+                }
+            }
+
+            /// <summary>
+            /// Properties specifying the directivity of a spatial sound.
+            /// </summary>
+            [StructLayout(LayoutKind.Sequential)]
+            public struct MLAudioSpatialSoundRadiationProperties
+            {
+                /// <summary>
+                /// Inner cone angle (0-360); radiation unaffected.
+                /// </summary>
+                private readonly float innerAngle;
+
+                /// <summary>
+                /// Outer cone angle (0-360); directivity at maximum.
+                /// </summary>
+                private readonly float outerAngle;
+
+                /// <summary>
+                /// Volume scale (0-1) beyond outer cone for all freqs.
+                /// </summary>
+                private readonly float outerGain;
+
+                /// <summary>
+                /// Volume scale (0-1) beyond outer cone for low freqs.
+                /// </summary>
+                private readonly float outerGainLF;
+
+                /// <summary>
+                /// Volume scale (0-1) beyond outer cone for mid freqs.
+                /// </summary>
+                private readonly float outerGainMF;
+
+                /// <summary>
+                /// Volume scale (0-1) beyond outer cone for high freqs.
+                /// </summary>
+                private readonly float outerGainHF;
+
+                public MLAudioSpatialSoundRadiationProperties(SpatialSound.RadiationProperties radiationProperties)
+                {
+                    this.innerAngle = radiationProperties.InnerAngle;
+                    this.outerAngle = radiationProperties.OuterAngle;
+                    this.outerGain = radiationProperties.OuterGain;
+                    this.outerGainLF = radiationProperties.OuterGainLF;
+                    this.outerGainMF = radiationProperties.OuterGainMF;
+                    this.outerGainHF = radiationProperties.OuterGainHF;
+                }
+            }
         }
     }
 }
-
-#endif

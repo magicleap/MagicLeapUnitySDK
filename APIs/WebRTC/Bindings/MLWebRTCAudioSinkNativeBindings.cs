@@ -89,6 +89,104 @@ namespace UnityEngine.XR.MagicLeap
 #endif
 
                 /// <summary>
+                /// Sets the world position of an audio sink channel.
+                /// </summary>
+                /// <param name="sinkHandle">The handle to the audio sink.</param>
+                /// <param name="position">The position & channel to set the audio sink spatialization for.</param>
+                /// <returns>
+                /// MLResult.Result will be <c>MLResult.Code.Ok</c> if spatialization settings were set successfully.
+                /// MLResult.Result will be <c>MLResult.Code.WebRTCResultInstanceNotCreated</c> if MLWebRTC instance was not created.
+                /// MLResult.Result will be <c>MLResult.Code.WebRTCResultMismatchingHandle</c> if an incorrect handle was sent.
+                /// MLResult.Result will be <c>MLResult.Code.InvalidParam</c> if an incorrect param was sent.
+                /// </returns>
+                [DllImport(WebRTCDLL, CallingConvention = CallingConvention.Cdecl)]
+                public static extern MLResult.Code MLWebRTCAudioSinkSetPositionEx(ulong sinkHandle, [In] ref MLWebRTCAudioSinkPosition position);
+
+                /// <summary>
+                /// Sets the volume of an audio sink.
+                /// </summary>
+                /// <param name="sinkHandle">The handle to the audio sink.</param>
+                /// <param name="volume">The sink volume.</param>
+                /// <returns>
+                /// MLResult.Result will be <c>MLResult.Code.Ok</c> if the volume was set successfully.
+                /// MLResult.Result will be <c>MLResult.Code.WebRTCResultInstanceNotCreated</c> if MLWebRTC instance was not created.
+                /// MLResult.Result will be <c>MLResult.Code.WebRTCResultMismatchingHandle</c> if an incorrect handle was sent.
+                /// MLResult.Result will be <c>MLResult.Code.InvalidParam</c> if an incorrect param was sent.
+                /// </returns>
+                [DllImport(WebRTCDLL, CallingConvention = CallingConvention.Cdecl)]
+                public static extern MLResult.Code MLWebRTCAudioSinkSetSoundVolume(ulong sinkHandle, float volume);
+
+                /// <summary>
+                /// Sets the world orientation of an audio sink channel.
+                /// </summary>
+                /// <param name="sinkHandle">The handle to the audio sink.</param>
+                /// <param name="orientation">The orientation & channel to set the audio sink spatialization for.</param>
+                /// <returns>
+                /// MLResult.Result will be <c>MLResult.Code.Ok</c> if spatialization settings were set successfully.
+                /// MLResult.Result will be <c>MLResult.Code.WebRTCResultInstanceNotCreated</c> if MLWebRTC instance was not created.
+                /// MLResult.Result will be <c>MLResult.Code.WebRTCResultMismatchingHandle</c> if an incorrect handle was sent.
+                /// MLResult.Result will be <c>MLResult.Code.InvalidParam</c> if an incorrect param was sent.
+                /// </returns>
+                [DllImport(WebRTCDLL, CallingConvention = CallingConvention.Cdecl)]
+                public static extern MLResult.Code MLWebRTCAudioSinkSetSoundOrientation(ulong sinkHandle, [In] ref MLWebRTCAudioSinkOrientation orientation);
+
+                /// <summary>
+                /// Sets the direct spatial sound send levels of an audio sink channel.
+                /// </summary>
+                /// <param name="sinkHandle">The handle to the audio sink.</param>
+                /// <param name="soundLevels">The sound levels & channel to set the audio sink spatialization for.</param>
+                /// <returns>
+                /// MLResult.Result will be <c>MLResult.Code.Ok</c> if spatialization settings were set successfully.
+                /// MLResult.Result will be <c>MLResult.Code.WebRTCResultInstanceNotCreated</c> if MLWebRTC instance was not created.
+                /// MLResult.Result will be <c>MLResult.Code.WebRTCResultMismatchingHandle</c> if an incorrect handle was sent.
+                /// MLResult.Result will be <c>MLResult.Code.InvalidParam</c> if an incorrect param was sent.
+                /// </returns>
+                [DllImport(WebRTCDLL, CallingConvention = CallingConvention.Cdecl)]
+                public static extern MLResult.Code MLWebRTCAudioSinkSetDirectSoundLevels(ulong sinkHandle, [In] ref MLWebRTCAudioSinkSoundLevels soundLevels);
+
+                /// <summary>
+                /// Sets the room spatial sound send levels of an audio sink channel.
+                /// </summary>
+                /// <param name="sinkHandle">The handle to the audio sink.</param>
+                /// <param name="soundLevels">The sound levels & channel to set the audio sink spatialization for.</param>
+                /// <returns>
+                /// MLResult.Result will be <c>MLResult.Code.Ok</c> if spatialization settings were set successfully.
+                /// MLResult.Result will be <c>MLResult.Code.WebRTCResultInstanceNotCreated</c> if MLWebRTC instance was not created.
+                /// MLResult.Result will be <c>MLResult.Code.WebRTCResultMismatchingHandle</c> if an incorrect handle was sent.
+                /// MLResult.Result will be <c>MLResult.Code.InvalidParam</c> if an incorrect param was sent.
+                /// </returns>
+                [DllImport(WebRTCDLL, CallingConvention = CallingConvention.Cdecl)]
+                public static extern MLResult.Code MLWebRTCAudioSinkSetRoomSoundLevels(ulong sinkHandle, [In] ref MLWebRTCAudioSinkSoundLevels soundLevels);
+
+                /// <summary>
+                /// Sets the distance properties of an audio sink channel.
+                /// </summary>
+                /// <param name="sinkHandle">The handle to the audio sink.</param>
+                /// <param name="soundDistance">The sound distance & channel to set the audio sink spatialization for.</param>
+                /// <returns>
+                /// MLResult.Result will be <c>MLResult.Code.Ok</c> if spatialization settings were set successfully.
+                /// MLResult.Result will be <c>MLResult.Code.WebRTCResultInstanceNotCreated</c> if MLWebRTC instance was not created.
+                /// MLResult.Result will be <c>MLResult.Code.WebRTCResultMismatchingHandle</c> if an incorrect handle was sent.
+                /// MLResult.Result will be <c>MLResult.Code.InvalidParam</c> if an incorrect param was sent.
+                /// </returns>
+                [DllImport(WebRTCDLL, CallingConvention = CallingConvention.Cdecl)]
+                public static extern MLResult.Code MLWebRTCAudioSinkSetSoundDistanceProperties(ulong sinkHandle, [In] ref MLWebRTCAudioSinkSoundDistance soundDistance);
+
+                /// <summary>
+                /// Sets the radiation properties of an audio sink channel.
+                /// </summary>
+                /// <param name="sinkHandle">The handle to the audio sink.</param>
+                /// <param name="soundRadiation">The sound radiation & channel to set the audio sink spatialization for.</param>
+                /// <returns>
+                /// MLResult.Result will be <c>MLResult.Code.Ok</c> if spatialization settings were set successfully.
+                /// MLResult.Result will be <c>MLResult.Code.WebRTCResultInstanceNotCreated</c> if MLWebRTC instance was not created.
+                /// MLResult.Result will be <c>MLResult.Code.WebRTCResultMismatchingHandle</c> if an incorrect handle was sent.
+                /// MLResult.Result will be <c>MLResult.Code.InvalidParam</c> if an incorrect param was sent.
+                /// </returns>
+                [DllImport(WebRTCDLL, CallingConvention = CallingConvention.Cdecl)]
+                public static extern MLResult.Code MLWebRTCAudioSinkSetSoundRadiationProperties(ulong sinkHandle, [In] ref MLWebRTCAudioSinkSoundRadiation soundRadiation);
+
+                /// <summary>
                 /// Resets the world position of an audio sink for <c>spatialized</c> audio.
                 /// </summary>
                 /// <param name="sinkHandle">The handle to the audio sink.</param>
@@ -157,6 +255,28 @@ namespace UnityEngine.XR.MagicLeap
                 }
 #endif
 
+                private delegate void OnAudioServiceStatusDelegate(ServiceStatus status, IntPtr userContext);
+
+                [AOT.MonoPInvokeCallback(typeof(OnAudioServiceStatusChangedDelegate))]
+                private static void OnAudioServiceStatus(ServiceStatus status, IntPtr userContext)
+                {
+#if PLATFORM_LUMIN
+                    GCHandle gcHandle = GCHandle.FromIntPtr(userContext);
+                    AudioSink audioSink = gcHandle.Target as AudioSink;
+
+                    if (audioSink == null)
+                    {
+                        return;
+                    }
+
+                    MLThreadDispatch.ScheduleMain(() =>
+                    {
+                        audioSink.CurrentServiceStatus = status;
+                        audioSink.OnAudioServiceStatusChanged?.Invoke(status);
+                    });
+#endif
+                }
+
                 [StructLayout(LayoutKind.Sequential)]
                 public struct MLWebRTCAudioSinkParams
                 {
@@ -166,15 +286,196 @@ namespace UnityEngine.XR.MagicLeap
 #if PLATFORM_LUMIN
                     private readonly OnAudioSinkDataAvailableDelegate audioSinkCallback;
 #endif
+                    private readonly OnAudioServiceStatusDelegate audioServiceStatusCallback;
 
                     public MLWebRTCAudioSinkParams(AudioSink audioSink)
                     {
                         this.version = 1;
                         this.mode = audioSink.Mode;
-                        this.userContext = GCHandle.ToIntPtr(audioSink.gcHandle);
 #if PLATFORM_LUMIN
-                        this.audioSinkCallback = OnAudioSinkDataAvailable;
+                        if (audioSink.Mode != BufferNotifyMode.None)
+                        {
+                            this.audioSinkCallback = OnAudioSinkDataAvailable;
+                        }
+                        else
+                        {
+                            this.audioSinkCallback = null;
+                        }
 #endif
+                        this.audioServiceStatusCallback = OnAudioServiceStatus;
+                        this.userContext = GCHandle.ToIntPtr(audioSink.gcHandle);
+                    }
+                }
+
+                [StructLayout(LayoutKind.Sequential)]
+                public struct MLWebRTCAudioSinkPosition
+                {
+                    /// <summary>
+                    /// Struct version
+                    /// </summary>
+                    private uint version;
+
+                    /// <summary>
+                    /// Ptr to position (MLVec3f) of the audio channel
+                    /// </summary>
+                    private IntPtr positionPtr;
+
+                    /// <summary>
+                    /// Channel to set this position for. Set to -1 to set for all avaialble channels.
+                    /// </summary>
+                    private int channel;
+
+                    public void Update(Vector3 position, int channel = -1)
+                    {
+#if PLATFORM_LUMIN
+                        if (this.positionPtr == IntPtr.Zero)
+                        {
+                            this.version = 1;
+                            this.positionPtr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(MagicLeapNativeBindings.MLVec3f)));
+                        }
+                        Marshal.StructureToPtr(MLConvert.FromUnity(position), this.positionPtr, false);
+                        this.channel = channel;
+#endif
+                    }
+
+                    public void FreeUnmanagedMemory()
+                    {
+                        if (positionPtr != IntPtr.Zero)
+                        {
+                            Marshal.FreeHGlobal(positionPtr);
+                            positionPtr = IntPtr.Zero;
+                        }
+                    }
+                }
+
+                [StructLayout(LayoutKind.Sequential)]
+                public struct MLWebRTCAudioSinkOrientation
+                {
+                    /// <summary>
+                    /// Struct version
+                    /// </summary>
+                    private uint version;
+
+                    /// <summary>
+                    /// Ptr to orientation (MLQuatf) of the audio channel
+                    /// </summary>
+                    private IntPtr orientationPtr;
+
+                    /// <summary>
+                    /// Channel to set this position for. Set to -1 to set for all avaialble channels.
+                    /// </summary>
+                    private int channel;
+
+                    public void Update(Quaternion orientation, int channel = -1)
+                    {
+#if PLATFORM_LUMIN
+                        if (this.orientationPtr == IntPtr.Zero)
+                        {
+                            this.version = 1;
+                            this.orientationPtr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(MagicLeapNativeBindings.MLQuaternionf)));
+                        }
+                        Marshal.StructureToPtr(MLConvert.FromUnity(orientation), this.orientationPtr, false);
+                        this.channel = channel;
+#endif
+                    }
+
+                    public void FreeUnmanagedMemory()
+                    {
+                        if (orientationPtr != IntPtr.Zero)
+                        {
+                            Marshal.FreeHGlobal(orientationPtr);
+                            orientationPtr = IntPtr.Zero;
+                        }
+                    }
+                }
+
+                [StructLayout(LayoutKind.Sequential)]
+                public struct MLWebRTCAudioSinkSoundLevels
+                {
+                    private uint version;
+
+                    private IntPtr sendLevelsPtr;
+
+                    private int channel;
+
+                    public void Update(MLAudio.SpatialSound.SendLevels sendLevels, int channel = -1)
+                    {
+                        if (this.sendLevelsPtr == IntPtr.Zero)
+                        {
+                            this.version = 1;
+                            this.sendLevelsPtr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(MLAudio.NativeBindings.MLAudioSpatialSoundSendLevels)));
+                        }
+                        Marshal.StructureToPtr(new MLAudio.NativeBindings.MLAudioSpatialSoundSendLevels(sendLevels), this.sendLevelsPtr, false);
+                        this.channel = channel;
+                    }
+
+                    public void FreeUnmanagedMemory()
+                    {
+                        if (sendLevelsPtr != IntPtr.Zero)
+                        {
+                            Marshal.FreeHGlobal(sendLevelsPtr);
+                            sendLevelsPtr = IntPtr.Zero;
+                        }
+                    }
+                }
+
+                [StructLayout(LayoutKind.Sequential)]
+                public struct MLWebRTCAudioSinkSoundDistance
+                {
+                    private uint version;
+
+                    private IntPtr distancePropertiesPtr;
+
+                    private int channel;
+
+                    public void Update(MLAudio.SpatialSound.DistanceProperties distanceProperties, int channel = -1)
+                    {
+                        if (this.distancePropertiesPtr == IntPtr.Zero)
+                        {
+                            this.version = 1;
+                            this.distancePropertiesPtr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(MLAudio.NativeBindings.MLAudioSpatialSoundDistanceProperties)));
+                        }
+                        Marshal.StructureToPtr(new MLAudio.NativeBindings.MLAudioSpatialSoundDistanceProperties(distanceProperties), this.distancePropertiesPtr, false);
+                        this.channel = channel;
+                    }
+
+                    public void FreeUnmanagedMemory()
+                    {
+                        if (distancePropertiesPtr != IntPtr.Zero)
+                        {
+                            Marshal.FreeHGlobal(distancePropertiesPtr);
+                            distancePropertiesPtr = IntPtr.Zero;
+                        }
+                    }
+                }
+
+                [StructLayout(LayoutKind.Sequential)]
+                public struct MLWebRTCAudioSinkSoundRadiation
+                {
+                    private uint version;
+
+                    private IntPtr radiationPropertiesPtr;
+
+                    private int channel;
+
+                    public void Update(MLAudio.SpatialSound.RadiationProperties radiationProperties, int channel = -1)
+                    {
+                        if (this.radiationPropertiesPtr == IntPtr.Zero)
+                        {
+                            this.version = 1;
+                            this.radiationPropertiesPtr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(MLAudio.NativeBindings.MLAudioSpatialSoundRadiationProperties)));
+                        }
+                        Marshal.StructureToPtr(new MLAudio.NativeBindings.MLAudioSpatialSoundRadiationProperties(radiationProperties), this.radiationPropertiesPtr, false);
+                        this.channel = channel;
+                    }
+
+                    public void FreeUnmanagedMemory()
+                    {
+                        if (radiationPropertiesPtr != IntPtr.Zero)
+                        {
+                            Marshal.FreeHGlobal(radiationPropertiesPtr);
+                            radiationPropertiesPtr = IntPtr.Zero;
+                        }
                     }
                 }
             }
