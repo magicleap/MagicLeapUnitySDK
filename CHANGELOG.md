@@ -2,6 +2,8 @@
 
 ## [0.26.0]
 ### New Features
+- New "Magic Leap → Zero Iteration" menu that contains functionality that was previously contained in the Magic Leap XR Plugin. 
+	- Note that the "Magic Leap → ML Remote" menu from the Magic Leap XR Plugin will be deprecated in a future release
 - Exposed APIs to optionally set/get the Ids for WebRTC media tracks. Ids can be specified when creating the tracks and the `MLWebRTC.MediaStream.Track.Id` property is already set upon receiving a track from the remote peer.
 - Exposed callbacks in `MLWebRTC.AudioSink` to provide the app with the incoming audio buffers. Pass in the appropriate `BufferNotifyMode` to `MLWebRTC.AudioSink.Create()` to set whether the app will receive the audio buffers or not and whether the underlying WebRTC platform will play the audio or leave it to the app to do so.
 - Exposed functions in `MLWebRTC.AudioSink` to set various soundfield parameters (position, orientation, direct send levels, room send levels, distance & radiation properties and sound volume). These properties should only be set after `MLWebRTC.AudioSink.CurrentServiceStatus` is `ServiceStatus.Started` or `MLWebRTC.AudioSink.OnAudioServiceStatusChanged` delegate is fired with `ServiceStatus.Started`.
