@@ -7,6 +7,7 @@
 - Exposed APIs to optionally set/get the Ids for WebRTC media tracks. Ids can be specified when creating the tracks and the `MLWebRTC.MediaStream.Track.Id` property is already set upon receiving a track from the remote peer.
 - Exposed callbacks in `MLWebRTC.AudioSink` to provide the app with the incoming audio buffers. Pass in the appropriate `BufferNotifyMode` to `MLWebRTC.AudioSink.Create()` to set whether the app will receive the audio buffers or not and whether the underlying WebRTC platform will play the audio or leave it to the app to do so.
 - Exposed functions in `MLWebRTC.AudioSink` to set various soundfield parameters (position, orientation, direct send levels, room send levels, distance & radiation properties and sound volume). These properties should only be set after `MLWebRTC.AudioSink.CurrentServiceStatus` is `ServiceStatus.Started` or `MLWebRTC.AudioSink.OnAudioServiceStatusChanged` delegate is fired with `ServiceStatus.Started`.
+- Updated `MLWebRTCAudioSinkBehavior` to playback the received audio via Unity if the "Sink Buffer Notify Mode" is set to "Notify Only" and an `AudioSource` component reference has been provided. This, combined with a spatialization plugin, can be used to achieve much more granular control over the spatialization than currently offered via the soundfield parameters in the `MLWebRTC.AudioSink` class.
 
 ### Updates
 - Added extensions for `MLPlanes.QueryFlags` enum. You can now check which flags are set by calling convenience functions like `IsCeiling()`, `IsFloor()` etc to check which planes the flag represents.
@@ -22,6 +23,9 @@
 
 ### Deprecations & Removals
 - `OnTrackAdded` & `OnTrackRemoved` delegates in the `MLWebRTC.PeerConnection` class have been deprecated in favor of `OnTrackAddedMultipleStreams` & `OnTrackRemovedMultipleStreams` delegates.
+
+### Known Issues
+- When playing WebRTC audio via Unity, while the playback is expected to be smooth, the audio buffers play at a much larger latency than when played directly via the underlying WebRTC platform.
 
 ## [0.25.0]
 ### New Features

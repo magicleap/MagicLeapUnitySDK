@@ -83,6 +83,21 @@ namespace UnityEngine.XR.MagicLeap
             {
                 return $"ChannelCount: {ChannelCount}, SamplesPerSec: {SamplesPerSecond}, BitsPerSample: {BitsPerSample}, ValidBitsPerSample: {ValidBitsPerSample}, SampleFormat: {SampleFormat}";
             }
+
+            public override bool Equals(object obj)
+            {
+                if ((obj == null) || !this.GetType().Equals(obj.GetType()))
+                {
+                    return false;
+                }
+
+                BufferFormat format = (BufferFormat)obj;
+                return (this.ChannelCount == format.ChannelCount) &&
+                    (this.SamplesPerSecond == format.SamplesPerSecond) &&
+                    (this.BitsPerSample == format.BitsPerSample) &&
+                    (this.ValidBitsPerSample == format.ValidBitsPerSample) &&
+                    (this.SampleFormat == format.SampleFormat);
+            }
         }
 
         /// <summary>
@@ -124,6 +139,14 @@ namespace UnityEngine.XR.MagicLeap
                 }
             }
 
+            private static readonly Dictionary<uint, Func<IntPtr, float>> UnmanagedToFloat = new Dictionary<uint, Func<IntPtr, float>>()
+            {
+                { 8,  (ptr) => Marshal.ReadByte (ptr) / (float)byte.MaxValue  },
+                { 16, (ptr) => Marshal.ReadInt16(ptr) / (float)short.MaxValue },
+                { 32, (ptr) => Marshal.ReadInt32(ptr) / (float)int.MaxValue   },
+                { 64, (ptr) => Marshal.ReadInt64(ptr) / (float)long.MaxValue  }
+            };
+
             /// <summary>
             /// Copy the provided unmanaged audio buffer to managed memory and convert the samples to float.
             /// </summary>
@@ -133,7 +156,8 @@ namespace UnityEngine.XR.MagicLeap
             /// <returns>Array of managed memory containing float samples</returns>
             public static float[] ConvertToManagedFloatSamples(uint size, IntPtr bufferPtr, BufferFormat format)
             {
-                uint numSamples = size / (format.BitsPerSample / 8);
+                uint bytesPerSample = format.BitsPerSample / 8;
+                uint numSamples = size / bytesPerSample;
                 float[] samples = new float[numSamples];
                 if (format.SampleFormat == SampleFormatType.Float)
                 {
@@ -141,35 +165,11 @@ namespace UnityEngine.XR.MagicLeap
                 }
                 else if (format.SampleFormat == SampleFormatType.Int)
                 {
-                    if (format.BitsPerSample == 8)
+                    var toFloat = UnmanagedToFloat[format.BitsPerSample];
+                    for (uint i = 0; i < numSamples; ++i)
                     {
-                        byte[] origSamples = new byte[numSamples];
-                        Marshal.Copy(bufferPtr, origSamples, 0, (int)numSamples);
-
-                        for (uint i = 0; i < numSamples; ++i)
-                        {
-                            samples[i] = origSamples[i] / (float)byte.MaxValue;
-                        }
-                    }
-                    else if (format.BitsPerSample == 16)
-                    {
-                        short[] origSamples = new short[numSamples];
-                        Marshal.Copy(bufferPtr, origSamples, 0, (int)numSamples);
-
-                        for (uint i = 0; i < numSamples; ++i)
-                        {
-                            samples[i] = origSamples[i] / (float)short.MaxValue;
-                        }
-                    }
-                    else if (format.BitsPerSample == 32)
-                    {
-                        int[] origSamples = new int[numSamples];
-                        Marshal.Copy(bufferPtr, origSamples, 0, (int)numSamples);
-
-                        for (uint i = 0; i < numSamples; ++i)
-                        {
-                            samples[i] = origSamples[i] / (float)int.MaxValue;
-                        }
+                        samples[i] = toFloat(bufferPtr);
+                        bufferPtr = IntPtr.Add(bufferPtr, (int)bytesPerSample);
                     }
                 }
 
