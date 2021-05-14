@@ -61,7 +61,7 @@ namespace UnityEditor.XR.MagicLeap
                 IEnumerable<XElement> compileElements = document.Root.Descendants(ns + element);
 
                 // Regex to find which part of Include attribute of Compile element to use for Link element value.
-                Regex regex = new Regex(@"\\(Packages)\\.*\.(cs|asmdef|shader)$");
+                Regex regex = new Regex(@"\\(Packages)\\.*\.(cs|asmdef|asmref|shader)$");
 
                 // Add child Link element to each Compile element
                 foreach (XElement el in compileElements)
