@@ -359,17 +359,29 @@ namespace UnityEngine.XR.MagicLeap
         }
 
         /// <summary>
+        /// Gets the curent pre-initialized object in use.
+        /// </summary>
+        /// <returns>Current object in the circular buffer</returns>
+        public T Peek()
+        {
+            return buffer[bufferIndex];
+        }
+
+        /// <summary>
         /// Gets the next available pre-initialized object.
         /// </summary>
         /// <returns>Next object in the circular buffer</returns>
         public T Get()
         {
+            T result = buffer[bufferIndex];
+
+            bufferIndex++;
             if (bufferIndex >= buffer.Length)
             {
                 bufferIndex = 0;
             }
 
-            return buffer[bufferIndex++];
+            return result;
         }
     }
 }

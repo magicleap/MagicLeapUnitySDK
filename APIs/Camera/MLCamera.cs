@@ -1519,7 +1519,7 @@ namespace UnityEngine.XR.MagicLeap
             if ((output.Format == OutputFormat.JPEG) &&
                 (output.PlaneCount == 1))
             {
-                if (byteArraysJPEGImageBuffer == null)
+                if (byteArraysJPEGImageBuffer == null || output.Planes[0].Size > byteArraysJPEGImageBuffer.Peek().Length)
                 {
                     byteArraysJPEGImageBuffer = CircularBuffer<byte[]>.Create(new byte[output.Planes[0].Size], new byte[output.Planes[0].Size], new byte[output.Planes[0].Size]);
                 }
@@ -1534,21 +1534,21 @@ namespace UnityEngine.XR.MagicLeap
                 YUVFrameInfo frameInfo = YUVFrameInfo.Create();
 
                 PlaneInfo planeInfoY = output.Planes[(int)MLCameraNativeBindings.YUVPlaneIndex.YPlane];
-                if (byteArraysYImageBuffer == null)
+                if (byteArraysYImageBuffer == null || planeInfoY.Size > byteArraysYImageBuffer.Peek().Length)
                 {
                     byteArraysYImageBuffer = CircularBuffer<byte[]>.Create(new byte[planeInfoY.Size], new byte[planeInfoY.Size], new byte[planeInfoY.Size]);
                 }
                 frameInfo.Y.CopyFromPlane(planeInfoY, byteArraysYImageBuffer.Get());
 
                 PlaneInfo planeInfoU = output.Planes[(int)MLCameraNativeBindings.YUVPlaneIndex.UPlane];
-                if (byteArraysUImageBuffer == null)
+                if (byteArraysUImageBuffer == null || planeInfoU.Size > byteArraysUImageBuffer.Peek().Length)
                 {
                     byteArraysUImageBuffer = CircularBuffer<byte[]>.Create(new byte[planeInfoU.Size], new byte[planeInfoU.Size], new byte[planeInfoU.Size]);
                 }
                 frameInfo.U.CopyFromPlane(planeInfoU, byteArraysUImageBuffer.Get());
 
                 PlaneInfo planeInfoV = output.Planes[(int)MLCameraNativeBindings.YUVPlaneIndex.VPlane];
-                if (byteArraysVImageBuffer == null)
+                if (byteArraysVImageBuffer == null || planeInfoV.Size > byteArraysVImageBuffer.Peek().Length)
                 {
                     byteArraysVImageBuffer = CircularBuffer<byte[]>.Create(new byte[planeInfoV.Size], new byte[planeInfoV.Size], new byte[planeInfoV.Size]);
                 }
@@ -1578,7 +1578,7 @@ namespace UnityEngine.XR.MagicLeap
                     YUVFrameInfo frameInfo = YUVFrameInfo.Create();
 
                     PlaneInfo planeInfoY = output.Planes[(int)MLCameraNativeBindings.YUVPlaneIndex.YPlane];
-                    if (byteArraysYBuffer == null)
+                    if (byteArraysYBuffer == null || planeInfoY.Size > byteArraysYBuffer.Peek().Length)
                     {
                         byteArraysYBuffer = CircularBuffer<byte[]>.Create(new byte[planeInfoY.Size], new byte[planeInfoY.Size], new byte[planeInfoY.Size]);
                     }
@@ -1587,7 +1587,7 @@ namespace UnityEngine.XR.MagicLeap
                     if (RawVideoFrameDataFilter == RawVideoFrameData.IntensityAndColor)
                     {
                         PlaneInfo planeInfoU = output.Planes[(int)MLCameraNativeBindings.YUVPlaneIndex.UPlane];
-                        if (byteArraysUBuffer == null)
+                        if (byteArraysUBuffer == null || planeInfoU.Size > byteArraysUBuffer.Peek().Length)
                         {
                             byteArraysUBuffer = CircularBuffer<byte[]>.Create(new byte[planeInfoU.Size], new byte[planeInfoU.Size], new byte[planeInfoU.Size]);
                         }
@@ -1595,7 +1595,7 @@ namespace UnityEngine.XR.MagicLeap
                         frameInfo.U.CopyFromPlane(planeInfoU, byteArraysUBuffer.Get());
 
                         PlaneInfo planeInfoV = output.Planes[(int)MLCameraNativeBindings.YUVPlaneIndex.VPlane];
-                        if (byteArraysVBuffer == null)
+                        if (byteArraysVBuffer == null || planeInfoV.Size > byteArraysVBuffer.Peek().Length)
                         {
                             byteArraysVBuffer = CircularBuffer<byte[]>.Create(new byte[planeInfoV.Size], new byte[planeInfoV.Size], new byte[planeInfoV.Size]);
                         }
