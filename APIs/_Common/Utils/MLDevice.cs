@@ -489,6 +489,12 @@ namespace UnityEngine.XR.MagicLeap
         private void OnApplicationPause(bool pauseStatus)
         {
             this.OnPauseEvent?.Invoke(pauseStatus);
+            if (pauseStatus)
+            {
+                // Flush the pending queue on app pause otherwise these events wont reach
+                // the subscribers until after the app has been resumed.
+                MLThreadDispatch.DispatchAll();
+            }
         }
 
         /// <summary>
