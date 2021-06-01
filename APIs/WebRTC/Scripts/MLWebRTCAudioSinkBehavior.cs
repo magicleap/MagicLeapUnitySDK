@@ -10,11 +10,13 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
+using System;
 using UnityEngine;
 using UnityEngine.XR.MagicLeap;
 
 namespace MagicLeap
 {
+    [RequireComponent(typeof(AudioSource))]
     public class MLWebRTCAudioSinkBehavior : MonoBehaviour
     {
         public MLWebRTC.AudioSink AudioSink
@@ -26,11 +28,19 @@ namespace MagicLeap
 
             set
             {
-                if (audioSink != null && audioSource == null)
+                if (audioSink != null)
                 {
+                    if (audioSource == null)
+                    {
 #if PLATFORM_LUMIN
-                    audioSink.ResetPosition();
+                        audioSink.ResetPosition();
 #endif
+                    }
+
+                    if (sinkBufferNotifyMode == MLWebRTC.AudioSink.BufferNotifyMode.NotifyOnly)
+                    {
+                        audioSink.OnAudioDataAvailable_NativeCallbackThread -= OnAudioDataAvailable_NativeCallbackThread;
+                    }
                 }
 
                 audioSink = value;
@@ -44,21 +54,34 @@ namespace MagicLeap
         [SerializeField, Tooltip("Used for the audio sink that is created by this behavior. When choosing BufferNotifyMode.NotifyOnly, apps should also provide an AudioSource to feed the incoming audio buffers to.")]
         private MLWebRTC.AudioSink.BufferNotifyMode sinkBufferNotifyMode;
 
-        [SerializeField, Tooltip("Used to play the audio coming into the sink when the selected buffer notify mode is 'NotifyOnly'")]
+        /// <summary>
+        /// Used to play the audio coming into the sink when the selected buffer notify mode is 'NotifyOnly'
+        /// </summary>
         private AudioSource audioSource;
 
-        private MLWebRTC.AudioSink audioSink;
+        /// <summary>
+        /// Used to play the audio coming into the sink when the selected buffer notify mode is 'NotifyOnly'
+        /// and the audio sample rate is NOT the same as that of Unity's audio engine.
+        /// </summary>
         private AudioClip audioClip;
 
+        private MLWebRTC.AudioSink audioSink;
+
+        /// <summary>
+        /// Lock object to synchronize Unity's main thread, Unity's Audio thread & MLWebRTC's callback thread.
+        /// </summary>
         private readonly object lockObject = new object();
 
         private CircularBuffer<float> queue = null;
         private MLAudio.BufferFormat lastBuferFormat;
-        private bool recreateAudioClip = false;
+        private bool recreateAudioClipOrSource = false;
+        private bool isReadyToSubmitAudio = false;
+        private float[] intermediateCache;
 
-        void Awake()
+        void Start()
         {
 #if PLATFORM_LUMIN
+            audioSource = gameObject.GetComponent<AudioSource>();
             audioSink = MLWebRTC.AudioSink.Create(out MLResult _, sinkBufferNotifyMode);
             SetupAudioSink();
 #endif
@@ -70,10 +93,10 @@ namespace MagicLeap
             {
                 if (queue == null)
                 {
-                    queue = new CircularBuffer<float>(GetDesiredBufferSizeForAudioFormat(buffer.Format));
-
                     lastBuferFormat = buffer.Format;
-                    recreateAudioClip = true;
+                    recreateAudioClipOrSource = true;
+
+                    queue = new CircularBuffer<float>(GetDesiredBufferSizeForAudioFormat(lastBuferFormat));
                 }
 
                 if (queue.Count > 0)
@@ -85,7 +108,8 @@ namespace MagicLeap
                         Debug.Log($"New Format : {buffer.Format}.");
 
                         lastBuferFormat = buffer.Format;
-                        recreateAudioClip = true;
+                        recreateAudioClipOrSource = true;
+                        isReadyToSubmitAudio = false;
 
                         queue.Clear();
                         queue.Resize(GetDesiredBufferSizeForAudioFormat(buffer.Format));
@@ -96,27 +120,98 @@ namespace MagicLeap
             }
         }
 
-        private void OnAudioClipRead(float[] data)
+        private void OnAudioFilterRead(float[] data, int channels)
         {
+            int numDequeued = 0;
+
             lock (lockObject)
             {
-                // Underflow
-                if (queue.Count == 0)
+                if (!(isReadyToSubmitAudio && audioClip == null))
                 {
-                    for (int i = 0; i < data.Length; ++i)
-                    {
-                        // avoid noise
-                        data[i] = 0;
-                    }
                     return;
                 }
 
-                int numDequeued = queue.Dequeue(data);
-                for (int i = numDequeued; i < data.Length; ++i)
+                if (lastBuferFormat.ChannelCount == channels)
                 {
-                    // avoid noise
-                    data[i] = 0;
+                    numDequeued = queue.Dequeue(data);
                 }
+                else
+                {
+                    // Calculate number of samples to dequeue based on the difference in number of channels.
+                    int maxDequeueSize = (lastBuferFormat.ChannelCount < channels) ? data.Length / channels : data.Length * channels;
+                    if (intermediateCache == null || intermediateCache.Length != maxDequeueSize)
+                    {
+                        intermediateCache = new float[maxDequeueSize];
+                    }
+
+                    numDequeued = queue.Dequeue(intermediateCache);
+
+                    // If we only have 1 channel in the input audio, use the same value
+                    // for all the channels in the output audio.
+                    if (lastBuferFormat.ChannelCount == 1)
+                    {
+                        for (int i = 0; i < numDequeued; i++)
+                        {
+                            for (int ch = 0; ch < channels; ch++)
+                            {
+                                // interleaved channels
+                                data[(i * channels) + ch] = intermediateCache[i];
+                            }
+                        }
+                    }
+                    // If the input audio has differnt num of channels than the output audio,
+                    // but more than 1 channel, copy the valid channels as is and
+                    // 0 out the remainder, if any.
+                    else
+                    {
+                        int minChannels = Math.Min((int)lastBuferFormat.ChannelCount, channels);
+                        for (int i = 0; i < numDequeued; i++)
+                        {
+                            // Channels for which we have data available in input audio
+                            for (int ch = 0; ch < minChannels; ch++)
+                            {
+                                // interleaved channels
+                                data[(i * channels) + ch] = intermediateCache[i];
+                            }
+
+                            // extra channels in output audio
+                            for (int ch = minChannels; ch < channels; ch++)
+                            {
+                                // interleaved channels
+                                data[(i * channels) + ch] = 0.0f;
+                            }
+                        }
+                    }
+
+                    // set numDequeued to how much of the 'data' array has been filled
+                    // so zeroing out doesnt reset valid samples.
+                    numDequeued *= channels;
+                }
+            }
+
+            for (int i = numDequeued; i < data.Length; ++i)
+            {
+                // avoid noise
+                data[i] = 0.0f;
+            }
+        }
+
+        private void OnAudioClipRead(float[] data)
+        {
+            int numDequeued = 0;
+
+            lock (lockObject)
+            {
+                if (isReadyToSubmitAudio)
+                {
+                    numDequeued = queue.Dequeue(data);
+                }
+            }
+
+            for (int i = numDequeued; i < data.Length; ++i)
+            {
+                // avoid noise
+                data[i] = 0.0f;
             }
         }
 
@@ -137,20 +232,35 @@ namespace MagicLeap
 
             lock (lockObject)
             {
-                if (recreateAudioClip)
+                if (recreateAudioClipOrSource)
                 {
-                    recreateAudioClip = false;
-                    string audioClipName = $"{gameObject.name}_MLWebRTCAudioSinkBehavior";
-                    Debug.Log($"Creating audio clip {audioClipName} with format {lastBuferFormat}");
+                    recreateAudioClipOrSource = false;
 
-                    // WebRTC sends data in 10ms packets
-                    int tenMsData = (int)(10 * lastBuferFormat.SamplesPerSecond * lastBuferFormat.ChannelCount / 1000);
-                    audioClip = AudioClip.Create(audioClipName, tenMsData, (int)lastBuferFormat.ChannelCount, (int)lastBuferFormat.SamplesPerSecond, true, OnAudioClipRead, OnAudioClipSetPosition);
+                    if (audioSource.isPlaying)
+                    {
+                        audioSource.Stop();
+                    }
+
+                    if (lastBuferFormat.SamplesPerSecond != AudioSettings.outputSampleRate)
+                    {
+                        string audioClipName = $"{gameObject.name}_MLWebRTCAudioSinkBehavior";
+
+                        // WebRTC sends data in 10ms packets
+                        int tenMsData = (int)(10 * lastBuferFormat.SamplesPerSecond * lastBuferFormat.ChannelCount / 1000);
+                        audioClip = AudioClip.Create(audioClipName, tenMsData, (int)lastBuferFormat.ChannelCount, (int)lastBuferFormat.SamplesPerSecond, true, OnAudioClipRead, OnAudioClipSetPosition);
+                    }
+                    else
+                    {
+                        audioClip = null;
+                    }
+
                     audioSource.clip = audioClip;
                     // Looping needs to be set to true so that Unity contines to call OnAudioClipRead
                     // even after the speicified duration in AudioClip.Create() expires.
                     audioSource.loop = true;
                     audioSource.Play();
+
+                    isReadyToSubmitAudio = true;
                 }
             }
         }
@@ -183,17 +293,13 @@ namespace MagicLeap
                     Debug.LogError($"MLWebRTCAudioSinkBehavior.sinkBufferNotifyMode for {gameObject.name} is 'NotifyOnly' but no AudioSource was provided. Audio for the track associated with this sink will NOT be played.");
                 }
             }
-            else if (audioSource != null)
-            {
-                Debug.LogWarning($"MLWebRTCAudioSinkBehavior.sinkBufferNotifyMode for {gameObject.name} is '{sinkBufferNotifyMode}' and yet an AudioSource was provided. Audio for the track associated with this sink will be played directly by the underlying WebRTC system. AudioSource settings will NOT be used. Change the sinkBufferNotifyMode to 'NotifyOnly' in order to use the Unity AudioSource for playback.");
-            }
         }
 
         private uint GetDesiredBufferSizeForAudioFormat(MLAudio.BufferFormat format)
         {
-            // Ideally this should be AudioCacheSizeMs * format.SamplesPerSecond * format.ChannelCount / 1000;
-            // but using size less than the current setting results in choppy playback.
-            return format.SamplesPerSecond * format.ChannelCount;
+            // 2 second cache
+            // TODO : make configurable with AudioCacheSize?
+            return (uint)(2 * format.SamplesPerSecond * format.ChannelCount);
         }
 
         private bool CanSetWebRTCSpatializationSettings()
