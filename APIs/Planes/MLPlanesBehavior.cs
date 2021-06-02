@@ -180,6 +180,10 @@ namespace MagicLeap.Core
         /// </summary>
         private void HandleOnQueriedPlanes(MLResult result, MLPlanes.Plane[] planes, MLPlanes.Boundaries[] boundaries)
         {
+            if (this == null)
+            {
+                return;
+            }
             if (result.IsOk)
             {
                 PlanesResult = planes;
