@@ -149,9 +149,6 @@ namespace UnityEngine.XR.MagicLeap
         {
             Instance.ValidateQueryParams(ref queryParams);
 
-            // Required flag by the CAPI, has to be set or errors will occur.
-            queryParams.Flags |= QueryFlags.Polygons;
-
             // Planes can't have MinHoleLength less than 0.0.
             queryParams.MinHoleLength = Mathf.Clamp(queryParams.MinHoleLength, 0.0f, queryParams.MinHoleLength);
 
