@@ -22,6 +22,18 @@ namespace UnityEngine.XR.MagicLeap
     public sealed partial class MLBluetoothLE : MLAPISingleton<MLBluetoothLE>
     {
 #if PLATFORM_LUMIN
+
+
+        /// <summary>
+        /// The defined constant max mtu size.
+        /// </summary>
+        public const int MaxMTUSize = 256;
+
+        /// <summary>
+        /// The defined constant min mtu size.
+        /// </summary>
+        public const int MinMTUSize = 23;
+
         /// <summary>
         /// Max Bluetooth buffer size, as defined by Android OS
         /// </summary>
@@ -301,7 +313,7 @@ namespace UnityEngine.XR.MagicLeap
         /// Attribute permission for a <c>Gatt</c> client
         /// </summary>
         [Flags]
-        public enum AttributePermissions
+        public enum AttributePermissions : int
         {
             /// <summary>
             /// No permissions
@@ -353,7 +365,7 @@ namespace UnityEngine.XR.MagicLeap
         /// Characteristic Properties for the <c>Gatt</c>
         /// </summary>
         [Flags]
-        public enum CharacteristicProperties
+        public enum CharacteristicProperties : int
         {
             /// <summary>
             /// No properties
@@ -573,12 +585,22 @@ namespace UnityEngine.XR.MagicLeap
         }
 
         /// <summary>
-        /// Begin scanning for Bluetooth LE devices
+        /// Begin scanning for Bluetooth LE devices.
         /// </summary>
         /// <returns>MLResultCode.Ok on success, or failure</returns>
         public static MLResult StartScan()
         {
             return MLResult.Create(NativeBindings.MLBluetoothLeStartScan());
+        }
+
+        /// <summary>
+        /// Updates connection interval.
+        /// </summary>
+        /// <param name="priority">A specific connection priority</param>
+        /// <returns>Returns <c>MLResult.Code.Ok</c> on success or an error on failure.</returns>
+        public static MLResult UpdateConnectionInterval(MLBluetoothLE.ConnectionPriority priority)
+        {
+            return MLResult.Create(NativeBindings.MLBluetoothGattRequestConnectionPriority(priority));
         }
 
         /// <summary>
@@ -670,6 +692,23 @@ namespace UnityEngine.XR.MagicLeap
         }
 
         /// <summary>
+        /// Requests to change MTU size.
+        /// The results of this call are delivered to the MLBluetoohLE.OnBluetoothMTUSizeChanged callback.
+        /// </summary>
+        /// <param name="mtu">The characteristic to write on the remote device</param>
+        /// <returns>Returns <c>MLResult.Code.Ok</c> on success or an error on failure.</returns>
+        public static MLResult ChangeMTUSize(int mtu)
+        {
+            if (mtu < MinMTUSize)
+                MLPluginLog.Warning($"MTU size {mtu} is less than the minimum of {MinMTUSize}.");
+
+            else if (mtu > MaxMTUSize)
+                MLPluginLog.Warning($"MTU size {mtu} is greater than the maximum of {MaxMTUSize}.");
+
+            return MLResult.Create(NativeBindings.MLBluetoothGattRequestMtu(Mathf.Clamp(mtu, MinMTUSize, MaxMTUSize)));
+        }
+
+        /// <summary>
         /// Reads the requested descriptor from the connected remote device
         /// </summary>
         /// <param name="descriptor">The descriptor to read from the remote device</param>
@@ -691,6 +730,10 @@ namespace UnityEngine.XR.MagicLeap
 
         /// <summary>
         /// Enables or disables notifications/indications for a given characteristic
+        /// The values for the client characteristic configuration descriptor to start or stop the notification or indication.
+        /// Enable notification: { 0x01, 0x00}.
+        /// Enable indication: {0x02, 0x0}.
+        /// Disable: {0x00, 0x00}.
         /// </summary>
         /// <param name="characteristic">Characteristic to be notified of</param>
         /// <param name="enabled">Enabled state</param>

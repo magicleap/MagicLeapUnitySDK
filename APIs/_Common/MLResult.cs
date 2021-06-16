@@ -1156,7 +1156,12 @@ namespace UnityEngine.XR.MagicLeap
             /// <summary>
             /// Code for web rtc related MLResults.
             /// </summary>
-            MLWebRTC = 0xefc7
+            MLWebRTC = 0xefc7,
+
+            /// <summary>
+            /// Code for MLBluetoothGatt related MLResults.
+            /// </summary>
+            MLBluetoothGattResult = 0xa718
         }
 
         #if PLATFORM_LUMIN
@@ -1267,6 +1272,9 @@ namespace UnityEngine.XR.MagicLeap
                     break;
                 case CodePrefix.MLWebRTC:
                     codeString = Marshal.PtrToStringAnsi(MLWebRTC.NativeBindings.MLWebRTCGetResultString(resultCode));
+                    break;
+               case CodePrefix.MLBluetoothGattResult:
+                    codeString = Marshal.PtrToStringAnsi(MLBluetoothLE.NativeBindings.MLBluetoothGattGetResultString(resultCode));
                     break;
                 default:
                     // This will catch any unknown/invalid return values.

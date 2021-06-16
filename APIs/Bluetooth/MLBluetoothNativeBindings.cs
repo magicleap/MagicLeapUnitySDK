@@ -19,10 +19,7 @@ namespace UnityEngine.XR.MagicLeap
     using Unity.Collections.LowLevel.Unsafe;
     using UnityEngine;
     using UnityEngine.XR.MagicLeap;
-
-#if PLATFORM_LUMIN
     using UnityEngine.XR.MagicLeap.Native;
-#endif
 
     /// <summary>
     /// Magic Leap Bluetooth Low Energy implementation for Unity
@@ -33,7 +30,7 @@ namespace UnityEngine.XR.MagicLeap
         /// <summary>
         /// Native bindings helper class for Magic Leap Bluetooth LE support 
         /// </summary>
-        private class NativeBindings
+        internal class NativeBindings
         {
             /// <summary>
             /// The name of the Adapter DLL to retrieve adapter API
@@ -119,7 +116,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="characteristic">Characteristic being read</param>
             /// <param name="status">Client status</param>
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate void GattCharacteristicReadDelegate(CharacteristicInternal characteristic, MLBluetoothLE.Status status);
+            public delegate void GattCharacteristicReadDelegate(ref CharacteristicInternal characteristic, MLBluetoothLE.Status status);
 
             /// <summary>
             /// Delegate describing the callback used to monitor <c>Gatt</c> interval updates
@@ -133,7 +130,7 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             /// <param name="characteristic">Characteristic that changed</param>
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate void GattRemoteCharacteristicChangedDelegate(CharacteristicInternal characteristic);
+            public delegate void GattRemoteCharacteristicChangedDelegate(ref CharacteristicInternal characteristic);
 
             /// <summary>
             /// Delegate describing the callback used to monitor <c>Gatt</c> descriptor writes
@@ -141,14 +138,14 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="descriptor">Descriptor that was written</param>
             /// <param name="status">Write status</param>
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate void GattDescriptorWriteDelegate(DescriptorInternal descriptor, MLBluetoothLE.Status status);
+            public delegate void GattDescriptorWriteDelegate(ref DescriptorInternal descriptor, MLBluetoothLE.Status status);
 
             /// <summary>
             /// Delegate describing the callback necessary to monitor <c>Gatt</c> descriptor changes
             /// </summary>
             /// <param name="descriptor">Descriptor that changed</param>
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate void GattNotifyDelegate(DescriptorInternal descriptor);
+            public delegate void GattNotifyDelegate(ref CharacteristicInternal characteristicInternal);
 
             /// <summary>
             /// Delegate describing the callback indicating a <c>Gatt</c> characteristic write change
@@ -156,7 +153,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="characteristic">Characteristic that was written</param>
             /// <param name="status">Write status</param>
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate void GattCharacteristicWriteDelegate(CharacteristicInternal characteristic, MLBluetoothLE.Status status);
+            public delegate void GattCharacteristicWriteDelegate(ref CharacteristicInternal characteristic, MLBluetoothLE.Status status);
 
             /// <summary>
             /// Delegate describing the callback indicating a <c>Gatt</c> Descriptor read has been successful
@@ -164,7 +161,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="descriptor">Descriptor being read</param>
             /// <param name="status">Read status</param>
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate void GattDescriptorReadDelegate(DescriptorInternal descriptor, MLBluetoothLE.Status status);
+            public delegate void GattDescriptorReadDelegate(ref DescriptorInternal descriptor, MLBluetoothLE.Status status);
 
             /// <summary>
             /// A delegate describing the requirements for the state change callback
@@ -207,7 +204,7 @@ namespace UnityEngine.XR.MagicLeap
                 RegisterBluetoothGattConnectionParametersUpdatedCallback(GattConnectionIntervalUpdatedCallback);
                 RegisterBluetoothGattConnectionStateChangedCallback(GattConnectionStateChangedCallback);
                 RegisterBluetoothGattMTUChangedCallback(GattMTUSizeChangedCallback);
-                RegisterBluetoothGattNotifyCallback(GattNotifyCallback);
+                RegisterBluetoothGattNotifyCallback(GattRemoteCharacteristicChangedCallback);
                 RegisterBluetoothGattReadCharacteristicCallback(GattCharacteristicReadCallback);
                 RegisterBluetoothGattReadDescriptorCallback(GattDescriptorReadCallback);
                 RegisterBluetoothGattWriteCharacteristicCallback(GattCharacteristicWriteCallback);
@@ -263,7 +260,7 @@ namespace UnityEngine.XR.MagicLeap
 
                     list.Add(nativeService.Data);
 
-                    serviceArray += System.Runtime.InteropServices.Marshal.SizeOf<GattServiceInternal>();
+                    serviceArray += Marshal.SizeOf<GattServiceInternal>();
                 }
 
                 MLBluetoothGattReleaseServiceList(ref returnedList);
@@ -298,11 +295,12 @@ namespace UnityEngine.XR.MagicLeap
             /// <returns>Returns <c>MLResult.Code.Ok</c> on success or an error on failure.</returns>
             public static MLResult.Code WriteCharacteristic(MLBluetoothLE.Characteristic characteristic)
             {
+                
                 CharacteristicInternal characteristicInternal = new CharacteristicInternal
                 {
                     Data = characteristic
                 };
-
+                
                 return MLBluetoothGattWriteCharacteristic(ref characteristicInternal);
             }
 
@@ -341,6 +339,10 @@ namespace UnityEngine.XR.MagicLeap
 
             /// <summary>
             /// Enables or disables notifications/indications for a given characteristic
+            /// The values for the client characteristic configuration descriptor to start or stop the notification or indication.
+            /// Enable notification: { 0x01, 0x00}.
+            /// Enable indication: {0x02, 0x0}.
+            /// Disable: {0x00, 0x00}.
             /// </summary>
             /// <param name="characteristic">characteristic The descriptor for which to enable notification</param>
             /// <param name="enabled">enable Set to true to enable notification or indications</param>
@@ -435,7 +437,7 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             /// <param name="state">The state of local Bluetooth adapter</param>
             /// <returns>Returns <c>MLResult.Code.Ok</c> on success or an error on failure.</returns>
-            [DllImport(MLBluetoothAdapterDll, CallingConvention = CallingConvention.StdCall)]
+            [DllImport(MLBluetoothAdapterDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLBluetoothAdapterGetState(ref MLBluetoothLE.AdapterState state);
 
             /// <summary>
@@ -443,7 +445,7 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             /// <param name="bluetoothAddress">The address of remote device to bond with</param>
             /// <returns>Returns <c>MLResult.Code.Ok</c> on success or an error on failure.</returns>
-            [DllImport(MLBluetoothAdapterDll, CallingConvention = CallingConvention.StdCall)]
+            [DllImport(MLBluetoothAdapterDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLBluetoothAdapterCreateBond(ref BluetoothAddress bluetoothAddress);
 
             /// <summary>
@@ -452,15 +454,15 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="characteristic">The descriptor for which to enable notification</param>
             /// <param name="enable">Set to true to enable notification or indications</param>
             /// <returns>Returns <c>MLResult.Code.Ok</c> on success or an error on failure.</returns>
-            [DllImport(MLBluetoothGattDll, CallingConvention = CallingConvention.StdCall)]
-            public static extern MLResult.Code MLBluetoothGattSetCharacteristicNotification(ref CharacteristicInternal characteristic, bool enable);
+            [DllImport(MLBluetoothGattDll, CallingConvention = CallingConvention.Cdecl)]
+            public static extern MLResult.Code MLBluetoothGattSetCharacteristicNotification(ref CharacteristicInternal characteristic, [MarshalAs(UnmanagedType.I1)] bool enable);
 
             /// <summary>
             /// Reads the requested characteristic from the connected remote device
             /// </summary>
             /// <param name="descriptor">The characteristic to read from the remote device</param>
             /// <returns>Returns <c>MLResult.Code.Ok</c> on success or an error on failure.</returns>
-            [DllImport(MLBluetoothGattDll, CallingConvention = CallingConvention.StdCall)]
+            [DllImport(MLBluetoothGattDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLBluetoothGattReadCharacteristic(ref CharacteristicInternal descriptor);
 
             /// <summary>
@@ -468,15 +470,24 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             /// <param name="descriptor">The characteristic to write on the remote device</param>
             /// <returns>Returns <c>MLResult.Code.Ok</c> on success or an error on failure.</returns>
-            [DllImport(MLBluetoothGattDll, CallingConvention = CallingConvention.StdCall)]
+            [DllImport(MLBluetoothGattDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLBluetoothGattWriteCharacteristic(ref CharacteristicInternal descriptor);
+
+            /// <summary>
+            /// Requests to change MTU size.
+            /// The results of this call are delivered to the MLBluetoohLE.OnBluetoothMTUSizeChanged callback.
+            /// </summary>
+            /// <param name="mtu">The characteristic to write on the remote device</param>
+            /// <returns>Returns <c>MLResult.Code.Ok</c> on success or an error on failure.</returns>
+            [DllImport(MLBluetoothGattDll, CallingConvention = CallingConvention.Cdecl)]
+            public static extern MLResult.Code MLBluetoothGattRequestMtu(int mtu);
 
             /// <summary>
             /// Writes the value of a given descriptor to the connected device
             /// </summary>
             /// <param name="descriptor">The descriptor to write to the remote device</param>
             /// <returns>Returns <c>MLResult.Code.Ok</c> on success or an error on failure.</returns>
-            [DllImport(MLBluetoothGattDll, CallingConvention = CallingConvention.StdCall)]
+            [DllImport(MLBluetoothGattDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLBluetoothGattWriteDescriptor(ref DescriptorInternal descriptor);
 
             /// <summary>
@@ -484,7 +495,7 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             /// <param name="descriptor">The descriptor to read from the remote device</param>
             /// <returns>Returns <c>MLResult.Code.Ok</c> on success or an error on failure.</returns>
-            [DllImport(MLBluetoothGattDll, CallingConvention = CallingConvention.StdCall)]
+            [DllImport(MLBluetoothGattDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLBluetoothGattReadDescriptor(ref DescriptorInternal descriptor);
 
             /// <summary>
@@ -492,7 +503,7 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             /// <param name="priority">A specific connection priority</param>
             /// <returns>Returns <c>MLResult.Code.Ok</c> on success or an error on failure.</returns>
-            [DllImport(MLBluetoothGattDll, CallingConvention = CallingConvention.StdCall)]
+            [DllImport(MLBluetoothGattDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLBluetoothGattRequestConnectionPriority(MLBluetoothLE.ConnectionPriority priority);
 
             /// <summary>
@@ -500,21 +511,21 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             /// <param name="bluetoothAddress">The Bluetooth address of device to connect to</param>
             /// <returns>Returns <c>MLResult.Code.Ok</c> on success or an error on failure.</returns>
-            [DllImport(MLBluetoothGattDll, CallingConvention = CallingConvention.StdCall)]
+            [DllImport(MLBluetoothGattDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLBluetoothGattConnect(ref BluetoothAddress bluetoothAddress);
 
             /// <summary>
             /// Disconnects an established connection, or cancel a connection attempt
             /// </summary>
             /// <returns>Returns <c>MLResult.Code.Ok</c> on success or an error on failure.</returns>
-            [DllImport(MLBluetoothGattDll, CallingConvention = CallingConvention.StdCall)]
+            [DllImport(MLBluetoothGattDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLBluetoothGattDisconnect();
 
             /// <summary>
             /// Discovers GATT services offered by a remote device
             /// </summary>
             /// <returns>Returns <c>MLResult.Code.Ok</c> on success or an error on failure.</returns>
-            [DllImport(MLBluetoothGattDll, CallingConvention = CallingConvention.StdCall)]
+            [DllImport(MLBluetoothGattDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLBluetoothGattDiscoverServices();
 
             /// <summary>
@@ -522,14 +533,17 @@ namespace UnityEngine.XR.MagicLeap
             /// callback will be invoked when the RSSI value has been read.
             /// </summary>
             /// <returns>Returns <c>MLResult.Code.Ok</c> on success or an error on failure.</returns>
-            [DllImport(MLBluetoothGattDll, CallingConvention = CallingConvention.StdCall)]
+            [DllImport(MLBluetoothGattDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLBluetoothGattReadRemoteRssi();
 
-            [DllImport(MLBluetoothGattDll, CallingConvention = CallingConvention.StdCall)]
+            [DllImport(MLBluetoothGattDll, CallingConvention = CallingConvention.Cdecl)]
             private static extern MLResult.Code MLBluetoothGattGetServiceRecord(ref ServiceListInternal serviceList);
 
-            [DllImport(MLBluetoothGattDll, CallingConvention = CallingConvention.StdCall)]
+            [DllImport(MLBluetoothGattDll, CallingConvention = CallingConvention.Cdecl)]
             private static extern MLResult.Code MLBluetoothGattReleaseServiceList(ref ServiceListInternal serviceList);
+
+            [DllImport(MLBluetoothGattDll, CallingConvention = CallingConvention.Cdecl)]
+            public static extern IntPtr MLBluetoothGattGetResultString(MLResult.Code resultCOde);
 
             /// <summary>
             /// Callback that is invoked when a device has been scanned
@@ -607,7 +621,7 @@ namespace UnityEngine.XR.MagicLeap
             }
 
             /// <summary>
-            /// Callback used to monitor the MTU size
+            /// Callback used to monitor the MTU size.
             /// </summary>
             /// <param name="mtu">new MTU size</param>
             /// <param name="status">Client status</param>
@@ -623,7 +637,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="characteristic">Characteristic being read</param>
             /// <param name="status">Client status</param>
             [AOT.MonoPInvokeCallback(typeof(NativeBindings.GattCharacteristicReadDelegate))]
-            private static void GattCharacteristicReadCallback(CharacteristicInternal characteristic, MLBluetoothLE.Status status)
+            private static void GattCharacteristicReadCallback(ref CharacteristicInternal characteristic, MLBluetoothLE.Status status)
             {
                 MLThreadDispatch.Call<Characteristic, MLBluetoothLE.Status>(characteristic.Data, status, MLBluetoothLE.OnBluetoothCharacteristicRead);
             }
@@ -634,7 +648,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="characteristic">Characteristic that was written</param>
             /// <param name="status">Write status</param>
             [AOT.MonoPInvokeCallback(typeof(NativeBindings.GattCharacteristicWriteDelegate))]
-            private static void GattCharacteristicWriteCallback(CharacteristicInternal characteristic, MLBluetoothLE.Status status)
+            private static void GattCharacteristicWriteCallback(ref CharacteristicInternal characteristic, MLBluetoothLE.Status status)
             {
                 MLThreadDispatch.Call<Characteristic, MLBluetoothLE.Status>(characteristic.Data, status, MLBluetoothLE.OnBluetoothCharacteristicWrite);
             }
@@ -654,19 +668,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             /// <param name="characteristic">Characteristic that changed</param>
             [AOT.MonoPInvokeCallback(typeof(NativeBindings.GattRemoteCharacteristicChangedDelegate))]
-            private static void GattRemoteCharacteristicChangedCallback(CharacteristicInternal characteristic)
+            private static void GattRemoteCharacteristicChangedCallback(ref CharacteristicInternal characteristic)
             {
                 MLThreadDispatch.Call<Characteristic>(characteristic.Data, MLBluetoothLE.OnBluetoothGattRemoteCharacteristicChanged);
-            }
-
-            /// <summary>
-            /// Delegate describing the callback necessary to monitor <c>Gatt</c> descriptor changes
-            /// </summary>
-            /// <param name="descriptor">Descriptor that changed</param>
-            [AOT.MonoPInvokeCallback(typeof(NativeBindings.GattNotifyDelegate))]
-            private static void GattNotifyCallback(DescriptorInternal descriptor)
-            {
-                // MLThreadDispatch.Call<Descriptor>(descriptor.Data, MLBluetoothLE.OnBluetoothGattNotify);
             }
 
             /// <summary>
@@ -675,7 +679,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="descriptor">Descriptor that was written</param>
             /// <param name="status">Write status</param>
             [AOT.MonoPInvokeCallback(typeof(NativeBindings.GattDescriptorWriteDelegate))]
-            private static void GattDescriptorWriteCallback(DescriptorInternal descriptor, MLBluetoothLE.Status status)
+            private static void GattDescriptorWriteCallback(ref DescriptorInternal descriptor, MLBluetoothLE.Status status)
             {
                 MLThreadDispatch.Call<Descriptor, MLBluetoothLE.Status>(descriptor.Data, status, MLBluetoothLE.OnBluetoothGattDescriptorWrite);
             }
@@ -686,7 +690,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="descriptor">Descriptor being read</param>
             /// <param name="status">Read status</param>
             [AOT.MonoPInvokeCallback(typeof(NativeBindings.GattDescriptorReadDelegate))]
-            private static void GattDescriptorReadCallback(DescriptorInternal descriptor, MLBluetoothLE.Status status)
+            private static void GattDescriptorReadCallback(ref DescriptorInternal descriptor, MLBluetoothLE.Status status)
             {
                 MLThreadDispatch.Call<Descriptor, MLBluetoothLE.Status>(descriptor.Data, status, MLBluetoothLE.OnBluetoothGattDescriptorRead);
             }
@@ -758,7 +762,7 @@ namespace UnityEngine.XR.MagicLeap
                 /// <summary>
                 /// Version number of this struct
                 /// </summary>
-                public int Version;
+                public uint Version;
 
                 /// <summary>
                 /// UUID of the characteristic
@@ -1188,7 +1192,6 @@ namespace UnityEngine.XR.MagicLeap
                         while (includeWalk != IntPtr.Zero)
                         {
                             CharacteristicNodeInternal walk = Marshal.PtrToStructure<CharacteristicNodeInternal>(includeWalk);
-
                             chars.Add(walk.Characteristic.Data);
 
                             includeWalk = walk.Next;
