@@ -20,12 +20,14 @@
 - Fixed a crash in MLWebRTC when the remote peer does not provide a stream ID for its media tracks. Use a default stream ID of "unknown_remote" in such cases.
 - Fixed the string returned from the scanned QR-code. The string had a null-terminator in the end.
 - Fixed MLWebRTCVideoSinkBehavior to scale the game object according to dyamic changes in video resolution.
+- Fixed errors thrown by pending MLPlanes queries when a new scene is loaded before they're completed.
+- Fixed an error in MLPlanes where polygons were always requested, regardless of the provided query flags.
 
 ### Deprecations & Removals
 - `OnTrackAdded` & `OnTrackRemoved` delegates in the `MLWebRTC.PeerConnection` class have been deprecated in favor of `OnTrackAddedMultipleStreams` & `OnTrackRemovedMultipleStreams` delegates.
 
 ### Known Issues
-- When playing WebRTC audio via Unity, while the playback is expected to be smooth, the audio buffers play at a much larger latency than when played directly via the underlying WebRTC platform.
+- When playing WebRTC audio via Unity, while the playback is expected to be smooth, the audio buffers play at a much larger latency than when played directly via the underlying WebRTC platform if the sample rate of the incoming audio stream does not match that of Unity (48000 Hz).
 
 ## [0.25.0]
 ### New Features
