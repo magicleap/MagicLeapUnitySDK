@@ -15,13 +15,15 @@
 - Added `OnTrackAddedMultipleStreams` & `OnTrackRemovedMultipleStreams` delegates to the `MLWebRTC.PeerConnection` class. These delegates are similar to the old `OnTrackAdded` & `OnTrackRemoved` delegates but report a full list of streams that added/removed track belongs to.
 - Upgraded Magic Leap XR Plugin support to 6.2.2.
 - Clarified the usage of `MLEyes.Timestamp` property that it won't automatically initialize the eye tracking api and returns 0 in that case.
-
+- Added ability to change MTU size in MLBluetoothLE.
 ### Bug Fixes
 - Fixed a crash in MLWebRTC when the remote peer does not provide a stream ID for its media tracks. Use a default stream ID of "unknown_remote" in such cases.
 - Fixed the string returned from the scanned QR-code. The string had a null-terminator in the end.
 - Fixed MLWebRTCVideoSinkBehavior to scale the game object according to dyamic changes in video resolution.
 - Fixed errors thrown by pending MLPlanes queries when a new scene is loaded before they're completed.
 - Fixed an error in MLPlanes where polygons were always requested, regardless of the provided query flags.
+- Fixed the OnBluetoothGattRemoteCharacteristicChanged callback in MLBluetoothLE.
+- Fixed the OnBluetoothCharacteristicRead callback in MLBluetoothLE.
 
 ### Deprecations & Removals
 - `OnTrackAdded` & `OnTrackRemoved` delegates in the `MLWebRTC.PeerConnection` class have been deprecated in favor of `OnTrackAddedMultipleStreams` & `OnTrackRemovedMultipleStreams` delegates.
