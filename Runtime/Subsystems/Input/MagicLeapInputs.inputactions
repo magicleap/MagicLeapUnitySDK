@@ -1,0 +1,1586 @@
+{
+    "name": "MagicLeapInputs",
+    "maps": [
+        {
+            "name": "Controller",
+            "id": "8eedf83d-1eff-4251-89b7-c1c139a7c198",
+            "actions": [
+                {
+                    "name": "Position",
+                    "type": "Value",
+                    "id": "782332fa-2273-4618-8f7e-84a41f6d6ebd",
+                    "expectedControlType": "Vector3",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Rotation",
+                    "type": "Value",
+                    "id": "d5979c49-d013-42f9-8dab-89874a22c458",
+                    "expectedControlType": "Quaternion",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Menu",
+                    "type": "Button",
+                    "id": "9df2a2c8-6ddc-45b2-9d58-e51400007121",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Bumper",
+                    "type": "Button",
+                    "id": "f2975b5b-2e25-479b-8eee-be572a216ece",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "TriggerButton",
+                    "type": "Button",
+                    "id": "f4dfb82b-918e-4409-87dc-c7b18cbe91fd",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Trigger",
+                    "type": "Value",
+                    "id": "44d463b3-8ef3-4957-b35e-d6e1510bdff5",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "TouchpadPosition",
+                    "type": "Value",
+                    "id": "469d249d-c91c-49e9-a777-ef61b9d6f690",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "TouchpadClick",
+                    "type": "Button",
+                    "id": "58fdbe06-4c4c-4ee5-b158-8821a389e434",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "TouchpadTouch",
+                    "type": "Button",
+                    "id": "d999b57b-4150-44fe-b1e4-faa3c21d49cc",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "TouchpadForce",
+                    "type": "Button",
+                    "id": "ededf6a4-0744-40ab-8120-fa5751638b2b",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "IsTracked",
+                    "type": "PassThrough",
+                    "id": "ecce99d5-5a3a-414e-83a8-ddc154834be9",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Haptic",
+                    "type": "PassThrough",
+                    "id": "ca5f855e-2ff0-43c8-8a13-e3b1b04a9bc3",
+                    "expectedControlType": "Haptic",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "e1d74f8f-8b4e-4573-8619-e97f7aecf52b",
+                    "path": "<XRController>{RightHand}/{primary2DAxis}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "XR Usage",
+                    "action": "TouchpadPosition",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "290b9ffa-9543-4459-a7ee-ba5a76a5c3d8",
+                    "path": "<XRController>{RightHand}/{primary2DAxisClick}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "XR Usage",
+                    "action": "TouchpadClick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f55725b6-acbf-41ba-a8c1-a5d601f52fb0",
+                    "path": "<XRController>{RightHand}/{primary2DAxisTouch}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "XR Usage",
+                    "action": "TouchpadTouch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "bbfa7afb-1011-4c91-bf0b-ed43b1af1d23",
+                    "path": "<XRController>{RightHand}/haptic",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "XR Usage",
+                    "action": "Haptic",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1a017191-64bb-4891-8ed5-0bb1d54a98b2",
+                    "path": "<XRController>{RightHand}/{secondary2DAxisForce}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "XR Usage",
+                    "action": "TouchpadForce",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f37fea1c-d4d8-4d9e-8698-ed7479b825c2",
+                    "path": "<XRController>{RightHand}/{trigger}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Trigger",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "Quaternion Fallback",
+                    "id": "fca4df74-51c9-4e3b-8493-82182c76d7fe",
+                    "path": "QuaternionFallback",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Rotation",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "first",
+                    "id": "3704ef6d-5360-40eb-b1b7-198762493f8d",
+                    "path": "<XRController>{RightHand}/pointerRotation",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Rotation",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "second",
+                    "id": "144f6be1-aae1-49bc-9ceb-94c242bc35ef",
+                    "path": "<XRController>{RightHand}/deviceRotation",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Rotation",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "third",
+                    "id": "47a4ccbf-ec6b-4323-8078-2aa08c005c0c",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Rotation",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "Vector 3 Fallback",
+                    "id": "a4891611-bb2b-419e-ad11-11a756ed461d",
+                    "path": "Vector3Fallback",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Position",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "first",
+                    "id": "fe13a61d-ab1e-4f06-b282-d3c1d2d98d9a",
+                    "path": "<XRController>{RightHand}/pointerPosition",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Position",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "second",
+                    "id": "f97f494e-8fa8-4be4-826c-aa3c45127f54",
+                    "path": "<XRController>{RightHand}/devicePosition",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Position",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "third",
+                    "id": "a1240932-fca5-4cc1-a010-e7cedee497ba",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Position",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "94f39bde-dd13-48bf-be85-e1df6ed5983b",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapController>/istracked",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "IsTracked",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "bec27350-beb9-42ee-9274-badd7d9e6e68",
+                    "path": "<XRController>{RightHand}/menu",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Menu",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6c5bf46f-92ba-4c59-bee8-7762907931e1",
+                    "path": "<XRController>{RightHand}/{triggerButton}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "TriggerButton",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ec778a53-15f1-40ca-887d-f212c1ba4d21",
+                    "path": "<XRController>{RightHand}/{gripButton}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Bumper",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "HMD",
+            "id": "84acb5bd-7e0e-4a12-b5a1-0f3540ada4fc",
+            "actions": [
+                {
+                    "name": "Position",
+                    "type": "Value",
+                    "id": "5e2c2bc9-567c-444c-89e7-23c2e6f611cc",
+                    "expectedControlType": "Vector3",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Rotation",
+                    "type": "Value",
+                    "id": "0010a23d-24c3-4cc9-b7c4-3fbec4353b71",
+                    "expectedControlType": "Quaternion",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "5e322891-a9b2-423a-b0b2-96a4d67fc09e",
+                    "path": "<MagicLeapHeadset>/devicePosition",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "MagicLeap",
+                    "action": "Position",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "18b692f6-18f0-41ee-b494-5b6c778c73e1",
+                    "path": "<XRHMD>/devicePosition",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "MagicLeap",
+                    "action": "Position",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "462fbcca-3888-418f-b064-8d6e6094f032",
+                    "path": "<MagicLeapHeadset>/deviceRotation",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "MagicLeap",
+                    "action": "Rotation",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "76675273-1218-457c-bf8b-ec613659bd37",
+                    "path": "<XRHMD>/deviceRotation",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "MagicLeap",
+                    "action": "Rotation",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Eyes",
+            "id": "e2892f01-37bd-4161-825f-4741d39463e1",
+            "actions": [
+                {
+                    "name": "Data",
+                    "type": "Value",
+                    "id": "4e0e9fc8-b071-48a9-a0b4-cee8df2aa187",
+                    "expectedControlType": "Eyes",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "fec52b17-7798-4c8e-af95-1b69946e0cdf",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapEyes>/eyesdata",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "MagicLeap",
+                    "action": "Data",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "LeftHand",
+            "id": "cd640869-6651-4206-88d7-e452052bceb5",
+            "actions": [
+                {
+                    "name": "Position",
+                    "type": "Value",
+                    "id": "de73b087-da8e-4ce0-b7fa-fa88a99eea9a",
+                    "expectedControlType": "Vector3",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Rotation",
+                    "type": "Value",
+                    "id": "13029a31-47ed-4210-8c52-3346bc353414",
+                    "expectedControlType": "Quaternion",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Keypose",
+                    "type": "Value",
+                    "id": "000a1cce-cfee-41a4-9ff5-a83d1c81e5bd",
+                    "expectedControlType": "Integer",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "ThumbMetacarpal",
+                    "type": "Value",
+                    "id": "22806e9a-d103-4cc1-b09c-13237b81978f",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "IndexMetacarpal",
+                    "type": "Value",
+                    "id": "7d2b785a-3705-4927-b095-b68455890173",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "MiddleMetacarpal",
+                    "type": "Value",
+                    "id": "bf51c96a-5b6a-4312-a7b7-92f8b94a9c8d",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "RingMetacarpal",
+                    "type": "Value",
+                    "id": "51cd933c-6afb-4284-97d4-35a390aa77d3",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "PinkyMetacarpal",
+                    "type": "Value",
+                    "id": "3bec5b0c-7605-41fb-9f68-d9b776d044ce",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "ThumbProximal",
+                    "type": "Value",
+                    "id": "8254828b-1105-4d8e-b125-d5a418e15087",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "IndexProximal",
+                    "type": "Value",
+                    "id": "a8fb4b9d-0bf4-4f99-8703-18adfb5d147f",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "MiddleProximal",
+                    "type": "Value",
+                    "id": "90b743ce-f316-474d-94e7-89d2b9bc67d7",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "RingProximal",
+                    "type": "Value",
+                    "id": "e6dc792e-bd50-42a7-b32e-085651be0c90",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "PinkyProximal",
+                    "type": "Value",
+                    "id": "34a9270f-8a98-4e3b-abf3-f07d2d8694c7",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "ThumbIntermediate",
+                    "type": "Value",
+                    "id": "4190038c-dd85-4e94-b22a-a8d2863a6ab5",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "IndexIntermediate",
+                    "type": "Value",
+                    "id": "53feadc7-5145-43bb-a3c1-e86f000ad780",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "MiddleIntermediate",
+                    "type": "Value",
+                    "id": "c25067a5-b56e-4fe3-9704-cba94bbd43a5",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "RingIntermediate",
+                    "type": "Value",
+                    "id": "0df1f0bb-2c6b-42f4-a556-5cd3839ee557",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "PinkyIntermediate",
+                    "type": "Value",
+                    "id": "3d679f86-4338-4814-9911-c315affe4830",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "ThumbDistal",
+                    "type": "Value",
+                    "id": "c282e22c-78fc-43d8-97f1-3daafd0702e3",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "IndexDistal",
+                    "type": "Value",
+                    "id": "d69a1cbd-b1be-499f-8131-9146a8975861",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "MiddleDistal",
+                    "type": "Value",
+                    "id": "8a7f66fb-ab2d-49a7-9356-c4916ab95da3",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "RingDistal",
+                    "type": "Value",
+                    "id": "d5f98e9d-a857-42d5-94f9-4a83e6ba663a",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "PinkyDistal",
+                    "type": "Value",
+                    "id": "404a86d7-793f-4caa-9b64-fc368c66146f",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "ThumbTip",
+                    "type": "Value",
+                    "id": "be19ff25-7c7c-424f-b575-a8cc5f121167",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "IndexTip",
+                    "type": "Value",
+                    "id": "61b82fa1-8b74-4faa-bfc4-e8548701b67e",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "MiddleTip",
+                    "type": "Value",
+                    "id": "37803418-3231-4ba2-9589-1217bc042b2f",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "RingTip",
+                    "type": "Value",
+                    "id": "8708a4ec-5f88-4804-b1e4-2eac72a34191",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "PinkyTip",
+                    "type": "Value",
+                    "id": "13e2b7f6-2333-4a05-983f-bae507f89f56",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "1ef5be79-52de-4dcd-b14e-2d1b418dde3b",
+                    "path": "<MagicLeapHandDevice>{LeftHand}/devicePosition",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "MagicLeap",
+                    "action": "Position",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "48e547fc-2db8-480c-9a24-6d8c88178c3d",
+                    "path": "<MagicLeapHandDevice>{LeftHand}/deviceRotation",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "MagicLeap",
+                    "action": "Rotation",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b66bcbd0-dccb-4f61-a563-f730d5084b36",
+                    "path": "<MagicLeapHandDevice>{LeftHand}/keyPose",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "MagicLeap",
+                    "action": "Keypose",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8c27a8e2-b315-4acd-8da7-6f10aa1909f5",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/boneindexmetacarpal",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "IndexMetacarpal",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "40b140f6-21e5-447c-ad31-490ce341043d",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/boneindexproximal",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "IndexProximal",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "43bae5f1-89d6-47e0-b2cc-1f02b45ed029",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/boneindexintermediate",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "IndexIntermediate",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "dcb367d7-2dd1-4500-8d36-8ebe31ce10c1",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/boneindexdistal",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "IndexDistal",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "0221227d-1229-4c12-a681-2060d8d14a3d",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/boneindextip",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "IndexTip",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4c542ca1-4460-460e-8c5a-9c2040d2bd00",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonepinkymetacarpal",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PinkyMetacarpal",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "bef21465-51f9-4696-bdb6-80cc0569b4e6",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonepinkyproximal",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PinkyProximal",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "48c29347-fa91-4e18-86dc-75639e826dee",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonepinkyintermediate",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PinkyIntermediate",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "946aaa2e-59d5-4f6c-9269-e0b0e1e7c283",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonepinkydistal",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PinkyDistal",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c3759d0a-a110-45c7-a7de-b41697d6ce4a",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonepinkytip",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PinkyTip",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "af231bdd-c353-423c-bcd3-91af4a964212",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonethumbmetacarpal",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ThumbMetacarpal",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ad3fb047-1833-46a2-b0d4-8097b4150d57",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonethumbproximal",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ThumbProximal",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1d14ec32-f5e7-463f-86e6-0ac69f47bb35",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonethumbintermediate",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ThumbIntermediate",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "842dc918-6312-407a-a541-cb629bbe4159",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonethumbdistal",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ThumbDistal",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2a077082-4543-46a5-9e62-de274f1b7598",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonethumbtip",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ThumbTip",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "820fe0c1-6508-4500-b9f7-3a94a9f839bc",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonemiddlemetacarpal",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MiddleMetacarpal",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1abb01c1-45e7-451c-8361-8d6f753b85d4",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/boneringmetacarpal",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RingMetacarpal",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "187f1d45-8b44-4767-8105-2d309fd77e07",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonemiddleproximal",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MiddleProximal",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "fdcc7cfe-07d8-4d25-86eb-6ae351867704",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/boneringproximal",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RingProximal",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ff81b8cc-aad4-44ce-936b-2aa311b5e298",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonemiddleintermediate",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MiddleIntermediate",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a2107d1d-9dea-4f1e-8682-0bad6627dc2e",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/boneringintermediate",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RingIntermediate",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "fdb755d9-c02d-41e4-a4d6-27f311295d3a",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonemiddledistal",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MiddleDistal",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "adb141a5-5754-4dd7-bf6a-c935fa3ce710",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/boneringdistal",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RingDistal",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a7da1513-3004-40cb-915b-9bef8dffcd80",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonemiddletip",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MiddleTip",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "737af103-f147-4ba5-bae7-686f0ed314df",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/boneringtip",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RingTip",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "RightHand",
+            "id": "42a4c021-efee-4dbd-bbe6-810cd925d45d",
+            "actions": [
+                {
+                    "name": "Position",
+                    "type": "Value",
+                    "id": "c40f930b-b6e7-4b00-834d-4aaff94533be",
+                    "expectedControlType": "Vector3",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Rotation",
+                    "type": "Value",
+                    "id": "8a8c639a-11a7-4702-969a-2d10d3560a71",
+                    "expectedControlType": "Quaternion",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Keypose",
+                    "type": "Value",
+                    "id": "e7cb9be8-f539-41a4-bc17-c50636537d3c",
+                    "expectedControlType": "Integer",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "ThumbMetacarpal",
+                    "type": "Value",
+                    "id": "435768ac-76cb-449a-ac90-7f06a27db5bc",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "IndexMetacarpal",
+                    "type": "Value",
+                    "id": "721b37b1-ac86-488b-8f1c-e856aadf7fea",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "MiddleMetacarpal",
+                    "type": "Value",
+                    "id": "4aba5635-767f-46bd-b0eb-8d0e1ae89f0f",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "RingMetacarpal",
+                    "type": "Value",
+                    "id": "4a2fcedc-e369-4d53-87a2-e957ba8aa822",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "PinkyMetacarpal",
+                    "type": "Value",
+                    "id": "e604aeb4-8d74-43c0-a772-840f8f5dfa6d",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "ThumbProximal",
+                    "type": "Value",
+                    "id": "2c0f8b6c-cf64-466e-ac5f-efab85bacc85",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "IndexProximal",
+                    "type": "Value",
+                    "id": "9dd8aa68-2d34-4f13-9390-0059fef2bca9",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "MiddleProximal",
+                    "type": "Value",
+                    "id": "148c6a17-c23d-4bf1-881a-e170065019fe",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "RingProximal",
+                    "type": "Value",
+                    "id": "d168be58-98d7-4255-bd7e-3de47ba4f79c",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "PinkyProximal",
+                    "type": "Value",
+                    "id": "d7715cae-67f9-4e34-a444-fdcd6673d733",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "ThumbIntermediate",
+                    "type": "Value",
+                    "id": "03407893-6254-45bc-8dc3-5a07b4a7befa",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "IndexIntermediate",
+                    "type": "Value",
+                    "id": "f0641216-a06e-445c-85ad-afadd17831bd",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "MiddleIntermediate",
+                    "type": "Value",
+                    "id": "bc837cf2-3380-46df-a9f6-896ccf04253e",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "RingIntermediate",
+                    "type": "Value",
+                    "id": "ce97ed4e-ef74-49a6-b02e-82f2fe7d27eb",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "PinkyIntermediate",
+                    "type": "Value",
+                    "id": "b927124d-4254-4a58-81c9-320881ec8791",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "ThumbDistal",
+                    "type": "Value",
+                    "id": "5fc8d0b1-31ec-44cc-b776-5257b7874c49",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "IndexDistal",
+                    "type": "Value",
+                    "id": "1c18055c-44e1-494e-b33c-bed2df61feeb",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "MiddleDistal",
+                    "type": "Value",
+                    "id": "c6c59bb1-3348-46f5-8b83-ab7d01239c39",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "RingDistal",
+                    "type": "Value",
+                    "id": "814177f0-7b16-4b42-a230-6dcd6cafc42c",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "PinkyDistal",
+                    "type": "Value",
+                    "id": "e9a51370-b71e-4b54-bc49-07468e822fa9",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "ThumbTip",
+                    "type": "Value",
+                    "id": "3206893d-69fd-404d-b774-88de32cdbda6",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "IndexTip",
+                    "type": "Value",
+                    "id": "544c5c40-26b8-4c30-ac80-d73c7e49ca4d",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "MiddleTip",
+                    "type": "Value",
+                    "id": "93d43d05-9268-48e0-8ff8-24e6fa0bbdc2",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "RingTip",
+                    "type": "Value",
+                    "id": "246bab7b-c86a-41d2-b4d7-33c76031c9e2",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "PinkyTip",
+                    "type": "Value",
+                    "id": "31cee515-95dd-4ba4-893d-8930b505c405",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "039954ad-6664-47ed-aba2-a3f686cf9b44",
+                    "path": "<MagicLeapHandDevice>{RightHand}/devicePosition",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "MagicLeap",
+                    "action": "Position",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "30df3163-de43-44fa-b982-e632885a81ab",
+                    "path": "<MagicLeapHandDevice>{RightHand}/deviceRotation",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "MagicLeap",
+                    "action": "Rotation",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "63748f44-d0cf-4b91-952f-5fe7096ca6d3",
+                    "path": "<MagicLeapHandDevice>{RightHand}/keyPose",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "MagicLeap",
+                    "action": "Keypose",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c22bce79-0e99-426a-a6be-85acd3ac1e89",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonethumbmetacarpal",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ThumbMetacarpal",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6acee0e0-e6ca-4e2e-930f-84d88d477692",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/boneindexmetacarpal",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "IndexMetacarpal",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2ab92c80-0bb6-4785-9f32-bbd40498e5f4",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonemiddlemetacarpal",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MiddleMetacarpal",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8f31ac7e-f8bf-48c9-9842-eb51a7f4cdfc",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/boneringmetacarpal",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RingMetacarpal",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4df5e83c-f67e-4207-87d7-3bc2c66f7794",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonepinkymetacarpal",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PinkyMetacarpal",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "525c659e-baf1-4d14-abc3-61c735e23a15",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonethumbproximal",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ThumbProximal",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "505e73ec-5ec4-4021-8557-19d3e8318db1",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/boneindexproximal",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "IndexProximal",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "584fe833-2732-4946-9f70-c78f86ff8710",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonemiddleproximal",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MiddleProximal",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8fea3e66-2722-401a-b4b4-b8f42d86d6cb",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/boneringproximal",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RingProximal",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "40777b92-16f6-42a7-ab50-672dfe82e8a9",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonepinkyproximal",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PinkyProximal",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d2239981-4dae-4b44-ade5-ade7c8823130",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonethumbintermediate",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ThumbIntermediate",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "54782886-2850-4acf-820a-b2297f93ad13",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/boneindexintermediate",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "IndexIntermediate",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1ea3efa3-9735-4060-845d-dc70242831a0",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonemiddleintermediate",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MiddleIntermediate",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a4ea3c84-4156-470e-aa74-399ad357f667",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/boneringintermediate",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RingIntermediate",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a5426425-fdc4-4f35-b361-82177a37bbe1",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonepinkyintermediate",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PinkyIntermediate",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e109023f-11ab-48cd-beab-d48a503c448a",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonethumbdistal",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ThumbDistal",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b5993170-e6da-423f-817d-0c564ccc08b5",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/boneindexdistal",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "IndexDistal",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e5a2b527-6947-4725-be46-34679b8b95fb",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonemiddledistal",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MiddleDistal",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "350990fb-7a86-4507-9447-4f78765b296f",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/boneringdistal",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RingDistal",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "94be4a88-3642-4e5e-9c81-d490231a6166",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonepinkydistal",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PinkyDistal",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8e566af4-87e8-4ab3-a428-7f5bd5994b52",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonethumbtip",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ThumbTip",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c5cfce60-310a-4ab6-9681-3748d708bbe8",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/boneindextip",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "IndexTip",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "28e55bf5-7d5f-470d-9ef0-f09b7595cde4",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonemiddletip",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MiddleTip",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c27530d4-aec1-4f2a-9b46-a6cd58152452",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/boneringtip",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RingTip",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "67cebf2f-aa38-457a-8140-83d2b8140a12",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonepinkytip",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PinkyTip",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": [
+        {
+            "name": "MagicLeap",
+            "bindingGroup": "MagicLeap",
+            "devices": [
+                {
+                    "devicePath": "<MagicLeapController>",
+                    "isOptional": true,
+                    "isOR": false
+                },
+                {
+                    "devicePath": "<MagicLeapLightwear>",
+                    "isOptional": true,
+                    "isOR": false
+                },
+                {
+                    "devicePath": "<MagicLeapHandDevice>{LeftHand}",
+                    "isOptional": true,
+                    "isOR": false
+                },
+                {
+                    "devicePath": "<MagicLeapHandDevice>{RightHand}",
+                    "isOptional": true,
+                    "isOR": false
+                },
+                {
+                    "devicePath": "<XRHMD>",
+                    "isOptional": true,
+                    "isOR": false
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,25 @@
+{
+    "name": "com.magicleap.unitysdk",
+    "displayName": "Magic Leap SDK",
+    "version": "0.53.2",
+    "unity": "2022.2",
+    "description": "Magic Leap Unity SDK",
+    "keywords": [
+        "magicleap",
+        "ar",
+        "augmented",
+        "xr",
+        "reality",
+        "xreditorsubsystem"
+    ],
+    "dependencies": {
+        "com.unity.xr.arfoundation": "5.0.0-pre.12",
+        "com.unity.xr.interaction.toolkit": "2.1.0-pre.1",
+        "com.unity.inputsystem": "1.3.0",
+        "com.unity.modules.androidjni": "1.0.0"
+    },
+    "author": {
+        "name": "Magic Leap",
+        "url": "https://developer.magicleap.com/"
+    }
+}

@@ -1,0 +1,15 @@
+.title {
+    font-size: 20px;
+    -unity-font-style: bold;
+    padding-left: 10px;
+}
+
+.path-selection-row {
+    flex-direction: row;
+    margin-left: 7px;
+}
+
+.path-selection-input {
+    flex-grow: 1;
+    width: 0;
+}

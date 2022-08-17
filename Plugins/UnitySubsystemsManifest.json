@@ -1,0 +1,16 @@
+{
+  "name": "LuminXrProvider",
+  "version": "1.0.0",
+  "libraryName": "LuminXrProvider",
+  "inputs": [
+    {
+      "id": "LuminXr-Input",
+      "disablesLegacyInput": true
+    }
+  ],
+  "meshings": [
+    {
+        "id": "LuminXr-Meshing"
+    }
+  ]
+}

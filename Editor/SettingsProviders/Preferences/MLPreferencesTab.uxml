@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" ml="UnityEditor.XR.MagicLeap" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Packages/com.magicleap.unitysdk/Editor/SettingsProviders/Preferences/SettingsProviderStyle.uss?fileID=7433441132597879392&amp;guid=2b121f46bce027c42b9c8cd471a4ea3e&amp;type=3#SettingsProviderStyle" />
+    <ui:Label text="Magic Leap" display-tooltip-when-elided="true" class="title" />
+    <ui:VisualElement name="SDKPath" class="path-selection-row">
+        <ui:TextField picking-mode="Ignore" label="Lumin SDK" name="SDKPath-Input" is-delayed="true" class="path-selection-input" style="flex-basis: 0;" />
+        <ui:Button text="Browse" display-tooltip-when-elided="true" name="SDKPath-Button" />
+    </ui:VisualElement>
+    <ui:VisualElement name="SDKPath-Help" />
+</ui:UXML>

@@ -1,0 +1,366 @@
+# Changelog
+
+## [0.53.2]
+
+### Features
+- Reorganized package structure to more align with Unity conventions.
+- Added support for Eye Fit and Calibration API. 
+- Renamed LuminUnity asmdef to MagicLeap.SDK.
+- Moved WorldScale to MagicLeapCamera.cs and now ensures it is updated if the main camera parent transform changes.
+- Updated to support 2022.2 a19 editor and render pipeline 14.0.3.
+- Added WebRTCSendNativeFrameError result code.
+- Post build step now checks for XR Loader toggle to determine if build is for ML2. 
+- Changed input device name from MagicLeapLightwear to MagicLeapHeadset.
+- Updated XRRig prefab to use action-based controllers.
+- Refactored MLCamera to support per-frame camera intrinsics parameters as callbacks.
+- Added support for getting audio data and position data for MLAudioInput. 
+- Added support to MLAudioInput to create non-streamed audio clip.
+- Added AudioInput.Clip class to record an AudioClip from the Microphone.
+- Added EyeCalibration and HeadsetFit APIs.
+- Added API for client to call MLCameraDeinit() as needed.
+- Updated MagicLeapInput action map to rename Touchpad1 to Touchpad. 
+
+### Bugfixes
+- No longer receive warnings about camera transform if its not set to identity now that XRRig is recommended.
+- MLDevice no longer derives from TrackedPoseDriver as it was unnecessary. 
+- MLPermissions handles logging errors internally and no longer errors on pending requests. 
+- Fixed cleanup errors of MLDevice under Zero Iteration.
+- SDK Loader now uses compile time constructed library names. 
+- Fixed meshing collider generation caused by incorrect current mesh type value override in session subsystem. 
+- Fixed platform wrappings for MLAudioInputClip.
+- Fixed release of render target when YcbcrRenderer cleanup is complete.
+- Marked IsBuffering, IsSeeking & Duration as c# properties to make them read-only in MLMediaPlayer class.
+- Set near clip plane on Main Camera prefab to remove warning about clip plane being too close.
+- Fixed inner planes tracker id and boundary generation. 
+- Fixed rectangular boundary generation.
+- Added epsilon check to convex hull generation point on left hand side check to avoid infinite loops on straight edges.
+- Fixed permission prompts to no longer hang UI when using Zero Iteration Frontend.
+- Fixed SDK loader library path sent to xr package.
+- Fixed MLCamera VirtualOnly camera mode orientation in WebRTC.
+- Fixed browse button for picking ML SDK.
+- Renamed The Lab launch method and comments.
+- Fixed The Lab launch root option and arguments. 
+- Added additional comment to MLCamera.CreateAndConnect method.
+- Added more information to MLCamera.GetStreamCapabilities function.
+- Fixed performance hit in MLTime by removing inheritance of MLAPIBase.
+
+### Deprecations & Removals
+- Removed deprecated MLSceneOptimizerBehavior.cs as this has been merged into MagicLeapCamera.cs as of 0.53.0.
+- Removed deprecated MLPermissionsRequesterBehavior.cs as this is no longer the recommended permissions requesting method.
+- Removed AndroidTargetDevices.RelishDevicesOnly, using MagicLeapLoader toggle instead. 
+- Remove MLTime inheritance to MLAPIBase and fix audio function call.
+- Moved WorldScale to MagicLeapCamera.cs from MLDevice and removed unnecessary references. 
+
+### Known Issues / Limitations
+- WebRTC LocalAppDefinedAudioSourceBehavior is restricted to 1 audio channel.
+- Marker tracker transforms are upside down requiring users to rotate them by 180 degrees about the forward vector.
+- Camera capture can freeze app after multiple captures.
+- MLCamera.CaptureVideoStop fails with UnspecifiedFailure when called by WebRTC CameraVideoSource.
+- Spatial anchors report incorrect location for a single frame.
+- Some configurations of camera capture can produce distorted images.
+- WebRTC video sync rendering fails when non-white material is assigned.
+- MLGestureClassification's GestureTransformRotation and GestureInteractionRotation are not implemented yet and data will not be guaranteed accurate. Currently only the Positions of the Hand Transform and Interaction Point will be recommended to use.
+
+## [0.53.1]
+
+### Bugfixes
+- `MLAudioPlayback` class has been restricted to submit audio buffers only in ZI mode, not when running the app directly on the device.
+
+## [0.53.0]
+
+### Features
+- Exposed `Headlock` API, which locks left and right eye projection matrix to origin and disabled timewarping.
+- Refactored `MLWebView` API to be more Object Oriented. 
+- Added support for canceling Certificate Error operation in `MLWebView`.
+- Added support for `MLMeshingDestroyClient` parameter change.
+- Relocated `MagicLeapCamera.cs` from com.unity.xr.magicleap package to the com.magicleap.unitysdk package as it has been deprecated and marked for removal in the xr package but is still required. 
+- Added callbacks to `MLPermissoins` API to make it match closer to Android permissions API
+- Added universal library builds for Mac OSX to support x86_64 and arm64 architectures (M1 support).
+- Isolated `MLAudioOutput` plugin code into separate class to be used by other systems.
+- Added callback that returns list of markers for `MLMarkerTracking` API.
+- Added com.magicleap.permissions.SPATIAL_MAPPING dangerous permission for `MLMeshing` and `MLPlanes` APIs. 
+- Added validation checks to `MLVoiceIntents` API. 
+- Added `MLGestureClassification` API to Unity Input system.
+- Added a `OnFrameResolutionChanged` delegate to the `MLWebRTC.VideoSink` class which triggers whenever the video frame resolution changes. The `MLWebRTCVideoSinkBehavior` uses this delegate to update the `RenderTarget` the video gets rendered on.
+
+### Bugfixes
+- Forced adding com.magicleap.permissions.HEAD_POSE to AndroidManifest.xml if not present.
+- Fixed WebRTC inverted video rendering.
+- Fixed WebRTC Local video and preview inverted rendering.
+- Fixed `VideoSyncRenderer` inverted video rendering.
+- Simplified `MeshingSubsystemComponent` code to no longer track default value struct.
+- Fixed polling rate of `MeshingSubsystem` to accurately reflect configured rate value.
+- Fixed initializaton of Magic Leap API version dropdown in manifest settings.
+- Forced setting min Android API version to 29.
+- Fixed some DLL Not Found exceptions when running Zero Iteration.
+- Fixed checking for com.magicleap.permissions.MARKER_TRACKING when using marker tracking API.
+- Unload all loaded libraries in library loader when changing lib paths to improve compatibility with Zero Iteration. 
+- Improved Zero Iteration "Not Running" error output.
+- Fixed additional calls to `YcbcrRenderer.SetRenderBuffer()`.
+- Fixed trying to run Zero Iteration when Magic Leap Zero Iteration provider is unchecked in XR Management settings.
+- Fixed crash on camera capture preview under Zero Iteration.
+- Fixed crash on requesting mesh vertex confidence.
+- Fixed texture memory leak when pausing and resuming apps.
+
+### Deprecations & Removals
+- Merged `MLSceneOptimizerBehavior.cs` into `MagicLeapCamera.cs`.
+- Removed `StabilizationMode` and `StabilizationDistance` options from `MagicLeapCamera.cs`
+- Removed com.magicleap.permissions.WORLD_RECOGNITION normal permission.
+
+### Known Issues / Limitations
+- Audio playback does not play at a constant speed.
+- Marker tracker transforms are upside down requiring users to rotate them by 180 degrees about the forward vector.
+- Camera capture can freeze app after multiple captures. 
+- `MLCamera.CaptureVideoStop` fails with UnspecifiedFailure when called by WebRTC `CameraVideoSource`.
+- Collision mesh not properly generated by `MeshingSubsystemComponent`.
+- `YcbcrRenderer.Cleanup()` not fully cleaning up resources. 
+- Create Voice Configuration asset menu item creates the wrong asset type.
+- Spatial anchors report incorrect location for a single frame.
+- Some configurations of camera capture can produce distored images. 
+- WebRTC video sync rendering fails when non-white material is assigned.
+- MLGestureClassification's GestureTransformRotation and GestureInteractionRotation are not implemented yet and data will not be guaranteed accurate. Currently only the Positions of the Hand Transform and Interaction Point are recommended to use.
+
+
+
+## [0.52.2]
+
+### Features
+- Update to Unity 2022.2.
+- Update XR Plugin dependency to `v7.0.0-preview.1`.
+- Exposed `MLSegmentedDimmer` API, which provides basic functions to manipulate the Segmented Dimmer URP feature in scenes.
+- Exposed `MLGlobalDimmer` API, which provides a function to set the global dimmer intensity.
+- Added support to stream any Unity AudioSource via WebRTC.
+- Hand tracking API has been updated to match what is offered by the platform i.e. static gesture detection has been removed and only hand keypoints are offered via this API now. To enable hand tracking, make sure to add the "com.magicleap.permission.HAND_TRACKING" permission to your project's AndroidManifest.xml and call `InputSubsystem.Extensions.MLHandTracking.StartTracking()` before using the feature.
+- Eye tracking is protected under a dangerous level permission. To enable eye tracking, make sure to add the "com.magicleap.permission.EYE_TRACKING" permission to your project's AndroidManifest.xml, request the said permission at runtime, and then call `InputSubsystem.Extensions.MLEyes.StartTracking()` once the permission has been granted before using the feature. The eye tracking example in the MagicLeapExamples project has been updated to reflect this required workflow.
+- Gaze recognition is protected under a dangerous level permission. To enable gaze recognition, make sure to add the "com.magicleap.permission.EYE_TRACKING" permission to your project's AndroidManifest.xml, and request the said permission at runtime. Make sure the permission has been granted before using the feature.
+- `MLCamera` class now offers utility methods like `GetImageStreamCapabilitiesForCamera()` and `GetBestFitStreamCapabilityFromCollection()`.
+- `MLAudioInput` and `MLAudioOutput` classes are now `MLAutoAPISingletons`. Developers no longer need to explicitely call `Start()` and `Stop()` on these APIs.
+- Added multi-tab support in WebView.
+- Added support for meshing API.
+- Added permission checks within some API calls.
+- Added permission checks to input subsystem.
+
+### Bugfixes
+- Fixed workflow involving permissions declaration in AndroidManifest.xml. Permissions are no longer added or removed at build time, and are fully in the developer's control.
+- Renamed some `MLResults` to match what they're now called for ML2.
+- WebRTC: Using `MLCamera` as `AppDefinedVideoSource` now allows for displaying local video stream using Preview capture mode.
+- WebRTC: Fixed issue where audio playback was sometimes accelerated.
+- Updated XR Rig prefab to use new XR Origin script.
+- Fixed padding bug with marshalling of native struct in `MLAnchors` API.
+- `MLAudioInput` and `MLAudioOutput` are now `MLAutoAPISingletons`.
+- Fixed issue in media player where a grey bar renderered at the bottom of the video screen. 
+
+### Deprecations & Removals
+- "Relish" platform is no longer supported. Developers now deploy Android apps to ML2 by setting `Target Devices` to "Relish Devices Only" under Player Settings.
+- Deprecated `MagicLeapManifestSettings.asset` and simplified the manifest interface in Project Settings. Developers now directly add necessary permissions to `Assets/Plugins/AndroidManifest.xml` like in normal Android development. 
+- Removed deprecated ML1 `MLResult` names.
+- Replaced all remaining instances of "Privilege" with "Permission".
+
+### Known Issues / Limitations
+- WebRTC: `LocalAppDefinedAudioSourceBehavior` is restricted to 1 audio channel (KARROT-359).
+
+## [0.52.1]
+
+### Features
+- Exposed WebView API. Refer to the WebView sample scene in the MagicLeapUnityExamples project for usage.
+- Exposed `MLTime` API, which provides a standardized way for all ML APIs to provide a timestamp. Camera, CVCamera, eye tracking, gaze recognition, meshing and hand tracking have been updated to provide an MLTime object instead of the usual uint or ulong timestamp values of varying units. The `MLTime` API provides helper methods get a `timespec` system time from an `MLTime` object and vice versa.
+- Permission enforcement has been enabled in the OS paired with this SDK release and thus `MLPermissions` has been updated to actually request permissions instead of simply returning "true".
+- Audio playback is now supported in ZI.
+- MLMeshing is now functional under Zero Iteration but is still not enabled on platform.
+
+### Bugfixes
+- Fixed `MLCamera` rendering for YUV buffers.
+- Fixed crash when performing consecutive MLCamera captures with different resolutions.
+- Controller.fbx heirarchy has been flattened and extraneous transforms have been remove from the prefab.
+- Fixed issue where `MLMarkerTrackerDecodedBinaryData` restricted data size to 100.
+- Fixed issue in MLWebRTC where video source could not be changed without restarting the app.
+- Fixed DllNotFoundException being thrown for MLWebRTC APIs when running in ZI mode. While WebRTC is still not supported in ZI, these API calls now fail more gracefully with an `MLResult.Code.NotImplemented` error.
+- Fixed media player crashing when calling `MLMediaPlayerBehavior.StopMLMediaPlayer()`.
+
+### Deprecations & Removals
+- Deprecated `MLCamera.MRBlendType` values of `Alpha` and `Hybrid` have been removed. `Additive` is the only supported blend type now.
+- Hand tracking has been moved from the `GestureSubsystem` to the `InputSubsystem` i.e. all `GestureSubsystem.Extensions.MLHandTracking` references now need to be updated to `InputSubsystem.Extensions.MLHandTracking`.
+- Eye pupil size has been removed from the MLEyes API.
+
+### Known Issues / Limitations
+- WebRTC: local video rendering does not work when using native buffers
+- WebRTC: using app-defined video source with CPU buffers and YUV frame format sends black-and-white frames (awaiting platform support)
+- Eye blinking state is not reported either by the eye tracking API or the gaze recognition API (awaiting platform support).
+- Labdriver is run even when MagicLeapLoader is not selected in XR Plugin Management.
+- Launching / terminating ZI after having played 1 editor session already, is not picked up by Unity and it continues to assume the original state of ZI for subsequent plays.
+- Media player render with a small grey-block at the bottom.
+- VoiceIntents: if a system popup/notification happens within an application while Voice Intents are processing, it will stop working. Stop and restart the API to resolve this.
+- Apps sometimes don't resume from paused state and switching between home menu and unity app repeatedly.
+- WebView platform callbacks are known to trigger twice, WebViewExample.cs has TODO: workaround to avoid registering keyboard callbacks twice as a result.
+- WebView platform functions `MLWebViewGetScrollSize` and `MLWebViewGetScrollOffset` always return values of (2, 2) regardless of actual webpage size or scroll location
+- Under Relish builds `EventSystem.current.IsPointerOverGameObject` does not properly report if the controller pointer is pointing at a UI (This causes Web view screen to react to controller trigger pulls when trying to interact with the virtual keyboard if they are overlapping). This will be fixed once we move under ML2 support under the Unity Android platform umbrella.
+
+## [0.52.0]
+
+### Features
+- Exposed Anchors API. Refer to the Anchors sample scene in the MagicLeapUnityExamples project for useage. 
+- Exposed Voice Intents API. Refer to the VoiceIntents sample scene in the MagicLeapUnityExamples project for useage.
+- Added support for AprilTags under the MLMarkerTracker API.
+- Re-enabled WebRTC support in Unity.
+- Hand tracking has been updated to only start when an app calls `GestureSubsystem.Extensions.MLHandTracking.SetConfiguration()`. This is done to save on resources and only enable tracking if the app is using the feature.
+- Timestamp data is now provided as part of the gaze recognition state.
+- Added MLCamera preview rendering support.
+- Added a utility UI under Project Settings > Magic Leap > Manifest Settings to help include required permissions in the app's AndroidManifest.xml file.
+- All native libs shipped with the SDK package have been marked to work on the Android x86_64 target and all platform code wrapped under `#if UNITY_MAGICLEAP || UNITY_ANDROID` in preparation for bringing Relish under the Unity Android platform umbrella. Developers building their own native libs for Relish or using the `UNITY_MAGICLEAP` preprocessor flag are advised to update their library setup and code accordingly.
+
+### Bugfixes
+- Fixed issue with Manifest Settings throwing error on first access
+- Fixed MediaPlayer Stop functionality
+- Fixed MediaPlayer local playback
+- Fixed C-API enum mismatch in GazeRecognition API
+- Updated WebRTC API to support deprecation of distinct MLMRCamera class
+- Updated `MagicLeapController/isTracked` input action binding to be a passthrough instead of a button for better detection of connection status at scene startup
+- Fixed using the PlayerInput component for Magic Leap Controller events.
+
+### Deprecations & Removals
+- Eye tracking calibration status has been removed.
+- `WinkLeft`, `WinkRight`, `Push` & `Pull` behaviors have been removed from the MLGazeRecognition API.
+- MLBluetooth APIs have been removed. Apps are expected to use Android Java APIs for bluetooth support.
+- Moved the prefab `AR Default Plane` and material `DebugPlane` from the SDK into the example project.
+
+### Known Issues / Limitations
+- WebRTC: local video rendering does not work when using native buffers
+- WebRTC: using app-defined video source with CPU buffers and YUV frame format sends black-and-white frames (awaiting platform support)
+- Eye blinking state is not reported either by the eye tracking API or the gaze recognition API (awaiting platform support).
+- Eye pupil size is always reported as 4.0 (awaiting platform support).
+- Labdriver is run even when MagicLeapLoader is not selected in XR Plugin Management.
+- Launching / terminating ZI after having played 1 editor session already, is not picked up by Unity and it continues to assume the original state of ZI for subsequent plays.
+- Media player render with a small grey-block at the bottom.
+- MLMarkerTrackerDecodedBinaryData restricts data size to 100.
+- VoiceIntents: if a system popup/notification happens within an application while Voice Intents are processing, it will stop working. Stop and restart the API to resolve this.
+
+## [0.51.0]
+
+### Features
+- Exposed gaze recognition API.
+- MediaPlayer support has been re-enabled in the SDK package. Only basic playback has been tested yet, support for DRM, subtitles, stereo videos etc needs to be verified.
+- Added a new function to `MLMedia.Player.Track.DRM` class to generate a signature using the provided algorithm and message data.
+- Added support for TTML subtitles to `MLMedia.Player`.
+- Controller touchpad gestures have been added to the MagicLeapInput action map and also exposed via the XR Gesture Subsystem extensions.
+- `MLMediaFormat` API integration has been updated to no longer be a singleton but instead be a regular C# class with different factory methods like `CreateVideo()`, `CreateAudio()`, `CreateSubtitle()` and `CreateEmpty()`. The format key specific functions have been removed in favor of general key-value getters and setter with overloads for each possible data type. All possible media format keys have been exposed in the `MLMediaFormatKey` class.
+- ArucoTracker & BarcodeScanner APIs have been combined into a single MLMarkerTracker API.
+- Numerous rendering performance improvements.
+- Hand tracking example has been updated to use the gesture subsystem.
+- All examples that used MLInput for controller interaction have been updated to use the new Input System.
+- Eye tracking example has been added which showcases how to use this feature via the new InputSystem, the XR Input Subsystem and the Magic Leap Extensions for the XR Input Subsystem.
+- Zero Iteration now works without needing to import the SDK libraries into the Unity project.
+- Exposed APIs for MLCamera (includes MRCamera), MLCameraMetadata and MLMediaRecorder. CameraCapture & MediaRecorder scenes have been added in the examples project to showcase the use the new APIs.
+- Exposed media events like play, pause, stop, next / prev track in the MLAudioOutput API.
+- Namespace for all scripts in the examples project has been changed to MagicLeap.Examples.
+
+### Bugfixes
+- Fixed menu button binding in the MagicLeapInput action map.
+- Fixed eye calibration status not being reported correctly.
+- Fixed API reference docs.
+- Fixed broken references to virtual keyboard in the examples project which prevented Build & Run.
+- Fixed exception thrown when attempting to use any head tracking extension functions.
+
+### Deprecations & Removals
+- MLHandTrackingm MLHeadTracking, MLMeshing, MLPlanes, MLInput APIs have been removed in favor of their respective XR subsystems. MagicLeap specific functionality has been exposed via the extension classes in the `UnityEngine.XR.MagicLeap.Extensions` namespace.
+- MCA / MLMA / MLMCA support has been removed from MLInput along with removal of touchpad gestures which were specific to it (LongHold, Scroll, Pinch)
+MLAppIdentifier, MLDispatch, MLIdentity, MLIMU, MLLocale, MLLocation, MLNetworking, MLSecureStorage, MLTokenAgent APIs have been removed in favor of their existing Android counterparts.
+- MLAppConnect, MLContacts, MLConnections, MLMediaPlayer Sharing, MLController LED, MLMusicService APIs have been removed and will not be supported on the ML2.
+
+### Known Issues / Limitations
+- Image tracking, Anchors (PCFs) & World Raycast support has been temporarily disabled in this release. None of these are currently supported on the device. Once re-enabled, developers can use these on ZI.
+- Media player currently only supports playback for web URLs. Support for files packaged in the apk will be added later.
+- Eye blinking state is not reported either by the eye tracking API or the gaze recognition API (awaiting platform support).
+- Eye pupil size is always reported as 4.0 (awaiting platform support).
+- Labdriver is run even when MagicLeapLoader is not selected in XR Plugin Management.
+- Launching / terminating ZI after having played 1 editor session already, is not picked up by Unity and it continues to assume the original state of ZI for subsequent plays.
+- You must have Assets/Plugins/Relish/MagicLeapManifestSettings.asset present or else APKs will fail to build. Workaround: Open Project Settings and select MagicLeap → Manifest Settings, this will auto-generate the file.
+
+## [0.50.0]
+Please see the "SDK Refactor" note in the README.
+
+### Features
+- The following features are supported in this package, in addition to the ones supported in the engine -
+  - Headpose
+  - Controller Input
+  - Eye Tracking
+  - Hand Tracking
+  - Media Player
+
+### Deprecations & Removals
+- The following APIs will not be supported on Relish & have been removed
+  - MLAppConnect
+  - MLController LED
+  - MLContacts
+  - MLConnections
+  - MLMediaPlayer Sharing (only the sharing APIs have been removed, general media player will still be supported)
+- The following APIs will be supported via the Android SDK instead of ML-specific APIs & have thus been removed
+  - MLAppIdentifier
+  - MLDispatch
+  - MLIdentity
+  - MLLifecycle
+  - MLLocale
+  - MLSecureStorage
+  - MLPrivileges
+  - MLIMU
+  - MLBattery
+  - MLInput Tablet
+
+### Known Issues
+- Media player only supports remote URLs right now, not videos packaged in the apk itself.
+
+## [0.26.0]
+### New Features
+- Exposed APIs to optionally set/get the Ids for WebRTC media tracks. Ids can be specified when creating the tracks and the `MLWebRTC.MediaStream.Track.Id` property is already set upon receiving a track from the remote peer.
+- Exposed callbacks in `MLWebRTC.AudioSink` to provide the app with the incoming audio buffers. Pass in the appropriate `BufferNotifyMode` to `MLWebRTC.AudioSink.Create()` to set whether the app will receive the audio buffers or not and whether the underlying WebRTC platform will play the audio or leave it to the app to do so.
+- Exposed functions in `MLWebRTC.AudioSink` to set various soundfield parameters (position, orientation, direct send levels, room send levels, distance & radiation properties and sound volume). These properties should only be set after `MLWebRTC.AudioSink.CurrentServiceStatus` is `ServiceStatus.Started` or `MLWebRTC.AudioSink.OnAudioServiceStatusChanged` delegate is fired with `ServiceStatus.Started`.
+
+### Updates
+- Added extensions for `MLPlanes.QueryFlags` enum. You can now check which flags are set by calling convenience functions like `IsCeiling()`, `IsFloor()` etc to check which planes the flag represents.
+- Image capture now uses memory from a circular buffer to avoid over-allocations in case of multiple capture requests.
+- Added `OnTrackAddedMultipleStreams` & `OnTrackRemovedMultipleStreams` delegates to the `MLWebRTC.PeerConnection` class. These delegates are similar to the old `OnTrackAdded` & `OnTrackRemoved` delegates but report a full list of streams that added/removed track belongs to.
+- Upgraded Magic Leap XR Plugin support to 6.2.2.
+- Clarified the usage of `MLEyes.Timestamp` property that it won't automatically initialize the eye tracking API and returns 0 in that case.
+
+### Bug Fixes
+- Fixed a crash in MLWebRTC when the remote peer does not provide a stream ID for its media tracks. Use a default stream ID of "unknown_remote" in such cases.
+- Fixed the string returned from the scanned QR-code. The string had a null-terminator in the end.
+- Fixed MLWebRTCVideoSinkBehavior to scale the game object according to dyamic changes in video resolution.
+
+### Deprecations & Removals
+- `OnTrackAdded` & `OnTrackRemoved` delegates in the `MLWebRTC.PeerConnection` class have been deprecated in favor of `OnTrackAddedMultipleStreams` & `OnTrackRemovedMultipleStreams` delegates.
+
+## [0.25.0]
+### New Features
+- Exposed a subset of WebRTC APIs to allow apps to send & receive audio, video and data streams between multiple peers over the network. This also includes helper implementations to stream video feed from the color camera or Mixed Reality Camera and audio feed from the device microphone.
+- New Barcode Scanner API allows for QR code detection.
+- New IMU API for reading IMU data.
+- New ID API for determining device ID.
+- Eye tracking API (MLEyes) now exposes pupil size.
+- New Found Objects example.
+- New Aruco tracking example.
+- New MRCamera API allows capture of the composited video the color camera and app content.
+- New Virtual Keyboard example.
+
+### Bug Fixes
+- Fixed a crash in UserInterface.cs on app termination and on ending play mode in the editor.
+- Fixed a bug in MLCamera where its APIs would fail to work after recovering from a system-level eviction. Priority processes like Device Capture and Device Stream evict app's hold on the camera and return it back once those processes are done. The fix now auto-resumes the camera state that was before the eviction.
+- Fixed a bug in MLPlanes where the min plane area query setting was not respected.
+- Switched PoseSource to 'CenterEye' in the MainCamera prefab to get rid of the editor warning.
+
+### Updates
+- Input, Eyes, Privileges, Hand Tracking, Camera, CV Camera, Raycast, Planes, and Image Tracking APIs are now AutoAPIs (see this page for more info: https://developer.magicleap.com/en-us/learn/guides/auto-API-changes).
+- CVCamera APIs have been moved from MLCamera into its own MLCVCamera class, removing the requirement from MLCamera users to specify the ComputerVision privilege if they don't intend on using that feature.
+- Exposed an event named OnRawVideoFrameAvailableYUV_NativeCallbackThread in the MLCamera class which provides the frame data via pointers to unmanaged memory. This event is more efficient to use in systems where the camera frames need to be sent from Unity to an unmanaged C/C++ library like WebRTC, OpenCV or any kind of media encoder.
+- Exposed asynchronous variants of expensive MLCamera functions. Each of these is accompanied with an event which is invoked when the asynchronous operation is completed.
+- The VideoCapture example has been split into VideoCapture (showcasing video capture to file) and RawVideoCapture (showcasing video capture to YUV frames delivered to the app).
+
+### Deprecations & Removals
+- All APIs marked deprecated in the 0.24.2 release have been removed.
+- `Start()` and `Stop()` methods of Input, Eyes, Privileges, Hand Tracking, Camera, CV Camera, Raycast, Planes, and Image Tracking APIs have been deprecated (see this page for more info: https://developer.magicleap.com/en-us/learn/guides/auto-API-changes).
+- `MLCamera.IntrinsicCalibrationParameters`, `MLCamera.GetIntrinsicCalibrationParameters()` and `MLCamera.GetFramePose()` have been deprecated in favor of their `MLCVCamera` counterparts.
+
+### Known Issues
+- With Unity 2020.2 on Windows, sometimes the XR Plug-in Management settings will be grayed out. This can be fixed by closing the editor, using `regedit` to delete 'Computer\HKEY_CURRENT_USER\Software\Unity Technologies\Unity Editor 5.x\XRMGT Rebuilding Cache'.
+- Unity cannot build packages on macOS Big Sur without manual steps. See README-macOS-Big-Sur.md in the root of the SDK for instructions.
+- When using Zero Iteration, Eye Tracking does not work with the Magic Leap XR Plugin (6.1.0-preview.2).
+- MLCamera and MRCamera operations are not implemented asynchronously in this release and can thus cause hitches during startup and shutdown.
