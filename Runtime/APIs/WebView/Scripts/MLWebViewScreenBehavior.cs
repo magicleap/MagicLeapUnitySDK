@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="MLWebViewScreenBehavior.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2021 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2021-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -84,6 +80,11 @@ namespace MagicLeap.Core
         private bool isScrolling = false;
 
         /// <summary>
+        /// Is the user currently pulling the trigger.
+        /// </summary>
+        private bool isTriggerDown = false;
+
+        /// <summary>
         /// Is pointer over WebView window.
         /// </summary>
         private bool pointerOverWebView = false;
@@ -111,17 +112,17 @@ namespace MagicLeap.Core
         /// <summary>
         /// Previous touchpad 1 position, used for touchpad scrolling mode.
         /// </summary> 
-        private Vector2 previousTouchpad1Pos = new Vector2(0.0f, 0.0f);
+        private Vector2 previousTouchpadPos = new Vector2(0.0f, 0.0f);
 
         /// <summary>
         /// Current touchpad 1 position, used for touchpad scrolling mode.
         /// </summary> 
-        private Vector2 currentTouchpad1Pos = new Vector2(0.0f, 0.0f);
+        private Vector2 currentTouchpadPos = new Vector2(0.0f, 0.0f);
 
         /// <summary> 
         /// Should the touchpad position tracking be reset.
         /// </summary>
-        private bool resetTouchpad1Pos = false;
+        private bool resetTouchpadPos = false;
 
         /// <summary>
         /// Raycast hit used to calculate the WebView cursor position.
@@ -132,6 +133,22 @@ namespace MagicLeap.Core
         /// WebView Renderer.
         /// </summary>
         private MLWebView.Renderer webViewRenderer;
+
+
+        public void Start()
+        {
+            if (pointRayTransform == null)
+            {
+                Debug.LogError("pointRayTransform is not set, disabling script.");
+                enabled = false;
+            }
+
+            if (webViewMeshRenderer == null)
+            {
+                Debug.LogError("webViewMeshRenderer is not set, disabling script.");
+                enabled = false;
+            }
+        }
 
         public void GetWebViewSize(out uint width, out uint height)
         {
@@ -218,9 +235,9 @@ namespace MagicLeap.Core
         {
             if (isInitialized)
             {
-                currentTouchpad1Pos = obj.ReadValue<Vector2>();
-                currentTouchpad1Pos.x *= webViewWidth;
-                currentTouchpad1Pos.y *= webViewHeight;
+                currentTouchpadPos = obj.ReadValue<Vector2>();
+                currentTouchpadPos.x *= webViewWidth;
+                currentTouchpadPos.y *= webViewHeight;
             }
         }
 
@@ -243,7 +260,7 @@ namespace MagicLeap.Core
             if (scrollingMode == ScrollingMode.Touchpad)
             {
                 isScrolling = false;
-                resetTouchpad1Pos = true;
+                resetTouchpadPos = true;
             }
         }
 
@@ -252,11 +269,13 @@ namespace MagicLeap.Core
         /// </summary>
         private void HandleTriggerDown(InputAction.CallbackContext callbackContext)
         {
-            if (pointerOverWebView && isInitialized)
+            if (pointerOverWebView && isInitialized && !isTriggerDown)
             {
                 if (WebView != null)
                 {
-                    WebView.InjectMouseButtonDown(currentCursorPositionX, currentCursorPositionY, MLWebView.EventFlags.None, MLWebView.MouseButtonType.Left);
+                    WebView.InjectMouseButtonDown(currentCursorPositionX, currentCursorPositionY, MLWebView.EventFlags.LeftMouseButton);
+                    isTriggerDown = true;
+
                     if (scrollingMode == ScrollingMode.TriggerDrag)
                     {
                         isScrolling = true;
@@ -270,9 +289,10 @@ namespace MagicLeap.Core
         /// </summary>
         private void HandleTriggerUp(InputAction.CallbackContext callbackContext)
         {
-            if (pointerOverWebView && isInitialized)
+            if (pointerOverWebView && isInitialized && isTriggerDown)
             {
-                WebView?.InjectMouseButtonUp(currentCursorPositionX, currentCursorPositionY, MLWebView.EventFlags.None, MLWebView.MouseButtonType.Left);
+                WebView?.InjectMouseButtonUp(currentCursorPositionX, currentCursorPositionY, MLWebView.EventFlags.LeftMouseButton);
+                isTriggerDown = false;
             }
             if (scrollingMode == ScrollingMode.TriggerDrag)
             {
@@ -301,7 +321,14 @@ namespace MagicLeap.Core
                             currentCursorPositionX = (uint)((raycastHit.point.x - position.x) / bounds.size.x * webViewWidth + webViewWidth / 2);
                             currentCursorPositionY = (uint)(-(raycastHit.point.y - position.y) / bounds.size.y * webViewHeight + webViewHeight / 2);
 
-                            WebView.InjectMouseMove(currentCursorPositionX, currentCursorPositionY, MLWebView.EventFlags.None);
+                            if (isTriggerDown)
+                            {
+                                WebView.InjectMouseMove(currentCursorPositionX, currentCursorPositionY, MLWebView.EventFlags.LeftMouseButton);
+                            }
+                            else
+                            {
+                                WebView.InjectMouseMove(currentCursorPositionX, currentCursorPositionY, MLWebView.EventFlags.None);
+                            }
 
                             if (isScrolling && scrollingMode == ScrollingMode.TriggerDrag)
                             {
@@ -327,18 +354,18 @@ namespace MagicLeap.Core
             {
                 if (isScrolling && scrollingMode == ScrollingMode.Touchpad)
                 {
-                    if (resetTouchpad1Pos)
+                    if (resetTouchpadPos)
                     {
-                        previousTouchpad1Pos = currentTouchpad1Pos;
-                        resetTouchpad1Pos = false;
+                        previousTouchpadPos = currentTouchpadPos;
+                        resetTouchpadPos = false;
                     }
                     else
                     {
-                        WebView?.ScrollBy((uint)(currentTouchpad1Pos.x - previousTouchpad1Pos.x), (uint)(currentTouchpad1Pos.y - previousTouchpad1Pos.y));
+                        WebView?.ScrollBy((uint)(currentTouchpadPos.x - previousTouchpadPos.x), (uint)(currentTouchpadPos.y - previousTouchpadPos.y));
                     }
                 }
 
-                previousTouchpad1Pos = currentTouchpad1Pos;
+                previousTouchpadPos = currentTouchpadPos;
             }
         }
 

@@ -180,9 +180,10 @@ namespace UnityEngine.XR.MagicLeap
         /// that should be analyzed.This is set in the
         /// MLMarkerTrackerSettings structure and this setting
         /// applies to all enabled trackers.
-        /// CPU load is a combination of enabled detector types and
-        /// FpsHint. More detectors and a higher FPS will
-        /// result in a higher CPU load. High CPU load can affect the
+        /// 
+        /// CPU load is a combination of enabled detector types,
+        /// FpsHint and ResolutionHint. More detectors with a higher FPS
+        /// and resolution hints will result in a higher CPU load. High CPU load can affect the
         /// performance of your system.        
         /// </summary>
         public enum FPSHint
@@ -191,6 +192,53 @@ namespace UnityEngine.XR.MagicLeap
             Medium,
             High,
             Max
+        }
+
+        /// <summary>
+        /// The MLMarkerTrackingResolutionHint enum values are
+        /// used to hint to the back-end the resolution
+        /// that should be used.This is set in the
+        /// MLMarkerTrackerSettings structure and this setting
+        /// currently only applies to the QR, UPC and EAN detectors.
+        /// 
+        /// CPU load is a combination of enabled detector types,
+        /// FpsHint and ResolutionHint.More detectors and a higher
+        /// fps and resolution hints will result in a higher CPU load.
+        /// High CPU load can affect the performance of your system.
+        /// </summary>
+        public enum ResolutionHint
+        {
+            Low,
+            Medium,
+            High
+        }
+
+        /// <summary>
+        /// In order to improve performance, the detectors don't always run on the full
+        /// frame. Full frame analysis is however necessary to detect new markers that
+        /// weren't detected before. Use this option to control how often the detector may
+        /// detect new markers and its impact on tracking performance.
+        /// </summary>
+        public enum FullAnalysisIntervalHint
+        {
+            Max,
+            Fast,
+            Medium,
+            Slow
+        }
+
+        /// <summary>
+        /// The Aruco/April tag detector comes with several corner refinement methods.
+        /// Choosing the right corner refinement method has an impact on the accuracy and
+        /// speed trade-off that comes with each detection pipeline.
+        /// Corner refinement only applies to Aruco and April tags, not QR codes.
+        /// </summary>
+        public enum CornerRefineMethod
+        {
+            None,
+            Subpix,
+            Contour,
+            AprilTag
         }
 
         public readonly struct ArucoData
@@ -298,7 +346,7 @@ namespace UnityEngine.XR.MagicLeap
                 }
                 return toString;
             }
-              
+
 
         }
     }

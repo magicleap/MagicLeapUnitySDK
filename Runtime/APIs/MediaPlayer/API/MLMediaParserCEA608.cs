@@ -43,12 +43,12 @@ namespace UnityEngine.XR.MagicLeap
             {
 #if UNITY_MAGICLEAP || UNITY_ANDROID
                 MLResult.Code resultCode = NativeBindings.MLMediaCCParserCreate(out ulong parserHandle);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaCCParserCreate");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaCCParserCreate));
                 this.Handle = parserHandle;
                 this.gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
                 IntPtr gcHandlePtr = GCHandle.ToIntPtr(this.gcHandle);
                 resultCode = NativeBindings.MLMediaCCParserSetDisplayChangedCallback(this.Handle, NativeBindings.OnDisplayChanged, gcHandlePtr);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaCCParserSetDisplayChangedCallback");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaCCParserSetDisplayChangedCallback));
 #endif
             }
 
@@ -56,9 +56,9 @@ namespace UnityEngine.XR.MagicLeap
             {
 #if UNITY_MAGICLEAP || UNITY_ANDROID
                 MLResult.Code resultCode = NativeBindings.MLMediaCCParserSetDisplayChangedCallback(this.Handle, null, IntPtr.Zero);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaCCParserSetDisplayChangedCallback");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaCCParserSetDisplayChangedCallback));
                 resultCode = NativeBindings.MLMediaCCParserDestroy(this.Handle);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaCCParserDestroy");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaCCParserDestroy));
                 this.gcHandle.Free();
 #endif
             }
@@ -67,7 +67,7 @@ namespace UnityEngine.XR.MagicLeap
             {
 #if UNITY_MAGICLEAP || UNITY_ANDROID
                 MLResult.Code resultCode = NativeBindings.MLMediaCCParserParse(this.Handle, data, dataSize);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaCCParserParse");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaCCParserParse));
 #endif
             }
 

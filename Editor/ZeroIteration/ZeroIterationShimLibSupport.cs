@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="ZeroIterationShimLibSupport.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2021 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2021-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -57,7 +53,7 @@ namespace UnityEditor.XR.MagicLeap
 
         /// <summary>
         /// Gets called before the XR Loader starts initializing all the subsystems.
-        /// Runs the labdriver command to get the list of folders where the ZI shim
+        /// Runs the labdriver command to get the list of folders where the ML App Sim shim
         /// libs reside and sends them to the SDK loader lib.
         /// </summary>
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -75,7 +71,7 @@ namespace UnityEditor.XR.MagicLeap
                 var path = MagicLeapSDKUtil.SdkPath;
                 if (string.IsNullOrEmpty(path))
                 {
-                    Debug.LogError("Magic Leap SDK path is not set. You must specify a Magic Leap SDK to detect a Zero Iteration instance.");
+                    Debug.LogError("Magic Leap SDK path is not set. You must specify a Magic Leap SDK to detect a Magic Leap App Simulator instance.");
                     SettingsService.OpenUserPreferences("Preferences/External Tools/Magic Leap");
                     return;
                 }
@@ -120,7 +116,7 @@ namespace UnityEditor.XR.MagicLeap
                 {
                     StreamReader errorStream = labdriverProcess.StandardError;
                     var error = errorStream.ReadToEnd();
-                    Debug.LogError($"labdriver exited with return code {labdriverProcess.ExitCode}. Please make sure Zero Iteration is installed in The Lab 2.0.\nOutput:\n{output}\nError:\n{error}");
+                    Debug.LogError($"labdriver exited with return code {labdriverProcess.ExitCode}. Please make sure Magic Leap App Simulator is installed in Magic Leap Hub.\nOutput:\n{output}\nError:\n{error}");
                     return;
                 }
 
@@ -143,7 +139,7 @@ namespace UnityEditor.XR.MagicLeap
                 libSearchPaths = new List<string>(cachedSearchPaths.Split(Path.PathSeparator));
             }
 
-            LuminXrProvider.AddLibrarySearchPaths(libSearchPaths);
+            MagicLeapXrProvider.AddLibrarySearchPaths(libSearchPaths);
         }
     }
 }

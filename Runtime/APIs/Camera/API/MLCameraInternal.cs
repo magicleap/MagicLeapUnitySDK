@@ -166,11 +166,22 @@ namespace UnityEngine.XR.MagicLeap
                 previewTexture = new RenderTexture(width, height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
             }
 
-            // preview rendering not supported under Zero Iteration
+            // preview rendering not supported under Magic Leap App Simulator
 #if !UNITY_EDITOR
             previewRenderer.Cleanup();
             previewRenderer = new MLCamera.Renderer(ColorSpace.Linear);
             previewRenderer.SetRenderBuffer(previewTexture);
+#endif
+        }
+
+        private MLResult InternalCapturePreviewStart()
+        {
+#if UNITY_MAGICLEAP || UNITY_ANDROID
+            MLResult.Code resultCode = NativeBindings.MLCameraCapturePreviewStart(Handle);
+            isCapturingPreview = MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraCapturePreviewStart));
+            return MLResult.Create(resultCode);
+#else
+            return MLResult.Create(MLResult.Code.NotImplemented);
 #endif
         }
 
@@ -199,21 +210,21 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         private void GLPluginEvent()
         {
-            // preview rendering not supported under Zero Iteration
+            // preview rendering not supported under Magic Leap App Simulator
 #if !UNITY_EDITOR
             previewRenderer.Render();
 #endif
         }
 
-        protected override void OnApplicationPause(bool pauseStatus)
+        protected async override void OnApplicationPause(bool pauseStatus)
         {
             applicationPausePerfMarker.Begin();
-            MLResult.Code result = pauseStatus ? InternalPause() : InternalResume();
+            MLResult.Code result = pauseStatus ? await InternalPause() : await InternalResume();
             applicationPausePerfMarker.End();
             if (result != MLResult.Code.Ok)
             {
-                Debug.LogErrorFormat("MLCamera.ApplicationPause failed to {0} the camera.",
-                    pauseStatus ? "pause" : "resume");
+                Debug.LogErrorFormat("MLCamera.ApplicationPause failed to {0} the camera. Reason: {1}",
+                    pauseStatus ? "pause" : "resume", result);
             }
         }
 
@@ -225,21 +236,20 @@ namespace UnityEngine.XR.MagicLeap
         /// MLResult.Result will be <c>MLResult.Code.Ok</c> if successful.
         /// MLResult.Result will be <c>MLResult.Code.UnspecifiedFailure</c> if failed due to internal error.
         /// </returns>
-        private MLResult.Code InternalPause(bool flagsOnly = false)
+        private async Task<MLResult.Code> InternalPause(bool flagsOnly = false)
         {
 #if UNITY_MAGICLEAP || UNITY_ANDROID
             MLResult.Code result = MLResult.Code.Ok;
 
-            if (this.cameraConnectionEstablished)
+            if (cameraConnectionEstablished)
             {
-                this.resumeConnect = true;
-                this.resumePreviewCapture = this.isCapturingPreview;
-                this.resumeVideoCapture = this.isCapturingVideo;
+                resumeConnect = true;
+                resumePreviewCapture = isCapturingPreview;
+                resumeVideoCapture = isCapturingVideo;
 
-                result = InternalDisconnect(flagsOnly);
-                if (!MLResult.IsOK(MLResult.Code.Ok))
+                result = await Task.Run(() => InternalDisconnect(flagsOnly));
+                if (!MLResult.IsOK(result))
                 {
-                    MLPluginLog.ErrorFormat("MLCamera.Pause failed to disconnect camera. Reason: {0}", result);
                     return result;
                 }
             }
@@ -262,65 +272,71 @@ namespace UnityEngine.XR.MagicLeap
         /// MLResult.Result will be <c>MLResult.Code.AllocFailed</c> if failed to allocate memory.
         /// MLResult.Result will be <c>MLResult.Code.PermissionDenied</c> if necessary permission is missing.
         /// </returns>
-        private MLResult.Code InternalResume()
+        private async Task<MLResult.Code> InternalResume()
         {
 #if UNITY_MAGICLEAP || UNITY_ANDROID
-            MLResult.Code result = MLResult.Code.Ok;
+            MLResult.Code resultCode = MLResult.Code.Ok;
 
-            if (this.resumeConnect)
+            if (resumeConnect)
             {
-                result = InternalConnect(cameraConnectContext);
-
-                this.resumeConnect = false;
-                if (!MLResult.IsOK(result))
+                if(InternalCheckCameraPermission() != MLResult.Code.Ok)
                 {
-                    MLPluginLog.ErrorFormat("MLCamera.Resume failed to connect camera. Reason: {0}", result);
-                    return result;
+                    return MLResult.Code.PermissionDenied;
                 }
 
-                if (this.resumePreviewCapture)
-                {
-                    result = InternalPrepareCapture(cameraCaptureConfig, out MLCamera.Metadata _);
+                resultCode = InternalConnect(cameraConnectContext);
 
-                    if (!MLResult.IsOK(result))
+                resumeConnect = false;
+                if (!MLResult.IsOK(resultCode))
+                {
+                    MLPluginLog.ErrorFormat("MLCamera.Resume failed to connect camera. Reason: {0}", resultCode);
+                    return resultCode;
+                }
+
+                if (resumePreviewCapture)
+                {
+                    resultCode = InternalPrepareCapture(cameraCaptureConfig, out MLCamera.Metadata _);
+
+                    if (!MLResult.IsOK(resultCode))
                     {
-                        MLPluginLog.ErrorFormat("MLCamera.Resume failed to prepare capture. Reason: {0}", result);
-                        return result;
+                        MLPluginLog.ErrorFormat("MLCamera.Resume failed to prepare capture. Reason: {0}", resultCode);
+                        return resultCode;
                     }
 
-                    PreCaptureAEAWB();
-                    result = CapturePreviewStart().Result;
+                    await PreCaptureAEAWBAsync();
 
-                    this.resumePreviewCapture = false;
+                    resultCode = (await CapturePreviewStartAsync()).Result;
+
+                    resumePreviewCapture = false;
                     if (!MLResult.IsOK(MLResult.Code.Ok))
                     {
-                        MLPluginLog.ErrorFormat("MLCamera.Resume failed to start camera preview. Reason: {0}", result);
-                        return result;
+                        MLPluginLog.ErrorFormat("MLCamera.Resume failed to start camera preview. Reason: {0}", resultCode);
+                        return resultCode;
                     }
                 }
-                else if (this.resumeVideoCapture)
+                else if (resumeVideoCapture)
                 {
-                    PrepareCapture(cameraCaptureConfig, out MLCamera.Metadata _);
+                    PrepareCapture(cameraCaptureConfig, out Metadata _);
 
-                    if (!MLResult.IsOK(result))
+                    if (!MLResult.IsOK(resultCode))
                     {
-                        MLPluginLog.ErrorFormat("MLCamera.Resume failed to prepare capture. Reason: {0}", result);
-                        return result;
+                        MLPluginLog.ErrorFormat("MLCamera.Resume failed to prepare capture. Reason: {0}", resultCode);
+                        return resultCode;
                     }
 
-                    PreCaptureAEAWB();
-                    result = CaptureVideoStart().Result;
+                    await PreCaptureAEAWBAsync();
+                    resultCode = (await CaptureVideoStartAsync()).Result;
 
-                    this.resumeVideoCapture = false;
+                    resumeVideoCapture = false;
                     if (!MLResult.IsOK(MLResult.Code.Ok))
                     {
-                        MLPluginLog.ErrorFormat("MLCamera.Resume failed to start camera preview. Reason: {0}", result);
-                        return result;
+                        MLPluginLog.ErrorFormat("MLCamera.Resume failed to start camera preview. Reason: {0}", resultCode);
+                        return resultCode;
                     }
                 }
             }
 
-            return result;
+            return resultCode;
 #else
             return MLResult.Code.NotImplemented;
 #endif
@@ -340,11 +356,10 @@ namespace UnityEngine.XR.MagicLeap
 #if UNITY_MAGICLEAP || UNITY_ANDROID
             var resultCode = NativeBindings.MLCameraDisconnect(Handle);
 
-            // preview rendering not supported under Zero Iteration
 #if !UNITY_EDITOR
-            previewRenderer.Cleanup();
+            // preview rendering not supported under Magic Leap App Simulator
+            MLThreadDispatch.ScheduleMain(() => previewRenderer.Cleanup());
 #endif
-
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraDisconnect));
 
             return resultCode;
@@ -399,68 +414,69 @@ namespace UnityEngine.XR.MagicLeap
 #endif
         }
 
-        private MLResult.Code InternalConnect(ConnectContext cameraConnectContext)
+        private static MLResult.Code InternalCheckCameraPermission()
         {
 #if UNITY_MAGICLEAP || UNITY_ANDROID
-            if (!MLResult.DidNativeCallSucceed(MLPermissions.CheckPermission(MLPermission.Camera).Result, nameof(MLPermissions.CheckPermission)))
+            var check = MLPermissions.CheckPermission(MLPermission.Camera);
+            if (!MLResult.DidNativeCallSucceed(check.Result, nameof(MLPermissions.CheckPermission)))
             {
                 return MLResult.Code.PermissionDenied;
             }
+#endif
+            return MLResult.Code.Ok;
+        }
 
+        private MLResult.Code InternalConnect(ConnectContext cameraConnectContext)
+        {
+#if UNITY_MAGICLEAP || UNITY_ANDROID
             this.cameraConnectContext = cameraConnectContext;
 
-            NativeBindings.MLCameraConnectContext context =
-                NativeBindings.MLCameraConnectContext.Create(cameraConnectContext);
-
+            NativeBindings.MLCameraConnectContext context = NativeBindings.MLCameraConnectContext.Create(cameraConnectContext);
+           
             var resultCode = NativeBindings.MLCameraConnect(ref context, out Handle);
-            if (!MLResult.IsOK(resultCode))
+
+            if (! MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraConnect)))
             {
                 Debug.LogErrorFormat("MLCamera.Connect failed connecting to the camera. Reason: {0}", resultCode);
                 connectPerfMarker.End();
                 return resultCode;
             }
 
-            NativeBindings.MLCameraCaptureCallbacks captureCallbacks =
-                NativeBindings.MLCameraCaptureCallbacks.Create();
-            resultCode =
-                NativeBindings.MLCameraSetCaptureCallbacks(Handle, ref captureCallbacks, GCHandle.ToIntPtr(gcHandle));
-            if (!MLResult.IsOK(resultCode))
+            NativeBindings.MLCameraCaptureCallbacks captureCallbacks = NativeBindings.MLCameraCaptureCallbacks.Create();
+
+            if (!MLResult.DidNativeCallSucceed(NativeBindings.MLCameraSetCaptureCallbacks(Handle, ref captureCallbacks, GCHandle.ToIntPtr(gcHandle)), nameof(NativeBindings.MLCameraSetCaptureCallbacks)))
             {
-                MLPluginLog.ErrorFormat(
-                    "MLCamera.CaptureCallbacks failed seting the capture callbacks. Reason: {0}", resultCode);
+                MLPluginLog.ErrorFormat("MLCamera.CaptureCallbacks failed seting the capture callbacks. Reason: {0}", resultCode);
                 connectPerfMarker.End();
                 return resultCode;
             }
 
-            NativeBindings.MLCameraDeviceStatusCallbacks deviceCallbacks =
-                NativeBindings.MLCameraDeviceStatusCallbacks.Create();
-            resultCode =
-                NativeBindings.MLCameraSetDeviceStatusCallbacks(Handle, ref deviceCallbacks,
-                    GCHandle.ToIntPtr(gcHandle));
+            NativeBindings.MLCameraDeviceStatusCallbacks deviceCallbacks = NativeBindings.MLCameraDeviceStatusCallbacks.Create();
 
-            if (!MLResult.IsOK(resultCode))
+            if (!MLResult.DidNativeCallSucceed(NativeBindings.MLCameraSetDeviceStatusCallbacks(Handle, ref deviceCallbacks, GCHandle.ToIntPtr(gcHandle)), nameof(NativeBindings.MLCameraSetDeviceStatusCallbacks)))
             {
-                MLPluginLog.ErrorFormat(
-                    "MLCamera.DeviceStatusCallbacks failed setting the device callbacks. Reason: {0}", resultCode);
+                MLPluginLog.ErrorFormat("MLCamera.DeviceStatusCallbacks failed setting the device callbacks. Reason: {0}", resultCode);
                 connectPerfMarker.End();
                 return resultCode;
             }
 
-            // preview rendering not supported under Zero Iteration
-#if !UNITY_EDITOR
+            cameraConnectionEstablished = MLResult.IsOK(resultCode);
+
+            if (!MLResult.IsOK(resultCode))
+            {
+                MLPluginLog.ErrorFormat("MLCamera.InternalConnect failed to populate characteristics for MLCamera. Reason: {0}", resultCode);
+                connectPerfMarker.End();
+                return resultCode;
+            }
+
+            // preview rendering not supported under Magic Leap App Simulator
             // TODO : This needs to be tackeled properly during SDKUNITY-4686
-            previewRenderer = new MLCamera.Renderer(ColorSpace.Linear);
-#endif
-
-            this.cameraConnectionEstablished = MLResult.IsOK(resultCode);
-
-            if (!MLResult.IsOK(resultCode))
+            if (!Application.isEditor)
             {
-                MLPluginLog.ErrorFormat(
-                    "MLCamera.InternalConnect failed to populate characteristics for MLCamera. Reason: {0}",
-                    resultCode);
-                connectPerfMarker.End();
-                return resultCode;
+                MLThreadDispatch.ScheduleMain(() =>
+                {
+                    previewRenderer = new MLCamera.Renderer(ColorSpace.Linear);
+                });
             }
 
             connectPerfMarker.End();
@@ -499,11 +515,11 @@ namespace UnityEngine.XR.MagicLeap
                     var stopResult = CapturePreviewStop();
                     if (stopResult.IsOk)
                     {
-                        this.isCapturingPreview = false;
+                        isCapturingPreview = false;
                     }
                 }
 
-                MLResult.Code result = this.DisconnectNative();
+                MLResult.Code result = DisconnectNative();
 
                 // Assume that connection is no longer established
                 // even if there is some failure disconnecting.

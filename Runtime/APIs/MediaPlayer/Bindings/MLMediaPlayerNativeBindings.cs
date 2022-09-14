@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="MLMediaPlayerNativeBindings.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -1252,7 +1248,8 @@ namespace UnityEngine.XR.MagicLeap
                 {
                     GCHandle gcHandle = GCHandle.FromIntPtr(videoSizeInfo.Data);
                     Player mediaPlayer = gcHandle.Target as Player;
-                    NativeBindings.MLMediaPlayerGetVideoSize(mediaPlayer.handle, out int width, out int height);
+                    var resultCode = NativeBindings.MLMediaPlayerGetVideoSize(mediaPlayer.handle, out int width, out int height);
+                    MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerGetVideoSize));
                     MLThreadDispatch.Call(mediaPlayer, width, height, mediaPlayer.OnVideoSizeChanged);
                 }
 
@@ -1380,7 +1377,8 @@ namespace UnityEngine.XR.MagicLeap
                         case VTTMime:
                         {
                             IntPtr webVTTDataPtr = Marshal.AllocHGlobal(Marshal.SizeOf<WebVTTData>());
-                            NativeBindings.MLMediaPlayerGetWebVTTData(mediaPlayerHandle, timedTextHandle, ref webVTTDataPtr);
+                            var resultCode = NativeBindings.MLMediaPlayerGetWebVTTData(mediaPlayerHandle, timedTextHandle, ref webVTTDataPtr);
+                            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerGetWebVTTData));
                             WebVTTData webVTTData = Marshal.PtrToStructure<WebVTTData>(webVTTDataPtr);
                             Marshal.FreeHGlobal(webVTTDataPtr);
                             MLThreadDispatch.Call(mediaPlayer, webVTTData.Body, mediaPlayer.OnTimedText);
@@ -1390,7 +1388,8 @@ namespace UnityEngine.XR.MagicLeap
                         case TTMLMime:
                         {
                             IntPtr ttmlDataPtr = Marshal.AllocHGlobal(Marshal.SizeOf<TTMLData>());
-                            NativeBindings.MLMediaPlayerGetTTMLData(mediaPlayerHandle, timedTextHandle, ref ttmlDataPtr);
+                            var resultCode = NativeBindings.MLMediaPlayerGetTTMLData(mediaPlayerHandle, timedTextHandle, ref ttmlDataPtr);
+                            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerGetTTMLData));
                             TTMLData ttmlData = Marshal.PtrToStructure<TTMLData>(ttmlDataPtr);
                             Marshal.FreeHGlobal(ttmlDataPtr);
                             MLThreadDispatch.Call(mediaPlayer, ttmlData.text, mediaPlayer.OnTimedText);

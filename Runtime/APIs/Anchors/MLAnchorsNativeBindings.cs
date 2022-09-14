@@ -1,11 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="MLAnchorNativeBindings.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018-present, Magic Leap, Inc. All Rights Reserved.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -19,11 +17,16 @@ namespace UnityEngine.XR.MagicLeap
 
 	/// <summary>
 	///	Spatial Anchor management is closely tied to the selected mapping mode on the device. The modes are
-	///	mutually exclusive and affect the functionality of these APIs.For example, publishing an anchor is
-	/// not available in "per-session" mapping mode.The available mapping modes are:
-	/// Per-Session Mode - A non-persistent mode in which anchors are only available for the currently active tracking session.
-	/// On-Device Mode - A persistent mode in which anchors are persisted locally and will be available
-	/// in multiple sessions when localized to the same space in which they were published.
+	///	mutually exclusive and affect the functionality of these APIs. 
+	///	The available mapping modes are:
+	///	
+	///	On-Device Mode - A persistent mode in which anchors are persisted locally and will be available
+	///	in multiple sessions when localized to the same space in which they were published.
+	///	
+	/// AR Cloud Mode - A persistent mode in which anchors are persisted in the cloud environment and
+	/// will be available in multiple sessions to devices that are localized to the same space in which
+	/// they were published.
+	/// 
 	/// </summary>
 	public partial class MLAnchors
 	{
@@ -74,14 +77,14 @@ namespace UnityEngine.XR.MagicLeap
 				public readonly MLUUIDBytes SpaceId;
 
 				public MLSpatialAnchor(MLAnchors.Anchor anchor)
-                		{
+				{
 					this.Version = 1;
 					this.Id = anchor.id;
 					this.Cfuid = anchor.cfuid;
 					this.ExpirationTimeStamp = anchor.ExpirationTimeStamp;
 					this.IsPersisted = anchor.IsPersisted;
 					this.SpaceId = anchor.spaceId;
-                		}
+				}
 
 				public MLSpatialAnchor(MLAnchors.Anchor anchor, ulong expirationTimeStamp )
 				{
@@ -282,6 +285,24 @@ namespace UnityEngine.XR.MagicLeap
 				/// If localized, this will contain the unique ID of the current space.
 				/// </summary>
 				public readonly NativeBindings.MLUUIDBytes SpaceId;
+
+				/// <summary>
+				/// If localized, this will contain the identifier of the transform of
+				///	the target space's origin relative to the world origin.
+				/// </summary>
+				public readonly MagicLeapNativeBindings.MLCoordinateFrameUID TargetSpaceOrigin;
+
+				public static MLSpatialAnchorLocalizationInfo Create() => new MLSpatialAnchorLocalizationInfo(2);
+
+				public MLSpatialAnchorLocalizationInfo(uint version)
+				{
+					this.Version = version;
+					this.LocalizationStatus = default;
+					this.MappingMode = default;
+					this.SpaceName = default;
+					this.SpaceId = default;
+					this.TargetSpaceOrigin = default;
+				}
 			};
 
 			/// <summary>

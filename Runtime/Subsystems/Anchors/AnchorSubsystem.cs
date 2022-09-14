@@ -1,13 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
-using UnityEngine.Lumin;
 using UnityEngine.Scripting;
 using UnityEngine.XR.ARSubsystems;
-using UnityEngine.XR.MagicLeap.Internal;
 
 namespace UnityEngine.XR.MagicLeap
 {
@@ -18,7 +14,6 @@ namespace UnityEngine.XR.MagicLeap
     /// Use <c>XRAnchorSubsystemDescriptor.Create()</c> instead.
     /// </summary>
     [Preserve]
-    //[UsesLuminPrivilege("PwFoundObjRead")]
     public sealed partial class AnchorSubsystem : XRAnchorSubsystem
     {
         const string kLogTag = "Unity-Anchors";
@@ -168,7 +163,7 @@ namespace UnityEngine.XR.MagicLeap
 #endif
                     return referenceFrame.SetTrackingState(TrackingState.None);
                 }
-                else if (!MLResult.IsOK(LuminXrProviderNativeBindings.GetUnityPose(arr[0].Cfuid, out Pose pose)))
+                else if (!MLResult.IsOK(MagicLeapXrProviderNativeBindings.GetUnityPose(arr[0].Cfuid, out Pose pose)))
                 {
                     DebugError($"TryGetPose for cfuid {arr[0].Cfuid} failed.");
                     return referenceFrame.SetTrackingState(TrackingState.None);
@@ -361,7 +356,7 @@ namespace UnityEngine.XR.MagicLeap
                     }
 
                     // Get the pose of the anchor
-                    if (!MLResult.IsOK(LuminXrProviderNativeBindings.GetUnityPose(arr[0].Cfuid, out cloestAnchorPose)))
+                    if (!MLResult.IsOK(MagicLeapXrProviderNativeBindings.GetUnityPose(arr[0].Cfuid, out cloestAnchorPose)))
                     {
                         LogWarning($"Could not create anchor because no pose could be determined for coordinate frame {arr[0].Cfuid}.");
                         anchor = default;
@@ -452,7 +447,7 @@ namespace UnityEngine.XR.MagicLeap
 #if UNITY_MAGICLEAP || UNITY_ANDROID
             XRAnchorSubsystemDescriptor.Create(new XRAnchorSubsystemDescriptor.Cinfo
             {
-                id = LuminXrProvider.AnchorSubsystemId,
+                id = MagicLeapXrProvider.AnchorSubsystemId,
 #if UNITY_2020_2_OR_NEWER
                 providerType = typeof(AnchorSubsystem.MagicLeapProvider),
                 subsystemTypeOverride = typeof(AnchorSubsystem),

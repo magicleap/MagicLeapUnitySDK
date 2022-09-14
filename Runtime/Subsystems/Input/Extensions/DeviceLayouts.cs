@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="DeviceLayouts.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2021 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2021-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -52,8 +48,8 @@ namespace UnityEngine.XR.MagicLeap
                 }
 
                 /// <summary>
-                /// Enum representing the eye calibration status for a MagicLeapLightwear headset.
-                /// For use with IntegerControl MagicLeapLightwear.eyeCalibrationStatus
+                /// Enum representing the eye calibration status for a MagicLeap headset.
+                /// For use with IntegerControl MagicLeapEyes.eyeCalibrationStatus
                 /// </summary>
                 public enum CalibrationStatus
                 {
@@ -63,7 +59,7 @@ namespace UnityEngine.XR.MagicLeap
                 }
 
                 /// <summary>
-                /// Enum representing the eye calibration status for a MagicLeapLightwear headset.
+                /// Enum representing the eye calibration status for a MagicLeap headset.
                 /// For use with MagicLeapController.dof IntegerControl
                 /// </summary>
                 public enum ControllerDoF
@@ -220,23 +216,13 @@ namespace UnityEngine.XR.MagicLeap
                 {
                     [Preserve]
                     [InputControl]
-                    public ButtonControl touchpad1Pressed { get; private set; }
+                    public Vector2Control touchpadPosition { get; private set; }
                     [Preserve]
                     [InputControl]
-                    public Vector2Control touchpad1Position { get; private set; }
+                    public ButtonControl touchpadClick { get; private set; }
                     [Preserve]
                     [InputControl]
-                    public AxisControl touchpad1Force { get; private set; }
-
-                    [Preserve]
-                    [InputControl]
-                    public ButtonControl touchpad2Pressed { get; private set; }
-                    [Preserve]
-                    [InputControl]
-                    public Vector2Control touchpad2Position { get; private set; }
-                    [Preserve]
-                    [InputControl]
-                    public AxisControl touchpad2Force { get; private set; }
+                    public ButtonControl touchpadTouch { get; private set; }
 
                     [Preserve]
                     [InputControl]
@@ -255,15 +241,6 @@ namespace UnityEngine.XR.MagicLeap
                     [Preserve]
                     [InputControl]
                     public ButtonControl menu { get; private set; }
-                    [Preserve]
-                    [InputControl]
-                    public IntegerControl dof { get; private set; }
-                    [Preserve]
-                    [InputControl]
-                    public IntegerControl calibrationAccuracy { get; private set; }
-                    [Preserve]
-                    [InputControl]
-                    public IntegerControl type { get; private set; }
 
 
                     //Need Discrete State for DOF and Type and CalibrationAccuracy
@@ -274,40 +251,20 @@ namespace UnityEngine.XR.MagicLeap
                         return ExecuteCommand(ref command) >= 0;
                     }
 
-                    public bool StartLEDPattern(LEDPattern ledPattern, LEDColor ledColor, uint durationMs)
-                    {
-                        var command = SendLEDPattern.Create(ledPattern, ledColor, durationMs);
-                        return ExecuteCommand(ref command) >= 0;
-                    }
-
-                    public bool StartLEDEffect(LEDEffect ledEffect, LEDSpeed ledSpeed, LEDPattern ledPattern, LEDColor ledColor, uint durationMs)
-                    {
-                        var command = SendLEDEffect.Create(ledEffect, ledSpeed, ledPattern, ledColor, durationMs);
-                        return ExecuteCommand(ref command) >= 0;
-                    }
-
+                    //dd
                     protected override void FinishSetup()
                     {
                         base.FinishSetup();
 
-                        touchpad1Pressed = GetChildControl<ButtonControl>("touchpad1Pressed");
-                        touchpad1Position = GetChildControl<Vector2Control>("touchpad1Position");
-                        touchpad1Force = GetChildControl<AxisControl>("touchpad1Force");
-
-                        touchpad2Pressed = GetChildControl<ButtonControl>("touchpad2Pressed");
-                        touchpad2Position = GetChildControl<Vector2Control>("touchpad2Position");
-                        touchpad2Force = GetChildControl<AxisControl>("touchpad2Force");
+                        touchpadPosition = GetChildControl<Vector2Control>("primary2DAxis");
+                        touchpadClick = GetChildControl<ButtonControl>("primary2DAxisClick");
+                        touchpadTouch = GetChildControl<ButtonControl>("primary2DAxisTouch");
 
                         triggerButton = GetChildControl<ButtonControl>("triggerButton");
                         trigger = GetChildControl<AxisControl>("trigger");
                         bumperButton = GetChildControl<ButtonControl>("gripButton");
                         bumper = GetChildControl<AxisControl>("grip");
-                        menu = GetChildControl<ButtonControl>("menu");
-
-                        dof = GetChildControl<IntegerControl>("dof");
-                        calibrationAccuracy = GetChildControl<IntegerControl>("calibrationAccuracy");
-                        type = GetChildControl<IntegerControl>("type");
-
+                        menu = GetChildControl<ButtonControl>("menuButton");
                     }
                 }
             }

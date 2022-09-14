@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file = "YcbcrRendererNativeBindings.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -98,6 +94,8 @@ namespace UnityEngine.XR.MagicLeap
             public delegate void IsNewFrameAvailableDelegate([MarshalAs(UnmanagedType.I1)][In][Out] ref bool success, IntPtr context);
 
             public delegate void OnCleanupCompleteDelegate(IntPtr context);
+
+            public delegate void OnFirstFrameRenderedDelegate(IntPtr context);
 
             [AOT.MonoPInvokeCallback(typeof(AcquireNextAvailableBufferDelegate))]
             private static void AcquireNextAvailableBuffer([MarshalAs(UnmanagedType.I1)][In][Out] ref bool success, [In][Out] ref ulong nativeBufferHandle, IntPtr context)
@@ -190,6 +188,19 @@ namespace UnityEngine.XR.MagicLeap
                 }
 
                 ycbcrRenderer.InvokeOnCleanupComplete_CallbackThread();
+            }
+
+            [AOT.MonoPInvokeCallback(typeof(OnFirstFrameRenderedDelegate))]
+            private static void OnFirstFrameRendered(IntPtr context)
+            {
+                GCHandle gcHandle = GCHandle.FromIntPtr(context);
+                YcbcrRenderer ycbcrRenderer = (gcHandle.Target as YcbcrRenderer);
+                if (ycbcrRenderer == null)
+                {
+                    return;
+                }
+
+                ycbcrRenderer.InvokeOnFirstFrameRendered();
             }
 
             /// <summary>
@@ -313,6 +324,8 @@ namespace UnityEngine.XR.MagicLeap
 
                 public OnCleanupCompleteDelegate OnCleanupCompleteCallback;
 
+                public OnFirstFrameRenderedDelegate OnFirstFrameRenderedCallback;
+
                 [MarshalAs(UnmanagedType.I1)]
                 public bool ShouldWaitForQueueIdleOnSubmit;
 
@@ -359,6 +372,7 @@ namespace UnityEngine.XR.MagicLeap
                     }
 
                     this.OnCleanupCompleteCallback = OnCleanupComplete;
+                    this.OnFirstFrameRenderedCallback = OnFirstFrameRendered;
                     this.ShouldWaitForQueueIdleOnSubmit = waitForQueueIdleOnSubmit;
                 }
             }

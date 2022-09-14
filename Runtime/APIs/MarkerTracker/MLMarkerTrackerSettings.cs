@@ -1,14 +1,10 @@
-// %BANNER_BEGIN% 
+// %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="MLMarkerTrackerSettings.cs" company="Magic Leap">
-//
-// Copyright (c) 2018 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
-// %COPYRIGHT_END% 
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
+// %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
@@ -34,6 +30,33 @@ namespace UnityEngine.XR.MagicLeap
             ///     A hint to the back-end the max frames per second hat should be analyzed.
             /// </summary>
             public readonly FPSHint FPSHint;
+
+            /// <summary>
+            ///     A hint to the back-end the resolution that should be used.
+            /// </summary>
+            public readonly ResolutionHint ResolutionHint;
+
+            /// <summary>
+            ///     In order to improve performance, the detectors don't always run on the full
+            ///     frame.Full frame analysis is however necessary to detect new markers that
+            ///     weren't detected before. Use this option to control how often the detector may
+            ///     detect new markers and its impact on tracking performance.
+            /// </summary>
+            public readonly FullAnalysisIntervalHint FullAnalysisIntervalHint;
+
+            /// <summary>
+            ///     This option provides control over corner refinement methods and a way to
+            ///     balance detection rate, speed and pose accuracy. Always available and
+            ///     applicable for Aruco and April tags.
+            /// </summary>
+            public readonly CornerRefineMethod CornerRefineMethod;
+
+            /// <summary>
+            ///     Run refinement step that uses marker edges to generate even more accurate
+            ///     corners, but slow down tracking rate overall by consuming more compute.
+            ///     Aruco/April tags only.
+            /// </summary>
+            public readonly bool UseEdgeRefinement;
 
             /// <summary>
             ///     Aruco dictionary to use.
@@ -64,24 +87,27 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             public readonly MarkerType MarkerTypes;
 
-            public Settings(bool enableMarkerScanning, FPSHint fpsHint, MarkerType markerTypes, float qRCodeSize, ArucoDictionaryName arucoDicitonary, float arucoMarkerSize)
+            internal Settings(bool enableMarkerScanning, FPSHint fpsHint, ResolutionHint resolutionHint, FullAnalysisIntervalHint fullAnalysisIntervalHint, CornerRefineMethod cornerRefineMethod, bool useEdgeRefinement, MarkerType markerTypes, float qRCodeSize, ArucoDictionaryName arucoDicitonary, float arucoMarkerSize)
             {
                 this.EnableMarkerScanning = enableMarkerScanning;
                 this.FPSHint = fpsHint;
+                this.ResolutionHint = resolutionHint;
+                this.FullAnalysisIntervalHint = fullAnalysisIntervalHint;
+                this.CornerRefineMethod = cornerRefineMethod;
+                this.UseEdgeRefinement = useEdgeRefinement;
                 this.ArucoDicitonary = arucoDicitonary;
                 this.ArucoMarkerSize = arucoMarkerSize;
                 this.QRCodeSize = qRCodeSize;
                 this.MarkerTypes = markerTypes;
 
             }
-            public static Settings Create(bool enableMarkerScanning = true, MarkerType markerTypes = MarkerType.All, float qRCodeSize = 0.1f, ArucoDictionaryName arucoDicitonary = ArucoDictionaryName.DICT_5X5_100, float arucoMarkerSize = 0.1f, FPSHint fpsHint = FPSHint.Medium) =>
-                new Settings(enableMarkerScanning, fpsHint, markerTypes, qRCodeSize, arucoDicitonary, arucoMarkerSize);
+
+            public static Settings Create(bool enableMarkerScanning = true, MarkerType markerTypes = MarkerType.All, float qRCodeSize = 0.1f, ArucoDictionaryName arucoDicitonary = ArucoDictionaryName.DICT_5X5_100, float arucoMarkerSize = 0.1f, FPSHint fpsHint = FPSHint.Medium, ResolutionHint resolutionHint = ResolutionHint.Low, FullAnalysisIntervalHint fullAnalysisIntervalHint = FullAnalysisIntervalHint.Medium, CornerRefineMethod cornerRefineMethod = CornerRefineMethod.None, bool useEdgeRefinement = false) =>
+                new Settings(enableMarkerScanning, fpsHint, resolutionHint, fullAnalysisIntervalHint, cornerRefineMethod, useEdgeRefinement, markerTypes, qRCodeSize, arucoDicitonary, arucoMarkerSize);
 
             
-            public override string ToString()
-            {
-                return $"{this.MarkerTypes}, {this.ArucoDicitonary}, {this.QRCodeSize}, {this.ArucoMarkerSize}, {this.EnableMarkerScanning}";
-            }
+            public override string ToString() => $"{this.MarkerTypes}, {this.ArucoDicitonary}, {this.QRCodeSize}, {this.ArucoMarkerSize}, {this.EnableMarkerScanning}";
+
         }
     }
 }

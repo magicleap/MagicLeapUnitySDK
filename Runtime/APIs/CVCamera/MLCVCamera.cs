@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file = "MLCVCamera.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -64,6 +60,7 @@ namespace UnityEngine.XR.MagicLeap
 
             nativeMLCVCameraTrackingCreatePerfMarker.Begin();
             MLResult.Code code = NativeBindings.MLCVCameraTrackingCreate(ref Handle);
+            MLResult.DidNativeCallSucceed(code, nameof(NativeBindings.MLCVCameraTrackingCreate));
             nativeMLCVCameraTrackingCreatePerfMarker.End();
 
             return code;
@@ -92,7 +89,8 @@ namespace UnityEngine.XR.MagicLeap
         {
             MagicLeapNativeBindings.MLTransform outInternalTransform = new MagicLeapNativeBindings.MLTransform();
 
-            MLResult.Code resultCode = NativeBindings.MLCVCameraGetFramePose(Handle, LuminXrProviderNativeBindings.GetHeadTrackerHandle(), cameraId, vcamTimestamp.Value, ref outInternalTransform);
+            MLResult.Code resultCode = NativeBindings.MLCVCameraGetFramePose(Handle, MagicLeapXrProviderNativeBindings.GetHeadTrackerHandle(), cameraId, vcamTimestamp.Value, ref outInternalTransform);
+            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCVCameraGetFramePose));
             MLResult poseResult = MLResult.Create(resultCode);
             if (!poseResult.IsOk)
             {

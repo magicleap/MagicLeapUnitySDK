@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="MLWebView.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -58,7 +54,7 @@ namespace UnityEngine.XR.MagicLeap
         /// <summary>
         /// Flag to indicate if urls issuing certificate errors should be loaded or not
         /// </summary>
-        public bool IgnoreCertificateError 
+        public bool IgnoreCertificateError
         {
             get; set;
         } = false;
@@ -129,10 +125,9 @@ namespace UnityEngine.XR.MagicLeap
         /// <param name="xPosition">Horizontal position of the cursor.</param>
         /// <param name="yPosition">Vertical position of the cursor.</param>
         /// <param name="modifiers">Should be one or combination of EventFlags.</param>
-        /// <param name="buttonType">The mouse button being pressed.</param>
         /// <returns>MLResult.Code.Ok if successful.</returns>
         /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView .</returns>
-        public MLResult InjectMouseButtonDown(uint xPosition, uint yPosition, EventFlags modifiers, MouseButtonType buttonType) => MLResult.Create(InjectMouseButtonDownInternal(xPosition, yPosition, modifiers, buttonType));
+        public MLResult InjectMouseButtonDown(uint xPosition, uint yPosition, EventFlags modifiers) => MLResult.Create(InjectMouseButtonDownInternal(xPosition, yPosition, modifiers));
 
         /// <summary>
         /// Sends a mouse button up/released event on a specific location on screen.
@@ -140,10 +135,9 @@ namespace UnityEngine.XR.MagicLeap
         /// <param name="xPosition">Horizontal position of the cursor.</param>
         /// <param name="yPosition">Vertical position of the cursor.</param>
         /// <param name="modifiers">Should be one or combination of EventFlags.</param>
-        /// <param name="buttonType">The mouse button being pressed.</param>
         /// <returns>MLResult.Code.Ok if successful.</returns>
         /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView .</returns>
-        public MLResult InjectMouseButtonUp(uint xPosition, uint yPosition, EventFlags modifiers, MouseButtonType buttonType) => MLResult.Create(InjectMouseButtonUpInternal(xPosition, yPosition, modifiers, buttonType));
+        public MLResult InjectMouseButtonUp(uint xPosition, uint yPosition, EventFlags modifiers) => MLResult.Create(InjectMouseButtonUpInternal(xPosition, yPosition, modifiers));
 
         /// <summary>
         /// Sends a printable char keyboard event to MLWebView.

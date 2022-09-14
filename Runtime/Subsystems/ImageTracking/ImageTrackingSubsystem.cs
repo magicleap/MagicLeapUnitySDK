@@ -4,12 +4,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
-using UnityEngine.Lumin;
 using UnityEngine.Scripting;
 using UnityEngine.XR.ARSubsystems;
-using UnityEngine.XR.MagicLeap.Internal;
+
 #if UNITY_MAGICLEAP || UNITY_ANDROID
 using UnityEngine.XR.MagicLeap.Native;
 #endif
@@ -19,7 +17,6 @@ namespace UnityEngine.XR.MagicLeap
     using MLLog = UnityEngine.XR.MagicLeap.MagicLeapLogger;
 
     [Preserve]
-    [UsesLuminPrivilege("CameraCapture")]
     public sealed class ImageTrackingSubsystem : XRImageTrackingSubsystem
     {
         public class Extensions
@@ -157,7 +154,7 @@ namespace UnityEngine.XR.MagicLeap
 
         internal ulong handle => MagicLeapProvider.trackerHandle;
 
-        const string kLogTag = LuminXrProvider.ImageTrackingSubsystemId;
+        const string kLogTag = MagicLeapXrProvider.ImageTrackingSubsystemId;
 
         [Conditional("DEVELOPMENT_BUILD")]
         static void DebugError(string msg) => LogError(msg);
@@ -193,7 +190,7 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         /// <remarks>
         /// The creation of the native image tracker handle that enables image tracking on
-        /// Lumin devices has an average startup time of anywhere between ~1500ms - ~6000ms
+        /// Magic Leap devices has an average startup time of anywhere between ~1500ms - ~6000ms
         /// depending on the state of the device and is blocking.  This subsystem opts to
         /// perform this operation asynchronously because of this.
         /// </remarks>
@@ -382,7 +379,7 @@ namespace UnityEngine.XR.MagicLeap
                         var nativeStaticData = new MLImageTracker.NativeBindings.MLImageTrackerTargetStaticDataNative();
                         resultCode = MLImageTracker.NativeBindings.MLImageTrackerGetTargetStaticData(MagicLeapProvider.trackerHandle, trackedImage.trackableId.subId1, ref nativeStaticData);
 
-                        resultCode = LuminXrProviderNativeBindings.GetUnityPose(nativeStaticData.CoordFrameTarget, out Pose pose);
+                        resultCode = MagicLeapXrProviderNativeBindings.GetUnityPose(nativeStaticData.CoordFrameTarget, out Pose pose);
 
                         trackedImage = new XRTrackedImage(trackedImage.trackableId, trackedImage.sourceImageId, pose, trackedImage.size, state, IntPtr.Zero);
                         if (previousTrackedImageIds.Contains(trackedImage.trackableId))
@@ -493,7 +490,7 @@ namespace UnityEngine.XR.MagicLeap
 #if UNITY_MAGICLEAP || UNITY_ANDROID
             XRImageTrackingSubsystemDescriptor.Create(new XRImageTrackingSubsystemDescriptor.Cinfo
             {
-                id = LuminXrProvider.ImageTrackingSubsystemId,
+                id = MagicLeapXrProvider.ImageTrackingSubsystemId,
 #if UNITY_2020_2_OR_NEWER
                 providerType = typeof(ImageTrackingSubsystem.MagicLeapProvider),
                 subsystemTypeOverride = typeof(ImageTrackingSubsystem),

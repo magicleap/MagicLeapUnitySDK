@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="MLMediaMuxer.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -90,13 +86,13 @@ namespace UnityEngine.XR.MagicLeap
             public Muxer()
             {
                 var result = NativeBindings.MLMediaMuxerCreate(out handle);
-                MLResult.DidNativeCallSucceed(result, "MLMediaMuxerCreate");
+                MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLMediaMuxerCreate));
             }
 
             ~Muxer()
             {
                 var result = NativeBindings.MLMediaMuxerRelease(handle);
-                MLResult.DidNativeCallSucceed(result, "MLMediaMuxerRelease");
+                MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLMediaMuxerRelease));
             }
 
             /// <summary>
@@ -108,7 +104,7 @@ namespace UnityEngine.XR.MagicLeap
             public MLResult Configure(OutputFormat format, string filePath)
             {
                 var resultCode = NativeBindings.MLMediaMuxerConfigure(handle, (int)format, filePath);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaMuxerConfigure");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaMuxerConfigure));
                 return MLResult.Create(resultCode);
             }
 
@@ -120,7 +116,7 @@ namespace UnityEngine.XR.MagicLeap
             public MLResult Start()
             {
                 var resultCode = NativeBindings.MLMediaMuxerStart(handle);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaMuxerStart");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaMuxerStart));
                 return MLResult.Create(resultCode);
             }
 
@@ -131,7 +127,7 @@ namespace UnityEngine.XR.MagicLeap
             public MLResult Stop()
             {
                 var resultCode = NativeBindings.MLMediaMuxerStop(handle);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMEdiaMuxerStop");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaMuxerStop));
                 return MLResult.Create(resultCode);
             }
 
@@ -197,7 +193,7 @@ namespace UnityEngine.XR.MagicLeap
             public MLResult SetOrientationHint(int degrees)
             {
                 var resultCode = NativeBindings.MLMediaMuxerSetOrientationHint(handle, degrees);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaMuxerSetOrientationHint");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaMuxerSetOrientationHint));
                 return MLResult.Create(resultCode);
             }
 
@@ -214,7 +210,7 @@ namespace UnityEngine.XR.MagicLeap
             public MLResult SetLocation(float latitude, float longitude)
             {
                 var resultCode = NativeBindings.MLMediaMuxerSetLocation(handle, latitude, longitude);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaMuxerSetLocation");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaMuxerSetLocation));
                 return MLResult.Create(resultCode);
             }
 

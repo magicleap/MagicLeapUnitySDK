@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="MLWebView.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -59,7 +55,8 @@ namespace UnityEngine.XR.MagicLeap
         private MLResult.Code CreateInternal(uint width, uint height)
         {
             Handle = MagicLeapNativeBindings.InvalidHandle;
-            if (!MLResult.DidNativeCallSucceed(MLPermissions.CheckPermission(MLPermission.WebView).Result, nameof(CreateInternal)))
+            var resultCode = MLPermissions.CheckPermission(MLPermission.WebView).Result;
+            if (!MLResult.DidNativeCallSucceed(resultCode, nameof(CreateInternal)))
             {
                 MLPluginLog.Error($"{nameof(MLWebView)} requires missing permission {MLPermission.Internet}");
                 return MLResult.Code.PermissionDenied;
@@ -83,11 +80,12 @@ namespace UnityEngine.XR.MagicLeap
         {
             if (!MagicLeapNativeBindings.MLHandleIsValid(Handle))
             {
-                MLPluginLog.Error("invaliad WebView handle");
+                MLPluginLog.Error("invalid WebView handle");
                 return MLResult.Code.InvalidParam;
             }
 
             MLResult.Code result = NativeBindings.MLWebViewDestroy(Handle);
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewDestroy));
             Handle = MagicLeapNativeBindings.InvalidHandle;
             return result;
         }
@@ -104,10 +102,12 @@ namespace UnityEngine.XR.MagicLeap
         {
             if (!MagicLeapNativeBindings.MLHandleIsValid(Handle))
             {
-                MLPluginLog.Error("invaliad WebView handle");
+                MLPluginLog.Error("invalid WebView handle");
                 return MLResult.Code.InvalidParam;
             }
-            return NativeBindings.MLWebViewGoTo(Handle, url);
+            var result = NativeBindings.MLWebViewGoTo(Handle, url);
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewGoTo));
+            return result;
         }
 
         /// <summary>
@@ -121,10 +121,12 @@ namespace UnityEngine.XR.MagicLeap
         {
             if (!MagicLeapNativeBindings.MLHandleIsValid(Handle))
             {
-                MLPluginLog.Error("invaliad WebView handle");
+                MLPluginLog.Error("invalid WebView handle");
                 return MLResult.Code.InvalidParam;
             }
-            return NativeBindings.MLWebViewGoBack(Handle);
+            var result = NativeBindings.MLWebViewGoBack(Handle);
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewGoBack));
+            return result;
         }
 
         /// <summary>
@@ -138,10 +140,12 @@ namespace UnityEngine.XR.MagicLeap
         {
             if (!MagicLeapNativeBindings.MLHandleIsValid(Handle))
             {
-                MLPluginLog.Error("invaliad WebView handle");
+                MLPluginLog.Error("invalid WebView handle");
                 return MLResult.Code.InvalidParam;
             }
-            return NativeBindings.MLWebViewGoForward(Handle);
+            var result = NativeBindings.MLWebViewGoForward(Handle);
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewGoForward));
+            return result;
         }
 
         /// <summary>
@@ -154,10 +158,12 @@ namespace UnityEngine.XR.MagicLeap
         {
             if (!MagicLeapNativeBindings.MLHandleIsValid(Handle))
             {
-                MLPluginLog.Error("invaliad WebView handle");
+                MLPluginLog.Error("invalid WebView handle");
                 return MLResult.Code.InvalidParam;
             }
-            return NativeBindings.MLWebViewReload(Handle);
+            var result = NativeBindings.MLWebViewReload(Handle);
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewReload));
+            return result;
         }
 
         /// <summary>
@@ -171,19 +177,20 @@ namespace UnityEngine.XR.MagicLeap
 
             if (!MagicLeapNativeBindings.MLHandleIsValid(Handle))
             {
-                MLPluginLog.Error("invaliad WebView handle");
+                MLPluginLog.Error("invalid WebView handle");
                 return url;
             }
 
             MLResult.Code result = NativeBindings.MLWebViewGetUrl(Handle, out uint length, IntPtr.Zero);
 
-            if (MLResult.DidNativeCallSucceed(result, "MLWebViewGetUrl"))
+            if (MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewGetUrl)))
             {
                 IntPtr stringPtr = Marshal.AllocHGlobal((int)length);
 
                 try
                 {
                     result = NativeBindings.MLWebViewGetUrl(Handle, out length, stringPtr);
+                    MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewGetUrl));
                     url = Marshal.PtrToStringAnsi(stringPtr);
                 }
                 finally
@@ -205,12 +212,12 @@ namespace UnityEngine.XR.MagicLeap
             bool canGoBack = false;
             if (!MagicLeapNativeBindings.MLHandleIsValid(Handle))
             {
-                MLPluginLog.Error("invaliad WebView handle");
+                MLPluginLog.Error("invalid WebView handle");
                 return canGoBack;
             }
 
             MLResult.Code result = NativeBindings.MLWebViewCanGoBack(Handle, out canGoBack);
-            MLResult.DidNativeCallSucceed(result, "MLWebViewCanGoBack");
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewCanGoBack));
             return canGoBack;
         }
 
@@ -225,12 +232,12 @@ namespace UnityEngine.XR.MagicLeap
 
             if (!MagicLeapNativeBindings.MLHandleIsValid(Handle))
             {
-                MLPluginLog.Error("invaliad WebView handle");
+                MLPluginLog.Error("invalid WebView handle");
                 return canGoForward;
             }
 
             MLResult.Code result = NativeBindings.MLWebViewCanGoForward(Handle, out canGoForward);
-            MLResult.DidNativeCallSucceed(result, "MLWebViewCanGoForward");
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewCanGoForward));
             return canGoForward;
         }
 
@@ -247,12 +254,14 @@ namespace UnityEngine.XR.MagicLeap
         {
             if (!MagicLeapNativeBindings.MLHandleIsValid(Handle))
             {
-                MLPluginLog.Error("invaliad WebView handle");
+                MLPluginLog.Error("invalid WebView handle");
                 return MLResult.Code.InvalidParam;
             }
 
             NativeBindings.CursorState cursorState = NativeBindings.CursorState.Create(xPosition, yPosition, modifiers);
-            return NativeBindings.MLWebViewInjectMouseMove(Handle, ref cursorState);
+            var result = NativeBindings.MLWebViewInjectMouseMove(Handle, ref cursorState);
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewInjectMouseMove));
+            return result;
         }
 
         /// <summary>
@@ -262,19 +271,20 @@ namespace UnityEngine.XR.MagicLeap
         /// <param name="xPosition">Horizontal position of the cursor.</param>
         /// <param name="yPosition">Vertical position of the cursor.</param>
         /// <param name="modifiers">Should be one or combination of EventFlags.</param>
-        /// <param name="buttonType">The mouse button being pressed.</param>
         /// <returns>MLResult.Code.Ok if successful.</returns>
         /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
-        private MLResult.Code InjectMouseButtonDownInternal(uint xPosition, uint yPosition, EventFlags modifiers, MouseButtonType buttonType)
+        private MLResult.Code InjectMouseButtonDownInternal(uint xPosition, uint yPosition, EventFlags modifiers)
         {
             if (!MagicLeapNativeBindings.MLHandleIsValid(Handle))
             {
-                MLPluginLog.Error("invaliad WebView handle");
+                MLPluginLog.Error("invalid WebView handle");
                 return MLResult.Code.InvalidParam;
             }
 
             NativeBindings.CursorState cursorState = NativeBindings.CursorState.Create(xPosition, yPosition, modifiers);
-            return NativeBindings.MLWebViewInjectMouseButtonDown(Handle, ref cursorState, buttonType);
+            var result = NativeBindings.MLWebViewInjectMouseButtonDown(Handle, ref cursorState);
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewInjectMouseButtonDown));
+            return result;
         }
 
         /// <summary>
@@ -284,19 +294,20 @@ namespace UnityEngine.XR.MagicLeap
         /// <param name="xPosition">Horizontal position of the cursor.</param>
         /// <param name="yPosition">Vertical position of the cursor.</param>
         /// <param name="modifiers">Should be one or combination of EventFlags.</param>
-        /// <param name="buttonType">The mouse button being pressed.</param>
         /// <returns>MLResult.Code.Ok if successful.</returns>
         /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
-        private MLResult.Code InjectMouseButtonUpInternal(uint xPosition, uint yPosition, EventFlags modifiers, MouseButtonType buttonType)
+        private MLResult.Code InjectMouseButtonUpInternal(uint xPosition, uint yPosition, EventFlags modifiers)
         {
             if (!MagicLeapNativeBindings.MLHandleIsValid(Handle))
             {
-                MLPluginLog.Error("invaliad WebView handle");
+                MLPluginLog.Error("invalid WebView handle");
                 return MLResult.Code.InvalidParam;
             }
 
             NativeBindings.CursorState cursorState = NativeBindings.CursorState.Create(xPosition, yPosition, modifiers);
-            return NativeBindings.MLWebViewInjectMouseButtonUp(Handle, ref cursorState, buttonType);
+            var result = NativeBindings.MLWebViewInjectMouseButtonUp(Handle, ref cursorState);
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewInjectMouseButtonUp));
+            return result;
         }
 
         /// <summary>
@@ -310,11 +321,13 @@ namespace UnityEngine.XR.MagicLeap
         {
             if (!MagicLeapNativeBindings.MLHandleIsValid(Handle))
             {
-                MLPluginLog.Error("invaliad WebView handle");
+                MLPluginLog.Error("invalid WebView handle");
                 return MLResult.Code.InvalidParam;
             }
 
-            return NativeBindings.MLWebViewInjectChar(Handle, Convert.ToUInt32(charUtf32));
+            var result = NativeBindings.MLWebViewInjectChar(Handle, Convert.ToUInt32(charUtf32));
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewInjectChar));
+            return result;
         }
 
         /// <summary>
@@ -329,11 +342,13 @@ namespace UnityEngine.XR.MagicLeap
         {
             if (!MagicLeapNativeBindings.MLHandleIsValid(Handle))
             {
-                MLPluginLog.Error("invaliad WebView handle");
+                MLPluginLog.Error("invalid WebView handle");
                 return MLResult.Code.InvalidParam;
             }
 
-            return NativeBindings.MLWebViewInjectKeyDown(Handle, keyCode, modifierMask);
+            var result = NativeBindings.MLWebViewInjectKeyDown(Handle, keyCode, modifierMask);
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewInjectKeyDown));
+            return result;
         }
 
         /// <summary>
@@ -348,11 +363,13 @@ namespace UnityEngine.XR.MagicLeap
         {
             if (!MagicLeapNativeBindings.MLHandleIsValid(Handle))
             {
-                MLPluginLog.Error("invaliad WebView handle");
+                MLPluginLog.Error("invalid WebView handle");
                 return MLResult.Code.InvalidParam;
             }
 
-            return NativeBindings.MLWebViewInjectKeyUp(Handle, keyCode, modifierMask);
+            var result = NativeBindings.MLWebViewInjectKeyUp(Handle, keyCode, modifierMask);
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewInjectKeyUp));
+            return result;
         }
 
         /// <summary>
@@ -367,11 +384,13 @@ namespace UnityEngine.XR.MagicLeap
         {
             if (!MagicLeapNativeBindings.MLHandleIsValid(Handle))
             {
-                MLPluginLog.Error("invaliad WebView handle");
+                MLPluginLog.Error("invalid WebView handle");
                 return MLResult.Code.InvalidParam;
             }
 
-            return NativeBindings.MLWebViewScrollBy(Handle, xPixels, yPixels);
+            var result = NativeBindings.MLWebViewScrollBy(Handle, xPixels, yPixels);
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewScrollBy));
+            return result;
         }
 
         /// <summary>
@@ -388,12 +407,12 @@ namespace UnityEngine.XR.MagicLeap
             int height = 0;
             if (!MagicLeapNativeBindings.MLHandleIsValid(Handle))
             {
-                MLPluginLog.Error("invaliad WebView handle");
+                MLPluginLog.Error("invalid WebView handle");
                 return new Vector2Int(width, height);
             }
 
             MLResult.Code result = NativeBindings.MLWebViewGetScrollSize(Handle, out width, out height);
-            MLResult.DidNativeCallSucceed(result, "MLWebViewGetScrollSize");
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewGetScrollSize));
             return new Vector2Int(width, height);
         }
 
@@ -408,12 +427,12 @@ namespace UnityEngine.XR.MagicLeap
             int y = 0;
             if (!MagicLeapNativeBindings.MLHandleIsValid(Handle))
             {
-                MLPluginLog.Error("invaliad WebView handle");
+                MLPluginLog.Error("invalid WebView handle");
                 return new Vector2Int(x, y);
             }
 
             MLResult.Code result = NativeBindings.MLWebViewGetScrollOffset(Handle, out x, out y);
-            MLResult.DidNativeCallSucceed(result, "MLWebViewGetScrollOffset");
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewGetScrollOffset));
             return new Vector2Int(x, y);
         }
 
@@ -428,11 +447,13 @@ namespace UnityEngine.XR.MagicLeap
         {
             if (!MagicLeapNativeBindings.MLHandleIsValid(Handle))
             {
-                MLPluginLog.Error("invaliad WebView handle");
+                MLPluginLog.Error("invalid WebView handle");
                 return MLResult.Code.InvalidParam;
             }
 
-            return NativeBindings.MLWebViewResetZoom(Handle);
+            var result = NativeBindings.MLWebViewResetZoom(Handle);
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewResetZoom));
+            return result;
         }
 
         /// <summary>
@@ -447,11 +468,13 @@ namespace UnityEngine.XR.MagicLeap
         {
             if (!MagicLeapNativeBindings.MLHandleIsValid(Handle))
             {
-                MLPluginLog.Error("invaliad WebView handle");
+                MLPluginLog.Error("invalid WebView handle");
                 return MLResult.Code.InvalidParam;
             }
 
-            return NativeBindings.MLWebViewZoomIn(Handle);
+            var result = NativeBindings.MLWebViewZoomIn(Handle);
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewZoomIn));
+            return result;
         }
 
         /// <summary>
@@ -466,11 +489,13 @@ namespace UnityEngine.XR.MagicLeap
         {
             if (!MagicLeapNativeBindings.MLHandleIsValid(Handle))
             {
-                MLPluginLog.Error("invaliad WebView handle");
+                MLPluginLog.Error("invalid WebView handle");
                 return MLResult.Code.InvalidParam;
             }
 
-            return NativeBindings.MLWebViewZoomOut(Handle);
+            var result = NativeBindings.MLWebViewZoomOut(Handle);
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewZoomOut));
+            return result;
         }
 
         /// <summary>
@@ -483,7 +508,7 @@ namespace UnityEngine.XR.MagicLeap
             double zoomFactor = 1;
             if (!MagicLeapNativeBindings.MLHandleIsValid(Handle))
             {
-                MLPluginLog.Error("invaliad WebView handle");
+                MLPluginLog.Error("invalid WebView handle");
                 return zoomFactor;
             }
 
@@ -503,11 +528,13 @@ namespace UnityEngine.XR.MagicLeap
         {
             if (!MagicLeapNativeBindings.MLHandleIsValid(Handle))
             {
-                MLPluginLog.Error("invaliad WebView handle");
+                MLPluginLog.Error("invalid WebView handle");
                 return MLResult.Code.InvalidParam;
             }
 
-            return NativeBindings.MLWebViewRemoveAllCookies(Handle);
+            var result = NativeBindings.MLWebViewRemoveAllCookies(Handle);
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewRemoveAllCookies));
+            return result;
         }
 
         /// <summary>
@@ -521,11 +548,13 @@ namespace UnityEngine.XR.MagicLeap
         {
             if (!MagicLeapNativeBindings.MLHandleIsValid(Handle))
             {
-                MLPluginLog.Error("invaliad WebView handle");
+                MLPluginLog.Error("invalid WebView handle");
                 return MLResult.Code.InvalidParam;
             }
 
-            return NativeBindings.MLWebViewClearCache(Handle);
+            var result = NativeBindings.MLWebViewClearCache(Handle);
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewClearCache));
+            return result;
         }
     }
 }

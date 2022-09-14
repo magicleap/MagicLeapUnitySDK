@@ -1,11 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="MLAnchorNativeBindings.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018-present, Magic Leap, Inc. All Rights Reserved.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -21,7 +19,7 @@ namespace UnityEngine.XR.MagicLeap
     /// a Scriptable Object called MLVoiceIntentsConfiguration, Located under Assets/Magic Leap/Voice Intents Configuration,
     /// with the application's voice intents data to MLVoice.SetupVoiceIntents().
     /// 
-    /// Name, id, and value should be unique. Value is the phrase needed to be spoken out loud after "Hey Lumin"
+    /// Name, id, and value should be unique. Value is the phrase needed to be spoken out loud after "Hey Magic Leap"
     /// " | " may be used in the configuration file's value field to indicate multiple values tied to the same name and id.
     /// </summary>
     public partial class MLVoice : MLAutoAPISingleton<MLVoice>
@@ -156,7 +154,10 @@ namespace UnityEngine.XR.MagicLeap
                 MLPluginLog.Error($"{nameof(MLVoice)} requires missing permission {MLPermission.VoiceInput}");
                 return MLResult.Code.PermissionDenied;
             }
-            return MLVoice.NativeBindings.MLVoiceIntentCreate(out this.Handle);
+            
+            var resultCode = MLVoice.NativeBindings.MLVoiceIntentCreate(out this.Handle);
+            MLResult.DidNativeCallSucceed(resultCode, nameof(MLVoice.NativeBindings.MLVoiceIntentCreate));
+            return resultCode;
         }
 
         protected override MLResult.Code StopAPI() => MLVoice.NativeBindings.MLVoiceIntentDestroy(this.Handle);
@@ -192,8 +193,9 @@ namespace UnityEngine.XR.MagicLeap
                 return result;
             }
 
-            result = MLResult.Create(NativeBindings.MLVoiceIntentStartProcessing(Instance.Handle));
-            if (!result.IsOk)
+            var resultCode = NativeBindings.MLVoiceIntentStartProcessing(Instance.Handle);
+            
+            if (!MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLVoiceIntentStartProcessing)))
             {
                 MLPluginLog.Error("MLVoice failed to StartProcessing: " + result);
             }
@@ -238,8 +240,9 @@ namespace UnityEngine.XR.MagicLeap
                 return result;
             }
 
-            result = MLResult.Create(NativeBindings.MLVoiceIntentStartProcessing(Instance.Handle));
-            if (!result.IsOk)
+            var resultCode = NativeBindings.MLVoiceIntentStartProcessing(Instance.Handle);
+            
+            if (!MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLVoiceIntentStartProcessing)))
             {
                 MLPluginLog.Error("MLVoice failed to StartProcessing: " + result);
             }
@@ -274,8 +277,9 @@ namespace UnityEngine.XR.MagicLeap
                 MLPluginLog.Error("MLVoice.Stop failed to unregister MLVoiceIntentSetCallbacks: " + result);
             }
 
-            result = MLResult.Create(NativeBindings.MLVoiceIntentStopProcessing(Instance.Handle));
-            if (!MLResult.IsOK(result.Result))
+            var resultCode = NativeBindings.MLVoiceIntentStopProcessing(Instance.Handle);            
+
+            if (!MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLVoiceIntentStopProcessing)))
             {
                 MLPluginLog.Error("MLVoice.Stop failed to MLVoiceIntentStopProcessing: " + result);
             }
@@ -284,7 +288,7 @@ namespace UnityEngine.XR.MagicLeap
                 Instance.isProcessing = false;
             }
 
-            return result;
+            return MLResult.Create(resultCode);
 #else
             return MLResult.Create(MLResult.Code.APIDLLNotFound);
 #endif

@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file = "MLCamera.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -50,8 +46,7 @@ namespace UnityEngine.XR.MagicLeap
         /// <returns>MLCamera instance if connection was successful, null otherwise</returns>
         public static MLCamera CreateAndConnect(ConnectContext connectContext)
         {
-            MLCamera camera = new MLCamera();
-            return camera.InternalConnect(connectContext) == MLResult.Code.Ok ? camera : null;
+            return CreateAndConnectAsync(connectContext).Result;
         }
 
         /// <summary>
@@ -77,7 +72,7 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public MLResult Disconnect()
         {
-            return MLResult.Create(InternalDisconnect());
+            return DisconnectAsync().Result;
         }
 
         public static MLResult Uninitialize()
@@ -103,13 +98,7 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public MLResult PreCaptureAEAWB()
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-            MLResult.Code resultCode = NativeBindings.MLCameraPreCaptureAEAWB(Handle);
-            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraPreCaptureAEAWB));
-            return MLResult.Create(resultCode);
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
+            return PreCaptureAEAWBAsync().Result;
         }
 
         /// <summary>
@@ -136,15 +125,9 @@ namespace UnityEngine.XR.MagicLeap
         /// Result will be availble via the MLCamera.OnRawImageAvailable event.
         /// </summary>
         /// <param name="numImages">no of images to capture valid range is 1-10</param>
-        public MLResult CaptureImage(uint numImages)
+        public MLResult CaptureImage(uint numImages = 1)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-            MLResult.Code resultCode = NativeBindings.MLCameraCaptureImage(Handle, numImages);
-            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraCaptureImage));
-            return MLResult.Create(resultCode);
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
+            return CaptureImageAsync(numImages).Result;
         }
 
         /// <summary>
@@ -157,13 +140,7 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public MLResult CaptureVideoStart()
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-            MLResult.Code resultCode = NativeBindings.MLCameraCaptureVideoStart(Handle);
-            isCapturingVideo = MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraCaptureVideoStart));
-            return MLResult.Create(resultCode);
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
+            return CaptureVideoStartAsync().Result;
         }
 
         /// <summary>
@@ -172,14 +149,7 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public MLResult CaptureVideoStop()
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-            MLResult.Code resultCode = NativeBindings.MLCameraCaptureVideoStop(Handle);
-            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraCaptureVideoStop));
-            isCapturingVideo = false;
-            return MLResult.Create(resultCode);
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
+            return CaptureVideoStopAsync().Result;
         }
 
         /// <summary>
@@ -187,14 +157,7 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public MLResult CapturePreviewStart()
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-            CreatePreviewTexture();
-            MLResult.Code resultCode = NativeBindings.MLCameraCapturePreviewStart(Handle);
-            isCapturingPreview = MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraCapturePreviewStart));
-            return MLResult.Create(resultCode);
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
+            return CapturePreviewStartAsync().Result;
         }
 
         /// <summary>
@@ -203,16 +166,17 @@ namespace UnityEngine.XR.MagicLeap
         /// <returns></returns>
         public MLResult CapturePreviewStop()
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-            MLResult.Code resultCode = NativeBindings.MLCameraCapturePreviewStop(Handle);
-            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraCapturePreviewStop));
-            isCapturingPreview = false;
-            return MLResult.Create(resultCode);
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
+            return CapturePreviewStopAsync().Result;
         }
 
+        /// <summary>
+        /// Poll camera device status.
+        /// Use <see cref="DeviceStatusFlag"/> to view specific status bit.
+        /// Call <see cref="GetErrorCode(out ErrorType)"/> to obtain the error code if
+        /// <see cref="DeviceStatusFlag.Error"/> bit is set.
+        /// </summary>
+        /// <param name="status"></param>
+        /// <returns></returns>
         public MLResult GetDeviceStatus(out DeviceStatusFlag status)
         {
             status = DeviceStatusFlag.Error;
@@ -228,6 +192,11 @@ namespace UnityEngine.XR.MagicLeap
 #endif
         }
 
+        /// <summary>
+        /// Obtain device error code.
+        /// </summary>
+        /// <param name="error">The <see cref="ErrorType"/> which triggered <see cref="DeviceStatusFlag.Error"/></param>
+        /// <returns></returns>
         public MLResult GetErrorCode(out ErrorType error)
         {
 #if UNITY_MAGICLEAP || UNITY_ANDROID
@@ -273,7 +242,9 @@ namespace UnityEngine.XR.MagicLeap
             }
 
 #if UNITY_MAGICLEAP || UNITY_ANDROID
-            return MLResult.Create(NativeBindings.MLCameraGetDeviceAvailabilityStatus(camId, out deviceAvailable));
+            var resultCode = NativeBindings.MLCameraGetDeviceAvailabilityStatus(camId, out deviceAvailable);
+            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraGetDeviceAvailabilityStatus));
+            return MLResult.Create(resultCode);
 #else
             deviceAvailable = false;
             return MLResult.Create(MLResult.Code.NotImplemented);

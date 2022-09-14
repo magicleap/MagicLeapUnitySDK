@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file = "MLAudioOutput.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -290,6 +286,7 @@ namespace UnityEngine.XR.MagicLeap
             {
                 nativeGetMasterVolumePerfMarker.Begin();
                 result = NativeBindings.MLAudioGetMasterVolume(out volume);
+                MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLAudioGetMasterVolume));
                 nativeGetMasterVolumePerfMarker.End();
                 if (result != MLResult.Code.Ok)
                 {
@@ -322,6 +319,7 @@ namespace UnityEngine.XR.MagicLeap
             nativeSetMasterVolumeCallbackPerfMarker.Begin();
             // Attempt to register the native callback for the volume change event.
             result = NativeBindings.MLAudioSetMasterVolumeCallback(HandleOnMLAudioSetMasterVolumeCallback, IntPtr.Zero);
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLAudioSetMasterVolumeCallback));
             nativeSetMasterVolumeCallbackPerfMarker.End();
 
             if (result != MLResult.Code.Ok)
@@ -333,6 +331,7 @@ namespace UnityEngine.XR.MagicLeap
             nativeMediaEventCallbackPerfMarker.Begin();
             // Attempt to register the native callback for the media event change event.
             result = NativeBindings.MLAudioSetMediaEventCallback(HandleOnMediaEventCallback, IntPtr.Zero);
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLAudioSetMediaEventCallback));
             nativeMediaEventCallbackPerfMarker.End();
 
             if (result != MLResult.Code.Ok)
@@ -361,6 +360,7 @@ namespace UnityEngine.XR.MagicLeap
             nativeSetMasterVolumeCallbackPerfMarker.Begin();
             // Unregister the native callback for the volume change event.
             result = NativeBindings.MLAudioSetMasterVolumeCallback(null, IntPtr.Zero);
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLAudioSetMasterVolumeCallback));
             nativeSetMasterVolumeCallbackPerfMarker.End();
 
             if (result != MLResult.Code.Ok)
@@ -371,6 +371,7 @@ namespace UnityEngine.XR.MagicLeap
             nativeMediaEventCallbackPerfMarker.Begin();
             // Attempt to register the native callback for the volume change event.
             result = NativeBindings.MLAudioSetMediaEventCallback(null, IntPtr.Zero);
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLAudioSetMediaEventCallback));
             nativeMediaEventCallbackPerfMarker.End();
 
             if (result != MLResult.Code.Ok)
@@ -391,6 +392,7 @@ namespace UnityEngine.XR.MagicLeap
             {
                 nativeGetOutputDevicePerfMarker.Begin();
                 MLResult.Code result = NativeBindings.MLAudioGetOutputDevice(out Instance.audioDevice);
+                MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLAudioGetOutputDevice));
                 nativeGetOutputDevicePerfMarker.End();
                 if (result != MLResult.Code.Ok)
                 {

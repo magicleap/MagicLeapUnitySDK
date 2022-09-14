@@ -1,11 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="MLAnchorNativeBindings.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018-present, Magic Leap, Inc. All Rights Reserved.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -26,7 +24,7 @@ namespace UnityEngine.XR.MagicLeap
 	///	
 	/// AR Cloud Mode - A persistent mode in which anchors are persisted in the cloud environment and
 	/// will be available in multiple sessions to devices that are localized to the same space in which
-	/// they were published. This mode is currently not supported.
+	/// they were published.
 	/// 
 	/// </summary>
 	public partial class MLAnchors : MLAutoAPISingleton<MLAnchors>
@@ -69,7 +67,7 @@ namespace UnityEngine.XR.MagicLeap
 			OnDevice,
 
 			/// <summary>
-			///  Using cloud-based mapping [Not Supported].
+			///  Using cloud-based mapping.
 			/// </summary>
 			ARCloud,
 		};
@@ -257,13 +255,33 @@ namespace UnityEngine.XR.MagicLeap
 
 		public readonly struct Anchor
 		{
+			/// <summary>
+			/// Creates a new anchor based on a given pose that can expire after a predefined amount of time. The anchor is only valid when MLResult.Code.Ok is returned.
+			/// </summary>
+			/// <param name="pose">Pose to base the anchor on.</param>
+			/// <param name="expirationSeconds">
+			/// Length of time before anchor expires. Can be a range from 0 to DateTime.MaxValue - DateTime.UtcNow. Passing a value of 0 creates an indefinite duration.</param>
+			/// <param name="anchor">Anchor being created.</param>
+			/// <returns>
+			/// MLResult.Result will be <c>MLResult.Code.Ok</c> if successful.
+			/// MLResult.Result will be <c>MLResult.Code.InvalidParam</c> if a parameter is invalid.
+			/// MLResult.Result will be <c>MLResult.Code.AnchorsInsufficientMapping</c> if the space has not been sufficiently mapped to allow this operation.
+			/// MLResult.Result will be <c>MLResult.Code.AnchorsInvalidExpirationTimestamp</c> if the provided expiration suggestion was not valid.
+			/// MLResult.Result will be <c>MLResult.Code.AnchorsMaxAnchorLimitReached</c> if the maximum number of anchors for the current space has been reached.
+			/// MLResult.Result will be <c>MLResult.Code.AnchorsMinDistanceThresholdExceeded</c> if the minimum distance between anchors was not met.
+			/// </returns>
 			public static MLResult Create(Pose pose, long expirationSeconds, out Anchor anchor)
 			{
-				var unixTimestamp = (DateTime.UtcNow.AddSeconds(expirationSeconds)).Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+				var maxExpirationSeconds = (long)DateTime.MaxValue.Subtract(DateTime.UtcNow).TotalSeconds;
+				var clampedExpirationSeconds = Math.Clamp(expirationSeconds, 0, maxExpirationSeconds);
+
+				var unixTimestamp = (DateTime.UtcNow.AddSeconds(clampedExpirationSeconds)).Subtract(DateTime.UnixEpoch).TotalSeconds;
 				var createInfo = new NativeBindings.MLSpatialAnchorCreateInfo(pose, (ulong)unixTimestamp);
 				var resultCode = MLAnchors.Instance.CreateAnchor(createInfo, out NativeBindings.MLSpatialAnchor nativeAnchor);
 				anchor = new Anchor(nativeAnchor);
-				return MLResult.Create(resultCode);
+				return expirationSeconds < 0 
+					? MLResult.Create(MLResult.Code.InvalidParam, "The expirationSeconds parameter was a negative number and should be positive or 0.") 
+					: MLResult.Create(resultCode);
 			}
 
 			public static MLResult DeleteAnchorWithId(string anchorId)
@@ -341,7 +359,7 @@ namespace UnityEngine.XR.MagicLeap
 				this.cfuid = nativeAnchor.Cfuid;
 
 #if UNITY_MAGICLEAP || UNITY_ANDROID
-				LuminXrProviderNativeBindings.GetUnityPose(nativeAnchor.Cfuid, out this.Pose);
+				MagicLeapXrProviderNativeBindings.GetUnityPose(nativeAnchor.Cfuid, out this.Pose);
 #else
 				this.Pose = default;
 #endif
@@ -404,6 +422,12 @@ namespace UnityEngine.XR.MagicLeap
 			public readonly string SpaceId => this.spaceId.ToString();
 
 			/// <summary>
+			/// If localized, this will contain the identifier of the transform of
+			///	the target space's origin relative to the world origin.
+			/// </summary>
+			public readonly MagicLeapNativeBindings.MLCoordinateFrameUID TargetSpaceOrigin;
+
+			/// <summary>
 			/// If localized, this will contain the unique ID of the current space.
 			/// </summary>
 			internal readonly NativeBindings.MLUUIDBytes spaceId;
@@ -414,9 +438,10 @@ namespace UnityEngine.XR.MagicLeap
 				this.MappingMode = nativeInfo.MappingMode;
 				this.SpaceName = nativeInfo.SpaceName;
 				this.spaceId = nativeInfo.SpaceId;
+				this.TargetSpaceOrigin = nativeInfo.TargetSpaceOrigin;
 			}
 
-			public override string ToString() => $"LocalizationStatus: {this.LocalizationStatus},\nMappingMode: {this.MappingMode},\nSpaceName: {this.SpaceName},\nSpaceId: {this.SpaceId}";
+			public override string ToString() => $"LocalizationStatus: {this.LocalizationStatus},\nMappingMode: {this.MappingMode},\nSpaceName: {this.SpaceName},\nSpaceId: {this.SpaceId}, \nTargetSpaceOrigin: {this.TargetSpaceOrigin}";
 
 		}
 	}

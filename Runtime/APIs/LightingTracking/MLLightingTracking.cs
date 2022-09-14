@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file = "MLLightingTracking.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -101,6 +97,7 @@ namespace UnityEngine.XR.MagicLeap
             this.nativeTracker = MagicLeapNativeBindings.InvalidHandle;
             nativeMLLightingTrackingCreatePerfMarker.Begin();
             MLResult.Code resultCode = NativeBindings.MLLightingTrackingCreate(ref this.nativeTracker);
+            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLLightingTrackingCreate));
             nativeMLLightingTrackingCreatePerfMarker.End();
 
             MLResult.DidNativeCallSucceed(resultCode, "MLLightingTracking.StartAPI()");
@@ -123,6 +120,7 @@ namespace UnityEngine.XR.MagicLeap
             {
                 nativeMLLightingTrackingDestroyPerfMarker.Begin();
                 result = NativeBindings.MLLightingTrackingDestroy(this.nativeTracker);
+                MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLLightingTrackingDestroy));
                 nativeMLLightingTrackingDestroyPerfMarker.End();
 
                 MLResult.DidNativeCallSucceed(result, "MLLightingTracking.StopAPI()");
@@ -142,6 +140,7 @@ namespace UnityEngine.XR.MagicLeap
             updatePerfMarker.Begin();
             nativeMLLightingTrackingGetColorTemperatureStatePerfMarker.Begin();
             MLResult.Code result = NativeBindings.MLLightingTrackingGetColorTemperatureState(this.nativeTracker, ref this.temperatureState);
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLLightingTrackingGetColorTemperatureState));
             nativeMLLightingTrackingGetColorTemperatureStatePerfMarker.End();
 
             if (result != MLResult.Code.Ok)

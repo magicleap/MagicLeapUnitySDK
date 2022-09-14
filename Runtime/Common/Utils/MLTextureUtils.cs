@@ -21,7 +21,7 @@ namespace UnityEngine.XR.MagicLeap.Native
     using UnityEngine.XR.MagicLeap;
 
     /// <summary>
-    /// Class containing utility functions to convert Unity Texture to <c>Lumin</c> OS compatible data structures.
+    /// Class containing utility functions to convert Unity Texture to <c>Magic Leap</c> OS compatible data structures.
     /// </summary>
     public static class MLTextureUtils
     {
@@ -81,8 +81,8 @@ namespace UnityEngine.XR.MagicLeap.Native
                 return encodedImage;
             }
 
-            // [2] Convert to coorindate frame used by Lumin OS
-            // Unity texture origin in bottom left, but Lumin OS is expecting top left to be the origin.
+            // [2] Convert to coorindate frame used by Magic Leap OS
+            // Unity texture origin in bottom left, but Magic Leap OS is expecting top left to be the origin.
             int rowLength = texture.width * numChannels;
             var rowTemp = new byte[rowLength];
             for (var i = 0; i < texture.height / 2; i++)

@@ -1,14 +1,10 @@
-// %BANNER_BEGIN% 
+// %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="MLMarkerTrackerNativeBindings.cs" company="Magic Leap">
-//
-// Copyright (c) 2018 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
-// %COPYRIGHT_END% 
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
+// %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
@@ -36,12 +32,13 @@ namespace UnityEngine.XR.MagicLeap
         private static MLResult.Code MLMarkerTrackerCreate(Settings settings)
         {
             var nativeSettings = new NativeBindings.MLMarkerTrackerSettings(settings);
-            if(!MLPermissions.CheckPermission(MLPermission.MarkerTracking).IsOk)
+            if (!MLPermissions.CheckPermission(MLPermission.MarkerTracking).IsOk)
             {
                 Debug.LogError($"Unable to create MLMarkerTracker because the permission {MLPermission.MarkerTracking} has not been granted.");
                 return MLResult.Code.PermissionDenied;
             }
             MLResult.Code resultCode = NativeBindings.MLMarkerTrackerCreate(nativeSettings, out Instance.Handle);
+            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMarkerTrackerCreate));
             return resultCode;
         }
 
@@ -75,9 +72,10 @@ namespace UnityEngine.XR.MagicLeap
         {
             try
             {
+                var resultCode = NativeBindings.MLMarkerTrackerGetResult(Instance.Handle, out NativeBindings.MLMarkerTrackerResultArray scannerResults);
+                
                 // get results from native api
-                MLResult.Code resultCode = NativeBindings.MLMarkerTrackerGetResult(Instance.Handle, out NativeBindings.MLMarkerTrackerResultArray scannerResults);
-                if (MLResult.IsOK(resultCode))
+                if (MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMarkerTrackerGetResult)))
                 {
                     var managedResults = new MarkerData[((int)scannerResults.Count)];
                     for (ulong i = 0; i < scannerResults.Count.ToUInt64(); i++)
@@ -89,7 +87,7 @@ namespace UnityEngine.XR.MagicLeap
 
                         if (detectedResult.IsValidPose)
                         {
-                            resultCode = LuminXrProviderNativeBindings.GetUnityPose(detectedResult.CoordinateFrameUID, out pose);
+                            resultCode = MagicLeapXrProviderNativeBindings.GetUnityPose(detectedResult.CoordinateFrameUID, out pose);
                             if (!MLResult.IsOK(resultCode))
                                 Debug.LogError($"Marker Scanner could not get pose data for coordinate frame id '{detectedResult.CoordinateFrameUID}'");
                         }
@@ -128,13 +126,12 @@ namespace UnityEngine.XR.MagicLeap
                                 pose,
                                 detectedResult.ReprojectionError
                             );
-                        
+
                     }
                     if (scannerResults.Count.ToUInt64() > 0)
                     {
-                        resultCode = NativeBindings.MLMarkerTrackerReleaseResult(ref scannerResults);
                         // release native memory so results can be polled again
-                        if (MLResult.IsOK(resultCode))
+                        if (MLResult.DidNativeCallSucceed(NativeBindings.MLMarkerTrackerReleaseResult(ref scannerResults), nameof(NativeBindings.MLMarkerTrackerReleaseResult)))
                             return managedResults;
                         else
                         {
@@ -171,7 +168,9 @@ namespace UnityEngine.XR.MagicLeap
             try
             {
                 var nativeSettings = new NativeBindings.MLMarkerTrackerSettings(settings);
-                MLResult createSettingsResult = MLResult.Create(NativeBindings.MLMarkerTrackerUpdateSettings(Instance.Handle, in nativeSettings));
+                var resultCode = NativeBindings.MLMarkerTrackerUpdateSettings(Instance.Handle, in nativeSettings);
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMarkerTrackerUpdateSettings));
+                MLResult createSettingsResult = MLResult.Create(resultCode);
                 if (!createSettingsResult.IsOk)
                     MLPluginLog.ErrorFormat("MLMarkerTracker.MLMarkerTrackerUpdateSettings failed to update scanner settings. Reason: {0}", createSettingsResult);
 
@@ -511,17 +510,49 @@ namespace UnityEngine.XR.MagicLeap
                 public readonly float QRCodeSize;
 
                 /// <summary>
+                ///     The resolution hint for all detectors.
+                /// </summary>
+                public readonly ResolutionHint ResolutionHint;
+
+                /// <summary>
+                ///     This option provides control over corner refinement methods and a way to
+                ///     balance detection rate, speed and pose accuracy. Always available and
+                ///     applicable for Aruco and April tags.
+                /// </summary>
+                public readonly CornerRefineMethod CornerRefineMethod;
+
+                /// <summary>
+                ///     Run refinement step that uses marker edges to generate even more accurate
+                ///     corners, but slow down tracking rate overall by consuming more compute.
+                ///     Aruco/April tags only.
+                /// </summary>
+                [MarshalAs(UnmanagedType.I1)]
+                public readonly bool UseEdgeRefinement;
+
+                /// <summary>
+                ///     In order to improve performance, the detectors don't always run on the full
+                ///     frame.Full frame analysis is however necessary to detect new markers that
+                ///     weren't detected before. Use this option to control how often the detector may
+                ///     detect new markers and its impact on tracking performance.
+                /// </summary>
+                public readonly FullAnalysisIntervalHint FullAnalysisIntervalHint;
+
+                /// <summary>
                 ///     Sets the native structures from the user facing properties.
                 /// </summary>
                 public MLMarkerTrackerSettings(Settings settings)
                 {
-                    this.Version = 1;
+                    this.Version = 3;
                     this.EnableMarkerScanning = settings.EnableMarkerScanning;
                     this.FPSHint = settings.FPSHint;
-                    this.ArucoDicitonary = settings.ArucoDicitonary;
-                    this.ArucoMarkerSize = settings.ArucoMarkerSize;
-                    this.QRCodeSize = settings.QRCodeSize;
+                    this.ResolutionHint = settings.ResolutionHint;
                     this.EnabledDetectorTypes = (uint)settings.MarkerTypes;
+                    this.ArucoDicitonary = settings.ArucoDicitonary;
+                    this.CornerRefineMethod = settings.CornerRefineMethod;
+                    this.UseEdgeRefinement = settings.UseEdgeRefinement;
+                    this.ArucoMarkerSize = settings.ArucoMarkerSize;
+                    this.FullAnalysisIntervalHint = settings.FullAnalysisIntervalHint;
+                    this.QRCodeSize = settings.QRCodeSize;
                 }
             }
         }

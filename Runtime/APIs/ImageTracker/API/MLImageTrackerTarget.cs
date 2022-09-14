@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="MLImageTrackerTarget.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -36,11 +32,11 @@ namespace UnityEngine.XR.MagicLeap
         {
 #if UNITY_MAGICLEAP || UNITY_ANDROID
 
-            // Image tracker working with ZI should prevent querying the transforms
+            // Image tracker working with ML App Sim should prevent querying the transforms
             // in the same frame as when the target was added and the image tracker enabled.
 #if UNITY_EDITOR
             /// <summary>
-            /// Used to delay queering image transform in the same frame, when working with ZI. 
+            /// Used to delay queering image transform in the same frame, when working with ML App Sim. 
             /// </summary>
             private bool isReady = false;
 #endif
@@ -107,12 +103,14 @@ namespace UnityEngine.XR.MagicLeap
 
                 nativeMLImageTrackerAddTargetFromArrayPerfMarker.Begin();
                 MLResult.Code result = NativeBindings.MLImageTrackerAddTargetFromArray(this.trackerHandle, ref this.targetSettings, this.imageData, (uint)image.width, (uint)image.height, (numChannels == 4) ? MLImageTracker.ImageFormat.RGBA : MLImageTracker.ImageFormat.RGB, ref this.targetHandle);
+                MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLImageTrackerAddTargetFromArray));
                 nativeMLImageTrackerAddTargetFromArrayPerfMarker.End();
 
                 if (result == MLResult.Code.Ok && this.IsValid && MagicLeapNativeBindings.MLHandleIsValid(this.trackerHandle))
                 {
                     nativeMLImageTrackerGetTargetStaticDataPerfMarker.Begin();
                     result = NativeBindings.MLImageTrackerGetTargetStaticData(this.trackerHandle, this.targetHandle, ref this.targetStaticData);
+                    MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLImageTrackerGetTargetStaticData));
                     nativeMLImageTrackerGetTargetStaticDataPerfMarker.End();
 
                     if (result != MLResult.Code.Ok)
@@ -230,7 +228,7 @@ namespace UnityEngine.XR.MagicLeap
                 bool success = false;
                 if (MagicLeapNativeBindings.MLHandleIsValid(this.trackerHandle) && this.IsValid)
                 {
-                    // Image tracker working with ZI should prevent querying the transforms in the same frame.
+                    // Image tracker working with ML App Sim should prevent querying the transforms in the same frame.
                     // Since update tracking data is invoked at mono behaviour update, is ready flag should
                     // prevent to update image transform at the same frame and after one frame delay marks target as ready.
 #if UNITY_EDITOR
@@ -245,6 +243,7 @@ namespace UnityEngine.XR.MagicLeap
 
                     nativeMLImageTrackerGetTargetResultPerfMarker.Begin();
                     MLResult.Code result = NativeBindings.MLImageTrackerGetTargetResult(this.trackerHandle, this.targetHandle, ref this.nativeTrackingResult);
+                    MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLImageTrackerGetTargetResult));
                     nativeMLImageTrackerGetTargetResultPerfMarker.End();
 
                     if (result != MLResult.Code.Ok)
@@ -317,6 +316,7 @@ namespace UnityEngine.XR.MagicLeap
                 this.targetSettings.LongerDimension = longerDimension;
                 nativeMLImageTrackerUpdateTargetSettingsPerfMarker.Begin();
                 MLResult.Code resultCode = NativeBindings.MLImageTrackerUpdateTargetSettings(this.trackerHandle, this.targetHandle, ref this.targetSettings);
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLImageTrackerUpdateTargetSettings));
                 nativeMLImageTrackerUpdateTargetSettingsPerfMarker.End();
                 MLResult result = MLResult.Create(resultCode);
                 if (!result.IsOk)
@@ -337,6 +337,7 @@ namespace UnityEngine.XR.MagicLeap
                 {
                     nativeMLImageTrackerRemoveTargetPerfMarker.Begin();
                     MLResult.Code result = NativeBindings.MLImageTrackerRemoveTarget(this.trackerHandle, this.targetHandle);
+                    MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLImageTrackerRemoveTarget));
                     nativeMLImageTrackerRemoveTargetPerfMarker.End();
                     if (result != MLResult.Code.Ok)
                     {

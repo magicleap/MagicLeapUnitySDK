@@ -261,13 +261,13 @@ namespace UnityEngine.XR.MagicLeap.Native
 
             if (transformFromRUF)
             {
-                outQuat.Z = quat.z;
-                outQuat.W = quat.w;
+                outQuat.Z = -quat.z;
+                outQuat.W = -quat.w;
             }
             else
             {
-                outQuat.Z = -quat.z;
-                outQuat.W = -quat.w;
+                outQuat.Z = quat.z;
+                outQuat.W = quat.w;
             }
 
             return outQuat;

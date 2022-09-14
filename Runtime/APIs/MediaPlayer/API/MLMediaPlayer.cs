@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="MLMediaPlayer.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -138,12 +134,12 @@ namespace UnityEngine.XR.MagicLeap
                 MLDevice.RegisterApplicationPause(this.OnApplicationPause);
 
 #if UNITY_EDITOR
-                // media player not supported under Zero Iteration
+                // media player not supported under Magic Leap App Simulator
                 MLResult.Code resultCode = MLResult.Code.NotImplemented;
 #else 
                 MLResult.Code resultCode = NativeBindings.MLMediaPlayerCreate(out this.handle);
 #endif
-                if (!MLResult.DidNativeCallSucceed(resultCode, "MLMediaPlayerCreate" ))
+                if (!MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerCreate) ))
                 {
                     result = MLResult.Create(resultCode);
                     return;
@@ -154,7 +150,7 @@ namespace UnityEngine.XR.MagicLeap
                 this.gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
                 IntPtr gcHandlePtr = GCHandle.ToIntPtr(this.gcHandle);
                 resultCode = NativeBindings.MLMediaPlayerSetEventCallbacksEx(this.handle, ref callbacks, gcHandlePtr);
-                if (!MLResult.DidNativeCallSucceed(resultCode, "MLMediaPlayerSetEventCallbacksEx"))
+                if (!MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerSetEventCallbacksEx)))
                 {
                     result = MLResult.Create(resultCode);
                     return;
@@ -167,8 +163,11 @@ namespace UnityEngine.XR.MagicLeap
                 this.parser708.OnText += On708Text;
 
                 // register to the captionings callbacks
-                NativeBindings.MLMediaPlayerSetOnMediaTimedTextUpdateCallback(this.handle, NativeBindings.OnTimedTextUpdate, gcHandlePtr);
+                resultCode = NativeBindings.MLMediaPlayerSetOnMediaTimedTextUpdateCallback(this.handle, NativeBindings.OnTimedTextUpdate, gcHandlePtr);
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerSetOnMediaTimedTextUpdateCallback));
+                
                 NativeBindings.MLMediaPlayerSetOnMediaSubtitleUpdateCallback(this.handle, NativeBindings.OnMediaSubtitleUpdate, gcHandlePtr);
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerSetOnMediaSubtitleUpdateCallback));
 
                 // timedtext and subtitles containers must be shared
                 TracksContainer captioningTracksContainer = new TracksContainer();
@@ -199,8 +198,13 @@ namespace UnityEngine.XR.MagicLeap
 
                 this.parser608.OnText -= On608Text;
                 this.parser708.OnText -= On708Text;
-                MLResult.DidNativeCallSucceed(NativeBindings.MLMediaPlayerSetOnMediaSubtitleUpdateCallback(this.handle, null, IntPtr.Zero), "MLMediaPlayerSetOnMediaSubtitleUpdateCallback");
-                MLResult.DidNativeCallSucceed(NativeBindings.MLMediaPlayerSetOnMediaTimedTextUpdateCallback(this.handle, null, IntPtr.Zero), "MLMediaPlayerSetOnMediaTimedTextUpdateCallback");
+                
+                var resultCode = NativeBindings.MLMediaPlayerSetOnMediaSubtitleUpdateCallback(this.handle, null, IntPtr.Zero);
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerSetOnMediaSubtitleUpdateCallback));
+                
+                resultCode = NativeBindings.MLMediaPlayerSetOnMediaTimedTextUpdateCallback(this.handle, null, IntPtr.Zero);
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerSetOnMediaTimedTextUpdateCallback));                
+                
                 if (VideoRenderer != null)
                 {
                     this.VideoRenderer.Cleanup();
@@ -208,15 +212,18 @@ namespace UnityEngine.XR.MagicLeap
 
                 AudioDRM = null;
                 VideoDRM = null;
+                
+                resultCode = NativeBindings.MLMediaPlayerDestroy(this.handle);
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerDestroy));
 
-                MLResult.DidNativeCallSucceed(NativeBindings.MLMediaPlayerDestroy(this.handle), "MLMediaPlayerDestroy");
                 this.gcHandle.Free();
             }
 
             public MLResult Play()
             {
                 MLResult.Code resultCode = NativeBindings.MLMediaPlayerStart(this.handle);
-                bool started = MLResult.DidNativeCallSucceed(resultCode, "MLMediaPlayerStart");
+                bool started = MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerStart));
+
                 if (started)
                     MLThreadDispatch.Call(this, this.OnPlay);
 
@@ -226,7 +233,7 @@ namespace UnityEngine.XR.MagicLeap
             public MLResult Pause()
             {
                 MLResult.Code resultCode = NativeBindings.MLMediaPlayerPause(this.handle);
-                bool paused = MLResult.DidNativeCallSucceed(resultCode, "MLMediaPlayerPause");
+                bool paused = MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerPause));
                 if (paused)
                     MLThreadDispatch.Call(this, this.OnPause);
                 return MLResult.Create(resultCode);
@@ -238,7 +245,7 @@ namespace UnityEngine.XR.MagicLeap
             {
                 // Construct flag data.
                 MLResult.Code resultCode = NativeBindings.MLMediaPlayerPollStates(this.handle, PollingStateFlags.All, out states);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaPlayerPollStates");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerPollStates));
                 return MLResult.Create(resultCode);
             }
 
@@ -246,7 +253,7 @@ namespace UnityEngine.XR.MagicLeap
             {
                 // Construct flag data.
                 MLResult.Code resultCode = NativeBindings.MLMediaPlayerPollStates(this.handle, stateFlags, out state);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaPlayerPollStates");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerPollStates));
                 return MLResult.Create(resultCode);
             }
 
@@ -258,7 +265,7 @@ namespace UnityEngine.XR.MagicLeap
             public MLResult Seek(int seekMS, SeekMode seekMode)
             {
                 MLResult.Code resultCode = NativeBindings.MLMediaPlayerSeekTo(this.handle, seekMS, SeekMode.ClosestSync);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaPlayerSeekTo");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerSeekTo));
                 return MLResult.Create(resultCode);
             }
 
@@ -275,7 +282,7 @@ namespace UnityEngine.XR.MagicLeap
                 UnlinkDataSource();
 
                 MLResult.Code resultCode = NativeBindings.MLMediaPlayerStop(this.handle);
-                bool stopped = MLResult.DidNativeCallSucceed(resultCode, "MLMediaPlayerStop");
+                bool stopped = MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerStop));
                 if (stopped)
                     MLThreadDispatch.Call(this, this.OnStop);
                 return MLResult.Create(resultCode);
@@ -284,7 +291,7 @@ namespace UnityEngine.XR.MagicLeap
             public MLResult SetLooping(bool loop)
             {
                 MLResult.Code resultCode = NativeBindings.MLMediaPlayerSetLooping(this.handle, loop);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaPlayerSetLooping");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerSetLooping));
                 return MLResult.Create(resultCode);
             }
 
@@ -292,65 +299,65 @@ namespace UnityEngine.XR.MagicLeap
             {
                 volume = Mathf.Clamp01(volume);
                 MLResult.Code resultCode = NativeBindings.MLMediaPlayerSetVolume(this.handle, volume);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaPlayerSetVolume");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerSetVolume));
                 return MLResult.Create(resultCode);
             }
 
             public MLResult GetDurationMS(out int duration)
             {
                 MLResult.Code resultCode = NativeBindings.MLMediaPlayerGetDuration(this.handle, out duration);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaPlayerGetDuration");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerGetDuration));
                 return MLResult.Create(resultCode);
             }
 
             public MLResult GetPositionMS(out int position)
             {
                 MLResult.Code resultCode = NativeBindings.MLMediaPlayerGetCurrentPosition(this.handle, out position);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaPlayerGetCurrentPosition");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerGetCurrentPosition));
                 return MLResult.Create(resultCode);
             }
 
             public MLResult GetVideoSize(out int width, out int height)
             {
                 MLResult.Code resultCode = NativeBindings.MLMediaPlayerGetVideoSize(this.handle, out width, out height);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaPlayerGetVideoSize");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerGetVideoSize));
                 return MLResult.Create(resultCode);
             }
 
             public MLResult SetSpatialAudioEnable(bool enable)
             {
                 MLResult.Code resultCode = NativeBindings.MLMediaPlayerGetAudioHandle(this.handle, out this.audioHandle);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaPlayerGetAudioHandle");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerGetAudioHandle));
                 resultCode = MLAudioOutput.NativeBindings.MLAudioSetSpatialSoundEnable(this.audioHandle, enable);
-                MLResult.DidNativeCallSucceed(resultCode, "MLAudioSetSpatialSoundEnable");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(MLAudioOutput.NativeBindings.MLAudioSetSpatialSoundEnable));
                 return MLResult.Create(resultCode);
             }
 
             public MLResult GetSpatialAudioEnable(out bool enabled)
             {
                 MLResult.Code resultCode = NativeBindings.MLMediaPlayerGetAudioHandle(this.handle, out this.audioHandle);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaPlayerGetAudioHandle");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerGetAudioHandle));
                 resultCode = MLAudioOutput.NativeBindings.MLAudioGetSpatialSoundEnable(this.audioHandle, out enabled);
-                MLResult.DidNativeCallSucceed(resultCode, "MLAudioGetSpatialSoundEnable");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(MLAudioOutput.NativeBindings.MLAudioGetSpatialSoundEnable));
                 return MLResult.Create(resultCode);
             }
 
             public MLResult SetSpatialAudioChannelPosition(uint channel, Vector3 position)
             {
                 MLResult.Code resultCode = NativeBindings.MLMediaPlayerGetAudioHandle(this.handle, out this.audioHandle);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaPlayerGetAudioHandle");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerGetAudioHandle));
                 MagicLeapNativeBindings.MLVec3f mlPosition = MLConvert.FromUnity(position);
                 resultCode = MLAudioOutput.NativeBindings.MLAudioSetSpatialSoundPosition(this.handle, channel, ref mlPosition);
-                MLResult.DidNativeCallSucceed(resultCode, "MLAudioSetSpatialSoundPosition");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(MLAudioOutput.NativeBindings.MLAudioSetSpatialSoundPosition));
                 return MLResult.Create(resultCode);
             }
 
             public MLResult GetSpatialAudioChannelPosition(uint channel, out Vector3 position)
             {
                 MLResult.Code resultCode = NativeBindings.MLMediaPlayerGetAudioHandle(this.handle, out this.audioHandle);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaPlayerGetAudioHandle");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerGetAudioHandle));
                 resultCode = MLAudioOutput.NativeBindings.MLAudioGetSpatialSoundPosition(this.handle, channel, out MagicLeapNativeBindings.MLVec3f mlPosition);
-                MLResult.DidNativeCallSucceed(resultCode, "MLAudioGetSpatialSoundPosition");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(MLAudioOutput.NativeBindings.MLAudioGetSpatialSoundPosition));
                 position = MLConvert.ToUnity(mlPosition);
                 return MLResult.Create(resultCode);
             }
@@ -358,7 +365,7 @@ namespace UnityEngine.XR.MagicLeap
             public MLResult SetSourceURI(string uri)
             {
                 MLResult.Code resultCode = NativeBindings.MLMediaPlayerSetDataSourceForURI(this.handle, uri);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaPlayerSetDataSourceForURI");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerSetDataSourceForURI));
                 this.Source = MLResult.IsOK(resultCode) ? uri : string.Empty;
                 this.IsPrepared = false;
 
@@ -368,7 +375,8 @@ namespace UnityEngine.XR.MagicLeap
             public MLResult SetSourcePath(string path)
             {
                 MLResult.Code resultCode = NativeBindings.MLMediaPlayerSetDataSourceForPath(this.handle, path);
-                MLResult.DidNativeCallSucceed(resultCode, $"MLMediaPlayerSetDataSourceForPath with parameter: {path}");
+                var nativeMethodName = nameof(NativeBindings.MLMediaPlayerSetDataSourceForPath);
+                MLResult.DidNativeCallSucceed(resultCode, $"{nativeMethodName} with parameter: {path}");
                 this.Source = MLResult.IsOK(resultCode) ? path : string.Empty;
                 this.IsPrepared = false;
                 return MLResult.Create(resultCode);
@@ -428,7 +436,7 @@ namespace UnityEngine.XR.MagicLeap
             public MLResult PreparePlayer()
             {
                 MLResult.Code resultCode = NativeBindings.MLMediaPlayerPrepare(this.handle);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaPlayerPrepare");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerPrepare));
                 this.IsPrepared = true;
                 ClearTrackContainers();
                 return MLResult.Create(resultCode);
@@ -437,7 +445,7 @@ namespace UnityEngine.XR.MagicLeap
             public MLResult PreparePlayerAsync()
             {
                 MLResult.Code resultCode = NativeBindings.MLMediaPlayerPrepareAsync(this.handle);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaPlayerPrepareAsync");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerPrepareAsync));
                 ClearTrackContainers();
                 return MLResult.Create(resultCode);
             }
@@ -445,7 +453,7 @@ namespace UnityEngine.XR.MagicLeap
             public MLResult Reset()
             {
                 var resultCode = NativeBindings.MLMediaPlayerReset(handle);
-                if(MLResult.DidNativeCallSucceed(resultCode, "MLMediaPlayerReset"))
+                if(MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerReset)))
                 {
                     IsPrepared = false;
                 }
@@ -455,7 +463,7 @@ namespace UnityEngine.XR.MagicLeap
             public MLResult ResetAsync()
             {
                 var resultCode = NativeBindings.MLMediaPlayerResetAsync(this.handle);
-                if(MLResult.DidNativeCallSucceed(resultCode, "MLMediaPlayerResetAsync"))
+                if(MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerResetAsync)))
                 {
                     IsPrepared = false;
                 }
@@ -483,7 +491,7 @@ namespace UnityEngine.XR.MagicLeap
             public int GetVideoBitrate()
             {
                 MLResult.Code resultCode = NativeBindings.MLMediaPlayerGetMetrics(this.handle, out NativeBindings.MLMediaPlayerMetrics metrics);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaPlayerGetMetrics");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerGetMetrics));
                 return metrics.AverageVideoBitrate;
             }
 
@@ -531,7 +539,7 @@ namespace UnityEngine.XR.MagicLeap
             public void PollForMetaData()
             {
                 MLResult.Code resultCode = NativeBindings.MLMediaPlayerPollStates(this.handle, PollingStateFlags.HasMetadataUpdated, out PollingStateFlags polledStates);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaPlayerPollStates");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerPollStates));
                 if (polledStates.HasFlag(PollingStateFlags.HasMetadataUpdated))
                 {
                     GetTracks();
@@ -551,7 +559,7 @@ namespace UnityEngine.XR.MagicLeap
                 TracksContainer container = this.trackContainers[track.TrackType];
 
                 MLResult.Code resultCode = NativeBindings.MLMediaPlayerSelectTrack(this.handle, track.Index);
-                if (!MLResult.DidNativeCallSucceed(resultCode, "MLMediaPlayerSelectTrack"))
+                if (!MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerSelectTrack)))
                 {
                     return MLResult.Create(resultCode);
                 }
@@ -564,7 +572,7 @@ namespace UnityEngine.XR.MagicLeap
             {
                 TracksContainer container = this.trackContainers[track.TrackType];
                 MLResult.Code resultCode = NativeBindings.MLMediaPlayerUnselectTrack(this.handle, track.Index);
-                if (!MLResult.DidNativeCallSucceed(resultCode, "MLMediaPlayerUnselectTrack"))
+                if (!MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerUnselectTrack)))
                 {
                     return MLResult.Create(resultCode);
                 }
@@ -581,7 +589,7 @@ namespace UnityEngine.XR.MagicLeap
                 // TODO : see if we need to add checks to confirm if source has been set.
                 // Technically it would be, becayse we get width and height only after that.
                 MLResult.Code resultCode = NativeBindings.MLMediaPlayerSetSurface(this.handle, VideoRenderer.Surface.Handle);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaPlayerSetSurface");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerSetSurface));
             }
 
             public Track.DRM AudioDRM { get; private set; }
@@ -591,7 +599,7 @@ namespace UnityEngine.XR.MagicLeap
             private void GetTracks()
             {
                 MLResult.Code resultCode = NativeBindings.MLMediaPlayerGetTrackCount(this.handle, out uint trackCount);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaPlayerGetTrackCount");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerGetTrackCount));
 
                 // Per the Media team as new tracks come in the old tracks are still valid so we start processing after the current last track
                 for (int i = allTracks.Count; i < trackCount; ++i)
@@ -655,7 +663,7 @@ namespace UnityEngine.XR.MagicLeap
                 this.byteBuffer = null;
 
 #if UNITY_MAGICLEAP || UNITY_ANDROID
-                // media player not supported in Zero Iteration
+                // media player not supported in Magic Leap App Simulator
 #if !UNITY_EDITOR
                 MLResult.Code result = NativeBindings.Create(this, out ulong handle);
                 if (MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLMediaDataSourceCreate)))
@@ -672,7 +680,7 @@ namespace UnityEngine.XR.MagicLeap
                 this.byteBuffer = byteBuffer;
 
 #if UNITY_MAGICLEAP || UNITY_ANDROID
-                // media player not supported in Zero Iteration
+                // media player not supported in Magic Leap App Simulator
 #if !UNITY_EDITOR
                 MLResult.Code result = NativeBindings.Create(this, out ulong handle);
                 if (MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLMediaDataSourceCreate)))
@@ -688,7 +696,8 @@ namespace UnityEngine.XR.MagicLeap
 #if UNITY_MAGICLEAP || UNITY_ANDROID
                 if (MagicLeapNativeBindings.MLHandleIsValid(Handle))
                 {
-                    MLResult.DidNativeCallSucceed(NativeBindings.MLMediaDataSourceDestroy(Handle), nameof(NativeBindings.MLMediaDataSourceDestroy));
+                    var resultCode = NativeBindings.MLMediaDataSourceDestroy(Handle);
+                    MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaDataSourceDestroy));
                     Handle = MagicLeapNativeBindings.InvalidHandle;
                 }
 #endif
@@ -699,7 +708,8 @@ namespace UnityEngine.XR.MagicLeap
 #if UNITY_MAGICLEAP || UNITY_ANDROID
                 if (MagicLeapNativeBindings.MLHandleIsValid(Handle))
                 {
-                    MLResult.DidNativeCallSucceed(NativeBindings.MLMediaDataSourceDestroy(Handle), nameof(NativeBindings.MLMediaDataSourceDestroy));
+                    var resultCode = NativeBindings.MLMediaDataSourceDestroy(Handle);
+                    MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaDataSourceDestroy));
                     Handle = MagicLeapNativeBindings.InvalidHandle;
                 }
 #endif

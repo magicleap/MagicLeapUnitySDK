@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="MLRaycast.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -44,6 +40,7 @@ namespace UnityEngine.XR.MagicLeap
         {
             nativeMLRaycastCreatePerfMarker.Begin();
             MLResult.Code resultCode = NativeBindings.MLRaycastCreate(ref trackerHandle);
+            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLRaycastCreate));
             nativeMLRaycastCreatePerfMarker.End();
             return resultCode;
         }
@@ -63,7 +60,7 @@ namespace UnityEngine.XR.MagicLeap
             nativeMLRaycastRequestPerfMarker.Begin();
             NativeBindings.MLRaycastQueryNative request = new NativeBindings.MLRaycastQueryNative(requestParams);
             MLResult.Code resultCode = NativeBindings.MLRaycastRequest(this.trackerHandle, ref request, ref queryHandle);
-            MLResult.DidNativeCallSucceed(resultCode, "MLRaycastRequest");
+            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLRaycastRequest));
             nativeMLRaycastRequestPerfMarker.End();
             return resultCode;
         }
@@ -85,6 +82,7 @@ namespace UnityEngine.XR.MagicLeap
         {
             nativeMLRaycastGetResultPerfMarker.Begin();
             MLResult.Code resultCode = NativeBindings.MLRaycastGetResult(trackerHandle, raycastRequest, out result);
+            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLRaycastGetResult));
             nativeMLRaycastGetResultPerfMarker.End();
             return resultCode;
         }
@@ -102,6 +100,7 @@ namespace UnityEngine.XR.MagicLeap
         {
             nativeMLRaycastDestroyPerfMarker.Begin();
             MLResult.Code resultCode = NativeBindings.MLRaycastDestroy(trackerHandle);
+            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLRaycastDestroy));
             nativeMLRaycastDestroyPerfMarker.End();
             return resultCode;
         }
@@ -121,8 +120,6 @@ namespace UnityEngine.XR.MagicLeap
             this.trackerHandle = MagicLeapNativeBindings.InvalidHandle;
 
             MLResult.Code resultCode = Create(ref this.trackerHandle);
-
-            MLResult.DidNativeCallSucceed(resultCode, "MLRaycastCreate");
 
             startAPIPerfMarker.End();
             return resultCode;

@@ -82,6 +82,15 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
+                    ""name"": ""TriggerHold"",
+                    ""type"": ""Value"",
+                    ""id"": ""4fa217d0-eb67-479f-899a-cd3c98e04377"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": ""Hold"",
+                    ""initialStateCheck"": true
+                },
+                {
                     ""name"": ""TouchpadPosition"",
                     ""type"": ""Value"",
                     ""id"": ""469d249d-c91c-49e9-a777-ef61b9d6f690"",
@@ -194,6 +203,17 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
+                    ""id"": ""e1104e8e-4806-44b7-bb74-8e73b4aa936a"",
+                    ""path"": ""<MagicLeapController>/mlcontrollertouch1force"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""TouchpadForce"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""f37fea1c-d4d8-4d9e-8698-ed7479b825c2"",
                     ""path"": ""<XRController>{RightHand}/{trigger}"",
                     ""interactions"": """",
@@ -217,7 +237,7 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
                 {
                     ""name"": ""first"",
                     ""id"": ""3704ef6d-5360-40eb-b1b7-198762493f8d"",
-                    ""path"": ""<XRController>{RightHand}/pointerRotation"",
+                    ""path"": ""<MagicLeapController>/deviceRotation"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -228,7 +248,7 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
                 {
                     ""name"": ""second"",
                     ""id"": ""144f6be1-aae1-49bc-9ceb-94c242bc35ef"",
-                    ""path"": ""<XRController>{RightHand}/deviceRotation"",
+                    ""path"": ""<XRController>{RightHand}/pointerRotation"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -239,7 +259,7 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
                 {
                     ""name"": ""third"",
                     ""id"": ""47a4ccbf-ec6b-4323-8078-2aa08c005c0c"",
-                    ""path"": """",
+                    ""path"": ""<XRController>{RightHand}/deviceRotation"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -261,7 +281,7 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
                 {
                     ""name"": ""first"",
                     ""id"": ""fe13a61d-ab1e-4f06-b282-d3c1d2d98d9a"",
-                    ""path"": ""<XRController>{RightHand}/pointerPosition"",
+                    ""path"": ""<MagicLeapController>/devicePosition"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -272,7 +292,7 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
                 {
                     ""name"": ""second"",
                     ""id"": ""f97f494e-8fa8-4be4-826c-aa3c45127f54"",
-                    ""path"": ""<XRController>{RightHand}/devicePosition"",
+                    ""path"": ""<XRController>{RightHand}/pointerPosition"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -283,7 +303,7 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
                 {
                     ""name"": ""third"",
                     ""id"": ""a1240932-fca5-4cc1-a010-e7cedee497ba"",
-                    ""path"": """",
+                    ""path"": ""<XRController>{RightHand}/devicePosition"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -305,7 +325,7 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""bec27350-beb9-42ee-9274-badd7d9e6e68"",
-                    ""path"": ""<XRController>{RightHand}/menu"",
+                    ""path"": ""<XRController>{RightHand}/menuButton"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -332,6 +352,17 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Bumper"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""664b2792-0666-4de1-898d-79ea48c10db5"",
+                    ""path"": ""<XRController>{RightHand}/{trigger}"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""TriggerHold"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -467,226 +498,181 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""ThumbMetacarpal"",
-                    ""type"": ""Value"",
-                    ""id"": ""22806e9a-d103-4cc1-b09c-13237b81978f"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""IndexMetacarpal"",
-                    ""type"": ""Value"",
-                    ""id"": ""7d2b785a-3705-4927-b095-b68455890173"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""MiddleMetacarpal"",
-                    ""type"": ""Value"",
-                    ""id"": ""bf51c96a-5b6a-4312-a7b7-92f8b94a9c8d"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""RingMetacarpal"",
-                    ""type"": ""Value"",
-                    ""id"": ""51cd933c-6afb-4284-97d4-35a390aa77d3"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""PinkyMetacarpal"",
-                    ""type"": ""Value"",
-                    ""id"": ""3bec5b0c-7605-41fb-9f68-d9b776d044ce"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""ThumbProximal"",
-                    ""type"": ""Value"",
-                    ""id"": ""8254828b-1105-4d8e-b125-d5a418e15087"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""IndexProximal"",
-                    ""type"": ""Value"",
-                    ""id"": ""a8fb4b9d-0bf4-4f99-8703-18adfb5d147f"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""MiddleProximal"",
-                    ""type"": ""Value"",
-                    ""id"": ""90b743ce-f316-474d-94e7-89d2b9bc67d7"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""RingProximal"",
-                    ""type"": ""Value"",
-                    ""id"": ""e6dc792e-bd50-42a7-b32e-085651be0c90"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""PinkyProximal"",
-                    ""type"": ""Value"",
-                    ""id"": ""34a9270f-8a98-4e3b-abf3-f07d2d8694c7"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""ThumbIntermediate"",
-                    ""type"": ""Value"",
-                    ""id"": ""4190038c-dd85-4e94-b22a-a8d2863a6ab5"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""IndexIntermediate"",
-                    ""type"": ""Value"",
-                    ""id"": ""53feadc7-5145-43bb-a3c1-e86f000ad780"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""MiddleIntermediate"",
-                    ""type"": ""Value"",
-                    ""id"": ""c25067a5-b56e-4fe3-9704-cba94bbd43a5"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""RingIntermediate"",
-                    ""type"": ""Value"",
-                    ""id"": ""0df1f0bb-2c6b-42f4-a556-5cd3839ee557"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""PinkyIntermediate"",
-                    ""type"": ""Value"",
-                    ""id"": ""3d679f86-4338-4814-9911-c315affe4830"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""ThumbDistal"",
-                    ""type"": ""Value"",
-                    ""id"": ""c282e22c-78fc-43d8-97f1-3daafd0702e3"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""IndexDistal"",
-                    ""type"": ""Value"",
-                    ""id"": ""d69a1cbd-b1be-499f-8131-9146a8975861"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""MiddleDistal"",
-                    ""type"": ""Value"",
-                    ""id"": ""8a7f66fb-ab2d-49a7-9356-c4916ab95da3"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""RingDistal"",
-                    ""type"": ""Value"",
-                    ""id"": ""d5f98e9d-a857-42d5-94f9-4a83e6ba663a"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""PinkyDistal"",
-                    ""type"": ""Value"",
-                    ""id"": ""404a86d7-793f-4caa-9b64-fc368c66146f"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""ThumbTip"",
+                    ""name"": ""ThumbTIP"",
                     ""type"": ""Value"",
                     ""id"": ""be19ff25-7c7c-424f-b575-a8cc5f121167"",
-                    ""expectedControlType"": """",
+                    ""expectedControlType"": ""Bone"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""IndexTip"",
+                    ""name"": ""ThumbIP"",
+                    ""type"": ""Value"",
+                    ""id"": ""8254828b-1105-4d8e-b125-d5a418e15087"",
+                    ""expectedControlType"": ""Bone"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""ThumbMCP"",
+                    ""type"": ""Value"",
+                    ""id"": ""22806e9a-d103-4cc1-b09c-13237b81978f"",
+                    ""expectedControlType"": ""Bone"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""ThumbCMC"",
+                    ""type"": ""Value"",
+                    ""id"": ""4190038c-dd85-4e94-b22a-a8d2863a6ab5"",
+                    ""expectedControlType"": ""Bone"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""IndexTIP"",
                     ""type"": ""Value"",
                     ""id"": ""61b82fa1-8b74-4faa-bfc4-e8548701b67e"",
-                    ""expectedControlType"": """",
+                    ""expectedControlType"": ""Bone"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""MiddleTip"",
+                    ""name"": ""IndexDIP"",
+                    ""type"": ""Value"",
+                    ""id"": ""d69a1cbd-b1be-499f-8131-9146a8975861"",
+                    ""expectedControlType"": ""Bone"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""IndexPIP"",
+                    ""type"": ""Value"",
+                    ""id"": ""a8fb4b9d-0bf4-4f99-8703-18adfb5d147f"",
+                    ""expectedControlType"": ""Bone"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""IndexMCP"",
+                    ""type"": ""Value"",
+                    ""id"": ""7d2b785a-3705-4927-b095-b68455890173"",
+                    ""expectedControlType"": ""Bone"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""MiddleTIP"",
                     ""type"": ""Value"",
                     ""id"": ""37803418-3231-4ba2-9589-1217bc042b2f"",
-                    ""expectedControlType"": """",
+                    ""expectedControlType"": ""Bone"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""RingTip"",
+                    ""name"": ""MiddleDIP"",
+                    ""type"": ""Value"",
+                    ""id"": ""8a7f66fb-ab2d-49a7-9356-c4916ab95da3"",
+                    ""expectedControlType"": ""Bone"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""MiddlePIP"",
+                    ""type"": ""Value"",
+                    ""id"": ""90b743ce-f316-474d-94e7-89d2b9bc67d7"",
+                    ""expectedControlType"": ""Bone"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""MiddleMCP"",
+                    ""type"": ""Value"",
+                    ""id"": ""bf51c96a-5b6a-4312-a7b7-92f8b94a9c8d"",
+                    ""expectedControlType"": ""Bone"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""RingTIP"",
                     ""type"": ""Value"",
                     ""id"": ""8708a4ec-5f88-4804-b1e4-2eac72a34191"",
-                    ""expectedControlType"": """",
+                    ""expectedControlType"": ""Bone"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""PinkyTip"",
+                    ""name"": ""RingDIP"",
+                    ""type"": ""Value"",
+                    ""id"": ""d5f98e9d-a857-42d5-94f9-4a83e6ba663a"",
+                    ""expectedControlType"": ""Bone"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""RingPIP"",
+                    ""type"": ""Value"",
+                    ""id"": ""e6dc792e-bd50-42a7-b32e-085651be0c90"",
+                    ""expectedControlType"": ""Bone"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""RingMCP"",
+                    ""type"": ""Value"",
+                    ""id"": ""51cd933c-6afb-4284-97d4-35a390aa77d3"",
+                    ""expectedControlType"": ""Bone"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""PinkyTIP"",
                     ""type"": ""Value"",
                     ""id"": ""13e2b7f6-2333-4a05-983f-bae507f89f56"",
-                    ""expectedControlType"": """",
+                    ""expectedControlType"": ""Bone"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""PinkyDIP"",
+                    ""type"": ""Value"",
+                    ""id"": ""404a86d7-793f-4caa-9b64-fc368c66146f"",
+                    ""expectedControlType"": ""Bone"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""PinkyPIP"",
+                    ""type"": ""Value"",
+                    ""id"": ""34a9270f-8a98-4e3b-abf3-f07d2d8694c7"",
+                    ""expectedControlType"": ""Bone"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""PinkyMCP"",
+                    ""type"": ""Value"",
+                    ""id"": ""3bec5b0c-7605-41fb-9f68-d9b776d044ce"",
+                    ""expectedControlType"": ""Bone"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
@@ -729,154 +715,66 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""8c27a8e2-b315-4acd-8da7-6f10aa1909f5"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/boneindexmetacarpal"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/boneindexmcp"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""IndexMetacarpal"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""40b140f6-21e5-447c-ad31-490ce341043d"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/boneindexproximal"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""IndexProximal"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""43bae5f1-89d6-47e0-b2cc-1f02b45ed029"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/boneindexintermediate"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""IndexIntermediate"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""dcb367d7-2dd1-4500-8d36-8ebe31ce10c1"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/boneindexdistal"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""IndexDistal"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""0221227d-1229-4c12-a681-2060d8d14a3d"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/boneindextip"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""IndexTip"",
+                    ""action"": ""IndexMCP"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
                     ""id"": ""4c542ca1-4460-460e-8c5a-9c2040d2bd00"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonepinkymetacarpal"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonepinkymcp"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""PinkyMetacarpal"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""bef21465-51f9-4696-bdb6-80cc0569b4e6"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonepinkyproximal"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""PinkyProximal"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""48c29347-fa91-4e18-86dc-75639e826dee"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonepinkyintermediate"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""PinkyIntermediate"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""946aaa2e-59d5-4f6c-9269-e0b0e1e7c283"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonepinkydistal"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""PinkyDistal"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""c3759d0a-a110-45c7-a7de-b41697d6ce4a"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonepinkytip"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""PinkyTip"",
+                    ""action"": ""PinkyMCP"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
                     ""id"": ""af231bdd-c353-423c-bcd3-91af4a964212"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonethumbmetacarpal"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonethumbmcp"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""ThumbMetacarpal"",
+                    ""action"": ""ThumbMCP"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""820fe0c1-6508-4500-b9f7-3a94a9f839bc"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonemiddlemcp"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MiddleMCP"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1abb01c1-45e7-451c-8361-8d6f753b85d4"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/boneringmcp"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RingMCP"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
                     ""id"": ""ad3fb047-1833-46a2-b0d4-8097b4150d57"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonethumbproximal"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonethumbip"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""ThumbProximal"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""1d14ec32-f5e7-463f-86e6-0ac69f47bb35"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonethumbintermediate"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""ThumbIntermediate"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""842dc918-6312-407a-a541-cb629bbe4159"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonethumbdistal"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""ThumbDistal"",
+                    ""action"": ""ThumbIP"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -887,95 +785,51 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""ThumbTip"",
+                    ""action"": ""ThumbTIP"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
-                    ""id"": ""820fe0c1-6508-4500-b9f7-3a94a9f839bc"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonemiddlemetacarpal"",
+                    ""id"": ""1d14ec32-f5e7-463f-86e6-0ac69f47bb35"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonethumbcmc"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""MiddleMetacarpal"",
+                    ""action"": ""ThumbCMC"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
-                    ""id"": ""1abb01c1-45e7-451c-8361-8d6f753b85d4"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/boneringmetacarpal"",
+                    ""id"": ""0221227d-1229-4c12-a681-2060d8d14a3d"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/boneindextip"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""RingMetacarpal"",
+                    ""action"": ""IndexTIP"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
-                    ""id"": ""187f1d45-8b44-4767-8105-2d309fd77e07"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonemiddleproximal"",
+                    ""id"": ""dcb367d7-2dd1-4500-8d36-8ebe31ce10c1"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/boneindexdip"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""MiddleProximal"",
+                    ""action"": ""IndexDIP"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
-                    ""id"": ""fdcc7cfe-07d8-4d25-86eb-6ae351867704"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/boneringproximal"",
+                    ""id"": ""40b140f6-21e5-447c-ad31-490ce341043d"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/boneindexpip"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""RingProximal"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""ff81b8cc-aad4-44ce-936b-2aa311b5e298"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonemiddleintermediate"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""MiddleIntermediate"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""a2107d1d-9dea-4f1e-8682-0bad6627dc2e"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/boneringintermediate"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""RingIntermediate"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""fdb755d9-c02d-41e4-a4d6-27f311295d3a"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonemiddledistal"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""MiddleDistal"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""adb141a5-5754-4dd7-bf6a-c935fa3ce710"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/boneringdistal"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""RingDistal"",
+                    ""action"": ""IndexPIP"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -986,7 +840,29 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""MiddleTip"",
+                    ""action"": ""MiddleTIP"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""fdb755d9-c02d-41e4-a4d6-27f311295d3a"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonemiddledip"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MiddleDIP"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""187f1d45-8b44-4767-8105-2d309fd77e07"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonemiddlepip"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MiddlePIP"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -997,7 +873,62 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""RingTip"",
+                    ""action"": ""RingTIP"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""adb141a5-5754-4dd7-bf6a-c935fa3ce710"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/boneringdip"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RingDIP"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""fdcc7cfe-07d8-4d25-86eb-6ae351867704"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/boneringpip"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RingPIP"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c3759d0a-a110-45c7-a7de-b41697d6ce4a"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonepinkytip"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""PinkyTIP"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""946aaa2e-59d5-4f6c-9269-e0b0e1e7c283"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonepinkydip"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""PinkyDIP"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""bef21465-51f9-4696-bdb6-80cc0569b4e6"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandLeft>{LeftHand}/bonepinkypip"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""PinkyPIP"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1035,226 +966,181 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""ThumbMetacarpal"",
-                    ""type"": ""Value"",
-                    ""id"": ""435768ac-76cb-449a-ac90-7f06a27db5bc"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""IndexMetacarpal"",
-                    ""type"": ""Value"",
-                    ""id"": ""721b37b1-ac86-488b-8f1c-e856aadf7fea"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""MiddleMetacarpal"",
-                    ""type"": ""Value"",
-                    ""id"": ""4aba5635-767f-46bd-b0eb-8d0e1ae89f0f"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""RingMetacarpal"",
-                    ""type"": ""Value"",
-                    ""id"": ""4a2fcedc-e369-4d53-87a2-e957ba8aa822"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""PinkyMetacarpal"",
-                    ""type"": ""Value"",
-                    ""id"": ""e604aeb4-8d74-43c0-a772-840f8f5dfa6d"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""ThumbProximal"",
-                    ""type"": ""Value"",
-                    ""id"": ""2c0f8b6c-cf64-466e-ac5f-efab85bacc85"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""IndexProximal"",
-                    ""type"": ""Value"",
-                    ""id"": ""9dd8aa68-2d34-4f13-9390-0059fef2bca9"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""MiddleProximal"",
-                    ""type"": ""Value"",
-                    ""id"": ""148c6a17-c23d-4bf1-881a-e170065019fe"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""RingProximal"",
-                    ""type"": ""Value"",
-                    ""id"": ""d168be58-98d7-4255-bd7e-3de47ba4f79c"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""PinkyProximal"",
-                    ""type"": ""Value"",
-                    ""id"": ""d7715cae-67f9-4e34-a444-fdcd6673d733"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""ThumbIntermediate"",
-                    ""type"": ""Value"",
-                    ""id"": ""03407893-6254-45bc-8dc3-5a07b4a7befa"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""IndexIntermediate"",
-                    ""type"": ""Value"",
-                    ""id"": ""f0641216-a06e-445c-85ad-afadd17831bd"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""MiddleIntermediate"",
-                    ""type"": ""Value"",
-                    ""id"": ""bc837cf2-3380-46df-a9f6-896ccf04253e"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""RingIntermediate"",
-                    ""type"": ""Value"",
-                    ""id"": ""ce97ed4e-ef74-49a6-b02e-82f2fe7d27eb"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""PinkyIntermediate"",
-                    ""type"": ""Value"",
-                    ""id"": ""b927124d-4254-4a58-81c9-320881ec8791"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""ThumbDistal"",
-                    ""type"": ""Value"",
-                    ""id"": ""5fc8d0b1-31ec-44cc-b776-5257b7874c49"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""IndexDistal"",
-                    ""type"": ""Value"",
-                    ""id"": ""1c18055c-44e1-494e-b33c-bed2df61feeb"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""MiddleDistal"",
-                    ""type"": ""Value"",
-                    ""id"": ""c6c59bb1-3348-46f5-8b83-ab7d01239c39"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""RingDistal"",
-                    ""type"": ""Value"",
-                    ""id"": ""814177f0-7b16-4b42-a230-6dcd6cafc42c"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""PinkyDistal"",
-                    ""type"": ""Value"",
-                    ""id"": ""e9a51370-b71e-4b54-bc49-07468e822fa9"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""ThumbTip"",
+                    ""name"": ""ThumbTIP"",
                     ""type"": ""Value"",
                     ""id"": ""3206893d-69fd-404d-b774-88de32cdbda6"",
-                    ""expectedControlType"": """",
+                    ""expectedControlType"": ""Bone"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""IndexTip"",
+                    ""name"": ""ThumbIP"",
+                    ""type"": ""Value"",
+                    ""id"": ""5fc8d0b1-31ec-44cc-b776-5257b7874c49"",
+                    ""expectedControlType"": ""Bone"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""ThumbMCP"",
+                    ""type"": ""Value"",
+                    ""id"": ""435768ac-76cb-449a-ac90-7f06a27db5bc"",
+                    ""expectedControlType"": ""Bone"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""ThumbCMC"",
+                    ""type"": ""Value"",
+                    ""id"": ""2c0f8b6c-cf64-466e-ac5f-efab85bacc85"",
+                    ""expectedControlType"": ""Bone"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""IndexTIP"",
                     ""type"": ""Value"",
                     ""id"": ""544c5c40-26b8-4c30-ac80-d73c7e49ca4d"",
-                    ""expectedControlType"": """",
+                    ""expectedControlType"": ""Bone"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""MiddleTip"",
+                    ""name"": ""IndexDIP"",
+                    ""type"": ""Value"",
+                    ""id"": ""1c18055c-44e1-494e-b33c-bed2df61feeb"",
+                    ""expectedControlType"": ""Bone"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""IndexPIP"",
+                    ""type"": ""Value"",
+                    ""id"": ""9dd8aa68-2d34-4f13-9390-0059fef2bca9"",
+                    ""expectedControlType"": ""Bone"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""IndexMCP"",
+                    ""type"": ""Value"",
+                    ""id"": ""721b37b1-ac86-488b-8f1c-e856aadf7fea"",
+                    ""expectedControlType"": ""Bone"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""MiddleTIP"",
                     ""type"": ""Value"",
                     ""id"": ""93d43d05-9268-48e0-8ff8-24e6fa0bbdc2"",
-                    ""expectedControlType"": """",
+                    ""expectedControlType"": ""Bone"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""RingTip"",
+                    ""name"": ""MiddleDIP"",
+                    ""type"": ""Value"",
+                    ""id"": ""c6c59bb1-3348-46f5-8b83-ab7d01239c39"",
+                    ""expectedControlType"": ""Bone"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""MiddlePIP"",
+                    ""type"": ""Value"",
+                    ""id"": ""148c6a17-c23d-4bf1-881a-e170065019fe"",
+                    ""expectedControlType"": ""Bone"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""MiddleMCP"",
+                    ""type"": ""Value"",
+                    ""id"": ""4aba5635-767f-46bd-b0eb-8d0e1ae89f0f"",
+                    ""expectedControlType"": ""Bone"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""RingTIP"",
                     ""type"": ""Value"",
                     ""id"": ""246bab7b-c86a-41d2-b4d7-33c76031c9e2"",
-                    ""expectedControlType"": """",
+                    ""expectedControlType"": ""Bone"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""PinkyTip"",
+                    ""name"": ""RingDIP"",
+                    ""type"": ""Value"",
+                    ""id"": ""814177f0-7b16-4b42-a230-6dcd6cafc42c"",
+                    ""expectedControlType"": ""Bone"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""RingPIP"",
+                    ""type"": ""Value"",
+                    ""id"": ""d168be58-98d7-4255-bd7e-3de47ba4f79c"",
+                    ""expectedControlType"": ""Bone"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""RingMCP"",
+                    ""type"": ""Value"",
+                    ""id"": ""4a2fcedc-e369-4d53-87a2-e957ba8aa822"",
+                    ""expectedControlType"": ""Bone"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""PinkyTIP"",
                     ""type"": ""Value"",
                     ""id"": ""31cee515-95dd-4ba4-893d-8930b505c405"",
-                    ""expectedControlType"": """",
+                    ""expectedControlType"": ""Bone"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""PinkyDIP"",
+                    ""type"": ""Value"",
+                    ""id"": ""e9a51370-b71e-4b54-bc49-07468e822fa9"",
+                    ""expectedControlType"": ""Bone"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""PinkyPIP"",
+                    ""type"": ""Value"",
+                    ""id"": ""d7715cae-67f9-4e34-a444-fdcd6673d733"",
+                    ""expectedControlType"": ""Bone"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""PinkyMCP"",
+                    ""type"": ""Value"",
+                    ""id"": ""e604aeb4-8d74-43c0-a772-840f8f5dfa6d"",
+                    ""expectedControlType"": ""Bone"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
@@ -1297,220 +1183,66 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""c22bce79-0e99-426a-a6be-85acd3ac1e89"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonethumbmetacarpal"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonethumbmcp"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""ThumbMetacarpal"",
+                    ""action"": ""ThumbMCP"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
                     ""id"": ""6acee0e0-e6ca-4e2e-930f-84d88d477692"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/boneindexmetacarpal"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/boneindexmcp"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""IndexMetacarpal"",
+                    ""action"": ""IndexMCP"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
                     ""id"": ""2ab92c80-0bb6-4785-9f32-bbd40498e5f4"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonemiddlemetacarpal"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonemiddlemcp"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""MiddleMetacarpal"",
+                    ""action"": ""MiddleMCP"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
                     ""id"": ""8f31ac7e-f8bf-48c9-9842-eb51a7f4cdfc"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/boneringmetacarpal"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/boneringmcp"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""RingMetacarpal"",
+                    ""action"": ""RingMCP"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
                     ""id"": ""4df5e83c-f67e-4207-87d7-3bc2c66f7794"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonepinkymetacarpal"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonepinkymcp"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""PinkyMetacarpal"",
+                    ""action"": ""PinkyMCP"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
                     ""id"": ""525c659e-baf1-4d14-abc3-61c735e23a15"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonethumbproximal"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonethumbcmc"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""ThumbProximal"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""505e73ec-5ec4-4021-8557-19d3e8318db1"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/boneindexproximal"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""IndexProximal"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""584fe833-2732-4946-9f70-c78f86ff8710"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonemiddleproximal"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""MiddleProximal"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""8fea3e66-2722-401a-b4b4-b8f42d86d6cb"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/boneringproximal"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""RingProximal"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""40777b92-16f6-42a7-ab50-672dfe82e8a9"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonepinkyproximal"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""PinkyProximal"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""d2239981-4dae-4b44-ade5-ade7c8823130"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonethumbintermediate"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""ThumbIntermediate"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""54782886-2850-4acf-820a-b2297f93ad13"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/boneindexintermediate"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""IndexIntermediate"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""1ea3efa3-9735-4060-845d-dc70242831a0"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonemiddleintermediate"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""MiddleIntermediate"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""a4ea3c84-4156-470e-aa74-399ad357f667"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/boneringintermediate"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""RingIntermediate"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""a5426425-fdc4-4f35-b361-82177a37bbe1"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonepinkyintermediate"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""PinkyIntermediate"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""e109023f-11ab-48cd-beab-d48a503c448a"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonethumbdistal"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""ThumbDistal"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""b5993170-e6da-423f-817d-0c564ccc08b5"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/boneindexdistal"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""IndexDistal"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""e5a2b527-6947-4725-be46-34679b8b95fb"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonemiddledistal"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""MiddleDistal"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""350990fb-7a86-4507-9447-4f78765b296f"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/boneringdistal"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""RingDistal"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""94be4a88-3642-4e5e-9c81-d490231a6166"",
-                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonepinkydistal"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""PinkyDistal"",
+                    ""action"": ""ThumbCMC"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -1521,7 +1253,18 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""ThumbTip"",
+                    ""action"": ""ThumbTIP"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e109023f-11ab-48cd-beab-d48a503c448a"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonethumbip"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ThumbIP"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -1532,7 +1275,29 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""IndexTip"",
+                    ""action"": ""IndexTIP"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b5993170-e6da-423f-817d-0c564ccc08b5"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/boneindexdip"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""IndexDIP"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""505e73ec-5ec4-4021-8557-19d3e8318db1"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/boneindexpip"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""IndexPIP"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -1543,7 +1308,29 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""MiddleTip"",
+                    ""action"": ""MiddleTIP"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e5a2b527-6947-4725-be46-34679b8b95fb"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonemiddledip"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MiddleDIP"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""584fe833-2732-4946-9f70-c78f86ff8710"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonemiddlepip"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MiddlePIP"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -1554,7 +1341,29 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""RingTip"",
+                    ""action"": ""RingTIP"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""350990fb-7a86-4507-9447-4f78765b296f"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/boneringdip"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RingDIP"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8fea3e66-2722-401a-b4b4-b8f42d86d6cb"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/boneringpip"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RingPIP"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -1565,7 +1374,29 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""PinkyTip"",
+                    ""action"": ""PinkyTIP"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""94be4a88-3642-4e5e-9c81-d490231a6166"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonepinkydip"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""PinkyDIP"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""40777b92-16f6-42a7-ab50-672dfe82e8a9"",
+                    ""path"": ""<XRInputV1::MagicLeap::MagicLeapHandRight>{RightHand}/bonepinkypip"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""PinkyPIP"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1583,7 +1414,7 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
                     ""isOR"": false
                 },
                 {
-                    ""devicePath"": ""<MagicLeapLightwear>"",
+                    ""devicePath"": ""<MagicLeapHeadset>"",
                     ""isOptional"": true,
                     ""isOR"": false
                 },
@@ -1614,6 +1445,7 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
         m_Controller_Bumper = m_Controller.FindAction("Bumper", throwIfNotFound: true);
         m_Controller_TriggerButton = m_Controller.FindAction("TriggerButton", throwIfNotFound: true);
         m_Controller_Trigger = m_Controller.FindAction("Trigger", throwIfNotFound: true);
+        m_Controller_TriggerHold = m_Controller.FindAction("TriggerHold", throwIfNotFound: true);
         m_Controller_TouchpadPosition = m_Controller.FindAction("TouchpadPosition", throwIfNotFound: true);
         m_Controller_TouchpadClick = m_Controller.FindAction("TouchpadClick", throwIfNotFound: true);
         m_Controller_TouchpadTouch = m_Controller.FindAction("TouchpadTouch", throwIfNotFound: true);
@@ -1632,61 +1464,51 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
         m_LeftHand_Position = m_LeftHand.FindAction("Position", throwIfNotFound: true);
         m_LeftHand_Rotation = m_LeftHand.FindAction("Rotation", throwIfNotFound: true);
         m_LeftHand_Keypose = m_LeftHand.FindAction("Keypose", throwIfNotFound: true);
-        m_LeftHand_ThumbMetacarpal = m_LeftHand.FindAction("ThumbMetacarpal", throwIfNotFound: true);
-        m_LeftHand_IndexMetacarpal = m_LeftHand.FindAction("IndexMetacarpal", throwIfNotFound: true);
-        m_LeftHand_MiddleMetacarpal = m_LeftHand.FindAction("MiddleMetacarpal", throwIfNotFound: true);
-        m_LeftHand_RingMetacarpal = m_LeftHand.FindAction("RingMetacarpal", throwIfNotFound: true);
-        m_LeftHand_PinkyMetacarpal = m_LeftHand.FindAction("PinkyMetacarpal", throwIfNotFound: true);
-        m_LeftHand_ThumbProximal = m_LeftHand.FindAction("ThumbProximal", throwIfNotFound: true);
-        m_LeftHand_IndexProximal = m_LeftHand.FindAction("IndexProximal", throwIfNotFound: true);
-        m_LeftHand_MiddleProximal = m_LeftHand.FindAction("MiddleProximal", throwIfNotFound: true);
-        m_LeftHand_RingProximal = m_LeftHand.FindAction("RingProximal", throwIfNotFound: true);
-        m_LeftHand_PinkyProximal = m_LeftHand.FindAction("PinkyProximal", throwIfNotFound: true);
-        m_LeftHand_ThumbIntermediate = m_LeftHand.FindAction("ThumbIntermediate", throwIfNotFound: true);
-        m_LeftHand_IndexIntermediate = m_LeftHand.FindAction("IndexIntermediate", throwIfNotFound: true);
-        m_LeftHand_MiddleIntermediate = m_LeftHand.FindAction("MiddleIntermediate", throwIfNotFound: true);
-        m_LeftHand_RingIntermediate = m_LeftHand.FindAction("RingIntermediate", throwIfNotFound: true);
-        m_LeftHand_PinkyIntermediate = m_LeftHand.FindAction("PinkyIntermediate", throwIfNotFound: true);
-        m_LeftHand_ThumbDistal = m_LeftHand.FindAction("ThumbDistal", throwIfNotFound: true);
-        m_LeftHand_IndexDistal = m_LeftHand.FindAction("IndexDistal", throwIfNotFound: true);
-        m_LeftHand_MiddleDistal = m_LeftHand.FindAction("MiddleDistal", throwIfNotFound: true);
-        m_LeftHand_RingDistal = m_LeftHand.FindAction("RingDistal", throwIfNotFound: true);
-        m_LeftHand_PinkyDistal = m_LeftHand.FindAction("PinkyDistal", throwIfNotFound: true);
-        m_LeftHand_ThumbTip = m_LeftHand.FindAction("ThumbTip", throwIfNotFound: true);
-        m_LeftHand_IndexTip = m_LeftHand.FindAction("IndexTip", throwIfNotFound: true);
-        m_LeftHand_MiddleTip = m_LeftHand.FindAction("MiddleTip", throwIfNotFound: true);
-        m_LeftHand_RingTip = m_LeftHand.FindAction("RingTip", throwIfNotFound: true);
-        m_LeftHand_PinkyTip = m_LeftHand.FindAction("PinkyTip", throwIfNotFound: true);
+        m_LeftHand_ThumbTIP = m_LeftHand.FindAction("ThumbTIP", throwIfNotFound: true);
+        m_LeftHand_ThumbIP = m_LeftHand.FindAction("ThumbIP", throwIfNotFound: true);
+        m_LeftHand_ThumbMCP = m_LeftHand.FindAction("ThumbMCP", throwIfNotFound: true);
+        m_LeftHand_ThumbCMC = m_LeftHand.FindAction("ThumbCMC", throwIfNotFound: true);
+        m_LeftHand_IndexTIP = m_LeftHand.FindAction("IndexTIP", throwIfNotFound: true);
+        m_LeftHand_IndexDIP = m_LeftHand.FindAction("IndexDIP", throwIfNotFound: true);
+        m_LeftHand_IndexPIP = m_LeftHand.FindAction("IndexPIP", throwIfNotFound: true);
+        m_LeftHand_IndexMCP = m_LeftHand.FindAction("IndexMCP", throwIfNotFound: true);
+        m_LeftHand_MiddleTIP = m_LeftHand.FindAction("MiddleTIP", throwIfNotFound: true);
+        m_LeftHand_MiddleDIP = m_LeftHand.FindAction("MiddleDIP", throwIfNotFound: true);
+        m_LeftHand_MiddlePIP = m_LeftHand.FindAction("MiddlePIP", throwIfNotFound: true);
+        m_LeftHand_MiddleMCP = m_LeftHand.FindAction("MiddleMCP", throwIfNotFound: true);
+        m_LeftHand_RingTIP = m_LeftHand.FindAction("RingTIP", throwIfNotFound: true);
+        m_LeftHand_RingDIP = m_LeftHand.FindAction("RingDIP", throwIfNotFound: true);
+        m_LeftHand_RingPIP = m_LeftHand.FindAction("RingPIP", throwIfNotFound: true);
+        m_LeftHand_RingMCP = m_LeftHand.FindAction("RingMCP", throwIfNotFound: true);
+        m_LeftHand_PinkyTIP = m_LeftHand.FindAction("PinkyTIP", throwIfNotFound: true);
+        m_LeftHand_PinkyDIP = m_LeftHand.FindAction("PinkyDIP", throwIfNotFound: true);
+        m_LeftHand_PinkyPIP = m_LeftHand.FindAction("PinkyPIP", throwIfNotFound: true);
+        m_LeftHand_PinkyMCP = m_LeftHand.FindAction("PinkyMCP", throwIfNotFound: true);
         // RightHand
         m_RightHand = asset.FindActionMap("RightHand", throwIfNotFound: true);
         m_RightHand_Position = m_RightHand.FindAction("Position", throwIfNotFound: true);
         m_RightHand_Rotation = m_RightHand.FindAction("Rotation", throwIfNotFound: true);
         m_RightHand_Keypose = m_RightHand.FindAction("Keypose", throwIfNotFound: true);
-        m_RightHand_ThumbMetacarpal = m_RightHand.FindAction("ThumbMetacarpal", throwIfNotFound: true);
-        m_RightHand_IndexMetacarpal = m_RightHand.FindAction("IndexMetacarpal", throwIfNotFound: true);
-        m_RightHand_MiddleMetacarpal = m_RightHand.FindAction("MiddleMetacarpal", throwIfNotFound: true);
-        m_RightHand_RingMetacarpal = m_RightHand.FindAction("RingMetacarpal", throwIfNotFound: true);
-        m_RightHand_PinkyMetacarpal = m_RightHand.FindAction("PinkyMetacarpal", throwIfNotFound: true);
-        m_RightHand_ThumbProximal = m_RightHand.FindAction("ThumbProximal", throwIfNotFound: true);
-        m_RightHand_IndexProximal = m_RightHand.FindAction("IndexProximal", throwIfNotFound: true);
-        m_RightHand_MiddleProximal = m_RightHand.FindAction("MiddleProximal", throwIfNotFound: true);
-        m_RightHand_RingProximal = m_RightHand.FindAction("RingProximal", throwIfNotFound: true);
-        m_RightHand_PinkyProximal = m_RightHand.FindAction("PinkyProximal", throwIfNotFound: true);
-        m_RightHand_ThumbIntermediate = m_RightHand.FindAction("ThumbIntermediate", throwIfNotFound: true);
-        m_RightHand_IndexIntermediate = m_RightHand.FindAction("IndexIntermediate", throwIfNotFound: true);
-        m_RightHand_MiddleIntermediate = m_RightHand.FindAction("MiddleIntermediate", throwIfNotFound: true);
-        m_RightHand_RingIntermediate = m_RightHand.FindAction("RingIntermediate", throwIfNotFound: true);
-        m_RightHand_PinkyIntermediate = m_RightHand.FindAction("PinkyIntermediate", throwIfNotFound: true);
-        m_RightHand_ThumbDistal = m_RightHand.FindAction("ThumbDistal", throwIfNotFound: true);
-        m_RightHand_IndexDistal = m_RightHand.FindAction("IndexDistal", throwIfNotFound: true);
-        m_RightHand_MiddleDistal = m_RightHand.FindAction("MiddleDistal", throwIfNotFound: true);
-        m_RightHand_RingDistal = m_RightHand.FindAction("RingDistal", throwIfNotFound: true);
-        m_RightHand_PinkyDistal = m_RightHand.FindAction("PinkyDistal", throwIfNotFound: true);
-        m_RightHand_ThumbTip = m_RightHand.FindAction("ThumbTip", throwIfNotFound: true);
-        m_RightHand_IndexTip = m_RightHand.FindAction("IndexTip", throwIfNotFound: true);
-        m_RightHand_MiddleTip = m_RightHand.FindAction("MiddleTip", throwIfNotFound: true);
-        m_RightHand_RingTip = m_RightHand.FindAction("RingTip", throwIfNotFound: true);
-        m_RightHand_PinkyTip = m_RightHand.FindAction("PinkyTip", throwIfNotFound: true);
+        m_RightHand_ThumbTIP = m_RightHand.FindAction("ThumbTIP", throwIfNotFound: true);
+        m_RightHand_ThumbIP = m_RightHand.FindAction("ThumbIP", throwIfNotFound: true);
+        m_RightHand_ThumbMCP = m_RightHand.FindAction("ThumbMCP", throwIfNotFound: true);
+        m_RightHand_ThumbCMC = m_RightHand.FindAction("ThumbCMC", throwIfNotFound: true);
+        m_RightHand_IndexTIP = m_RightHand.FindAction("IndexTIP", throwIfNotFound: true);
+        m_RightHand_IndexDIP = m_RightHand.FindAction("IndexDIP", throwIfNotFound: true);
+        m_RightHand_IndexPIP = m_RightHand.FindAction("IndexPIP", throwIfNotFound: true);
+        m_RightHand_IndexMCP = m_RightHand.FindAction("IndexMCP", throwIfNotFound: true);
+        m_RightHand_MiddleTIP = m_RightHand.FindAction("MiddleTIP", throwIfNotFound: true);
+        m_RightHand_MiddleDIP = m_RightHand.FindAction("MiddleDIP", throwIfNotFound: true);
+        m_RightHand_MiddlePIP = m_RightHand.FindAction("MiddlePIP", throwIfNotFound: true);
+        m_RightHand_MiddleMCP = m_RightHand.FindAction("MiddleMCP", throwIfNotFound: true);
+        m_RightHand_RingTIP = m_RightHand.FindAction("RingTIP", throwIfNotFound: true);
+        m_RightHand_RingDIP = m_RightHand.FindAction("RingDIP", throwIfNotFound: true);
+        m_RightHand_RingPIP = m_RightHand.FindAction("RingPIP", throwIfNotFound: true);
+        m_RightHand_RingMCP = m_RightHand.FindAction("RingMCP", throwIfNotFound: true);
+        m_RightHand_PinkyTIP = m_RightHand.FindAction("PinkyTIP", throwIfNotFound: true);
+        m_RightHand_PinkyDIP = m_RightHand.FindAction("PinkyDIP", throwIfNotFound: true);
+        m_RightHand_PinkyPIP = m_RightHand.FindAction("PinkyPIP", throwIfNotFound: true);
+        m_RightHand_PinkyMCP = m_RightHand.FindAction("PinkyMCP", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -1752,6 +1574,7 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
     private readonly InputAction m_Controller_Bumper;
     private readonly InputAction m_Controller_TriggerButton;
     private readonly InputAction m_Controller_Trigger;
+    private readonly InputAction m_Controller_TriggerHold;
     private readonly InputAction m_Controller_TouchpadPosition;
     private readonly InputAction m_Controller_TouchpadClick;
     private readonly InputAction m_Controller_TouchpadTouch;
@@ -1768,6 +1591,7 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
         public InputAction @Bumper => m_Wrapper.m_Controller_Bumper;
         public InputAction @TriggerButton => m_Wrapper.m_Controller_TriggerButton;
         public InputAction @Trigger => m_Wrapper.m_Controller_Trigger;
+        public InputAction @TriggerHold => m_Wrapper.m_Controller_TriggerHold;
         public InputAction @TouchpadPosition => m_Wrapper.m_Controller_TouchpadPosition;
         public InputAction @TouchpadClick => m_Wrapper.m_Controller_TouchpadClick;
         public InputAction @TouchpadTouch => m_Wrapper.m_Controller_TouchpadTouch;
@@ -1801,6 +1625,9 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
                 @Trigger.started -= m_Wrapper.m_ControllerActionsCallbackInterface.OnTrigger;
                 @Trigger.performed -= m_Wrapper.m_ControllerActionsCallbackInterface.OnTrigger;
                 @Trigger.canceled -= m_Wrapper.m_ControllerActionsCallbackInterface.OnTrigger;
+                @TriggerHold.started -= m_Wrapper.m_ControllerActionsCallbackInterface.OnTriggerHold;
+                @TriggerHold.performed -= m_Wrapper.m_ControllerActionsCallbackInterface.OnTriggerHold;
+                @TriggerHold.canceled -= m_Wrapper.m_ControllerActionsCallbackInterface.OnTriggerHold;
                 @TouchpadPosition.started -= m_Wrapper.m_ControllerActionsCallbackInterface.OnTouchpadPosition;
                 @TouchpadPosition.performed -= m_Wrapper.m_ControllerActionsCallbackInterface.OnTouchpadPosition;
                 @TouchpadPosition.canceled -= m_Wrapper.m_ControllerActionsCallbackInterface.OnTouchpadPosition;
@@ -1841,6 +1668,9 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
                 @Trigger.started += instance.OnTrigger;
                 @Trigger.performed += instance.OnTrigger;
                 @Trigger.canceled += instance.OnTrigger;
+                @TriggerHold.started += instance.OnTriggerHold;
+                @TriggerHold.performed += instance.OnTriggerHold;
+                @TriggerHold.canceled += instance.OnTriggerHold;
                 @TouchpadPosition.started += instance.OnTouchpadPosition;
                 @TouchpadPosition.performed += instance.OnTouchpadPosition;
                 @TouchpadPosition.canceled += instance.OnTouchpadPosition;
@@ -1944,31 +1774,26 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
     private readonly InputAction m_LeftHand_Position;
     private readonly InputAction m_LeftHand_Rotation;
     private readonly InputAction m_LeftHand_Keypose;
-    private readonly InputAction m_LeftHand_ThumbMetacarpal;
-    private readonly InputAction m_LeftHand_IndexMetacarpal;
-    private readonly InputAction m_LeftHand_MiddleMetacarpal;
-    private readonly InputAction m_LeftHand_RingMetacarpal;
-    private readonly InputAction m_LeftHand_PinkyMetacarpal;
-    private readonly InputAction m_LeftHand_ThumbProximal;
-    private readonly InputAction m_LeftHand_IndexProximal;
-    private readonly InputAction m_LeftHand_MiddleProximal;
-    private readonly InputAction m_LeftHand_RingProximal;
-    private readonly InputAction m_LeftHand_PinkyProximal;
-    private readonly InputAction m_LeftHand_ThumbIntermediate;
-    private readonly InputAction m_LeftHand_IndexIntermediate;
-    private readonly InputAction m_LeftHand_MiddleIntermediate;
-    private readonly InputAction m_LeftHand_RingIntermediate;
-    private readonly InputAction m_LeftHand_PinkyIntermediate;
-    private readonly InputAction m_LeftHand_ThumbDistal;
-    private readonly InputAction m_LeftHand_IndexDistal;
-    private readonly InputAction m_LeftHand_MiddleDistal;
-    private readonly InputAction m_LeftHand_RingDistal;
-    private readonly InputAction m_LeftHand_PinkyDistal;
-    private readonly InputAction m_LeftHand_ThumbTip;
-    private readonly InputAction m_LeftHand_IndexTip;
-    private readonly InputAction m_LeftHand_MiddleTip;
-    private readonly InputAction m_LeftHand_RingTip;
-    private readonly InputAction m_LeftHand_PinkyTip;
+    private readonly InputAction m_LeftHand_ThumbTIP;
+    private readonly InputAction m_LeftHand_ThumbIP;
+    private readonly InputAction m_LeftHand_ThumbMCP;
+    private readonly InputAction m_LeftHand_ThumbCMC;
+    private readonly InputAction m_LeftHand_IndexTIP;
+    private readonly InputAction m_LeftHand_IndexDIP;
+    private readonly InputAction m_LeftHand_IndexPIP;
+    private readonly InputAction m_LeftHand_IndexMCP;
+    private readonly InputAction m_LeftHand_MiddleTIP;
+    private readonly InputAction m_LeftHand_MiddleDIP;
+    private readonly InputAction m_LeftHand_MiddlePIP;
+    private readonly InputAction m_LeftHand_MiddleMCP;
+    private readonly InputAction m_LeftHand_RingTIP;
+    private readonly InputAction m_LeftHand_RingDIP;
+    private readonly InputAction m_LeftHand_RingPIP;
+    private readonly InputAction m_LeftHand_RingMCP;
+    private readonly InputAction m_LeftHand_PinkyTIP;
+    private readonly InputAction m_LeftHand_PinkyDIP;
+    private readonly InputAction m_LeftHand_PinkyPIP;
+    private readonly InputAction m_LeftHand_PinkyMCP;
     public struct LeftHandActions
     {
         private @MagicLeapInputs m_Wrapper;
@@ -1976,31 +1801,26 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
         public InputAction @Position => m_Wrapper.m_LeftHand_Position;
         public InputAction @Rotation => m_Wrapper.m_LeftHand_Rotation;
         public InputAction @Keypose => m_Wrapper.m_LeftHand_Keypose;
-        public InputAction @ThumbMetacarpal => m_Wrapper.m_LeftHand_ThumbMetacarpal;
-        public InputAction @IndexMetacarpal => m_Wrapper.m_LeftHand_IndexMetacarpal;
-        public InputAction @MiddleMetacarpal => m_Wrapper.m_LeftHand_MiddleMetacarpal;
-        public InputAction @RingMetacarpal => m_Wrapper.m_LeftHand_RingMetacarpal;
-        public InputAction @PinkyMetacarpal => m_Wrapper.m_LeftHand_PinkyMetacarpal;
-        public InputAction @ThumbProximal => m_Wrapper.m_LeftHand_ThumbProximal;
-        public InputAction @IndexProximal => m_Wrapper.m_LeftHand_IndexProximal;
-        public InputAction @MiddleProximal => m_Wrapper.m_LeftHand_MiddleProximal;
-        public InputAction @RingProximal => m_Wrapper.m_LeftHand_RingProximal;
-        public InputAction @PinkyProximal => m_Wrapper.m_LeftHand_PinkyProximal;
-        public InputAction @ThumbIntermediate => m_Wrapper.m_LeftHand_ThumbIntermediate;
-        public InputAction @IndexIntermediate => m_Wrapper.m_LeftHand_IndexIntermediate;
-        public InputAction @MiddleIntermediate => m_Wrapper.m_LeftHand_MiddleIntermediate;
-        public InputAction @RingIntermediate => m_Wrapper.m_LeftHand_RingIntermediate;
-        public InputAction @PinkyIntermediate => m_Wrapper.m_LeftHand_PinkyIntermediate;
-        public InputAction @ThumbDistal => m_Wrapper.m_LeftHand_ThumbDistal;
-        public InputAction @IndexDistal => m_Wrapper.m_LeftHand_IndexDistal;
-        public InputAction @MiddleDistal => m_Wrapper.m_LeftHand_MiddleDistal;
-        public InputAction @RingDistal => m_Wrapper.m_LeftHand_RingDistal;
-        public InputAction @PinkyDistal => m_Wrapper.m_LeftHand_PinkyDistal;
-        public InputAction @ThumbTip => m_Wrapper.m_LeftHand_ThumbTip;
-        public InputAction @IndexTip => m_Wrapper.m_LeftHand_IndexTip;
-        public InputAction @MiddleTip => m_Wrapper.m_LeftHand_MiddleTip;
-        public InputAction @RingTip => m_Wrapper.m_LeftHand_RingTip;
-        public InputAction @PinkyTip => m_Wrapper.m_LeftHand_PinkyTip;
+        public InputAction @ThumbTIP => m_Wrapper.m_LeftHand_ThumbTIP;
+        public InputAction @ThumbIP => m_Wrapper.m_LeftHand_ThumbIP;
+        public InputAction @ThumbMCP => m_Wrapper.m_LeftHand_ThumbMCP;
+        public InputAction @ThumbCMC => m_Wrapper.m_LeftHand_ThumbCMC;
+        public InputAction @IndexTIP => m_Wrapper.m_LeftHand_IndexTIP;
+        public InputAction @IndexDIP => m_Wrapper.m_LeftHand_IndexDIP;
+        public InputAction @IndexPIP => m_Wrapper.m_LeftHand_IndexPIP;
+        public InputAction @IndexMCP => m_Wrapper.m_LeftHand_IndexMCP;
+        public InputAction @MiddleTIP => m_Wrapper.m_LeftHand_MiddleTIP;
+        public InputAction @MiddleDIP => m_Wrapper.m_LeftHand_MiddleDIP;
+        public InputAction @MiddlePIP => m_Wrapper.m_LeftHand_MiddlePIP;
+        public InputAction @MiddleMCP => m_Wrapper.m_LeftHand_MiddleMCP;
+        public InputAction @RingTIP => m_Wrapper.m_LeftHand_RingTIP;
+        public InputAction @RingDIP => m_Wrapper.m_LeftHand_RingDIP;
+        public InputAction @RingPIP => m_Wrapper.m_LeftHand_RingPIP;
+        public InputAction @RingMCP => m_Wrapper.m_LeftHand_RingMCP;
+        public InputAction @PinkyTIP => m_Wrapper.m_LeftHand_PinkyTIP;
+        public InputAction @PinkyDIP => m_Wrapper.m_LeftHand_PinkyDIP;
+        public InputAction @PinkyPIP => m_Wrapper.m_LeftHand_PinkyPIP;
+        public InputAction @PinkyMCP => m_Wrapper.m_LeftHand_PinkyMCP;
         public InputActionMap Get() { return m_Wrapper.m_LeftHand; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -2019,81 +1839,66 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
                 @Keypose.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnKeypose;
                 @Keypose.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnKeypose;
                 @Keypose.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnKeypose;
-                @ThumbMetacarpal.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnThumbMetacarpal;
-                @ThumbMetacarpal.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnThumbMetacarpal;
-                @ThumbMetacarpal.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnThumbMetacarpal;
-                @IndexMetacarpal.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnIndexMetacarpal;
-                @IndexMetacarpal.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnIndexMetacarpal;
-                @IndexMetacarpal.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnIndexMetacarpal;
-                @MiddleMetacarpal.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnMiddleMetacarpal;
-                @MiddleMetacarpal.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnMiddleMetacarpal;
-                @MiddleMetacarpal.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnMiddleMetacarpal;
-                @RingMetacarpal.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnRingMetacarpal;
-                @RingMetacarpal.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnRingMetacarpal;
-                @RingMetacarpal.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnRingMetacarpal;
-                @PinkyMetacarpal.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnPinkyMetacarpal;
-                @PinkyMetacarpal.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnPinkyMetacarpal;
-                @PinkyMetacarpal.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnPinkyMetacarpal;
-                @ThumbProximal.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnThumbProximal;
-                @ThumbProximal.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnThumbProximal;
-                @ThumbProximal.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnThumbProximal;
-                @IndexProximal.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnIndexProximal;
-                @IndexProximal.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnIndexProximal;
-                @IndexProximal.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnIndexProximal;
-                @MiddleProximal.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnMiddleProximal;
-                @MiddleProximal.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnMiddleProximal;
-                @MiddleProximal.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnMiddleProximal;
-                @RingProximal.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnRingProximal;
-                @RingProximal.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnRingProximal;
-                @RingProximal.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnRingProximal;
-                @PinkyProximal.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnPinkyProximal;
-                @PinkyProximal.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnPinkyProximal;
-                @PinkyProximal.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnPinkyProximal;
-                @ThumbIntermediate.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnThumbIntermediate;
-                @ThumbIntermediate.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnThumbIntermediate;
-                @ThumbIntermediate.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnThumbIntermediate;
-                @IndexIntermediate.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnIndexIntermediate;
-                @IndexIntermediate.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnIndexIntermediate;
-                @IndexIntermediate.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnIndexIntermediate;
-                @MiddleIntermediate.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnMiddleIntermediate;
-                @MiddleIntermediate.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnMiddleIntermediate;
-                @MiddleIntermediate.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnMiddleIntermediate;
-                @RingIntermediate.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnRingIntermediate;
-                @RingIntermediate.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnRingIntermediate;
-                @RingIntermediate.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnRingIntermediate;
-                @PinkyIntermediate.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnPinkyIntermediate;
-                @PinkyIntermediate.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnPinkyIntermediate;
-                @PinkyIntermediate.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnPinkyIntermediate;
-                @ThumbDistal.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnThumbDistal;
-                @ThumbDistal.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnThumbDistal;
-                @ThumbDistal.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnThumbDistal;
-                @IndexDistal.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnIndexDistal;
-                @IndexDistal.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnIndexDistal;
-                @IndexDistal.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnIndexDistal;
-                @MiddleDistal.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnMiddleDistal;
-                @MiddleDistal.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnMiddleDistal;
-                @MiddleDistal.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnMiddleDistal;
-                @RingDistal.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnRingDistal;
-                @RingDistal.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnRingDistal;
-                @RingDistal.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnRingDistal;
-                @PinkyDistal.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnPinkyDistal;
-                @PinkyDistal.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnPinkyDistal;
-                @PinkyDistal.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnPinkyDistal;
-                @ThumbTip.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnThumbTip;
-                @ThumbTip.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnThumbTip;
-                @ThumbTip.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnThumbTip;
-                @IndexTip.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnIndexTip;
-                @IndexTip.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnIndexTip;
-                @IndexTip.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnIndexTip;
-                @MiddleTip.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnMiddleTip;
-                @MiddleTip.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnMiddleTip;
-                @MiddleTip.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnMiddleTip;
-                @RingTip.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnRingTip;
-                @RingTip.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnRingTip;
-                @RingTip.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnRingTip;
-                @PinkyTip.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnPinkyTip;
-                @PinkyTip.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnPinkyTip;
-                @PinkyTip.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnPinkyTip;
+                @ThumbTIP.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnThumbTIP;
+                @ThumbTIP.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnThumbTIP;
+                @ThumbTIP.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnThumbTIP;
+                @ThumbIP.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnThumbIP;
+                @ThumbIP.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnThumbIP;
+                @ThumbIP.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnThumbIP;
+                @ThumbMCP.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnThumbMCP;
+                @ThumbMCP.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnThumbMCP;
+                @ThumbMCP.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnThumbMCP;
+                @ThumbCMC.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnThumbCMC;
+                @ThumbCMC.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnThumbCMC;
+                @ThumbCMC.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnThumbCMC;
+                @IndexTIP.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnIndexTIP;
+                @IndexTIP.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnIndexTIP;
+                @IndexTIP.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnIndexTIP;
+                @IndexDIP.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnIndexDIP;
+                @IndexDIP.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnIndexDIP;
+                @IndexDIP.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnIndexDIP;
+                @IndexPIP.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnIndexPIP;
+                @IndexPIP.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnIndexPIP;
+                @IndexPIP.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnIndexPIP;
+                @IndexMCP.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnIndexMCP;
+                @IndexMCP.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnIndexMCP;
+                @IndexMCP.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnIndexMCP;
+                @MiddleTIP.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnMiddleTIP;
+                @MiddleTIP.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnMiddleTIP;
+                @MiddleTIP.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnMiddleTIP;
+                @MiddleDIP.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnMiddleDIP;
+                @MiddleDIP.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnMiddleDIP;
+                @MiddleDIP.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnMiddleDIP;
+                @MiddlePIP.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnMiddlePIP;
+                @MiddlePIP.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnMiddlePIP;
+                @MiddlePIP.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnMiddlePIP;
+                @MiddleMCP.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnMiddleMCP;
+                @MiddleMCP.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnMiddleMCP;
+                @MiddleMCP.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnMiddleMCP;
+                @RingTIP.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnRingTIP;
+                @RingTIP.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnRingTIP;
+                @RingTIP.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnRingTIP;
+                @RingDIP.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnRingDIP;
+                @RingDIP.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnRingDIP;
+                @RingDIP.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnRingDIP;
+                @RingPIP.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnRingPIP;
+                @RingPIP.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnRingPIP;
+                @RingPIP.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnRingPIP;
+                @RingMCP.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnRingMCP;
+                @RingMCP.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnRingMCP;
+                @RingMCP.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnRingMCP;
+                @PinkyTIP.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnPinkyTIP;
+                @PinkyTIP.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnPinkyTIP;
+                @PinkyTIP.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnPinkyTIP;
+                @PinkyDIP.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnPinkyDIP;
+                @PinkyDIP.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnPinkyDIP;
+                @PinkyDIP.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnPinkyDIP;
+                @PinkyPIP.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnPinkyPIP;
+                @PinkyPIP.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnPinkyPIP;
+                @PinkyPIP.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnPinkyPIP;
+                @PinkyMCP.started -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnPinkyMCP;
+                @PinkyMCP.performed -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnPinkyMCP;
+                @PinkyMCP.canceled -= m_Wrapper.m_LeftHandActionsCallbackInterface.OnPinkyMCP;
             }
             m_Wrapper.m_LeftHandActionsCallbackInterface = instance;
             if (instance != null)
@@ -2107,81 +1912,66 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
                 @Keypose.started += instance.OnKeypose;
                 @Keypose.performed += instance.OnKeypose;
                 @Keypose.canceled += instance.OnKeypose;
-                @ThumbMetacarpal.started += instance.OnThumbMetacarpal;
-                @ThumbMetacarpal.performed += instance.OnThumbMetacarpal;
-                @ThumbMetacarpal.canceled += instance.OnThumbMetacarpal;
-                @IndexMetacarpal.started += instance.OnIndexMetacarpal;
-                @IndexMetacarpal.performed += instance.OnIndexMetacarpal;
-                @IndexMetacarpal.canceled += instance.OnIndexMetacarpal;
-                @MiddleMetacarpal.started += instance.OnMiddleMetacarpal;
-                @MiddleMetacarpal.performed += instance.OnMiddleMetacarpal;
-                @MiddleMetacarpal.canceled += instance.OnMiddleMetacarpal;
-                @RingMetacarpal.started += instance.OnRingMetacarpal;
-                @RingMetacarpal.performed += instance.OnRingMetacarpal;
-                @RingMetacarpal.canceled += instance.OnRingMetacarpal;
-                @PinkyMetacarpal.started += instance.OnPinkyMetacarpal;
-                @PinkyMetacarpal.performed += instance.OnPinkyMetacarpal;
-                @PinkyMetacarpal.canceled += instance.OnPinkyMetacarpal;
-                @ThumbProximal.started += instance.OnThumbProximal;
-                @ThumbProximal.performed += instance.OnThumbProximal;
-                @ThumbProximal.canceled += instance.OnThumbProximal;
-                @IndexProximal.started += instance.OnIndexProximal;
-                @IndexProximal.performed += instance.OnIndexProximal;
-                @IndexProximal.canceled += instance.OnIndexProximal;
-                @MiddleProximal.started += instance.OnMiddleProximal;
-                @MiddleProximal.performed += instance.OnMiddleProximal;
-                @MiddleProximal.canceled += instance.OnMiddleProximal;
-                @RingProximal.started += instance.OnRingProximal;
-                @RingProximal.performed += instance.OnRingProximal;
-                @RingProximal.canceled += instance.OnRingProximal;
-                @PinkyProximal.started += instance.OnPinkyProximal;
-                @PinkyProximal.performed += instance.OnPinkyProximal;
-                @PinkyProximal.canceled += instance.OnPinkyProximal;
-                @ThumbIntermediate.started += instance.OnThumbIntermediate;
-                @ThumbIntermediate.performed += instance.OnThumbIntermediate;
-                @ThumbIntermediate.canceled += instance.OnThumbIntermediate;
-                @IndexIntermediate.started += instance.OnIndexIntermediate;
-                @IndexIntermediate.performed += instance.OnIndexIntermediate;
-                @IndexIntermediate.canceled += instance.OnIndexIntermediate;
-                @MiddleIntermediate.started += instance.OnMiddleIntermediate;
-                @MiddleIntermediate.performed += instance.OnMiddleIntermediate;
-                @MiddleIntermediate.canceled += instance.OnMiddleIntermediate;
-                @RingIntermediate.started += instance.OnRingIntermediate;
-                @RingIntermediate.performed += instance.OnRingIntermediate;
-                @RingIntermediate.canceled += instance.OnRingIntermediate;
-                @PinkyIntermediate.started += instance.OnPinkyIntermediate;
-                @PinkyIntermediate.performed += instance.OnPinkyIntermediate;
-                @PinkyIntermediate.canceled += instance.OnPinkyIntermediate;
-                @ThumbDistal.started += instance.OnThumbDistal;
-                @ThumbDistal.performed += instance.OnThumbDistal;
-                @ThumbDistal.canceled += instance.OnThumbDistal;
-                @IndexDistal.started += instance.OnIndexDistal;
-                @IndexDistal.performed += instance.OnIndexDistal;
-                @IndexDistal.canceled += instance.OnIndexDistal;
-                @MiddleDistal.started += instance.OnMiddleDistal;
-                @MiddleDistal.performed += instance.OnMiddleDistal;
-                @MiddleDistal.canceled += instance.OnMiddleDistal;
-                @RingDistal.started += instance.OnRingDistal;
-                @RingDistal.performed += instance.OnRingDistal;
-                @RingDistal.canceled += instance.OnRingDistal;
-                @PinkyDistal.started += instance.OnPinkyDistal;
-                @PinkyDistal.performed += instance.OnPinkyDistal;
-                @PinkyDistal.canceled += instance.OnPinkyDistal;
-                @ThumbTip.started += instance.OnThumbTip;
-                @ThumbTip.performed += instance.OnThumbTip;
-                @ThumbTip.canceled += instance.OnThumbTip;
-                @IndexTip.started += instance.OnIndexTip;
-                @IndexTip.performed += instance.OnIndexTip;
-                @IndexTip.canceled += instance.OnIndexTip;
-                @MiddleTip.started += instance.OnMiddleTip;
-                @MiddleTip.performed += instance.OnMiddleTip;
-                @MiddleTip.canceled += instance.OnMiddleTip;
-                @RingTip.started += instance.OnRingTip;
-                @RingTip.performed += instance.OnRingTip;
-                @RingTip.canceled += instance.OnRingTip;
-                @PinkyTip.started += instance.OnPinkyTip;
-                @PinkyTip.performed += instance.OnPinkyTip;
-                @PinkyTip.canceled += instance.OnPinkyTip;
+                @ThumbTIP.started += instance.OnThumbTIP;
+                @ThumbTIP.performed += instance.OnThumbTIP;
+                @ThumbTIP.canceled += instance.OnThumbTIP;
+                @ThumbIP.started += instance.OnThumbIP;
+                @ThumbIP.performed += instance.OnThumbIP;
+                @ThumbIP.canceled += instance.OnThumbIP;
+                @ThumbMCP.started += instance.OnThumbMCP;
+                @ThumbMCP.performed += instance.OnThumbMCP;
+                @ThumbMCP.canceled += instance.OnThumbMCP;
+                @ThumbCMC.started += instance.OnThumbCMC;
+                @ThumbCMC.performed += instance.OnThumbCMC;
+                @ThumbCMC.canceled += instance.OnThumbCMC;
+                @IndexTIP.started += instance.OnIndexTIP;
+                @IndexTIP.performed += instance.OnIndexTIP;
+                @IndexTIP.canceled += instance.OnIndexTIP;
+                @IndexDIP.started += instance.OnIndexDIP;
+                @IndexDIP.performed += instance.OnIndexDIP;
+                @IndexDIP.canceled += instance.OnIndexDIP;
+                @IndexPIP.started += instance.OnIndexPIP;
+                @IndexPIP.performed += instance.OnIndexPIP;
+                @IndexPIP.canceled += instance.OnIndexPIP;
+                @IndexMCP.started += instance.OnIndexMCP;
+                @IndexMCP.performed += instance.OnIndexMCP;
+                @IndexMCP.canceled += instance.OnIndexMCP;
+                @MiddleTIP.started += instance.OnMiddleTIP;
+                @MiddleTIP.performed += instance.OnMiddleTIP;
+                @MiddleTIP.canceled += instance.OnMiddleTIP;
+                @MiddleDIP.started += instance.OnMiddleDIP;
+                @MiddleDIP.performed += instance.OnMiddleDIP;
+                @MiddleDIP.canceled += instance.OnMiddleDIP;
+                @MiddlePIP.started += instance.OnMiddlePIP;
+                @MiddlePIP.performed += instance.OnMiddlePIP;
+                @MiddlePIP.canceled += instance.OnMiddlePIP;
+                @MiddleMCP.started += instance.OnMiddleMCP;
+                @MiddleMCP.performed += instance.OnMiddleMCP;
+                @MiddleMCP.canceled += instance.OnMiddleMCP;
+                @RingTIP.started += instance.OnRingTIP;
+                @RingTIP.performed += instance.OnRingTIP;
+                @RingTIP.canceled += instance.OnRingTIP;
+                @RingDIP.started += instance.OnRingDIP;
+                @RingDIP.performed += instance.OnRingDIP;
+                @RingDIP.canceled += instance.OnRingDIP;
+                @RingPIP.started += instance.OnRingPIP;
+                @RingPIP.performed += instance.OnRingPIP;
+                @RingPIP.canceled += instance.OnRingPIP;
+                @RingMCP.started += instance.OnRingMCP;
+                @RingMCP.performed += instance.OnRingMCP;
+                @RingMCP.canceled += instance.OnRingMCP;
+                @PinkyTIP.started += instance.OnPinkyTIP;
+                @PinkyTIP.performed += instance.OnPinkyTIP;
+                @PinkyTIP.canceled += instance.OnPinkyTIP;
+                @PinkyDIP.started += instance.OnPinkyDIP;
+                @PinkyDIP.performed += instance.OnPinkyDIP;
+                @PinkyDIP.canceled += instance.OnPinkyDIP;
+                @PinkyPIP.started += instance.OnPinkyPIP;
+                @PinkyPIP.performed += instance.OnPinkyPIP;
+                @PinkyPIP.canceled += instance.OnPinkyPIP;
+                @PinkyMCP.started += instance.OnPinkyMCP;
+                @PinkyMCP.performed += instance.OnPinkyMCP;
+                @PinkyMCP.canceled += instance.OnPinkyMCP;
             }
         }
     }
@@ -2193,31 +1983,26 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
     private readonly InputAction m_RightHand_Position;
     private readonly InputAction m_RightHand_Rotation;
     private readonly InputAction m_RightHand_Keypose;
-    private readonly InputAction m_RightHand_ThumbMetacarpal;
-    private readonly InputAction m_RightHand_IndexMetacarpal;
-    private readonly InputAction m_RightHand_MiddleMetacarpal;
-    private readonly InputAction m_RightHand_RingMetacarpal;
-    private readonly InputAction m_RightHand_PinkyMetacarpal;
-    private readonly InputAction m_RightHand_ThumbProximal;
-    private readonly InputAction m_RightHand_IndexProximal;
-    private readonly InputAction m_RightHand_MiddleProximal;
-    private readonly InputAction m_RightHand_RingProximal;
-    private readonly InputAction m_RightHand_PinkyProximal;
-    private readonly InputAction m_RightHand_ThumbIntermediate;
-    private readonly InputAction m_RightHand_IndexIntermediate;
-    private readonly InputAction m_RightHand_MiddleIntermediate;
-    private readonly InputAction m_RightHand_RingIntermediate;
-    private readonly InputAction m_RightHand_PinkyIntermediate;
-    private readonly InputAction m_RightHand_ThumbDistal;
-    private readonly InputAction m_RightHand_IndexDistal;
-    private readonly InputAction m_RightHand_MiddleDistal;
-    private readonly InputAction m_RightHand_RingDistal;
-    private readonly InputAction m_RightHand_PinkyDistal;
-    private readonly InputAction m_RightHand_ThumbTip;
-    private readonly InputAction m_RightHand_IndexTip;
-    private readonly InputAction m_RightHand_MiddleTip;
-    private readonly InputAction m_RightHand_RingTip;
-    private readonly InputAction m_RightHand_PinkyTip;
+    private readonly InputAction m_RightHand_ThumbTIP;
+    private readonly InputAction m_RightHand_ThumbIP;
+    private readonly InputAction m_RightHand_ThumbMCP;
+    private readonly InputAction m_RightHand_ThumbCMC;
+    private readonly InputAction m_RightHand_IndexTIP;
+    private readonly InputAction m_RightHand_IndexDIP;
+    private readonly InputAction m_RightHand_IndexPIP;
+    private readonly InputAction m_RightHand_IndexMCP;
+    private readonly InputAction m_RightHand_MiddleTIP;
+    private readonly InputAction m_RightHand_MiddleDIP;
+    private readonly InputAction m_RightHand_MiddlePIP;
+    private readonly InputAction m_RightHand_MiddleMCP;
+    private readonly InputAction m_RightHand_RingTIP;
+    private readonly InputAction m_RightHand_RingDIP;
+    private readonly InputAction m_RightHand_RingPIP;
+    private readonly InputAction m_RightHand_RingMCP;
+    private readonly InputAction m_RightHand_PinkyTIP;
+    private readonly InputAction m_RightHand_PinkyDIP;
+    private readonly InputAction m_RightHand_PinkyPIP;
+    private readonly InputAction m_RightHand_PinkyMCP;
     public struct RightHandActions
     {
         private @MagicLeapInputs m_Wrapper;
@@ -2225,31 +2010,26 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
         public InputAction @Position => m_Wrapper.m_RightHand_Position;
         public InputAction @Rotation => m_Wrapper.m_RightHand_Rotation;
         public InputAction @Keypose => m_Wrapper.m_RightHand_Keypose;
-        public InputAction @ThumbMetacarpal => m_Wrapper.m_RightHand_ThumbMetacarpal;
-        public InputAction @IndexMetacarpal => m_Wrapper.m_RightHand_IndexMetacarpal;
-        public InputAction @MiddleMetacarpal => m_Wrapper.m_RightHand_MiddleMetacarpal;
-        public InputAction @RingMetacarpal => m_Wrapper.m_RightHand_RingMetacarpal;
-        public InputAction @PinkyMetacarpal => m_Wrapper.m_RightHand_PinkyMetacarpal;
-        public InputAction @ThumbProximal => m_Wrapper.m_RightHand_ThumbProximal;
-        public InputAction @IndexProximal => m_Wrapper.m_RightHand_IndexProximal;
-        public InputAction @MiddleProximal => m_Wrapper.m_RightHand_MiddleProximal;
-        public InputAction @RingProximal => m_Wrapper.m_RightHand_RingProximal;
-        public InputAction @PinkyProximal => m_Wrapper.m_RightHand_PinkyProximal;
-        public InputAction @ThumbIntermediate => m_Wrapper.m_RightHand_ThumbIntermediate;
-        public InputAction @IndexIntermediate => m_Wrapper.m_RightHand_IndexIntermediate;
-        public InputAction @MiddleIntermediate => m_Wrapper.m_RightHand_MiddleIntermediate;
-        public InputAction @RingIntermediate => m_Wrapper.m_RightHand_RingIntermediate;
-        public InputAction @PinkyIntermediate => m_Wrapper.m_RightHand_PinkyIntermediate;
-        public InputAction @ThumbDistal => m_Wrapper.m_RightHand_ThumbDistal;
-        public InputAction @IndexDistal => m_Wrapper.m_RightHand_IndexDistal;
-        public InputAction @MiddleDistal => m_Wrapper.m_RightHand_MiddleDistal;
-        public InputAction @RingDistal => m_Wrapper.m_RightHand_RingDistal;
-        public InputAction @PinkyDistal => m_Wrapper.m_RightHand_PinkyDistal;
-        public InputAction @ThumbTip => m_Wrapper.m_RightHand_ThumbTip;
-        public InputAction @IndexTip => m_Wrapper.m_RightHand_IndexTip;
-        public InputAction @MiddleTip => m_Wrapper.m_RightHand_MiddleTip;
-        public InputAction @RingTip => m_Wrapper.m_RightHand_RingTip;
-        public InputAction @PinkyTip => m_Wrapper.m_RightHand_PinkyTip;
+        public InputAction @ThumbTIP => m_Wrapper.m_RightHand_ThumbTIP;
+        public InputAction @ThumbIP => m_Wrapper.m_RightHand_ThumbIP;
+        public InputAction @ThumbMCP => m_Wrapper.m_RightHand_ThumbMCP;
+        public InputAction @ThumbCMC => m_Wrapper.m_RightHand_ThumbCMC;
+        public InputAction @IndexTIP => m_Wrapper.m_RightHand_IndexTIP;
+        public InputAction @IndexDIP => m_Wrapper.m_RightHand_IndexDIP;
+        public InputAction @IndexPIP => m_Wrapper.m_RightHand_IndexPIP;
+        public InputAction @IndexMCP => m_Wrapper.m_RightHand_IndexMCP;
+        public InputAction @MiddleTIP => m_Wrapper.m_RightHand_MiddleTIP;
+        public InputAction @MiddleDIP => m_Wrapper.m_RightHand_MiddleDIP;
+        public InputAction @MiddlePIP => m_Wrapper.m_RightHand_MiddlePIP;
+        public InputAction @MiddleMCP => m_Wrapper.m_RightHand_MiddleMCP;
+        public InputAction @RingTIP => m_Wrapper.m_RightHand_RingTIP;
+        public InputAction @RingDIP => m_Wrapper.m_RightHand_RingDIP;
+        public InputAction @RingPIP => m_Wrapper.m_RightHand_RingPIP;
+        public InputAction @RingMCP => m_Wrapper.m_RightHand_RingMCP;
+        public InputAction @PinkyTIP => m_Wrapper.m_RightHand_PinkyTIP;
+        public InputAction @PinkyDIP => m_Wrapper.m_RightHand_PinkyDIP;
+        public InputAction @PinkyPIP => m_Wrapper.m_RightHand_PinkyPIP;
+        public InputAction @PinkyMCP => m_Wrapper.m_RightHand_PinkyMCP;
         public InputActionMap Get() { return m_Wrapper.m_RightHand; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -2268,81 +2048,66 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
                 @Keypose.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnKeypose;
                 @Keypose.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnKeypose;
                 @Keypose.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnKeypose;
-                @ThumbMetacarpal.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnThumbMetacarpal;
-                @ThumbMetacarpal.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnThumbMetacarpal;
-                @ThumbMetacarpal.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnThumbMetacarpal;
-                @IndexMetacarpal.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnIndexMetacarpal;
-                @IndexMetacarpal.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnIndexMetacarpal;
-                @IndexMetacarpal.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnIndexMetacarpal;
-                @MiddleMetacarpal.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnMiddleMetacarpal;
-                @MiddleMetacarpal.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnMiddleMetacarpal;
-                @MiddleMetacarpal.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnMiddleMetacarpal;
-                @RingMetacarpal.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnRingMetacarpal;
-                @RingMetacarpal.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnRingMetacarpal;
-                @RingMetacarpal.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnRingMetacarpal;
-                @PinkyMetacarpal.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnPinkyMetacarpal;
-                @PinkyMetacarpal.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnPinkyMetacarpal;
-                @PinkyMetacarpal.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnPinkyMetacarpal;
-                @ThumbProximal.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnThumbProximal;
-                @ThumbProximal.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnThumbProximal;
-                @ThumbProximal.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnThumbProximal;
-                @IndexProximal.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnIndexProximal;
-                @IndexProximal.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnIndexProximal;
-                @IndexProximal.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnIndexProximal;
-                @MiddleProximal.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnMiddleProximal;
-                @MiddleProximal.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnMiddleProximal;
-                @MiddleProximal.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnMiddleProximal;
-                @RingProximal.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnRingProximal;
-                @RingProximal.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnRingProximal;
-                @RingProximal.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnRingProximal;
-                @PinkyProximal.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnPinkyProximal;
-                @PinkyProximal.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnPinkyProximal;
-                @PinkyProximal.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnPinkyProximal;
-                @ThumbIntermediate.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnThumbIntermediate;
-                @ThumbIntermediate.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnThumbIntermediate;
-                @ThumbIntermediate.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnThumbIntermediate;
-                @IndexIntermediate.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnIndexIntermediate;
-                @IndexIntermediate.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnIndexIntermediate;
-                @IndexIntermediate.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnIndexIntermediate;
-                @MiddleIntermediate.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnMiddleIntermediate;
-                @MiddleIntermediate.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnMiddleIntermediate;
-                @MiddleIntermediate.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnMiddleIntermediate;
-                @RingIntermediate.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnRingIntermediate;
-                @RingIntermediate.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnRingIntermediate;
-                @RingIntermediate.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnRingIntermediate;
-                @PinkyIntermediate.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnPinkyIntermediate;
-                @PinkyIntermediate.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnPinkyIntermediate;
-                @PinkyIntermediate.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnPinkyIntermediate;
-                @ThumbDistal.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnThumbDistal;
-                @ThumbDistal.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnThumbDistal;
-                @ThumbDistal.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnThumbDistal;
-                @IndexDistal.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnIndexDistal;
-                @IndexDistal.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnIndexDistal;
-                @IndexDistal.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnIndexDistal;
-                @MiddleDistal.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnMiddleDistal;
-                @MiddleDistal.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnMiddleDistal;
-                @MiddleDistal.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnMiddleDistal;
-                @RingDistal.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnRingDistal;
-                @RingDistal.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnRingDistal;
-                @RingDistal.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnRingDistal;
-                @PinkyDistal.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnPinkyDistal;
-                @PinkyDistal.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnPinkyDistal;
-                @PinkyDistal.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnPinkyDistal;
-                @ThumbTip.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnThumbTip;
-                @ThumbTip.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnThumbTip;
-                @ThumbTip.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnThumbTip;
-                @IndexTip.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnIndexTip;
-                @IndexTip.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnIndexTip;
-                @IndexTip.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnIndexTip;
-                @MiddleTip.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnMiddleTip;
-                @MiddleTip.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnMiddleTip;
-                @MiddleTip.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnMiddleTip;
-                @RingTip.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnRingTip;
-                @RingTip.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnRingTip;
-                @RingTip.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnRingTip;
-                @PinkyTip.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnPinkyTip;
-                @PinkyTip.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnPinkyTip;
-                @PinkyTip.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnPinkyTip;
+                @ThumbTIP.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnThumbTIP;
+                @ThumbTIP.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnThumbTIP;
+                @ThumbTIP.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnThumbTIP;
+                @ThumbIP.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnThumbIP;
+                @ThumbIP.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnThumbIP;
+                @ThumbIP.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnThumbIP;
+                @ThumbMCP.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnThumbMCP;
+                @ThumbMCP.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnThumbMCP;
+                @ThumbMCP.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnThumbMCP;
+                @ThumbCMC.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnThumbCMC;
+                @ThumbCMC.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnThumbCMC;
+                @ThumbCMC.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnThumbCMC;
+                @IndexTIP.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnIndexTIP;
+                @IndexTIP.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnIndexTIP;
+                @IndexTIP.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnIndexTIP;
+                @IndexDIP.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnIndexDIP;
+                @IndexDIP.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnIndexDIP;
+                @IndexDIP.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnIndexDIP;
+                @IndexPIP.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnIndexPIP;
+                @IndexPIP.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnIndexPIP;
+                @IndexPIP.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnIndexPIP;
+                @IndexMCP.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnIndexMCP;
+                @IndexMCP.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnIndexMCP;
+                @IndexMCP.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnIndexMCP;
+                @MiddleTIP.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnMiddleTIP;
+                @MiddleTIP.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnMiddleTIP;
+                @MiddleTIP.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnMiddleTIP;
+                @MiddleDIP.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnMiddleDIP;
+                @MiddleDIP.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnMiddleDIP;
+                @MiddleDIP.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnMiddleDIP;
+                @MiddlePIP.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnMiddlePIP;
+                @MiddlePIP.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnMiddlePIP;
+                @MiddlePIP.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnMiddlePIP;
+                @MiddleMCP.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnMiddleMCP;
+                @MiddleMCP.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnMiddleMCP;
+                @MiddleMCP.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnMiddleMCP;
+                @RingTIP.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnRingTIP;
+                @RingTIP.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnRingTIP;
+                @RingTIP.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnRingTIP;
+                @RingDIP.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnRingDIP;
+                @RingDIP.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnRingDIP;
+                @RingDIP.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnRingDIP;
+                @RingPIP.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnRingPIP;
+                @RingPIP.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnRingPIP;
+                @RingPIP.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnRingPIP;
+                @RingMCP.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnRingMCP;
+                @RingMCP.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnRingMCP;
+                @RingMCP.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnRingMCP;
+                @PinkyTIP.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnPinkyTIP;
+                @PinkyTIP.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnPinkyTIP;
+                @PinkyTIP.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnPinkyTIP;
+                @PinkyDIP.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnPinkyDIP;
+                @PinkyDIP.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnPinkyDIP;
+                @PinkyDIP.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnPinkyDIP;
+                @PinkyPIP.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnPinkyPIP;
+                @PinkyPIP.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnPinkyPIP;
+                @PinkyPIP.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnPinkyPIP;
+                @PinkyMCP.started -= m_Wrapper.m_RightHandActionsCallbackInterface.OnPinkyMCP;
+                @PinkyMCP.performed -= m_Wrapper.m_RightHandActionsCallbackInterface.OnPinkyMCP;
+                @PinkyMCP.canceled -= m_Wrapper.m_RightHandActionsCallbackInterface.OnPinkyMCP;
             }
             m_Wrapper.m_RightHandActionsCallbackInterface = instance;
             if (instance != null)
@@ -2356,81 +2121,66 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
                 @Keypose.started += instance.OnKeypose;
                 @Keypose.performed += instance.OnKeypose;
                 @Keypose.canceled += instance.OnKeypose;
-                @ThumbMetacarpal.started += instance.OnThumbMetacarpal;
-                @ThumbMetacarpal.performed += instance.OnThumbMetacarpal;
-                @ThumbMetacarpal.canceled += instance.OnThumbMetacarpal;
-                @IndexMetacarpal.started += instance.OnIndexMetacarpal;
-                @IndexMetacarpal.performed += instance.OnIndexMetacarpal;
-                @IndexMetacarpal.canceled += instance.OnIndexMetacarpal;
-                @MiddleMetacarpal.started += instance.OnMiddleMetacarpal;
-                @MiddleMetacarpal.performed += instance.OnMiddleMetacarpal;
-                @MiddleMetacarpal.canceled += instance.OnMiddleMetacarpal;
-                @RingMetacarpal.started += instance.OnRingMetacarpal;
-                @RingMetacarpal.performed += instance.OnRingMetacarpal;
-                @RingMetacarpal.canceled += instance.OnRingMetacarpal;
-                @PinkyMetacarpal.started += instance.OnPinkyMetacarpal;
-                @PinkyMetacarpal.performed += instance.OnPinkyMetacarpal;
-                @PinkyMetacarpal.canceled += instance.OnPinkyMetacarpal;
-                @ThumbProximal.started += instance.OnThumbProximal;
-                @ThumbProximal.performed += instance.OnThumbProximal;
-                @ThumbProximal.canceled += instance.OnThumbProximal;
-                @IndexProximal.started += instance.OnIndexProximal;
-                @IndexProximal.performed += instance.OnIndexProximal;
-                @IndexProximal.canceled += instance.OnIndexProximal;
-                @MiddleProximal.started += instance.OnMiddleProximal;
-                @MiddleProximal.performed += instance.OnMiddleProximal;
-                @MiddleProximal.canceled += instance.OnMiddleProximal;
-                @RingProximal.started += instance.OnRingProximal;
-                @RingProximal.performed += instance.OnRingProximal;
-                @RingProximal.canceled += instance.OnRingProximal;
-                @PinkyProximal.started += instance.OnPinkyProximal;
-                @PinkyProximal.performed += instance.OnPinkyProximal;
-                @PinkyProximal.canceled += instance.OnPinkyProximal;
-                @ThumbIntermediate.started += instance.OnThumbIntermediate;
-                @ThumbIntermediate.performed += instance.OnThumbIntermediate;
-                @ThumbIntermediate.canceled += instance.OnThumbIntermediate;
-                @IndexIntermediate.started += instance.OnIndexIntermediate;
-                @IndexIntermediate.performed += instance.OnIndexIntermediate;
-                @IndexIntermediate.canceled += instance.OnIndexIntermediate;
-                @MiddleIntermediate.started += instance.OnMiddleIntermediate;
-                @MiddleIntermediate.performed += instance.OnMiddleIntermediate;
-                @MiddleIntermediate.canceled += instance.OnMiddleIntermediate;
-                @RingIntermediate.started += instance.OnRingIntermediate;
-                @RingIntermediate.performed += instance.OnRingIntermediate;
-                @RingIntermediate.canceled += instance.OnRingIntermediate;
-                @PinkyIntermediate.started += instance.OnPinkyIntermediate;
-                @PinkyIntermediate.performed += instance.OnPinkyIntermediate;
-                @PinkyIntermediate.canceled += instance.OnPinkyIntermediate;
-                @ThumbDistal.started += instance.OnThumbDistal;
-                @ThumbDistal.performed += instance.OnThumbDistal;
-                @ThumbDistal.canceled += instance.OnThumbDistal;
-                @IndexDistal.started += instance.OnIndexDistal;
-                @IndexDistal.performed += instance.OnIndexDistal;
-                @IndexDistal.canceled += instance.OnIndexDistal;
-                @MiddleDistal.started += instance.OnMiddleDistal;
-                @MiddleDistal.performed += instance.OnMiddleDistal;
-                @MiddleDistal.canceled += instance.OnMiddleDistal;
-                @RingDistal.started += instance.OnRingDistal;
-                @RingDistal.performed += instance.OnRingDistal;
-                @RingDistal.canceled += instance.OnRingDistal;
-                @PinkyDistal.started += instance.OnPinkyDistal;
-                @PinkyDistal.performed += instance.OnPinkyDistal;
-                @PinkyDistal.canceled += instance.OnPinkyDistal;
-                @ThumbTip.started += instance.OnThumbTip;
-                @ThumbTip.performed += instance.OnThumbTip;
-                @ThumbTip.canceled += instance.OnThumbTip;
-                @IndexTip.started += instance.OnIndexTip;
-                @IndexTip.performed += instance.OnIndexTip;
-                @IndexTip.canceled += instance.OnIndexTip;
-                @MiddleTip.started += instance.OnMiddleTip;
-                @MiddleTip.performed += instance.OnMiddleTip;
-                @MiddleTip.canceled += instance.OnMiddleTip;
-                @RingTip.started += instance.OnRingTip;
-                @RingTip.performed += instance.OnRingTip;
-                @RingTip.canceled += instance.OnRingTip;
-                @PinkyTip.started += instance.OnPinkyTip;
-                @PinkyTip.performed += instance.OnPinkyTip;
-                @PinkyTip.canceled += instance.OnPinkyTip;
+                @ThumbTIP.started += instance.OnThumbTIP;
+                @ThumbTIP.performed += instance.OnThumbTIP;
+                @ThumbTIP.canceled += instance.OnThumbTIP;
+                @ThumbIP.started += instance.OnThumbIP;
+                @ThumbIP.performed += instance.OnThumbIP;
+                @ThumbIP.canceled += instance.OnThumbIP;
+                @ThumbMCP.started += instance.OnThumbMCP;
+                @ThumbMCP.performed += instance.OnThumbMCP;
+                @ThumbMCP.canceled += instance.OnThumbMCP;
+                @ThumbCMC.started += instance.OnThumbCMC;
+                @ThumbCMC.performed += instance.OnThumbCMC;
+                @ThumbCMC.canceled += instance.OnThumbCMC;
+                @IndexTIP.started += instance.OnIndexTIP;
+                @IndexTIP.performed += instance.OnIndexTIP;
+                @IndexTIP.canceled += instance.OnIndexTIP;
+                @IndexDIP.started += instance.OnIndexDIP;
+                @IndexDIP.performed += instance.OnIndexDIP;
+                @IndexDIP.canceled += instance.OnIndexDIP;
+                @IndexPIP.started += instance.OnIndexPIP;
+                @IndexPIP.performed += instance.OnIndexPIP;
+                @IndexPIP.canceled += instance.OnIndexPIP;
+                @IndexMCP.started += instance.OnIndexMCP;
+                @IndexMCP.performed += instance.OnIndexMCP;
+                @IndexMCP.canceled += instance.OnIndexMCP;
+                @MiddleTIP.started += instance.OnMiddleTIP;
+                @MiddleTIP.performed += instance.OnMiddleTIP;
+                @MiddleTIP.canceled += instance.OnMiddleTIP;
+                @MiddleDIP.started += instance.OnMiddleDIP;
+                @MiddleDIP.performed += instance.OnMiddleDIP;
+                @MiddleDIP.canceled += instance.OnMiddleDIP;
+                @MiddlePIP.started += instance.OnMiddlePIP;
+                @MiddlePIP.performed += instance.OnMiddlePIP;
+                @MiddlePIP.canceled += instance.OnMiddlePIP;
+                @MiddleMCP.started += instance.OnMiddleMCP;
+                @MiddleMCP.performed += instance.OnMiddleMCP;
+                @MiddleMCP.canceled += instance.OnMiddleMCP;
+                @RingTIP.started += instance.OnRingTIP;
+                @RingTIP.performed += instance.OnRingTIP;
+                @RingTIP.canceled += instance.OnRingTIP;
+                @RingDIP.started += instance.OnRingDIP;
+                @RingDIP.performed += instance.OnRingDIP;
+                @RingDIP.canceled += instance.OnRingDIP;
+                @RingPIP.started += instance.OnRingPIP;
+                @RingPIP.performed += instance.OnRingPIP;
+                @RingPIP.canceled += instance.OnRingPIP;
+                @RingMCP.started += instance.OnRingMCP;
+                @RingMCP.performed += instance.OnRingMCP;
+                @RingMCP.canceled += instance.OnRingMCP;
+                @PinkyTIP.started += instance.OnPinkyTIP;
+                @PinkyTIP.performed += instance.OnPinkyTIP;
+                @PinkyTIP.canceled += instance.OnPinkyTIP;
+                @PinkyDIP.started += instance.OnPinkyDIP;
+                @PinkyDIP.performed += instance.OnPinkyDIP;
+                @PinkyDIP.canceled += instance.OnPinkyDIP;
+                @PinkyPIP.started += instance.OnPinkyPIP;
+                @PinkyPIP.performed += instance.OnPinkyPIP;
+                @PinkyPIP.canceled += instance.OnPinkyPIP;
+                @PinkyMCP.started += instance.OnPinkyMCP;
+                @PinkyMCP.performed += instance.OnPinkyMCP;
+                @PinkyMCP.canceled += instance.OnPinkyMCP;
             }
         }
     }
@@ -2452,6 +2202,7 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
         void OnBumper(InputAction.CallbackContext context);
         void OnTriggerButton(InputAction.CallbackContext context);
         void OnTrigger(InputAction.CallbackContext context);
+        void OnTriggerHold(InputAction.CallbackContext context);
         void OnTouchpadPosition(InputAction.CallbackContext context);
         void OnTouchpadClick(InputAction.CallbackContext context);
         void OnTouchpadTouch(InputAction.CallbackContext context);
@@ -2473,61 +2224,51 @@ public partial class @MagicLeapInputs : IInputActionCollection2, IDisposable
         void OnPosition(InputAction.CallbackContext context);
         void OnRotation(InputAction.CallbackContext context);
         void OnKeypose(InputAction.CallbackContext context);
-        void OnThumbMetacarpal(InputAction.CallbackContext context);
-        void OnIndexMetacarpal(InputAction.CallbackContext context);
-        void OnMiddleMetacarpal(InputAction.CallbackContext context);
-        void OnRingMetacarpal(InputAction.CallbackContext context);
-        void OnPinkyMetacarpal(InputAction.CallbackContext context);
-        void OnThumbProximal(InputAction.CallbackContext context);
-        void OnIndexProximal(InputAction.CallbackContext context);
-        void OnMiddleProximal(InputAction.CallbackContext context);
-        void OnRingProximal(InputAction.CallbackContext context);
-        void OnPinkyProximal(InputAction.CallbackContext context);
-        void OnThumbIntermediate(InputAction.CallbackContext context);
-        void OnIndexIntermediate(InputAction.CallbackContext context);
-        void OnMiddleIntermediate(InputAction.CallbackContext context);
-        void OnRingIntermediate(InputAction.CallbackContext context);
-        void OnPinkyIntermediate(InputAction.CallbackContext context);
-        void OnThumbDistal(InputAction.CallbackContext context);
-        void OnIndexDistal(InputAction.CallbackContext context);
-        void OnMiddleDistal(InputAction.CallbackContext context);
-        void OnRingDistal(InputAction.CallbackContext context);
-        void OnPinkyDistal(InputAction.CallbackContext context);
-        void OnThumbTip(InputAction.CallbackContext context);
-        void OnIndexTip(InputAction.CallbackContext context);
-        void OnMiddleTip(InputAction.CallbackContext context);
-        void OnRingTip(InputAction.CallbackContext context);
-        void OnPinkyTip(InputAction.CallbackContext context);
+        void OnThumbTIP(InputAction.CallbackContext context);
+        void OnThumbIP(InputAction.CallbackContext context);
+        void OnThumbMCP(InputAction.CallbackContext context);
+        void OnThumbCMC(InputAction.CallbackContext context);
+        void OnIndexTIP(InputAction.CallbackContext context);
+        void OnIndexDIP(InputAction.CallbackContext context);
+        void OnIndexPIP(InputAction.CallbackContext context);
+        void OnIndexMCP(InputAction.CallbackContext context);
+        void OnMiddleTIP(InputAction.CallbackContext context);
+        void OnMiddleDIP(InputAction.CallbackContext context);
+        void OnMiddlePIP(InputAction.CallbackContext context);
+        void OnMiddleMCP(InputAction.CallbackContext context);
+        void OnRingTIP(InputAction.CallbackContext context);
+        void OnRingDIP(InputAction.CallbackContext context);
+        void OnRingPIP(InputAction.CallbackContext context);
+        void OnRingMCP(InputAction.CallbackContext context);
+        void OnPinkyTIP(InputAction.CallbackContext context);
+        void OnPinkyDIP(InputAction.CallbackContext context);
+        void OnPinkyPIP(InputAction.CallbackContext context);
+        void OnPinkyMCP(InputAction.CallbackContext context);
     }
     public interface IRightHandActions
     {
         void OnPosition(InputAction.CallbackContext context);
         void OnRotation(InputAction.CallbackContext context);
         void OnKeypose(InputAction.CallbackContext context);
-        void OnThumbMetacarpal(InputAction.CallbackContext context);
-        void OnIndexMetacarpal(InputAction.CallbackContext context);
-        void OnMiddleMetacarpal(InputAction.CallbackContext context);
-        void OnRingMetacarpal(InputAction.CallbackContext context);
-        void OnPinkyMetacarpal(InputAction.CallbackContext context);
-        void OnThumbProximal(InputAction.CallbackContext context);
-        void OnIndexProximal(InputAction.CallbackContext context);
-        void OnMiddleProximal(InputAction.CallbackContext context);
-        void OnRingProximal(InputAction.CallbackContext context);
-        void OnPinkyProximal(InputAction.CallbackContext context);
-        void OnThumbIntermediate(InputAction.CallbackContext context);
-        void OnIndexIntermediate(InputAction.CallbackContext context);
-        void OnMiddleIntermediate(InputAction.CallbackContext context);
-        void OnRingIntermediate(InputAction.CallbackContext context);
-        void OnPinkyIntermediate(InputAction.CallbackContext context);
-        void OnThumbDistal(InputAction.CallbackContext context);
-        void OnIndexDistal(InputAction.CallbackContext context);
-        void OnMiddleDistal(InputAction.CallbackContext context);
-        void OnRingDistal(InputAction.CallbackContext context);
-        void OnPinkyDistal(InputAction.CallbackContext context);
-        void OnThumbTip(InputAction.CallbackContext context);
-        void OnIndexTip(InputAction.CallbackContext context);
-        void OnMiddleTip(InputAction.CallbackContext context);
-        void OnRingTip(InputAction.CallbackContext context);
-        void OnPinkyTip(InputAction.CallbackContext context);
+        void OnThumbTIP(InputAction.CallbackContext context);
+        void OnThumbIP(InputAction.CallbackContext context);
+        void OnThumbMCP(InputAction.CallbackContext context);
+        void OnThumbCMC(InputAction.CallbackContext context);
+        void OnIndexTIP(InputAction.CallbackContext context);
+        void OnIndexDIP(InputAction.CallbackContext context);
+        void OnIndexPIP(InputAction.CallbackContext context);
+        void OnIndexMCP(InputAction.CallbackContext context);
+        void OnMiddleTIP(InputAction.CallbackContext context);
+        void OnMiddleDIP(InputAction.CallbackContext context);
+        void OnMiddlePIP(InputAction.CallbackContext context);
+        void OnMiddleMCP(InputAction.CallbackContext context);
+        void OnRingTIP(InputAction.CallbackContext context);
+        void OnRingDIP(InputAction.CallbackContext context);
+        void OnRingPIP(InputAction.CallbackContext context);
+        void OnRingMCP(InputAction.CallbackContext context);
+        void OnPinkyTIP(InputAction.CallbackContext context);
+        void OnPinkyDIP(InputAction.CallbackContext context);
+        void OnPinkyPIP(InputAction.CallbackContext context);
+        void OnPinkyMCP(InputAction.CallbackContext context);
     }
 }

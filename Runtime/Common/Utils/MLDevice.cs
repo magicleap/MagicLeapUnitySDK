@@ -18,15 +18,41 @@ namespace UnityEngine.XR.MagicLeap
     using System.Collections;
     using System.Collections.Generic;
     using UnityEditor;
-    using UnityEngine.SceneManagement;
-    using UnityEngine.XR.MagicLeap.Internal;
     using UnityEngine.XR.MagicLeap.Native;
 
     /// <summary>
     /// MagicLeap device class responsible for updating all trackers when they register and are enabled.
     /// </summary>
+    [DefaultExecutionOrder(ScriptOrder)]
     public class MLDevice : MonoBehaviour
     {
+        /// <summary>
+        /// Ensures this MonoBehavior runs its event methods very early before all other scripts.
+        /// </summary>
+        private const int ScriptOrder = -15001;
+
+        /// <summary>
+        /// Create the MLDevice instance object on application startup from the main thread
+        /// This avoids race conditions and situations where worker threads need to access it
+        /// </summary>
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void InstantiateSingleton()
+        {
+            if (instance == null)
+            {
+                GameObject go = new GameObject("(MLDevice Singleton)");
+                instance = go.AddComponent<MLDevice>();
+#if DEBUG
+                MLPluginLog.Debug("Creating MLDevice");
+#endif
+
+                if (Application.isPlaying)
+                {
+                    DontDestroyOnLoad(instance.gameObject);
+                }
+            }
+        }
+
         /// <summary>
         /// Hardcoded value approximating minimum near clip plane distance allowed by the platform.
         /// </summary>
@@ -40,7 +66,7 @@ namespace UnityEngine.XR.MagicLeap
         /// <summary>
         /// MagicLeap platform Unity name.
         /// </summary>
-        public const string MagicLeapDeviceName = "Lumin";
+        public const string MagicLeapDeviceName = "MagicLeap";
 
         /// <summary>
         /// Reference to the active MLDevice instance.
@@ -170,33 +196,7 @@ namespace UnityEngine.XR.MagicLeap
         /// <summary>
         /// Gets the MLDevice singleton instance.
         /// </summary>
-        private static MLDevice Instance
-        {
-            get
-            {
-                instance = instance == null ? FindObjectOfType<MLDevice>() : instance;
-
-                if (instance == null)
-                {
-                    GameObject go = new GameObject();
-                    instance = go.AddComponent<MLDevice>();
-                    instance.name = "(MLDevice Singleton) ";
-#if DEBUG
-                    MLPluginLog.Debug("Creating MLDevice");
-#endif
-                }
-
-#if UNITY_EDITOR
-                if (EditorApplication.isPlaying)
-                {
-                    UnityEngine.Object.DontDestroyOnLoad(instance.gameObject);
-                }
-#else
-                UnityEngine.Object.DontDestroyOnLoad(instance.gameObject);
-#endif
-                return instance;
-            }
-        }
+        private static MLDevice Instance => instance;
 
         /// <summary>
         /// Check if the underlying Unity XR MagicLeap subsystem is initialized.

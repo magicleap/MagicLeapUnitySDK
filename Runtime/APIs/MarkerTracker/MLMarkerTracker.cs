@@ -1,15 +1,11 @@
-// %BANNER_BEGIN% 
-// --------------------------------------------------------------------- 
+// %BANNER_BEGIN%
+// ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="MLMarkerTracker.cs" company="Magic Leap">
-//
-// Copyright (c) 2018 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
-// %COPYRIGHT_END% 
-// --------------------------------------------------------------------- 
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
+// %COPYRIGHT_END%
+// ---------------------------------------------------------------------
 // %BANNER_END%
 
 #if UNITY_MAGICLEAP || UNITY_ANDROID
@@ -76,12 +72,12 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public static async Task StartScanningAsync(Settings? settings = null)
         {
-            settings ??= Instance.settings;
-
-            if (Instance.settings.EnableMarkerScanning == true)
+            if (IsStarted && Instance.settings.EnableMarkerScanning == true)
                 return;
 
-            await SetSettingsAsync(Settings.Create(true, Instance.settings.MarkerTypes, Instance.settings.QRCodeSize, Instance.settings.ArucoDicitonary, Instance.settings.ArucoMarkerSize));
+            settings ??= Instance.settings;
+
+            await SetSettingsAsync(Settings.Create(true, settings.Value.MarkerTypes, settings.Value.QRCodeSize, settings.Value.ArucoDicitonary, settings.Value.ArucoMarkerSize));
         }
 
         /// <summary>

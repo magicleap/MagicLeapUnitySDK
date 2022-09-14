@@ -1,22 +1,17 @@
-// %BANNER_BEGIN% 
-// --------------------------------------------------------------------- 
+// %BANNER_BEGIN%
+// ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="MLAPISingleton.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
-// --------------------------------------------------------------------- 
+// ---------------------------------------------------------------------
 // %BANNER_END%
 
 namespace UnityEngine.XR.MagicLeap
 {
     using System;
     using System.Reflection;
-    using UnityEngine.Lumin;
 
 #if UNITY_MAGICLEAP || UNITY_ANDROID
     using UnityEngine.XR.MagicLeap.Internal;
@@ -71,7 +66,7 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public static bool IsStarted { get; private set; } = false;
 
-        protected readonly string DllNotFoundError = $"Failed to start {typeof(T).Name} API. This API is only available on device or when running inside the Unity editor with Zero Iteration enabled.";
+        protected readonly string DllNotFoundError = $"Failed to start {typeof(T).Name} API. This API is only available on device or when running inside the Unity editor with Magic Leap App Simulator enabled.";
 
         /// <summary>
         /// Do API-specific creation/initialization of ML resources for this API, such as

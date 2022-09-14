@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="MLMediaMuxerNativeBindings.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -181,7 +177,7 @@ namespace UnityEngine.XR.MagicLeap
             {
                 const int sizeOfOutputFormatEnum = sizeof(OutputFormat);
                 var resultCode = NativeBindings.MLMediaMuxerGetSupportedOutputFormats(handle, out IntPtr resultPtr, out int resultCount);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaMuxerGetSupportedOutputFormats");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaMuxerGetSupportedOutputFormats));
                 formats = new OutputFormat[resultCount];
                 if (resultCode == MLResult.Code.Ok)
                 {
@@ -217,7 +213,7 @@ namespace UnityEngine.XR.MagicLeap
             {
                 var resultCode = NativeBindings.MLMediaMuxerAddTrack(handle, mediaFormatHandle, out UIntPtr indexPtr);
                 trackIndex = (int)indexPtr;
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaMuxerAddTrack");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaMuxerAddTrack));
                 return resultCode;
             }
 
@@ -231,7 +227,7 @@ namespace UnityEngine.XR.MagicLeap
                 sampleData.Flags = flags;
 
                 var resultCode = NativeBindings.MLMediaMuxerWriteSampleData(handle, sampleData);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaMuxerWriteSampleData");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaMuxerWriteSampleData));
                 return resultCode;
             }
         }

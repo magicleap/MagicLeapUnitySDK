@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="MLMediaParserCEA608.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -46,12 +42,12 @@ namespace UnityEngine.XR.MagicLeap
             {
 #if UNITY_MAGICLEAP || UNITY_ANDROID
                 MLResult.Code resultCode = NativeBindings.MLMediaCea708ParserCreate(out ulong parserHandle);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaCea708ParserCreate");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaCea708ParserCreate));
                 this.Handle = parserHandle;
                 this.gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
                 IntPtr gcHandlePtr = GCHandle.ToIntPtr(this.gcHandle);
                 resultCode = NativeBindings.MLMediaCea708ParserSetEmitEventCallback(this.Handle, NativeBindings.OnEmitEvent, gcHandlePtr);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaCea708ParserSetEmitEventCallback");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaCea708ParserSetEmitEventCallback));
 #endif
             }
 
@@ -59,9 +55,9 @@ namespace UnityEngine.XR.MagicLeap
             {
 #if UNITY_MAGICLEAP || UNITY_ANDROID
                 MLResult.Code resultCode = NativeBindings.MLMediaCea708ParserSetEmitEventCallback(this.Handle, null, IntPtr.Zero);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaCea708ParserSetEmitEventCallback");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaCea708ParserSetEmitEventCallback));
                 resultCode = NativeBindings.MLMediaCea708ParserDestroy(this.Handle);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaCea708ParserDestroy");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaCea708ParserDestroy));
                 this.gcHandle.Free();
 #endif
             }
@@ -70,7 +66,7 @@ namespace UnityEngine.XR.MagicLeap
             {
 #if UNITY_MAGICLEAP || UNITY_ANDROID
                 MLResult.Code resultCode = NativeBindings.MLMediaCea708ParserParse(this.Handle, data, dataSize);
-                MLResult.DidNativeCallSucceed(resultCode, "MLMediaCea708ParserParse");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaCea708ParserParse));
 #endif
             }
 

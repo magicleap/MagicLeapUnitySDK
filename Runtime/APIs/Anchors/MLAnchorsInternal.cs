@@ -1,11 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="MLAnchorNativeBindings.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018-present, Magic Leap, Inc. All Rights Reserved.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -14,7 +12,6 @@
 namespace UnityEngine.XR.MagicLeap
 {
 	using System;
-	using System.Runtime.InteropServices;
 	using Native;
 
 	/// <summary>
@@ -32,7 +29,9 @@ namespace UnityEngine.XR.MagicLeap
 		private MLResult.Code GetQueryResult(Request.Params requestParams, ulong queryHandle, uint firstIndex, uint lastIndex, NativeBindings.MLSpatialAnchor[] anchors)
 		{
 #if UNITY_MAGICLEAP || UNITY_ANDROID
-			return NativeBindings.MLSpatialAnchorQueryGetResult(this.Handle, queryHandle, firstIndex, lastIndex, anchors);
+			var resultCode = NativeBindings.MLSpatialAnchorQueryGetResult(this.Handle, queryHandle, firstIndex, lastIndex, anchors);
+			MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLSpatialAnchorQueryGetResult));
+			return resultCode;
 #else
 			queryHandle = MagicLeapNativeBindings.InvalidHandle;
 			return MLResult.Code.APIDLLNotFound;
@@ -42,7 +41,9 @@ namespace UnityEngine.XR.MagicLeap
 		private MLResult.Code DestroyQuery(ulong queryHandle)
 		{
 #if UNITY_MAGICLEAP || UNITY_ANDROID
-			return NativeBindings.MLSpatialAnchorQueryDestroy(this.Handle, queryHandle);
+			var resultCode = NativeBindings.MLSpatialAnchorQueryDestroy(this.Handle, queryHandle);
+			MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLSpatialAnchorQueryDestroy));
+			return resultCode;
 #else
 			return MLResult.Code.APIDLLNotFound;
 
@@ -53,7 +54,9 @@ namespace UnityEngine.XR.MagicLeap
 		{
 #if UNITY_MAGICLEAP || UNITY_ANDROID
 			var resultCode = NativeBindings.MLSpatialAnchorGetLocalizationInfo(this.Handle, out NativeBindings.MLSpatialAnchorLocalizationInfo nativeInfo);
+			MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLSpatialAnchorGetLocalizationInfo));
 			info = new LocalizationInfo(nativeInfo);
+
 			return resultCode;
 #else
 			info = default;
@@ -64,7 +67,9 @@ namespace UnityEngine.XR.MagicLeap
 		private MLResult.Code CreateAnchor(NativeBindings.MLSpatialAnchorCreateInfo createInfo, out NativeBindings.MLSpatialAnchor anchor)
 		{
 #if UNITY_MAGICLEAP || UNITY_ANDROID
-			return NativeBindings.MLSpatialAnchorCreate(this.Handle, in createInfo, out anchor);
+			var resultCode = NativeBindings.MLSpatialAnchorCreate(this.Handle, in createInfo, out anchor);
+			MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLSpatialAnchorCreate));
+			return resultCode;
 #else
 			anchor = default;
 			return MLResult.Code.APIDLLNotFound;
@@ -75,7 +80,9 @@ namespace UnityEngine.XR.MagicLeap
 		private MLResult.Code PublishAnchor(Anchor anchor)
 		{
 #if UNITY_MAGICLEAP || UNITY_ANDROID
-			return NativeBindings.MLSpatialAnchorPublish(this.Handle, anchor.id);
+			var resultCode = NativeBindings.MLSpatialAnchorPublish(this.Handle, anchor.id);
+			MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLSpatialAnchorPublish));
+			return resultCode;
 #else
 			return MLResult.Code.APIDLLNotFound;
 
@@ -87,7 +94,9 @@ namespace UnityEngine.XR.MagicLeap
 #if UNITY_MAGICLEAP || UNITY_ANDROID
 			var unixTimestamp = (DateTime.UtcNow.AddSeconds(expirationTimeStamp)).Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
 			var nativeAnchor = new NativeBindings.MLSpatialAnchor(anchor, (ulong)unixTimestamp);
-			return NativeBindings.MLSpatialAnchorUpdate(this.Handle, in nativeAnchor);
+			var resultCode = NativeBindings.MLSpatialAnchorUpdate(this.Handle, in nativeAnchor);
+			MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLSpatialAnchorUpdate));
+			return resultCode;
 #else
 			return MLResult.Code.APIDLLNotFound;
 
@@ -97,7 +106,9 @@ namespace UnityEngine.XR.MagicLeap
 		private MLResult.Code DeleteAnchor(Anchor anchor)
 		{
 #if UNITY_MAGICLEAP || UNITY_ANDROID
-			return NativeBindings.MLSpatialAnchorDelete(this.Handle, anchor.id);
+			var resultCode = NativeBindings.MLSpatialAnchorDelete(this.Handle, anchor.id);
+			MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLSpatialAnchorDelete));
+			return resultCode;
 #else
 			return MLResult.Code.APIDLLNotFound;
 
@@ -106,7 +117,9 @@ namespace UnityEngine.XR.MagicLeap
 		private MLResult.Code DeleteAnchor(string anchorId)
 		{
 #if UNITY_MAGICLEAP || UNITY_ANDROID
-			return NativeBindings.MLSpatialAnchorDelete(this.Handle, new MagicLeapNativeBindings.MLUUIDBytes(anchorId));
+			var resultCode = NativeBindings.MLSpatialAnchorDelete(this.Handle, new MagicLeapNativeBindings.MLUUIDBytes(anchorId));
+			MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLSpatialAnchorDelete));
+			return resultCode;
 #else
 			return MLResult.Code.APIDLLNotFound;
 

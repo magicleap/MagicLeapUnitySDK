@@ -1,16 +1,16 @@
 {
-  "name": "LuminXrProvider",
+  "name": "MagicLeapXrProvider",
   "version": "1.0.0",
-  "libraryName": "LuminXrProvider",
+  "libraryName": "MagicLeapXrProvider",
   "inputs": [
     {
-      "id": "LuminXr-Input",
+      "id": "MagicLeapXr-Input",
       "disablesLegacyInput": true
     }
   ],
   "meshings": [
     {
-        "id": "LuminXr-Meshing"
+        "id": "MagicLeapXr-Meshing"
     }
   ]
 }

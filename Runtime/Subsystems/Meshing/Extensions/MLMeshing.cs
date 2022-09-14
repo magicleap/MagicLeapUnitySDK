@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="MeshingSubsystemConfig.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2021 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2021-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -22,25 +18,23 @@ namespace UnityEngine.XR.MagicLeap
     {
         public static partial class Extensions
         {
-            public static class MLMeshing
+            public static partial class MLMeshing
             {
-                public static class Config
+                public static partial class Config
                 {
-                    private const string LuminXrProviderDll = "LuminXrProvider";
-
-                    public static IntPtr AcquireConfidence(MeshId meshId, out int count) => MeshingAcquireConfidence(meshId, out count);
-                    public static void ReleaseConfidence(MeshId meshId) => MeshingReleaseConfidence(meshId);
+                    public static IntPtr AcquireConfidence(MeshId meshId, out int count) => NativeBindings.MeshingAcquireConfidence(meshId, out count);
+                    public static void ReleaseConfidence(MeshId meshId) => NativeBindings.MeshingReleaseConfidence(meshId);
                     public static void SetBounds(Transform transform, Vector3 extents) => SetBounds(transform.localPosition, transform.localRotation, extents);
-                    public static void SetBounds(Vector3 position, Quaternion rotation, Vector3 extents) => MeshingSetBounds(position, rotation, extents);
+                    public static void SetBounds(Vector3 position, Quaternion rotation, Vector3 extents) => NativeBindings.MeshingSetBounds(position, rotation, extents);
 
                     public static int batchSize
                     {
-                        set { MeshingSetBatchSize(value); }
+                        set { NativeBindings.MeshingSetBatchSize(value); }
                     }
 
                     public static float density
                     {
-                        set { MeshingSetDensity(value); }
+                        set { NativeBindings.MeshingSetDensity(value); }
                     }
 
                     public static Settings meshingSettings
@@ -56,41 +50,9 @@ namespace UnityEngine.XR.MagicLeap
                             {
                                 SubsystemFeatures.SetCurrentFeatureEnabled(Feature.Meshing, true);
                             }
-                            MeshingUpdateSettings(ref value);
+                            NativeBindings.MeshingUpdateSettings(ref value);
                         }
                     }
-
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-                    [DllImport(LuminXrProviderDll)]
-                    internal static extern void MeshingUpdateSettings(ref Settings newSettings);
-
-                    [DllImport(LuminXrProviderDll)]
-                    internal static extern void MeshingSetDensity(float density);
-
-                    [DllImport(LuminXrProviderDll)]
-                    internal static extern void MeshingSetBounds(Vector3 center, Quaternion rotation, Vector3 extents);
-
-                    [DllImport(LuminXrProviderDll)]
-                    internal static extern void MeshingSetBatchSize(int batchSize);
-
-                    [DllImport(LuminXrProviderDll)]
-                    internal static extern IntPtr MeshingAcquireConfidence(MeshId meshId, out int count);
-
-                    [DllImport(LuminXrProviderDll)]
-                    internal static extern void MeshingReleaseConfidence(MeshId meshId);
-#else
-                    internal static void MeshingUpdateSettings(ref Settings newSettings) { }
-
-                    internal static void MeshingSetDensity(float density) { }
-
-                    internal static void MeshingSetBounds(Vector3 center, Quaternion rotation, Vector3 extents) { }
-
-                    internal static void MeshingSetBatchSize(int batchSize) { }
-
-                    internal static IntPtr MeshingAcquireConfidence(MeshId meshId, out int count) { count = 0; return IntPtr.Zero; }
-
-                    internal static void MeshingReleaseConfidence(MeshId meshId) { }
-#endif
 
                     [Flags]
                     public enum Flags

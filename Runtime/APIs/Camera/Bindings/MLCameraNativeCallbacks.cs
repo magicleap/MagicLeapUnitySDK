@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file = "MLCameraOutput.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -147,7 +143,7 @@ namespace UnityEngine.XR.MagicLeap
                 GCHandle gcHandle = GCHandle.FromIntPtr(data);
                 MLCamera camera = gcHandle.Target as MLCamera;
 
-                if (camera.OnRawImageAvailable.GetInvocationList().Length > 0)
+                if (camera.OnRawImageAvailable?.GetInvocationList().Length > 0)
                 {
                     MLCamera.IntrinsicCalibrationParameters? lambdaIntrinsics = CreateIntrinsicParameters(extra.Intrinsics);
                     MLCamera.ResultExtras lambdaExtra = new ResultExtras(extra.FrameNumber, extra.VcamTimestamp, lambdaIntrinsics);
@@ -167,7 +163,7 @@ namespace UnityEngine.XR.MagicLeap
                 GCHandle gcHandle = GCHandle.FromIntPtr(data);
                 MLCamera camera = gcHandle.Target as MLCamera;
 
-                bool shouldCopyToManaged = (camera.OnRawVideoFrameAvailable.GetInvocationList().Length > 0);
+                bool shouldCopyToManaged = camera.OnRawVideoFrameAvailable?.GetInvocationList().Length > 0;
                 MLCamera.IntrinsicCalibrationParameters? lambdaIntrinsics = CreateIntrinsicParameters(extra.Intrinsics);
                 ResultExtras lambdaExtra = new ResultExtras(extra.FrameNumber, extra.VcamTimestamp, lambdaIntrinsics);
 
@@ -182,7 +178,7 @@ namespace UnityEngine.XR.MagicLeap
                     }
                 }
                 CameraOutput frameInfo = output.CreateFrameInfo(shouldCopyToManaged, shouldCopyToManaged ? camera.byteArrays : null);
-                camera.OnRawVideoFrameAvailable_NativeCallbackThread(frameInfo, lambdaExtra);
+                camera.OnRawVideoFrameAvailable_NativeCallbackThread?.Invoke(frameInfo, lambdaExtra);
 
                 if (shouldCopyToManaged)
                 {
@@ -210,6 +206,8 @@ namespace UnityEngine.XR.MagicLeap
                 }
 
                 MLThreadDispatch.Call(camera.GLPluginEvent);
+
+                MLThreadDispatch.Call(metadataHandle, lambdaExtra, camera.OnPreviewBufferAvailable);
             }
         }
     }

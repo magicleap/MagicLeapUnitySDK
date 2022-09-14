@@ -1,11 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-//
-// Copyright (c) 2019 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
+// Copyright (c) (2019-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -13,6 +11,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine.XR.MagicLeap.Native;
 #if UNITY_MAGICLEAP || UNITY_ANDROID
 using static UnityEngine.XR.MagicLeap.MLWebRTC.VideoSink.Frame;
@@ -63,16 +62,14 @@ namespace UnityEngine.XR.MagicLeap
             private bool isCapturing = false;
             private bool shouldStopCapturing = false;
             private int surfaceFrameAvailable = 0;
-            private int rawVideoFrameAvailable = 0;
             private bool isCapturingPreview = false;
             private float previewAspectRatio = 0;
             private bool useNativeBuffers = true;
+            private bool applicationPause = false;
 
             public bool IsCapturing => isCapturing;
 
             private static readonly ushort captureBufferCount = 4;
-
-            private VideoSink.Frame currentRawVideoFrame;
 
             /// <summary>
             /// Developer should've created the MLCamera object, queried the
@@ -94,13 +91,6 @@ namespace UnityEngine.XR.MagicLeap
             /// <returns></returns>
             public static MLCameraVideoSource CreateLocal(MLCamera camera, MLCamera.CaptureConfig captureConfig, out MLResult result, string trackId = "", Renderer localRenderer = null, bool nativeBuffers = true)
             {
-                if (!MLResult.DidNativeCallSucceed(MLPermissions.CheckPermission(MLPermission.Camera).Result, nameof(CreateLocal)))
-                {
-                    MLPluginLog.Error($"{nameof(MLCameraVideoSource)} requires missing permission {MLPermission.Camera}");
-                    result = MLResult.Create(MLResult.Code.PermissionDenied);
-                    return null;
-                }
-
                 if (camera == null || captureConfig.StreamConfigs == null || captureConfig.StreamConfigs.Length < 1)
                 {
                     result = MLResult.Create(MLResult.Code.InvalidParam);
@@ -109,7 +99,7 @@ namespace UnityEngine.XR.MagicLeap
 
                 MLCameraVideoSource mlCameraVideoSource = new MLCameraVideoSource(camera, captureConfig, trackId, localRenderer, nativeBuffers);
 
-                if(localRenderer != null)
+                if (localRenderer != null)
                 {
                     localRenderer.enabled = nativeBuffers;
                 }
@@ -144,8 +134,8 @@ namespace UnityEngine.XR.MagicLeap
             }
 
             private void ConfigureRecorderSurface()
-            { 
-                if(!useNativeBuffers)
+            {
+                if (!useNativeBuffers)
                 {
                     return;
                 }
@@ -193,7 +183,7 @@ namespace UnityEngine.XR.MagicLeap
                 renderer.transform.localScale = localScale;
             }
 
-            private void StartCapture()
+            private async void StartCapture()
             {
                 if (!isCapturing)
                 {
@@ -204,22 +194,27 @@ namespace UnityEngine.XR.MagicLeap
                         ConfigureRecorderSurface();
                     }
 
-                    SetupCameraCallbacks();
-
                     MLResult result = camera.PrepareCapture(captureConfig, cameraMetadata: out _);
                     if (result.IsOk)
                     {
-                        if (camera.PreCaptureAEAWB().IsOk)
+                        await Task.Run(async() =>
                         {
+                            await camera.PreCaptureAEAWBAsync();
+                            bool needsPreview = false;
                             foreach (var config in captureConfig.StreamConfigs)
                             {
                                 if (config.CaptureType == MLCamera.CaptureType.Preview)
                                 {
-                                    if (camera.CapturePreviewStart().IsOk)
-                                    {
-                                        isCapturingPreview = true;
-                                    }
+                                    needsPreview = true;
                                     break;
+                                }
+                            }
+                            if (needsPreview)
+                            {
+                                result = await camera.CapturePreviewStartAsync();
+                                if (result.IsOk)
+                                {
+                                    isCapturingPreview = true;
                                 }
                             }
                             if (isCapturingPreview && previewRenderer != null)
@@ -228,27 +223,37 @@ namespace UnityEngine.XR.MagicLeap
                                 previewRenderer.enabled = true;
                                 previewRenderer.material.mainTexture = camera.PreviewTexture;
                             }
-                            result = camera.CaptureVideoStart();
-                        }
+                            result = await camera.CaptureVideoStartAsync();
+                        });
                     }
 
                     isCapturing = result.IsOk;
+                    if(IsCapturing)
+                    {
+                        Debug.Log("\nsetting up camera callbacks...");
+                        SetupCameraCallbacks();
+                    }
                 }
             }
 
             private void StopCapture()
             {
-                if (isCapturing)
+                if (isCapturing && !applicationPause)
                 {
                     shouldStopCapturing = true;
+                    if (!useNativeBuffers)
+                    {
+                        isCapturing = false;
+                        TerminateCaptureNow();
+                    }
                 }
             }
 
             private void SetupCameraCallbacks()
             {
-                if(camera != null)
+                if (camera != null)
                 {
-                    if(!useNativeBuffers)
+                    if (!useNativeBuffers)
                     {
                         camera.OnRawVideoFrameAvailable_NativeCallbackThread += Camera_OnRawVideoFrameAvailable_NativeCallbackThread;
                     }
@@ -263,9 +268,9 @@ namespace UnityEngine.XR.MagicLeap
 
             private void RemoveCameraCallbacks()
             {
-                if(camera != null)
+                if (camera != null)
                 {
-                    if(!useNativeBuffers)
+                    if (!useNativeBuffers)
                     {
                         camera.OnRawVideoFrameAvailable_NativeCallbackThread -= Camera_OnRawVideoFrameAvailable_NativeCallbackThread;
                     }
@@ -276,6 +281,12 @@ namespace UnityEngine.XR.MagicLeap
                     camera.OnDeviceError -= Camera_OnDeviceError;
                     camera.OnDeviceStreaming -= Camera_OnDeviceStreaming;
                 }
+            }
+
+            protected override void OnApplicationPause(bool pause)
+            {
+                applicationPause = pause;
+                base.OnApplicationPause(pause);
             }
 
             /// <summary>
@@ -311,44 +322,39 @@ namespace UnityEngine.XR.MagicLeap
                                 PushFrame(frame);
                             }
                         }
-                    }
-                    else
-                    {
-                        bool ready = Interlocked.Exchange(ref rawVideoFrameAvailable, 0) == 1;
-                        if (ready)
-                        {
-                            PushFrame(currentRawVideoFrame);
-                        }
-                    }
 
-                    if (shouldStopCapturing)
-                    {
-                        if (useNativeBuffers)
+                        if (shouldStopCapturing)
                         {
-                            cameraRecorderSurface.OnFrameAvailable -= CameraRecorderSurface_OnFrameAvailable;
+                            TerminateCaptureNow();
+                            return;
                         }
-
-                        camera.CaptureVideoStop();
-                        if (isCapturingPreview)
-                        {
-                            camera.CapturePreviewStop();
-                            isCapturingPreview = false;
-                        }
-                        shouldStopCapturing = false;
-                        isCapturing = false;
-                        RemoveCameraCallbacks();
-                        cameraRecorderSurface = null;
-                        captureConfig.StreamConfigs[0].Surface = null;
-                        return;
                     }
                 }
             }
 
+            private async void TerminateCaptureNow()
+            {
+                if (useNativeBuffers)
+                {
+                    cameraRecorderSurface.OnFrameAvailable -= CameraRecorderSurface_OnFrameAvailable;
+                }
+
+                await camera.CaptureVideoStopAsync();
+                if (isCapturingPreview)
+                {
+                    await camera.CapturePreviewStopAsync();
+                    isCapturingPreview = false;
+                }
+                shouldStopCapturing = false;
+                isCapturing = false;
+                RemoveCameraCallbacks();
+                cameraRecorderSurface = null;
+                captureConfig.StreamConfigs[0].Surface = null;
+            }
+
             private void Camera_OnRawVideoFrameAvailable_NativeCallbackThread(MLCamera.CameraOutput cameraOutput, MLCamera.ResultExtras results)
             {
-                rawVideoFrameAvailable = 1;
-
-                if(useNativeBuffers)
+                if (useNativeBuffers || !isCapturing)
                 {
                     return;
                 }
@@ -372,7 +378,9 @@ namespace UnityEngine.XR.MagicLeap
 
                 MLTime.ConvertMLTimeToSystemTime(results.VCamTimestamp, out long nanoseconds);
 
-                currentRawVideoFrame = Create((ulong)results.FrameNumber, (ulong)nanoseconds / 1000, imagePlaneArray, outFmt);
+                var frame = Create((ulong)results.FrameNumber, (ulong)nanoseconds / 1000, imagePlaneArray, outFmt);
+
+                PushFrame(frame);
             }
 
             private void Camera_OnDeviceError(MLCamera.ErrorType error)

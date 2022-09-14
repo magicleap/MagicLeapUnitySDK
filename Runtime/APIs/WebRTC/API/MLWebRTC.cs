@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="MLWebRTC.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -89,6 +85,7 @@ namespace UnityEngine.XR.MagicLeap
             Instance.localTracks.Clear();
 
             MLResult.Code resultCode = NativeBindings.MLWebRTCInstanceDestroy();
+            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCInstanceDestroy));
             return resultCode; 
         }
 
@@ -102,6 +99,7 @@ namespace UnityEngine.XR.MagicLeap
         {
             NativeBindings.MLWebRTCDebugUtils debugUtils = NativeBindings.MLWebRTCDebugUtils.Create();
             MLResult.Code resultCode = NativeBindings.MLWebRTCInstanceCreateWithDebugUtils(in debugUtils);
+            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCInstanceCreateWithDebugUtils));
             return resultCode;
         }
 

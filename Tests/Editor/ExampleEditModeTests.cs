@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file = "ExampleEditModeTests.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -20,14 +16,14 @@ using UnityEngine.XR.MagicLeap.Native;
 
 /// <summary>
 /// "Edit-Mode Tests" are tests which can only be run at edit time in the Unity editor, 
-/// e.g. they don't require running on device or in Playmode via Zero Iteration. 
+/// e.g. they don't require running on device or in Playmode via Magic Leap App Simulator. 
 /// 
 /// Edit-mode tests can be ideal for test-driven-development (TDD). The examples below
 /// are very rudimentary methods which check that certain simple methods in the Magic Leap
 /// SDK return the expected values. 
 /// 
 /// Note that these methods don't perform any action that
-/// depends on the app actually running on device (or via Zero Iteration).
+/// depends on the app actually running on device (or via Magic Leap App Simulator).
 /// </summary>
 
 public class ExampleEditModeTests

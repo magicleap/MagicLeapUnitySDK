@@ -1,11 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-//
-// Copyright (c) 2019-present, Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by the Developer Agreement, located
-// here: https://auth.magicleap.com/terms/developer
-//
+// Copyright (c) (2019-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -26,28 +24,15 @@ namespace MagicLeap
     /// <summary>
     /// Displays Dialog box at build time about incorrect color space setting.
     /// </summary>
-    public class ColorSpaceBuildPreprocessor : IPreprocessBuildWithReport, IPostGenerateGradleAndroidProject
+    public class ColorSpaceBuildPreprocessor : IPreprocessBuildWithReport
     {
         public int callbackOrder { get { return 0; } }
-
-        public void OnPostGenerateGradleAndroidProject(string path)
-        {
-            if (IsMagicLeapLoaderEnabled())
-            {
-                string manifestPath = Path.Combine(path, "src", "main", "AndroidManifest.xml");
-
-                AndroidManifestXml manifest = new AndroidManifestXml(manifestPath);
-                manifest.AddPermission("com.magicleap.permission.HEAD_POSE");
-                manifest.Save();
-            }
-        }
 
         public void OnPreprocessBuild(BuildReport report)
         {
             if (report.summary.platform == BuildTarget.Android && IsMagicLeapLoaderEnabled())
             {
                 SetLinearColorSpace();
-                UnsetStripEngineCode();
                 SetAndroidMinSdkVersion();
             }
         }
@@ -90,15 +75,6 @@ namespace MagicLeap
                         EditorUtility.SetDirty(editorProjectData);
                     }
                 }
-            }
-        }
-
-        private void UnsetStripEngineCode()
-        {
-            if (PlayerSettings.stripEngineCode)
-            {
-                Debug.LogWarning("\'Strip Engine Code\' is enabled for this project but is currently not supported for ML2 devices. Disabling the setting.");
-                PlayerSettings.stripEngineCode = false;
             }
         }
 

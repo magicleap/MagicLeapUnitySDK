@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="MLWebRTCSourceNativeBindings.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -181,13 +177,14 @@ namespace UnityEngine.XR.MagicLeap
                         {
                             string trackId = string.Empty;
                             MLResult.Code resultCode = NativeBindings.MLWebRTCSourceGetTrackId(this.Handle, out IntPtr trackIdPtr);
-                            if (MLResult.IsOK(resultCode))
+                            
+                            if (MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCSourceGetTrackId)))
                             {
                                 if (trackIdPtr != IntPtr.Zero)
                                 {
                                     trackId = Marshal.PtrToStringAnsi(trackIdPtr);
                                     resultCode = NativeBindings.MLWebRTCSourceReleaseTrackId(this.Handle, trackIdPtr);
-                                    MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCSourceReleaseTrackId()");
+                                    MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCSourceReleaseTrackId));
                                 }
                             }
 

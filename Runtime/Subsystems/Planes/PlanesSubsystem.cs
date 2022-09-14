@@ -1,25 +1,19 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="PlanesSubsystem.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2021 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2021-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine.XR.ARSubsystems;
-using UnityEngine.Lumin;
 using UnityEngine.Scripting;
 using UnityEngine.XR.MagicLeap.Native;
 
@@ -30,7 +24,6 @@ namespace UnityEngine.XR.MagicLeap
     /// Use <c>PlanesSubsystemDescriptor.Create()</c> instead.
     /// </summary>
     [Preserve]
-    [UsesLuminPrivilege("SpatialMapping")]
     public sealed partial class PlanesSubsystem : XRPlaneSubsystem
     {
         public static partial class Extensions
@@ -473,7 +466,7 @@ namespace UnityEngine.XR.MagicLeap
 #if UNITY_MAGICLEAP || UNITY_ANDROID
             XRPlaneSubsystemDescriptor.Create(new XRPlaneSubsystemDescriptor.Cinfo
             {
-                id = LuminXrProvider.PlanesSubsystemId,
+                id = MagicLeapXrProvider.PlanesSubsystemId,
 #if UNITY_2020_2_OR_NEWER
                 providerType = typeof(PlanesSubsystem.MagicLeapProvider),
                 subsystemTypeOverride = typeof(PlanesSubsystem),

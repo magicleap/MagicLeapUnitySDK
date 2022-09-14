@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="MLMediaPlayerBehavior.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2021 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2021-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -67,6 +63,7 @@ namespace MagicLeap.Core
         public event Action<bool> OnIsBufferingChanged;
 
         private long currentPositionInMiliseconds = 0;
+        private bool hasSetSourceURI = false;
 
 #if UNITY_MAGICLEAP || UNITY_ANDROID
         /// <summary>
@@ -182,7 +179,11 @@ namespace MagicLeap.Core
                 }
                 else
                 {
-                    result = mlPlayer.SetSourceURI(source);
+                    if (!hasSetSourceURI)
+                    {
+                        result = mlPlayer.SetSourceURI(source);
+                        hasSetSourceURI = true;
+                    }
                 }
             }
             else if (pathSourceType == PathSourceType.StreamingAssets)
@@ -277,7 +278,7 @@ namespace MagicLeap.Core
         }
 
         /// <summary>
-        /// Creates the texture on the renderer to play the video on <c>Lumin</c>.
+        /// Creates the texture on the renderer to play the video on <c>Magic Leap</c>.
         /// </summary>
         private bool CreateTexture(int width, int height)
         {
@@ -396,6 +397,7 @@ namespace MagicLeap.Core
         private void HandleOnPrepare(MLMedia.Player mediaplayer)
         {
             DurationInMiliseconds = MediaPlayer.GetDurationMilliseconds();
+            hasSetSourceURI = false;
             OnPrepared?.Invoke();
         }
 

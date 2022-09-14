@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file = "YcbcrRenderer.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -53,9 +49,26 @@ namespace UnityEngine.XR.MagicLeap
         private readonly Dictionary<NativeBindings.PluginEvent, CommandBuffer> commandBuffers = new Dictionary<NativeBindings.PluginEvent, CommandBuffer>();
 
         public delegate void OnCleanupCompleteDelegate();
+        public delegate void OnFirstFrameRendereredDelegate();
 
+        /// <summary>
+        /// Event fired on the callback thread to indicate that resource cleanup is complete in the native plugin
+        /// and it is now safe to cleanup associated managed resources like the RenderTexture.
+        /// </summary>
         public event OnCleanupCompleteDelegate OnCleanupComplete_CallbackThread = delegate { };
+
+        /// <summary>
+        /// Event fired on Unity's main thread to indicate that resource cleanup is complete in the native plugin
+        /// and it is now safe to cleanup associated managed resources like the RenderTexture.
+        /// </summary>
         public event OnCleanupCompleteDelegate OnCleanupComplete = delegate { };
+
+        /// <summary>
+        /// Event fired to indicate a frame has been rendered on the current RenderTexture for the first time.
+        /// Apps can use this event to disable UI elements like loading indicators since the RenderTexture will
+        /// have a valid frame to display.
+        /// </summary>
+        public event OnFirstFrameRendereredDelegate OnFirstFrameRendered = delegate { };
 
         /// <summary>
         /// Initialize the native api handle & the graphics command buffers.
@@ -209,6 +222,13 @@ namespace UnityEngine.XR.MagicLeap
             ReleaseUnmanagedMemory();
 
             OnCleanupComplete();
+        }
+
+        private void InvokeOnFirstFrameRendered()
+        {
+#if UNITY_ANDROID
+            Native.MLThreadDispatch.Call(OnFirstFrameRendered);
+#endif
         }
     }
 }

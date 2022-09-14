@@ -48,7 +48,7 @@ namespace UnityEditor.XR.MagicLeap
                 },
 
                 // Populate the search keywords to enable smart search filtering and label highlighting:
-                keywords = new HashSet<string>(new[] { "Magic", "Leap", "SDK", "MLSDK", "Lumin" })
+                keywords = new HashSet<string>(new[] { "Magic", "Leap", "SDK", "MLSDK" })
             };
 
             return provider;

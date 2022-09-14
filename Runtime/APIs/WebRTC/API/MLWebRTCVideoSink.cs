@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="MLWebRTCVideoSink.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -86,7 +82,7 @@ namespace UnityEngine.XR.MagicLeap
                 List<MLWebRTC.Sink> sinks = MLWebRTC.Instance.sinks;
                 ulong Handle = MagicLeapNativeBindings.InvalidHandle;
                 MLResult.Code resultCode = NativeBindings.MLWebRTCVideoSinkCreate(out Handle);
-                if (!MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCVideoSinkCreate()"))
+                if (!MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCVideoSinkCreate)))
                 {
                     result = MLResult.Create(resultCode);
                     return videoSink;
@@ -109,7 +105,7 @@ namespace UnityEngine.XR.MagicLeap
             {
 #if UNITY_MAGICLEAP || UNITY_ANDROID
                 MLResult.Code resultCode = NativeBindings.MLWebRTCVideoSinkIsNewFrameAvailable(this.Handle, out bool newFrameAvailable);
-                MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCVideoSinkIsNewFrameAvailable()");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCVideoSinkIsNewFrameAvailable));
                 return newFrameAvailable;
 #else
                 return false;
@@ -122,14 +118,14 @@ namespace UnityEngine.XR.MagicLeap
 #if UNITY_MAGICLEAP || UNITY_ANDROID
                 ulong frameHandle = MagicLeapNativeBindings.InvalidHandle;
                 MLResult.Code resultCode = NativeBindings.MLWebRTCVideoSinkAcquireNextAvailableFrame(this.Handle, out frameHandle);
-                if (!MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCVideoSinkAcquireNextAvailableFrame()"))
+                if (!MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCVideoSinkAcquireNextAvailableFrame)))
                 {
                     return false;
                 }
 
                 Frame.NativeBindings.MLWebRTCFrame nativeFrame = Frame.NativeBindings.MLWebRTCFrame.Create(Frame.OutputFormat.YUV_420_888);
                 resultCode = Frame.NativeBindings.MLWebRTCFrameGetData(frameHandle, ref nativeFrame);
-                if (MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCFrameGetData()"))
+                if (MLResult.DidNativeCallSucceed(resultCode, nameof(Frame.NativeBindings.MLWebRTCFrameGetData)))
                 {
                     newFrameHandle = frameHandle;
                     newFrame = Frame.Create(frameHandle, nativeFrame, imagePlanesBuffer.Get());
@@ -152,7 +148,8 @@ namespace UnityEngine.XR.MagicLeap
 #if UNITY_MAGICLEAP || UNITY_ANDROID
                 if (MagicLeapNativeBindings.MLHandleIsValid(newFrameHandle))
                 {
-                    MLResult.DidNativeCallSucceed(NativeBindings.MLWebRTCVideoSinkReleaseFrame(Handle, newFrameHandle), "MLWebRTCVideoSinkReleaseFrame()");
+                    var resultCode = NativeBindings.MLWebRTCVideoSinkReleaseFrame(Handle, newFrameHandle);
+                    MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCVideoSinkReleaseFrame));
                     newFrameHandle = MagicLeapNativeBindings.InvalidHandle;
                 }
 #endif
@@ -172,7 +169,7 @@ namespace UnityEngine.XR.MagicLeap
 #if UNITY_MAGICLEAP || UNITY_ANDROID
                 ulong sourceHandle = track != null ? track.Handle : MagicLeapNativeBindings.InvalidHandle;
                 MLResult.Code resultCode = NativeBindings.MLWebRTCVideoSinkSetSource(this.Handle, sourceHandle);
-                MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCVideoSinkSetSource()");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCVideoSinkSetSource));
                 return MLResult.Create(resultCode);
 #else
                 return new MLResult();
@@ -229,7 +226,7 @@ namespace UnityEngine.XR.MagicLeap
 
                 // TODO : synchronize with renderer
                 MLResult.Code resultCode = NativeBindings.MLWebRTCVideoSinkDestroy(this.Handle);
-                MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCVideoSinkDestroy()");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCVideoSinkDestroy));
                 this.InvalidateHandle();
                 MLWebRTC.Instance.sinks.Remove(this);
 

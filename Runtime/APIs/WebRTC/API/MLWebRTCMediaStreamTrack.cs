@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="MLWebRTCMediaStreamTrack.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -175,7 +171,7 @@ namespace UnityEngine.XR.MagicLeap
 
                     resultCode = Source.NativeBindings.MLWebRTCSourceCreateLocalSourceForMicrophoneEx(trackId, out handle);
 
-                    if (!MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCSourceCreateLocalSourceForMicrophoneEx()"))
+                    if (!MLResult.DidNativeCallSucceed(resultCode, nameof(Source.NativeBindings.MLWebRTCSourceCreateLocalSourceForMicrophoneEx)))
                     {
                         result = MLResult.Create(resultCode);
                         return track;
@@ -207,7 +203,7 @@ namespace UnityEngine.XR.MagicLeap
                     var sourceParams = Source.NativeBindings.MLWebRTCAppDefinedSourceParams.Create(trackId);
                     resultCode = Source.NativeBindings.MLWebRTCSourceCreateAppDefinedAudioSourceEx(ref sourceParams, out handle);
 
-                    if (!MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCSourceCreateAppDefinedAudioSourceEx()"))
+                    if (!MLResult.DidNativeCallSucceed(resultCode, nameof(Source.NativeBindings.MLWebRTCSourceCreateAppDefinedAudioSourceEx)))
                     {
                         result = MLResult.Create(resultCode);
                         return track;
@@ -256,10 +252,7 @@ namespace UnityEngine.XR.MagicLeap
                             break;
                     }
 
-                    resultCode = Source.NativeBindings.MLWebRTCSourceCreateLocalSourceForCamera(MLCamera.NativeBindings.MLCameraConnectContext.Create(connectContext), out handle);
-                    MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCSourceCreateLocalSourceForCamera");
-
-                    if (!MLResult.IsOK(resultCode))
+                    if (!MLResult.DidNativeCallSucceed(Source.NativeBindings.MLWebRTCSourceCreateLocalSourceForCamera(MLCamera.NativeBindings.MLCameraConnectContext.Create(connectContext), out handle), nameof(Source.NativeBindings.MLWebRTCSourceCreateLocalSourceForCamera)))
                     {
                         result = MLResult.Create(resultCode);
                         return track;
@@ -297,7 +290,7 @@ namespace UnityEngine.XR.MagicLeap
                     }
 
                     MLResult.Code resultCode = Source.NativeBindings.MLWebRTCSourceIsEnabled(this.Handle, out isEnabled);
-                    MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCSourceIsEnabled()");
+                    MLResult.DidNativeCallSucceed(resultCode, nameof(Source.NativeBindings.MLWebRTCSourceIsEnabled));
                     return MLResult.Create(resultCode);
 #else
                     isEnabled = false;
@@ -331,7 +324,7 @@ namespace UnityEngine.XR.MagicLeap
                     if (trackEnabled != isEnabled)
                     {
                         MLResult.Code resultCode = Source.NativeBindings.MLWebRTCSourceSetEnabled(this.Handle, isEnabled);
-                        MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCSourceSetEnabled");
+                        MLResult.DidNativeCallSucceed(resultCode, nameof(Source.NativeBindings.MLWebRTCSourceSetEnabled));
                         result = MLResult.Create(resultCode);
                     }
 
@@ -379,7 +372,7 @@ namespace UnityEngine.XR.MagicLeap
                     MLWebRTC.Instance.localTracks.Remove(this);
 
                     resultCode = Source.NativeBindings.MLWebRTCSourceDestroy(this.Handle);
-                    MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCSourceDestroy()");
+                    MLResult.DidNativeCallSucceed(resultCode, nameof(Source.NativeBindings.MLWebRTCSourceDestroy));
                     this.Handle = MagicLeapNativeBindings.InvalidHandle;
                     this.ParentConnection = null;
 

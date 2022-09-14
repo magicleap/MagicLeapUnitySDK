@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="MLImageTracker.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -100,6 +96,7 @@ namespace UnityEngine.XR.MagicLeap
 
             nativeMLImageTrackerUpdateSettingsPerfMarker.Begin();
             MLResult.Code resultCode = NativeBindings.MLImageTrackerUpdateSettings(Instance.handle, ref Instance.trackerSettings);
+            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLImageTrackerUpdateSettings));
             nativeMLImageTrackerUpdateSettingsPerfMarker.End();
             MLResult result = MLResult.Create(resultCode);
             if (!result.IsOk)
@@ -210,6 +207,7 @@ namespace UnityEngine.XR.MagicLeap
             this.trackerSettings = NativeBindings.MLImageTrackerSettingsNative.Create();
             nativeMLImageTrackerInitSettingsPerfMarker.Begin();
             MLResult.Code result = NativeBindings.MLImageTrackerInitSettings(ref this.trackerSettings);
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLImageTrackerInitSettings));
             nativeMLImageTrackerInitSettingsPerfMarker.End();
             if (result != MLResult.Code.Ok)
             {
@@ -221,6 +219,7 @@ namespace UnityEngine.XR.MagicLeap
             this.handle = MagicLeapNativeBindings.InvalidHandle;
             nativeMLImageTrackerCreatePerfMarker.Begin();
             MLResult.Code resultCode = NativeBindings.MLImageTrackerCreate(ref this.trackerSettings, ref this.handle);
+            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLImageTrackerCreate));
             nativeMLImageTrackerCreatePerfMarker.End();
 
             if (!MLResult.DidNativeCallSucceed(resultCode, "MLImageTrackerCreate"))
@@ -297,6 +296,7 @@ namespace UnityEngine.XR.MagicLeap
 
             nativeMLImageTrackerDestroyPerfMarker.Begin();
             MLResult.Code result = NativeBindings.MLImageTrackerDestroy(this.handle);
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLImageTrackerDestroy));
             nativeMLImageTrackerDestroyPerfMarker.End();
             if (result != MLResult.Code.Ok)
             {
@@ -398,6 +398,7 @@ namespace UnityEngine.XR.MagicLeap
 
             nativeMLImageTrackerUpdateSettingsPerfMarker.Begin();
             MLResult.Code resultCode = NativeBindings.MLImageTrackerUpdateSettings(this.handle, ref this.trackerSettings);
+            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLImageTrackerUpdateSettings));
             nativeMLImageTrackerUpdateSettingsPerfMarker.End();
             MLResult result = MLResult.Create(resultCode);
             if (!result.IsOk)

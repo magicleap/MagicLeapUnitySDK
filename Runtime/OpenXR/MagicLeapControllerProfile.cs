@@ -23,7 +23,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         BuildTargetGroups = new[] {BuildTargetGroup.Android},
         Company = "Magic Leap",
         Desc = "Allows for mapping input to the Magic Leap Controller interaction profile.",
-        OpenxrExtensionStrings = "",
+        OpenxrExtensionStrings = extensionString,
         Version = "0.53.2",
         Category = UnityEditor.XR.OpenXR.Features.FeatureCategory.Interaction,
         FeatureId = featureId)]
@@ -34,6 +34,11 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         /// The feature id string. This is used to give the feature a well known id for reference.
         /// </summary>
         public const string featureId = "com.magicleap.openxr.feature.input.mlcontrollerprofile";
+
+        /// <summary>
+        /// Extension required for enable the Magic Leap 2 Controller Interaction Profile.
+        /// </summary>
+        public const string extensionString = "XR_ML_ml2_controller_interaction";
 
         /// <summary>
         /// An Input System device based off the <see href="https://www.khronos.org/registry/OpenXR/specs/1.0/html/xrspec.html#_khronos_simple_controller_profile">Magic Leap Controller interaction profile</see>. This device contains one haptic output motor.

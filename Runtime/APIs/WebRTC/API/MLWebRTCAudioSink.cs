@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="MLWebRTCAudioSink.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -203,7 +199,7 @@ namespace UnityEngine.XR.MagicLeap
 
                 NativeBindings.MLWebRTCAudioSinkParams sinkParams = new NativeBindings.MLWebRTCAudioSinkParams(audioSink);
                 MLResult.Code resultCode = NativeBindings.MLWebRTCAudioSinkCreateEx(ref sinkParams, out handle);
-                if (!MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCAudioSinkCreateEx()"))
+                if (!MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCAudioSinkCreateEx)))
                 {
                     result = MLResult.Create(resultCode);
                     return null;
@@ -265,7 +261,7 @@ namespace UnityEngine.XR.MagicLeap
             {
 #if UNITY_MAGICLEAP || UNITY_ANDROID
                 MLResult.Code resultCode = NativeBindings.MLWebRTCAudioSinkSetSoundVolume(this.Handle, volume);
-                MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCAudioSinkSetSoundVolume()");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCAudioSinkSetSoundVolume));
                 return MLResult.Create(resultCode);
 #else
                 return new MLResult();
@@ -288,7 +284,7 @@ namespace UnityEngine.XR.MagicLeap
 #if UNITY_MAGICLEAP || UNITY_ANDROID
                 nativePosition.Update(position, channel);
                 MLResult.Code resultCode = NativeBindings.MLWebRTCAudioSinkSetPositionEx(this.Handle, ref nativePosition);
-                MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCAudioSinkSetPositionEx()");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCAudioSinkSetPositionEx));
                 return MLResult.Create(resultCode);
 #else
                 return new MLResult();
@@ -311,7 +307,7 @@ namespace UnityEngine.XR.MagicLeap
 #if UNITY_MAGICLEAP || UNITY_ANDROID
                 nativeOrientation.Update(orientation, channel);
                 MLResult.Code resultCode = NativeBindings.MLWebRTCAudioSinkSetSoundOrientation(this.Handle, ref nativeOrientation);
-                MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCAudioSinkSetSoundOrientation()");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCAudioSinkSetSoundOrientation));
                 return MLResult.Create(resultCode);
 #else
                 return new MLResult();
@@ -334,7 +330,7 @@ namespace UnityEngine.XR.MagicLeap
 #if UNITY_MAGICLEAP || UNITY_ANDROID
                 nativeSoundLevels.Update(sendLevels, channel);
                 MLResult.Code resultCode = NativeBindings.MLWebRTCAudioSinkSetDirectSoundLevels(this.Handle, ref nativeSoundLevels);
-                MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCAudioSinkSetDirectSoundLevels()");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCAudioSinkSetDirectSoundLevels));
                 return MLResult.Create(resultCode);
 #else
                 return new MLResult();
@@ -357,7 +353,7 @@ namespace UnityEngine.XR.MagicLeap
 #if UNITY_MAGICLEAP || UNITY_ANDROID
                 nativeSoundLevels.Update(sendLevels, channel);
                 MLResult.Code resultCode = NativeBindings.MLWebRTCAudioSinkSetRoomSoundLevels(this.Handle, ref nativeSoundLevels);
-                MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCAudioSinkSetRoomSoundLevels()");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCAudioSinkSetRoomSoundLevels));
                 return MLResult.Create(resultCode);
 #else
                 return new MLResult();
@@ -380,7 +376,7 @@ namespace UnityEngine.XR.MagicLeap
 #if UNITY_MAGICLEAP || UNITY_ANDROID
                 nativeDistance.Update(distanceProperties, channel);
                 MLResult.Code resultCode = NativeBindings.MLWebRTCAudioSinkSetSoundDistanceProperties(this.Handle, ref nativeDistance);
-                MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCAudioSinkSetSoundDistanceProperties()");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCAudioSinkSetSoundDistanceProperties));
                 return MLResult.Create(resultCode);
 #else
                 return new MLResult();
@@ -403,7 +399,7 @@ namespace UnityEngine.XR.MagicLeap
 #if UNITY_MAGICLEAP || UNITY_ANDROID
                 nativeRadiation.Update(radiationProperties, channel);
                 MLResult.Code resultCode = NativeBindings.MLWebRTCAudioSinkSetSoundRadiationProperties(this.Handle, ref nativeRadiation);
-                MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCAudioSinkSetSoundRadiationProperties()");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCAudioSinkSetSoundRadiationProperties));
                 return MLResult.Create(resultCode);
 #else
                 return new MLResult();
@@ -422,7 +418,7 @@ namespace UnityEngine.XR.MagicLeap
             public MLResult ResetPosition()
             {
                 MLResult.Code resultCode = NativeBindings.MLWebRTCAudioSinkResetPosition(this.Handle);
-                MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCAudioSinkResetPosition()");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCAudioSinkResetPosition));
                 return MLResult.Create(resultCode);
             }
 #endif
@@ -443,7 +439,8 @@ namespace UnityEngine.XR.MagicLeap
             {
 #if UNITY_MAGICLEAP || UNITY_ANDROID
                 MLResult.Code resultCode = NativeBindings.MLWebRTCAudioSinkSetCacheSize(this.Handle, millisecondsToCache);
-                MLResult.DidNativeCallSucceed(resultCode, $"MLWebRTCAudioSinkSetCacheSize({millisecondsToCache})");
+                string nativeMethodName = nameof(NativeBindings.MLWebRTCAudioSinkSetCacheSize);
+                MLResult.DidNativeCallSucceed(resultCode, $"{nativeMethodName}({millisecondsToCache})");
                 return MLResult.Create(resultCode);
 #else
                 return new MLResult();
@@ -468,7 +465,7 @@ namespace UnityEngine.XR.MagicLeap
 
                 this.SetStream(null);
                 MLResult.Code resultCode = NativeBindings.MLWebRTCAudioSinkDestroy(this.Handle);
-                MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCAudioSinkDestroy()");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCAudioSinkDestroy));
                 this.InvalidateHandle();
 
                 MLWebRTC.Instance.sinks.Remove(this);
@@ -500,7 +497,7 @@ namespace UnityEngine.XR.MagicLeap
 #if UNITY_MAGICLEAP || UNITY_ANDROID
                 ulong sourceHandle = track != null ? track.Handle : MagicLeapNativeBindings.InvalidHandle;
                 MLResult.Code resultCode = NativeBindings.MLWebRTCAudioSinkSetSource(this.Handle, sourceHandle);
-                MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCAudioSinkSetSource()");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCAudioSinkSetSource));
                 return MLResult.Create(resultCode);
 #else
                 return new MLResult();

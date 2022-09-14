@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="MeshingSubsystemComponent.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2021 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2021-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -15,14 +11,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using UnityEngine;
-using UnityEngine.Lumin;
 using UnityEngine.Serialization;
-using UnityEngine.XR;
 using UnityEngine.XR.ARSubsystems;
 using UnityEngine.XR.Management;
-using UnityEngine.XR.MagicLeap.Meshing;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -31,7 +22,6 @@ using UnityEditor;
 
 namespace UnityEngine.XR.MagicLeap
 {
-    [UsesLuminPrivilege("SpatialMapping")]
     [DisallowMultipleComponent]
     public sealed class MeshingSubsystemComponent : MonoBehaviour
     {
@@ -86,7 +76,10 @@ namespace UnityEngine.XR.MagicLeap
             set { m_MeshPrefab = value; }
         }
 
+        public void OnMeshingPropertyChanged() => m_SettingsDirty = true;
+
         [SerializeField]
+        [OnChangedCall(nameof(OnMeshingPropertyChanged))]
         bool m_ComputeNormals = true;
 
         /// <summary>
@@ -140,6 +133,7 @@ namespace UnityEngine.XR.MagicLeap
         }
 
         [SerializeField]
+        [OnChangedCall(nameof(OnMeshingPropertyChanged))]
         float m_Density = 1.0f;
 
         public float density
@@ -169,6 +163,7 @@ namespace UnityEngine.XR.MagicLeap
 
         [SerializeField]
         [FormerlySerializedAs("m_MeshType")]
+        [OnChangedCall(nameof(OnMeshingPropertyChanged))]
         MeshType m_RequestedMeshType = MeshType.Triangles;
 
         /// <summary>
@@ -193,6 +188,7 @@ namespace UnityEngine.XR.MagicLeap
         }
 
         [SerializeField]
+        [OnChangedCall(nameof(OnMeshingPropertyChanged))]
         float m_FillHoleLength = 1.0f;
 
         /// <summary>
@@ -212,6 +208,7 @@ namespace UnityEngine.XR.MagicLeap
         }
 
         [SerializeField]
+        [OnChangedCall(nameof(OnMeshingPropertyChanged))]
         bool m_Planarize = false;
 
         /// <summary>
@@ -231,6 +228,7 @@ namespace UnityEngine.XR.MagicLeap
         }
 
         [SerializeField]
+        [OnChangedCall(nameof(OnMeshingPropertyChanged))]
         float m_DisconnectedComponentArea = 0.25f;
 
         /// <summary>
@@ -274,6 +272,7 @@ namespace UnityEngine.XR.MagicLeap
         }
 
         [SerializeField]
+        [OnChangedCall(nameof(OnMeshingPropertyChanged))]
         int m_BatchSize = 16;
 
         /// <summary>
@@ -293,6 +292,7 @@ namespace UnityEngine.XR.MagicLeap
         }
 
         [SerializeField]
+        [OnChangedCall(nameof(OnMeshingPropertyChanged))]
         bool m_RequestVertexConfidence = false;
 
         /// <summary>
@@ -313,6 +313,7 @@ namespace UnityEngine.XR.MagicLeap
         }
 
         [SerializeField]
+        [OnChangedCall(nameof(OnMeshingPropertyChanged))]
         bool m_RemoveMeshSkirt = false;
 
         /// <summary>

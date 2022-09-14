@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="MLWebRTCConnection.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -238,7 +234,7 @@ namespace UnityEngine.XR.MagicLeap
                 List<MLWebRTC.PeerConnection> connections = MLWebRTC.Instance.connections;
 
                 MLResult.Code resultCode = NativeBindings.CreateRemoteConnection(iceServers, out PeerConnection connection);
-                MLResult.DidNativeCallSucceed(resultCode, "CreateRemoteConnection()");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.CreateRemoteConnection));
                 result = MLResult.Create(resultCode);
                 if(result.IsOk)
                 {
@@ -272,7 +268,7 @@ namespace UnityEngine.XR.MagicLeap
                 List<MLWebRTC.PeerConnection> connections = MLWebRTC.Instance.connections;
 
                 MLResult.Code resultCode = NativeBindings.CreateRemoteConnection(iceServers, proxyConfig, out PeerConnection connection);
-                MLResult.DidNativeCallSucceed(resultCode, "CreateRemoteConnection()");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.CreateRemoteConnection));
                 result = MLResult.Create(resultCode);
                 if (result.IsOk)
                 {
@@ -305,7 +301,7 @@ namespace UnityEngine.XR.MagicLeap
                 }
                 bool isConnected = false;
                 MLResult.Code resultCode = NativeBindings.MLWebRTCConnectionIsConnected(this.Handle, out isConnected);
-                MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCConnectionIsConnected()");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCConnectionIsConnected));
                 connected = isConnected;
                 return MLResult.Create(resultCode);
 #else
@@ -335,7 +331,7 @@ namespace UnityEngine.XR.MagicLeap
 
                 bool isFailed = false;
                 MLResult.Code resultCode = NativeBindings.MLWebRTCConnectionHasFailed(this.Handle, out isFailed);
-                MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCConnectionHasFailed()");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCConnectionHasFailed));
                 failed = isFailed;
                 return MLResult.Create(resultCode);
 #else
@@ -361,7 +357,7 @@ namespace UnityEngine.XR.MagicLeap
                     return MLResult.Create(MLResult.Code.InvalidParam, "Handle is invalid.");
                 }
                 MLResult.Code resultCode = NativeBindings.MLWebRTCConnectionCreateOffer(this.Handle);
-                MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCConnectionCreateOffer()");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCConnectionCreateOffer));
                 return MLResult.Create(resultCode);
 #else
                 return new MLResult();
@@ -387,7 +383,7 @@ namespace UnityEngine.XR.MagicLeap
                 }
 #endif
                 MLResult.Code resultCode = NativeBindings.MLWebRTCConnectionSetRemoteOffer(this.Handle, remoteOffer);
-                MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCConnectionSetRemoteOffer()");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCConnectionSetRemoteOffer));
                 return MLResult.Create(resultCode);
             }
 
@@ -411,7 +407,7 @@ namespace UnityEngine.XR.MagicLeap
 #endif
 
                 MLResult.Code resultCode = NativeBindings.MLWebRTCConnectionSetRemoteAnswer(this.Handle, remoteAnswer);
-                MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCConnectionSetRemoteAnswer()");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCConnectionSetRemoteAnswer));
                 return MLResult.Create(resultCode);
             }
 
@@ -438,7 +434,7 @@ namespace UnityEngine.XR.MagicLeap
 
                 MLResult.Code resultCode = NativeBindings.MLWebRTCConnectionAddRemoteIceCandidate(this.Handle, in nativeIceCandidate);
 
-                if (MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCConnectionAddRemoteIceCandidate"))
+                if (MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCConnectionAddRemoteIceCandidate)))
                 {
                     this.IceCandidate = iceCandidate;
                 }
@@ -468,7 +464,8 @@ namespace UnityEngine.XR.MagicLeap
                 foreach (MLWebRTC.MediaStream.Track mediaStreamTrack in this.localMediaStreamTracks)
                 {
                     // Don't call this.RemoveLocalTrack() because that modifies the list we're iterating on.
-                    MLResult.DidNativeCallSucceed(NativeBindings.MLWebRTCConnectionRemoveLocalSourceTrack(this.Handle, mediaStreamTrack.Handle), "MLWebRTCConnectionRemoveLocalSourceTrack");
+                    var result = NativeBindings.MLWebRTCConnectionRemoveLocalSourceTrack(this.Handle, mediaStreamTrack.Handle);
+                    MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebRTCConnectionRemoveLocalSourceTrack));
                 }
 
                 // Invalidate the handles of any remote sources and remove the media stream id from the set of unique ids.
@@ -545,7 +542,7 @@ namespace UnityEngine.XR.MagicLeap
                 NativeBindings.MLWebRTCTrackInfo trackInfo = new NativeBindings.MLWebRTCTrackInfo(streamIds, trackToAdd.Id);
                 MLResult.Code resultCode = NativeBindings.MLWebRTCConnectionAddLocalSourceTrackEx(Handle, trackToAdd.Handle, ref trackInfo);
                 trackInfo.FreeUnmanagedMemory();
-                if (MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCConnectionAddLocalSourceTrack()"))
+                if (MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCConnectionAddLocalSourceTrackEx)))
                 {
                     localMediaStreamTracks.Add(trackToAdd);
                 }
@@ -584,7 +581,7 @@ namespace UnityEngine.XR.MagicLeap
                 }
 
                 MLResult.Code resultCode = MLWebRTC.PeerConnection.NativeBindings.MLWebRTCConnectionRemoveLocalSourceTrack(this.Handle, trackToRemove.Handle);
-                MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCConnectionAddLocalSourceTrack()");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(MLWebRTC.PeerConnection.NativeBindings.MLWebRTCConnectionRemoveLocalSourceTrack));
                 this.localMediaStreamTracks.Remove(trackToRemove);
                 foreach (MLWebRTC.MediaStream stream in trackToRemove.Streams)
                 {

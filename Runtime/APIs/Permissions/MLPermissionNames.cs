@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="MLPermissionNames.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2021 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2021-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -31,10 +27,6 @@ namespace UnityEngine.XR.MagicLeap
         public const string EyeTracking = "com.magicleap.permission.EYE_TRACKING";
 
         public const string PupilSize = "com.magicleap.permission.PUPIL_SIZE";
-
-        public const string ControllerPose = "com.magicleap.permission.CONTROLLER_POSE";
-
-        public const string HeadPose = "com.magicleap.permission.HEAD_POSE";
 
         public const string SpatialAnchors = "com.magicleap.permission.SPATIAL_ANCHOR";
 

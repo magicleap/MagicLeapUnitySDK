@@ -69,7 +69,7 @@ namespace UnityEditor.XR.MagicLeap
 
         private void OnRemoteChecksUI()
         {
-            GUILayout.Label("Zero Iteration Requirements", EditorStyles.boldLabel);
+            GUILayout.Label("Magic Leap App Simulator Requirements", EditorStyles.boldLabel);
 
             using (new GUILayout.HorizontalScope())
             {
@@ -81,7 +81,7 @@ namespace UnityEditor.XR.MagicLeap
                     {
                         if (EditorUtility.DisplayDialog("Editor Restart Required",
                             string.Format(
-                                "To use Magic Leap Zero Iteration mode in the editor, the editor must restart using OpenGL."),
+                                "To use Magic Leap App Simulator for Unity within the editor, the editor must restart using OpenGL."),
                             "Restart", "Do Not Restart"))
                         {
                             Restart("-force-glcore");
@@ -128,7 +128,7 @@ namespace UnityEditor.XR.MagicLeap
         {
             if (s_LabdriverIsRunning)
             {
-                EditorUtility.DisplayProgressBar("Zero Iteration - Import Support Libraries", "labdriver is running...", 1f);
+                EditorUtility.DisplayProgressBar("Magic Leap App Simulator - Import Support Libraries", "labdriver is running...", 1f);
             }
             else
             {
@@ -180,7 +180,7 @@ namespace UnityEditor.XR.MagicLeap
             s_Process.BeginErrorReadLine();
         }
 
-        [MenuItem("Magic Leap/Launch The Lab")]
+        [MenuItem("Magic Leap/Launch Magic Leap Hub")]
         private static void LaunchLab()
         {
             var sdkPath = MagicLeapSDKUtil.SdkPath;
@@ -198,10 +198,10 @@ namespace UnityEditor.XR.MagicLeap
             {
                 UnityEngine.Debug.Log("Launching labdriver process.");
 #if UNITY_EDITOR_OSX
-                // MacOSX - Lab Launch
+                // MacOSX - ML Hub Launch
                 LaunchProcess("/bin/bash", $"\"{sdkPath}/labdriver\" -pretty start-gui");
 #elif UNITY_EDITOR_WIN
-                // Windows - Lab Launch
+                // Windows - ML Hub Launch
                 LaunchProcess("cmd.exe", $"/C \"{sdkPath}/labdriver.cmd\" -pretty start-gui");
 #endif
             }
@@ -264,10 +264,10 @@ namespace UnityEditor.XR.MagicLeap
 
                     if (String.IsNullOrEmpty(finalError))
                     {
-                        String currentAction = s_LabdriverIsImport ? "import support libraries" : "launch ZI";
-                        finalError = String.Format("Magic Leap's The Lab encountered an unknown error while attempting to {0}. " +
-                            "Please confirm The Lab in installed and up to date with the Zero Iteration Module and Zero Iteration " +
-                            "Runtime package installed.", currentAction);
+                        String currentAction = s_LabdriverIsImport ? "import support libraries" : "launch Magic Leap App Simulator";
+                        finalError = String.Format("Magic Leap Hub encountered an unknown error while attempting to {0}. " +
+                            "Please confirm Magic Leap Hub is installed and up to date with the Magic Leap App Simulator Module and " +
+                            "Magic Leap App Simulator Runtime package installed.", currentAction);
                     }
 
                     Progress.Remove(progressId);
@@ -335,10 +335,10 @@ namespace UnityEditor.XR.MagicLeap
 
             if (String.IsNullOrEmpty(logToPrint) || s_LabdriverIsImport)
             {
-                String currentAction = s_LabdriverIsImport ? "import support libraries" : "launch ZI";
-                logToPrint = String.Format("The Lab encountered an unknown error while attempting to {0}. " +
-                    "Please confirm The Lab in installed and up to date with the Zero Iteration Module and Zero Iteration " +
-                    "Runtime package installed.\n", currentAction) + logToPrint;
+                String currentAction = s_LabdriverIsImport ? "import support libraries" : "launch Magic Leap App Simulator";
+                logToPrint = String.Format("Magic Leap Hub encountered an unknown error while attempting to {0}. " +
+                    "Please confirm Magic Leap Hub in installed and up to date with the Magic Leap App Simulator Module and " +
+                    "Magic Leap App Simulator Runtime package installed.\n", currentAction) + logToPrint;
             }
 
             String finalLog = "labdriver completed with errors. \nErrors:" + logToPrint;

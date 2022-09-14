@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="MLHandMeshing.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -41,6 +37,7 @@ namespace UnityEngine.XR.MagicLeap
         {
             nativeMLHandMeshingRequestMeshPerfMarker.Begin();
             MLResult.Code result = NativeBindings.MLHandMeshingRequestMesh(tracker, ref requestHandle);
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLHandMeshingRequestMesh));
             nativeMLHandMeshingRequestMeshPerfMarker.End();
             return result;
         }
@@ -60,6 +57,7 @@ namespace UnityEngine.XR.MagicLeap
         {
             nativeMLHandMeshingGetResultPerfMarker.Begin();
             MLResult.Code result = NativeBindings.MLHandMeshingGetResult(handle, requestHandle, ref mesh);
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLHandMeshingGetResult));
             nativeMLHandMeshingGetResultPerfMarker.End();
             return result;
         }
@@ -77,6 +75,7 @@ namespace UnityEngine.XR.MagicLeap
         {
             nativeMLHandMeshingFreeResourcePerfMarker.Begin();
             MLResult.Code result = NativeBindings.MLHandMeshingFreeResource(tracker, ref requestHandle);
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLHandMeshingFreeResource));
             nativeMLHandMeshingFreeResourcePerfMarker.End();
             return result;
         }
@@ -112,9 +111,8 @@ namespace UnityEngine.XR.MagicLeap
 
             nativeMLHandMeshingDestroyClientPerfMarker.Begin();
             MLResult.Code result = NativeBindings.MLHandMeshingDestroyClient(ref this.nativeTracker);
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLHandMeshingDestroyClient));
             nativeMLHandMeshingDestroyClientPerfMarker.End();
-
-            MLResult.DidNativeCallSucceed(result, "DestroyNativeTracker()");
 
             this.nativeTracker = MagicLeapNativeBindings.InvalidHandle;
         }
@@ -133,6 +131,7 @@ namespace UnityEngine.XR.MagicLeap
             this.nativeTracker = MagicLeapNativeBindings.InvalidHandle;
             nativeMLHandMeshingCreateClientPerfMarker.Begin();
             MLResult.Code code = NativeBindings.MLHandMeshingCreateClient(ref this.nativeTracker);
+            MLResult.DidNativeCallSucceed(code, nameof(NativeBindings.MLHandMeshingCreateClient));
             nativeMLHandMeshingCreateClientPerfMarker.End();
             return code;
         }

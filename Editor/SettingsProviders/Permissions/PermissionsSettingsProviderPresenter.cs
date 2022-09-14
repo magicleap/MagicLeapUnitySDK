@@ -1,11 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-//
 // Copyright (c) 2022 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -23,7 +21,7 @@ namespace UnityEditor.XR.MagicLeap
         internal const string missingMLSDKPathText = "Unity Editor is missing Magic Leap SDK. To fix that go to: " +
             "'Preferences...' > 'External tools' > 'Magic Leap' and set the Magic Leap SDK path. " +
             "Then click the 'Synchronize' button below to update the permissions list " +
-            "against the Lumin SDK specified in the editor preferences.";
+            "against the Magic Leap C SDK specified in the editor preferences.";
 
         private const string PathToUss =
             @"Packages\com.magicleap.unitysdk\Editor\SettingsProviders\Permissions\SettingsProviderStyle.uss";
@@ -50,7 +48,7 @@ namespace UnityEditor.XR.MagicLeap
         private string savedMinimumApiLevelChoice = null;
         private List<int> apiLevelDropdownChoices = new List<int>();
         private int minimumApiLevelChosen = 1;
-        private readonly static IReadOnlyCollection<string> mandatoryPermissions = new HashSet<string> { "com.magicleap.permission.HEAD_POSE" };
+        private readonly static IReadOnlyCollection<string> mandatoryPermissions = new HashSet<string> { };
 
         AndroidManifestXml androidManifest;
 

@@ -11,10 +11,15 @@ namespace UnityEngine.XR.MagicLeap
     /// </summary>
     [ExecuteInEditMode]
     [AddComponentMenu("AR/Magic Leap/Magic Leap Camera")]
-    [DefaultExecutionOrder(-15000)]
+    [DefaultExecutionOrder(ScriptOrder)]
     [RequireComponent(typeof(Camera))]
     public sealed class MagicLeapCamera : MonoBehaviour
     {
+        /// <summary>
+        /// Ensures this MonoBehavior runs its event methods very early before most other scripts.
+        /// </summary>
+        private const int ScriptOrder = -15000;
+
         private new Camera camera;
 
         private List<Transform> transforms = new List<Transform>();
@@ -35,6 +40,7 @@ namespace UnityEngine.XR.MagicLeap
         [SerializeField]
         private bool fixProblemsOnStartup = true;
 
+        private static float worldScale = 1.0f;
 
         /// <summary>
         /// The minimum recommended near clip value
@@ -93,11 +99,21 @@ namespace UnityEngine.XR.MagicLeap
         {
             camera = GetComponent<Camera>();
             FixupCamera(fixProblemsOnStartup);
+            CalculateWorldScale();
         }
 
         private void Reset()
         {
+            CalculateWorldScale();
             FixupCamera(fixProblemsOnStartup);
+        }
+
+        private void OnTransformParentChanged()
+        {
+            if (camera == Camera.main)
+            {
+                CalculateWorldScale();
+            }
         }
 
         private void LateUpdate()
@@ -148,6 +164,15 @@ namespace UnityEngine.XR.MagicLeap
                 {
                     camera.nearClipPlane = min;
                 }
+            }
+        }
+
+        private void CalculateWorldScale()
+        {
+            var cameraLossyScale = GetCameraScale();
+            if (camera && camera == Camera.main)
+            {
+                worldScale = (cameraLossyScale.x + cameraLossyScale.y + cameraLossyScale.z) / 3.0f;
             }
         }
 
@@ -246,7 +271,7 @@ namespace UnityEngine.XR.MagicLeap
         {
             Vector3 scale = Vector3.one;
 
-            if (camera)
+            if (camera && camera == Camera.main)
             {
                 if (transform.parent)
                 {
@@ -261,18 +286,6 @@ namespace UnityEngine.XR.MagicLeap
         /// Gets the last scale assigned from the main camera's parent.
         /// This value is the average of any lossy scale value of the main camera's parent transform.
         /// </summary>
-        public static float WorldScale
-        {
-            get
-            {
-                float worldScale = 1.0f;
-                if (Camera.main != null && Camera.main.transform.parent != null)
-                {
-                    Vector3 cameraLossyScale = Camera.main.transform.parent.lossyScale;
-                    worldScale = (cameraLossyScale.x + cameraLossyScale.y + cameraLossyScale.z) / 3.0f;
-                }
-                return worldScale;
-            }
-        }
+        public static float WorldScale => worldScale;
     }
 }

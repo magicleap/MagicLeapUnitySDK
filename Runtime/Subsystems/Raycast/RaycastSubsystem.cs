@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Unity.Collections;
-using UnityEngine.Lumin;
 using UnityEngine.Scripting;
 using UnityEngine.XR.ARSubsystems;
 using UnityEngine.XR.MagicLeap.Native;
@@ -14,7 +13,6 @@ namespace UnityEngine.XR.MagicLeap
     /// Use <c>XRRaycastSubsystemDescriptor.Create()</c> instead.
     /// </summary>
     [Preserve]
-    [UsesLuminPrivilege("SpatialMapping")]
     public sealed class RaycastSubsystem : XRRaycastSubsystem
     {
         /// <summary>
@@ -164,7 +162,7 @@ namespace UnityEngine.XR.MagicLeap
 #if UNITY_MAGICLEAP || UNITY_ANDROID
             XRRaycastSubsystemDescriptor.RegisterDescriptor(new XRRaycastSubsystemDescriptor.Cinfo
             {
-                id = LuminXrProvider.RaycastSubsystemId,
+                id = MagicLeapXrProvider.RaycastSubsystemId,
 #if UNITY_2020_2_OR_NEWER
                 providerType = typeof(RaycastSubsystem.MagicLeapProvider),
                 subsystemTypeOverride = typeof(RaycastSubsystem),

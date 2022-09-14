@@ -1,13 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file="MLWebRTCDataChannel.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018 Magic Leap, Inc. All Rights Reserved.
-// Use of this file is governed by your Early Access Terms and Conditions.
-// This software is an Early Access Product.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -132,7 +128,7 @@ namespace UnityEngine.XR.MagicLeap
 
                 ulong dataChannelHandle = MagicLeapNativeBindings.InvalidHandle;
                 MLResult.Code resultCode = NativeBindings.MLWebRTCDataChannelCreate(connection.Handle, label, out dataChannelHandle);
-                if (!MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCDataChannelCreate()"))
+                if (!MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCDataChannelCreate)))
                 {
                     result = MLResult.Create(resultCode);
                     return dataChannel;
@@ -146,7 +142,7 @@ namespace UnityEngine.XR.MagicLeap
 
                 resultCode = NativeBindings.SetCallbacks(dataChannel);
 
-                if (!MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCDataChannelSetCallbacks()"))
+                if (!MLResult.IsOK(resultCode) )
                 {
                     result = MLResult.Create(resultCode);
                     return dataChannel;
@@ -171,7 +167,7 @@ namespace UnityEngine.XR.MagicLeap
             public MLResult SendMessage(string message)
             {
                 MLResult.Code resultCode = NativeBindings.SendMessageToDataChannel(this, message);
-                MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCDataChannel.SendMessageToDataChannel()");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.SendMessageToDataChannel));
                 return MLResult.Create(resultCode);
             }
 
@@ -189,7 +185,7 @@ namespace UnityEngine.XR.MagicLeap
             public MLResult SendMessage<T>(T[] message)
             {
                 MLResult.Code resultCode = NativeBindings.SendMessageToDataChannel(this, message);
-                MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCDataChannel.SendMessageToDataChannel()");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.SendMessageToDataChannel));
                 return MLResult.Create(resultCode);
             }
 
@@ -207,7 +203,7 @@ namespace UnityEngine.XR.MagicLeap
             {
                 bool isOpen = false;
                 MLResult.Code resultCode = NativeBindings.MLWebRTCDataChannelIsOpen(this.Handle, out isOpen);
-                MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCDataChannelIsOpen()");
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCDataChannelIsOpen));
                 open = isOpen;
                 MLResult result = MLResult.Create(resultCode);
                 return result;
@@ -229,7 +225,7 @@ namespace UnityEngine.XR.MagicLeap
                 }
 
                 MLResult.Code resultCode = NativeBindings.MLWebRTCDataChannelDestroy(this.ParentConnection.Handle, this.Handle);
-                if (MLResult.DidNativeCallSucceed(resultCode, "MLWebRTCDataChannelDestroy()"))
+                if (MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCDataChannelDestroy)))
                 {
                     this.Handle = MagicLeapNativeBindings.InvalidHandle;
                     this.ParentConnection = null;

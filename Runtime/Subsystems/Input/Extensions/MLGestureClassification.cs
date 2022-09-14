@@ -128,14 +128,14 @@ namespace UnityEngine.XR.MagicLeap
                 public static void StartTracking()
                 {
 #if UNITY_ANDROID
-                    LuminXrProviderNativeBindings.StartGestureTracking();
+                    MagicLeapXrProviderNativeBindings.StartGestureTracking();
 #endif
                 }
 
                 public static void StopTracking()
                 {
 #if UNITY_ANDROID
-                    LuminXrProviderNativeBindings.StopGestureTracking();
+                    MagicLeapXrProviderNativeBindings.StopGestureTracking();
 #endif
                 }
 
