@@ -1,0 +1,34 @@
+{
+    "name": "MagicLeap.SDK",
+    "rootNamespace": "",
+    "references": [
+        "GUID:28d8685fae23c21419ef42894cb9b075",
+        "GUID:f2d67d65fc4899a4089f85ebb7f8c2ff",
+        "GUID:ba171b3dd2a51234ab864770f99741a5",
+        "GUID:e40ba710768534012815d3193fa296cb",
+        "GUID:92703082f92b41ba80f0d6912de66115",
+        "GUID:75469ad4d38634e559750d17036d5f7c",
+        "GUID:15fc0a57446b3144c949da3e2b9737a9",
+        "GUID:4847341ff46394e83bb78fbd0652937e"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.render-pipelines.universal",
+            "expression": "14.0.0",
+            "define": "URP_14_0_0_OR_NEWER"
+        },
+        {
+            "name": "com.unity.xr.openxr",
+            "expression": "1.4.0",
+            "define": "UNITY_OPENXR_1_4_0_OR_NEWER"
+        }
+    ],
+    "noEngineReferences": false
+}

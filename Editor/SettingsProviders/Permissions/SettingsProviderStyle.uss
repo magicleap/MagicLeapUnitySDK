@@ -1,0 +1,21 @@
+.settings-label {
+    font-size: 20px;
+    -unity-font-style: bold;
+    padding-left: 10px;
+}
+
+.settings-foldout {
+    -unity-font-style: bold;
+}
+
+.settings-permission-label {
+    -unity-font-style: normal;
+}
+
+.settings-help-box {
+    white-space: normal;
+    position: absolute;
+    bottom: 00px;
+    left: 0px;
+    right: 0px;
+}

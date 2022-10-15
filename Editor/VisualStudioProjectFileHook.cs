@@ -30,9 +30,9 @@ namespace UnityEditor.XR.MagicLeap
 
         public static string OnGeneratedCSProject(string path, string content)
         {
-            // Only change for project files starting with "LuminUnity"
-            // i.e. "LuminUnity.csproj" & "LuminUnity-Editor.csproj"
-            if (!Path.GetFileName(path).StartsWith("LuminUnity"))
+            // Only change for project files starting with "MagicLeap.SDK"
+            // i.e. "MagicLeap.SDK.csproj" & "MagicLeap.SDK.Editor.csproj"
+            if (!Path.GetFileName(path).StartsWith("MagicLeap.SDK"))
             {
                 return content;
             }
@@ -61,7 +61,7 @@ namespace UnityEditor.XR.MagicLeap
                 IEnumerable<XElement> compileElements = document.Root.Descendants(ns + element);
 
                 // Regex to find which part of Include attribute of Compile element to use for Link element value.
-                Regex regex = new Regex(@"\\(Packages)\\.*\.(cs|asmdef|asmref|shader)$");
+                Regex regex = new Regex(@"\\(Packages)\\.*\.(cs|asmdef|shader)$");
 
                 // Add child Link element to each Compile element
                 foreach (XElement el in compileElements)

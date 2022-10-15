@@ -1,0 +1,33 @@
+.title {
+    font-size: 20px;
+    -unity-font-style: bold;
+    padding-left: 10px;
+}
+
+.settings-row {
+    flex-grow: 0;
+    background-color: rgba(0, 0, 0, 0);
+    flex-direction: row;
+    margin-left: 7px;
+}
+
+.path-input {
+    flex-grow: 1;
+}
+
+.path-browse-button {
+    flex-direction: row;
+    justify-content: flex-end;
+}
+
+.unity-text-field__label {
+    min-width: 130px;
+}
+
+.unity-toggle__label {
+	min-width: 130px;
+}
+
+.unity-text-field__input{
+	width: 0;
+}

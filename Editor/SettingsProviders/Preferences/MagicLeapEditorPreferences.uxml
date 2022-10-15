@@ -1,0 +1,16 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" ml="UnityEditor.XR.MagicLeap" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Packages/com.magicleap.unitysdk/Editor/SettingsProviders/Preferences/SettingsProviderStyle.uss?fileID=7433441132597879392&amp;guid=2b121f46bce027c42b9c8cd471a4ea3e&amp;type=3#SettingsProviderStyle" />
+    <ui:Label text="Magic Leap" display-tooltip-when-elided="true" class="title" />
+    <ui:VisualElement name="Row-MLSDK" class="settings-row">
+        <ui:TextField picking-mode="Ignore" label="MLSDK" name="MLSDK-Input" is-delayed="true" class="path-input" />
+        <ui:Button tabindex="-1" text="Browse" display-tooltip-when-elided="true" name="MLSDK-Browse" class="path-browse-button" />
+    </ui:VisualElement>
+    <ui:VisualElement name="SDKPath-Help" style="flex-grow: 0; background-color: rgba(0, 0, 0, 0);" />
+    <ui:VisualElement name="Row-ZI" class="settings-row" style="padding-top: 10px;">
+        <ui:Label tabindex="-1" text="App Simulator Runtime" display-tooltip-when-elided="true" style="margin-left: 4px; padding-right: 0; padding-left: 0; -unity-text-align: middle-left;" />
+        <ui:TextField picking-mode="Ignore" name="ZI-Input" is-delayed="true" class="path-input" />
+        <ui:Button tabindex="-1" text="Browse" display-tooltip-when-elided="true" name="ZI-Browse" class="path-browse-button" />
+    </ui:VisualElement>
+    <ui:Toggle label="Override" name="ZI-Override" class="settings-row" style="left: 3px;" />
+    <ui:VisualElement name="ZIPath-Help" style="margin-left: 158px; height: 90px; margin-top: -15px;" />
+</ui:UXML>

@@ -1,18 +1,23 @@
 {
 	"name": "com.magicleap.unitysdk",
 	"displayName": "Magic Leap SDK",
-	"version": "0.26.0",
-	"unity": "2020.2",
+	"version": "1.0.0",
+	"unity": "2022.2",
 	"description": "Magic Leap Unity SDK",
 	"keywords": [
 		"magicleap",
 		"ar",
 		"augmented",
 		"xr",
-		"reality"
+		"reality",
+		"xreditorsubsystem"
 	],
 	"dependencies": {
-		"com.unity.xr.magicleap": "6.2.2"
+		"com.unity.xr.magicleap": "7.0.0-exp.4",
+		"com.unity.xr.arfoundation": "5.0.0-pre.12",
+		"com.unity.xr.interaction.toolkit": "2.1.0-pre.1",
+		"com.unity.inputsystem": "1.3.0",
+		"com.unity.modules.androidjni": "1.0.0"
 	},
 	"author": {
 		"name": "Magic Leap",

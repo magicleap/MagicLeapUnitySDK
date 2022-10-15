@@ -1,0 +1,16 @@
+{
+  "name": "MagicLeapXrProvider",
+  "version": "1.0.0",
+  "libraryName": "MagicLeapXrProvider",
+  "inputs": [
+    {
+      "id": "MagicLeapXr-Input",
+      "disablesLegacyInput": true
+    }
+  ],
+  "meshings": [
+    {
+        "id": "MagicLeapXr-Meshing"
+    }
+  ]
+}
