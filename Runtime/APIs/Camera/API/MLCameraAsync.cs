@@ -9,6 +9,7 @@
 // %BANNER_END%
 
 using System.Threading.Tasks;
+using UnityEngine.XR.MagicLeap.Native;
 
 namespace UnityEngine.XR.MagicLeap
 {
@@ -27,9 +28,14 @@ namespace UnityEngine.XR.MagicLeap
         {
             if (InternalCheckCameraPermission() == MLResult.Code.Ok)
             {
+                var camera = new MLCamera()
+                {
+#if !UNITY_EDITOR   // preview rendering not supported under Magic Leap App Simulator
+                    previewRenderer = new Renderer()
+#endif
+                };
                 return Task.Run(() =>
                 {
-                    MLCamera camera = new();
                     var resultCode = camera.InternalConnect(connectContext);
                     return resultCode == MLResult.Code.Ok ? camera : null;
                 });
@@ -65,9 +71,12 @@ namespace UnityEngine.XR.MagicLeap
             return Task.Run(() =>
             {
 #if UNITY_MAGICLEAP || UNITY_ANDROID
-                MLResult.Code resultCode = NativeBindings.MLCameraPreCaptureAEAWB(Handle);
-                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraPreCaptureAEAWB));
-                return MLResult.Create(resultCode);
+                lock (apiLock)
+                {
+                    MLResult.Code resultCode = NativeBindings.MLCameraPreCaptureAEAWB(Handle);
+                    MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraPreCaptureAEAWB));
+                    return MLResult.Create(resultCode);
+                }
 #else
                 return MLResult.Create(MLResult.Code.NotImplemented);
 #endif
@@ -87,8 +96,15 @@ namespace UnityEngine.XR.MagicLeap
             return Task.Run(() =>
             {
 #if UNITY_MAGICLEAP || UNITY_ANDROID
-                MLResult.Code resultCode = NativeBindings.MLCameraCaptureVideoStart(Handle);
-                isCapturingVideo = MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraCaptureVideoStart));
+                MLResult.Code resultCode = MLResult.Code.Ok;
+                lock (apiLock)
+                {
+                    if (!isCapturingVideo)
+                    {
+                        resultCode = NativeBindings.MLCameraCaptureVideoStart(Handle);
+                        isCapturingVideo = MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraCaptureVideoStart));
+                    }
+                }
                 return MLResult.Create(resultCode);
 #else
                 return MLResult.Create(MLResult.Code.NotImplemented);
@@ -105,9 +121,16 @@ namespace UnityEngine.XR.MagicLeap
             return Task.Run(() =>
             {
 #if UNITY_MAGICLEAP || UNITY_ANDROID
-                MLResult.Code resultCode = NativeBindings.MLCameraCaptureVideoStop(Handle);
-                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraCaptureVideoStop));
-                isCapturingVideo = false;
+                MLResult.Code resultCode = MLResult.Code.Ok;
+                lock (apiLock)
+                {
+                    if (isCapturingVideo)
+                    {
+                        resultCode = NativeBindings.MLCameraCaptureVideoStop(Handle);
+                        MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraCaptureVideoStop));
+                        isCapturingVideo = false;
+                    }
+                }
                 return MLResult.Create(resultCode);
 #else
                 return MLResult.Create(MLResult.Code.NotImplemented);
@@ -129,8 +152,15 @@ namespace UnityEngine.XR.MagicLeap
             return Task.Run(() =>
             {
 #if UNITY_MAGICLEAP || UNITY_ANDROID
-                MLResult.Code resultCode = NativeBindings.MLCameraCapturePreviewStart(Handle);
-                isCapturingPreview = MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraCapturePreviewStart));
+                MLResult.Code resultCode = MLResult.Code.Ok;
+                lock (apiLock)
+                {
+                    if (!isCapturingPreview)
+                    {
+                        resultCode = NativeBindings.MLCameraCapturePreviewStart(Handle);
+                        isCapturingPreview = MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraCapturePreviewStart));
+                    }
+                }
                 return MLResult.Create(resultCode);
 #else
                 return MLResult.Create(MLResult.Code.NotImplemented);
@@ -146,9 +176,17 @@ namespace UnityEngine.XR.MagicLeap
             return Task.Run(() =>
             {
 #if UNITY_MAGICLEAP || UNITY_ANDROID
-                MLResult.Code resultCode = NativeBindings.MLCameraCapturePreviewStop(Handle);
-                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraCapturePreviewStop));
-                isCapturingPreview = false;
+                MLResult.Code resultCode = MLResult.Code.Ok;
+                lock (apiLock)
+                {
+                    if (isCapturingPreview)
+                    {
+                        resultCode = NativeBindings.MLCameraCapturePreviewStop(Handle);
+                        MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraCapturePreviewStop));
+                        isCapturingPreview = false;
+                    }
+                    MLThreadDispatch.ScheduleMain(ClearPreviewTexture);
+                }
                 return MLResult.Create(resultCode);
 #else
                 return MLResult.Create(MLResult.Code.NotImplemented);
@@ -166,8 +204,12 @@ namespace UnityEngine.XR.MagicLeap
             return Task.Run(() =>
             {
 #if UNITY_MAGICLEAP || UNITY_ANDROID
-                MLResult.Code resultCode = NativeBindings.MLCameraCaptureImage(Handle, numImages);
-                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraCaptureImage));
+                MLResult.Code resultCode = MLResult.Code.Ok;
+                lock (apiLock)
+                {
+                    resultCode = NativeBindings.MLCameraCaptureImage(Handle, numImages);
+                    MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraCaptureImage));
+                }
                 return MLResult.Create(resultCode);
 #else
                 return MLResult.Create(MLResult.Code.NotImplemented);

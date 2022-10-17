@@ -97,6 +97,8 @@ namespace UnityEngine.XR.MagicLeap
 
             public delegate void OnFirstFrameRenderedDelegate(IntPtr context);
 
+            public delegate void OverrideYcbcrConversionSamplerDelegate([In] ref VkAndroidHardwareBufferFormatPropertiesANDROID hwBufferFormatProperties, [MarshalAs(UnmanagedType.I1)][In][Out] ref bool samplerChanged, [In][Out] ref VkSamplerYcbcrConversionCreateInfo sampler, IntPtr context);
+
             [AOT.MonoPInvokeCallback(typeof(AcquireNextAvailableBufferDelegate))]
             private static void AcquireNextAvailableBuffer([MarshalAs(UnmanagedType.I1)][In][Out] ref bool success, [In][Out] ref ulong nativeBufferHandle, IntPtr context)
             {
@@ -203,6 +205,19 @@ namespace UnityEngine.XR.MagicLeap
                 ycbcrRenderer.InvokeOnFirstFrameRendered();
             }
 
+            [AOT.MonoPInvokeCallback(typeof(OverrideYcbcrConversionSamplerDelegate))]
+            private static void OverrideYcbcrConversionSampler([In] ref VkAndroidHardwareBufferFormatPropertiesANDROID hwBufferFormatProperties, [MarshalAs(UnmanagedType.I1)][In][Out] ref bool samplerChanged, [In][Out] ref VkSamplerYcbcrConversionCreateInfo sampler, IntPtr context)
+            {
+                GCHandle gcHandle = GCHandle.FromIntPtr(context);
+                IYcbcrConversionSamplerProvider ycbcrRenderer = (gcHandle.Target as IYcbcrConversionSamplerProvider);
+                if (ycbcrRenderer == null)
+                {
+                    return;
+                }
+
+                samplerChanged = ycbcrRenderer.OverrideYcbcrConversionSampler(ref hwBufferFormatProperties, ref sampler);
+            }
+
             /// <summary>
             /// Color spaces supported by the native rendering plugin
             /// </summary>
@@ -263,17 +278,9 @@ namespace UnityEngine.XR.MagicLeap
                 public int Height;
 
                 /// <summary>
-                /// Construct the PluginEventData using the provided handle and Unity texture
+                /// Color space to render the native buffer in.
                 /// </summary>
-                /// <param name="rendererHandle">YcbcrRenderer handle</param>
-                /// <param name="texture">Unity texture to render the native buffer on</param>
-                public PluginEventData(ulong rendererHandle, Texture2D texture)
-                {
-                    this.RendererHandle = rendererHandle;
-                    this.TextureHandle = texture.GetNativeTexturePtr();
-                    this.Width = texture.width;
-                    this.Height = texture.height;
-                }
+                public ColorSpace ColorSpace;
 
                 public PluginEventData(ulong rendererHandle, RenderTexture renderBuffer)
                 {
@@ -281,6 +288,13 @@ namespace UnityEngine.XR.MagicLeap
                     this.TextureHandle = renderBuffer.colorBuffer.GetNativeRenderBufferPtr();
                     this.Width = renderBuffer.width;
                     this.Height = renderBuffer.height;
+                    // As per https://docs.unity3d.com/ScriptReference/RenderTextureReadWrite.html,
+                    // when project color space is Linear, RenderTextures that are supposed to be
+                    // used as color textures should should use srgb read-write (default for Linear
+                    // color space projets). In such a case, "fragment shaders are considered to output
+                    // linear color values", which is why we select Linear here. If srgb read-wrtite is
+                    // disabled for this RenderTexture, we should direclty output gamma pixels.
+                    this.ColorSpace = renderBuffer.sRGB ? ColorSpace.Linear : ColorSpace.Gamma;
                 }
             }
 
@@ -290,10 +304,6 @@ namespace UnityEngine.XR.MagicLeap
             [StructLayout(LayoutKind.Sequential)]
             public struct CreateInfo
             {
-                /// <summary>
-                /// Color space to render the native buffer in.
-                /// </summary>
-                public readonly ColorSpace ColorSpace;
                 /// <summary>
                 /// User context data provided in the callbacks.
                 /// </summary>
@@ -326,19 +336,19 @@ namespace UnityEngine.XR.MagicLeap
 
                 public OnFirstFrameRenderedDelegate OnFirstFrameRenderedCallback;
 
+                public OverrideYcbcrConversionSamplerDelegate OverrideYcbcrConversionSamplerCallback;
+
                 [MarshalAs(UnmanagedType.I1)]
                 public bool ShouldWaitForQueueIdleOnSubmit;
 
                 /// <summary>
                 /// Construct the info for the native plugin instance
                 /// </summary>
-                /// <param name="colorSpace">Color space</param>
                 /// <param name="context">GCHandle passed back to the callbacks as the user context</param>
                 /// <param name="isReleaseBufferAvailable">If the api supports releasing the native buffer. Pass false to avoid unnecesarry calls from unmanaged to managed layer.</param>
                 /// <param name="isFrameTransformMatrixAvailable">If the api supports a frame transform matrix. Pass false to avoid unnecesarry calls & data copies from unmanaged to managed layer & back.</param>
-                public CreateInfo(ColorSpace colorSpace, GCHandle context, YcbcrRenderer renderer, bool waitForQueueIdleOnSubmit)
+                public CreateInfo(GCHandle context, YcbcrRenderer renderer, bool waitForQueueIdleOnSubmit)
                 {
-                    this.ColorSpace = colorSpace;
                     this.Context = GCHandle.ToIntPtr(context);
 
                     this.AcquireNextAvailableBufferCallback = null;
@@ -373,6 +383,13 @@ namespace UnityEngine.XR.MagicLeap
 
                     this.OnCleanupCompleteCallback = OnCleanupComplete;
                     this.OnFirstFrameRenderedCallback = OnFirstFrameRendered;
+
+                    this.OverrideYcbcrConversionSamplerCallback = null;
+                    if (renderer is IYcbcrConversionSamplerProvider)
+                    {
+                        this.OverrideYcbcrConversionSamplerCallback = OverrideYcbcrConversionSampler;
+                    }
+
                     this.ShouldWaitForQueueIdleOnSubmit = waitForQueueIdleOnSubmit;
                 }
             }

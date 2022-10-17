@@ -18,7 +18,7 @@ namespace UnityEditor.XR.MagicLeap
         internal static UnityEditor.SettingsProvider RenderSettingProvider()
         {
             return new PermissionsSettingsProviderPresenter(
-                "MagicLeap/Manifest Settings",
+                "MagicLeap/Permissions",
                 @"Permissions");
         }
     }

@@ -38,6 +38,11 @@ namespace MagicLeap.Core
             text = GetComponentInChildren<Text>();
         }
 
+        void OnDestroy()
+        {
+            DestroyTab();
+        }
+
         public bool CreateTab(MLWebViewTabBarBehavior tabBar, MLWebViewScreenBehavior webViewScreen, InputField addressBar)
         {
             if (!MLPermissions.CheckPermission(MLPermission.WebView).IsOk)
@@ -105,21 +110,24 @@ namespace MagicLeap.Core
                 }
             }
 
-            WebView.OnLoadEnded -= OnLoadEnded;
-            WebView.OnServiceConnected -= OnServiceConnected;
-
-            // manually call ServiceDisconnected because webview could be garbage collected
-            // prior to the callback coming back from platform
-            webViewScreen.ServiceDisconnected();
-
-            if (!WebView.Destroy().IsOk)
+            if (WebView != null)
             {
-                Debug.LogError("Failed to destroy webview tab " + WebView.WebViewHandle);
-            }
-            else
-            {
-                WebView = null;
-                Destroy(gameObject);
+                WebView.OnLoadEnded -= OnLoadEnded;
+                WebView.OnServiceConnected -= OnServiceConnected;
+
+                // manually call ServiceDisconnected because webview could be garbage collected
+                // prior to the callback coming back from platform
+                webViewScreen.ServiceDisconnected();
+
+                if (!WebView.Destroy().IsOk)
+                {
+                    Debug.LogError("Failed to destroy webview tab " + WebView.WebViewHandle);
+                }
+                else
+                {
+                    WebView = null;
+                    Destroy(gameObject);
+                }
             }
 #endif
         }
@@ -168,7 +176,7 @@ namespace MagicLeap.Core
             UpdateTabLabel();
 
 #if UNITY_MAGICLEAP || UNITY_ANDROID
-            if (webViewScreen.WebView == WebView)
+            if (WebView != null && webViewScreen.WebView == WebView)
             {
                 if (addressBar != null)
                 {

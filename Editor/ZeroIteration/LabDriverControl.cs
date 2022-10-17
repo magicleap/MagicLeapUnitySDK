@@ -7,8 +7,8 @@ using System.Text;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
-using UnityEngine.UIElements;
 using UnityEngine.Rendering;
+using UnityEngine.UIElements;
 
 namespace UnityEditor.XR.MagicLeap
 {
@@ -26,6 +26,7 @@ namespace UnityEditor.XR.MagicLeap
         internal static bool s_LabdriverExit = false;
         internal static bool s_LabdriverOutputDone = false;
         internal static bool s_LabdriverIsImport = false;
+        internal static Action<bool, string> s_LabdriverOnComplete = null;
 
         private static int progressId;
 
@@ -64,7 +65,7 @@ namespace UnityEditor.XR.MagicLeap
 
         private void OnGUI()
         {
-            
+
         }
 
         private void OnRemoteChecksUI()
@@ -128,7 +129,7 @@ namespace UnityEditor.XR.MagicLeap
         {
             if (s_LabdriverIsRunning)
             {
-                EditorUtility.DisplayProgressBar("Magic Leap App Simulator - Import Support Libraries", "labdriver is running...", 1f);
+                EditorUtility.DisplayProgressBar("Magic Leap Hub", "Issuing command to Magic Leap Hub...", 1f);
             }
             else
             {
@@ -137,7 +138,7 @@ namespace UnityEditor.XR.MagicLeap
             }
         }
 
-        internal static void LaunchProcess(string filename, string args = "", bool importCommand = false, bool useVirtualDevice = false)
+        internal static void LaunchLabDriver(string filename, string args, Action<bool, string> onComplete, bool importCommand = false, bool useVirtualDevice = false)
         {
             EditorApplication.update += ShowProgressDialog;
 
@@ -156,9 +157,9 @@ namespace UnityEditor.XR.MagicLeap
                 RedirectStandardError = true
             };
 
-            if(useVirtualDevice)
+            if (useVirtualDevice)
             {
-                if(!startInfo.EnvironmentVariables.ContainsKey("ML_ZI_ROOT"))
+                if (!startInfo.EnvironmentVariables.ContainsKey("ML_ZI_ROOT"))
                 {
                     startInfo.EnvironmentVariables.Add("ML_ZI_ROOT", MagicLeapSDKUtil.SdkPath + "/VirtualDevice");
                 }
@@ -172,6 +173,9 @@ namespace UnityEditor.XR.MagicLeap
             s_Process.StartInfo = startInfo;
 
             s_LabdriverIsImport = importCommand;
+            s_LabdriverOnComplete = onComplete;
+            s_LabdriverLog.Clear();
+            s_LabdriverErrorLog.Clear();
 
             progressId = Progress.Start("Running labdriver process");
 
@@ -180,8 +184,7 @@ namespace UnityEditor.XR.MagicLeap
             s_Process.BeginErrorReadLine();
         }
 
-        [MenuItem("Magic Leap/Launch Magic Leap Hub")]
-        private static void LaunchLab()
+        private static void LaunchLabDriverCommand(string commands, Action<bool, string> onComplete)
         {
             var sdkPath = MagicLeapSDKUtil.SdkPath;
             if (string.IsNullOrEmpty(sdkPath))
@@ -189,26 +192,95 @@ namespace UnityEditor.XR.MagicLeap
                 UnityEngine.Debug.LogError("Magic Leap SDK path not configured!");
                 return;
             }
-            else if(!File.Exists(Path.Combine(sdkPath, "labdriver")))
+            else if (!File.Exists(Path.Combine(sdkPath, "labdriver")))
             {
                 UnityEngine.Debug.LogErrorFormat("labdriver executable not found in configured SDK path \"{0}\"! Make sure the path is valid.", sdkPath);
                 return;
             }
             if (!s_LabdriverIsRunning)
             {
-                UnityEngine.Debug.Log("Launching labdriver process.");
+                UnityEngine.Debug.Log("Launching labdriver with: " + commands);
 #if UNITY_EDITOR_OSX
-                // MacOSX - ML Hub Launch
-                LaunchProcess("/bin/bash", $"\"{sdkPath}/labdriver\" -pretty start-gui");
+                LaunchLabDriver("/bin/bash", $"\"{sdkPath}/labdriver\" -pretty " + commands, onComplete);
 #elif UNITY_EDITOR_WIN
-                // Windows - ML Hub Launch
-                LaunchProcess("cmd.exe", $"/C \"{sdkPath}/labdriver.cmd\" -pretty start-gui");
+                LaunchLabDriver("cmd.exe", $"/C \"{sdkPath}/labdriver.cmd\" -pretty " + commands, onComplete);
 #endif
             }
             else
             {
-                UnityEngine.Debug.Log("Previous labdriver process is still running. Please wait until it completes.");
+                UnityEngine.Debug.Log("Previous Magic Leap Hub command is still running. Please wait until it completes.");
             }
+        }
+
+        private static void HandleLabDriverResult(bool success, string json)
+        {
+            if (!success)
+            {
+                UnityEngine.Debug.LogError("Magic Leap Hub command failed:\n" + json);
+            }
+        }
+
+        [MenuItem("Magic Leap/Launch Magic Leap Hub")]
+        private static void LaunchHub()
+        {
+            LaunchLabDriverCommand("start-gui", HandleLabDriverResult);
+        }
+
+        [MenuItem("Magic Leap/Save Diagnostic Logs...")]
+        private static void SaveLogs()
+        {
+            bool result = EditorUtility.DisplayDialog("Privacy Notice",
+                String.Concat(
+                    "Create an error report file (.zip) to help us diagnose problems.\n\n",
+                    "(Note: if you are using a Magic Leap device, please connect it now.)\n\n",
+                    "Ask a question in the Magic Leap Developer Portal (https://developer.magicleap.cloud/support) " +
+                    "and attach the error report .zip file.\n\n",
+                    "Error reports are public, and the .zip file may contain identifying information, so you should inspect the .zip before sending.\n\n",
+                    "See https://developer-docs.magicleap.cloud/docs/guides/developer-tools/ml-hub/error-reporting"
+                ), "Ok", "Cancel");
+            if (!result)
+            {
+                return;
+            }
+
+            string dateTime = DateTime.Now.ToString("yyyyMMddHHmmss");
+            string tempFile = $"MLHubLogs-{dateTime}.zip";
+            string tempFileDir = Path.GetTempPath();
+            string tempFilePath = Path.Combine(tempFileDir, tempFile);
+
+            void OpenLogFile(bool success, string json)
+            {
+                if (!success)
+                {
+                    HandleLabDriverResult(success, json);
+                    return;
+                }
+
+                // reveal file in explorer/finder
+                string revealName;
+                string revealArguments;
+#if UNITY_EDITOR_OSX
+                revealName = "/usr/bin/open";
+                revealArguments = $"-R \"{tempFilePath}\"";
+#elif UNITY_EDITOR_WIN
+                revealName = "explorer.exe";
+                revealArguments = $"/select, \"${tempFilePath}\"";
+#endif
+
+                var startInfo = new ProcessStartInfo
+                {
+                    UseShellExecute = true,
+                    FileName = revealName,
+                    Arguments = revealArguments,
+                    CreateNoWindow = true
+                };
+
+                var process = new System.Diagnostics.Process();
+                process.StartInfo = startInfo;
+                process.Start();
+            }
+
+            LaunchLabDriverCommand($"save-logs \"{tempFilePath}\"", OpenLogFile);
         }
 
         private static void Restart(params string[] args)
@@ -257,25 +329,28 @@ namespace UnityEditor.XR.MagicLeap
                     }
 
                     Progress.Remove(progressId);
+
+                    if (s_LabdriverOnComplete != null)
+                    {
+                        // success
+                        s_LabdriverOnComplete(true, finalResult);
+                    }
                 }
                 else
                 {
                     String finalError = s_LabdriverErrorLog.ToString();
 
-                    if (String.IsNullOrEmpty(finalError))
-                    {
-                        String currentAction = s_LabdriverIsImport ? "import support libraries" : "launch Magic Leap App Simulator";
-                        finalError = String.Format("Magic Leap Hub encountered an unknown error while attempting to {0}. " +
-                            "Please confirm Magic Leap Hub is installed and up to date with the Magic Leap App Simulator Module and " +
-                            "Magic Leap App Simulator Runtime package installed.", currentAction);
-                    }
-
                     Progress.Remove(progressId);
 
-                    UnityEngine.Debug.LogError(finalError);
+                    if (s_LabdriverOnComplete != null)
+                    {
+                        // failure
+                        s_LabdriverOnComplete(false, finalError);
+                    }
                 }
 
                 s_LabdriverIsImport = false;
+                s_LabdriverOnComplete = null;
             }
         }
 
@@ -292,6 +367,7 @@ namespace UnityEditor.XR.MagicLeap
                     s_LabdriverOutputDone = true;
                     WaitForComplete();
                 }
+                s_LabdriverLog.Append(' ');
             }
             else
             {
@@ -308,6 +384,7 @@ namespace UnityEditor.XR.MagicLeap
             if (!String.IsNullOrEmpty(e.Data))
             {
                 s_LabdriverErrorLog.Append(e.Data);
+                s_LabdriverErrorLog.Append(' ');
             }
         }
 

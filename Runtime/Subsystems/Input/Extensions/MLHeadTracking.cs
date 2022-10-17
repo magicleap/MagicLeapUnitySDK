@@ -46,7 +46,7 @@ namespace UnityEngine.XR.MagicLeap
                     /// <summary>
                     /// Full 6 degrees of freedom tracking (position and orientation).
                     /// </summary>
-                    Mode6DO,
+                    Mode6DOF,
 
                     /// <summary>
                     /// Head tracking is unavailable.

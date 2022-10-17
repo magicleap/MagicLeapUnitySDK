@@ -34,10 +34,11 @@ namespace UnityEngine.XR.MagicLeap
             return streamCapabilities.ToArray();
         }
 
-        public static StreamCapability GetBestFitStreamCapabilityFromCollection(StreamCapability[] streamCapabilities, int width, int height, CaptureType captureType)
+        public static bool TryGetBestFitStreamCapabilityFromCollection(StreamCapability[] streamCapabilities, int width, int height, CaptureType captureType, out StreamCapability streamCapability)
         {
-            int bestFitIndex = 0;
+            int bestFitIndex = -1;
             int minScore = int.MaxValue;
+            streamCapability = default;
 
             for (int i = 0; i < streamCapabilities.Length; ++i)
             {
@@ -53,7 +54,11 @@ namespace UnityEngine.XR.MagicLeap
                 }
             }
 
-            return streamCapabilities[bestFitIndex];
+            if (bestFitIndex == -1)
+                return false;
+
+            streamCapability = streamCapabilities[bestFitIndex];
+            return true;
         }
 
         public static bool IsCaptureTypeSupported(MLCamera camera, CaptureType captureType)

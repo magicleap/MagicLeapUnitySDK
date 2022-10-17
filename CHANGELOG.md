@@ -1,5 +1,54 @@
 # Changelog
 
+## [1.0.0]
+
+### Features
+- Added controller pose derivative values to Unity Input system. 
+- Added ability to save Magic Leap diagnostic logs from within Unity. 
+- Updated license agreements and copyright headers. 
+- Added Anchors space origin transform. 
+- Added MLAudioInput support for streaming audio clips. 
+- Updated WebRTC API struct format and improved memory management. 
+- Added new `Auto Resize Native Renderer` option to `MLWebRTCVideoSinkBehavior` which if enabled will allow the Native Renderer to automatically be adjusted in response to changes in WebRTC stream size. 
+- Added ability for developers to override `VkSamplerYcbcrConversionCreateInfo` struct. 
+
+### Bugfixes
+- Fixed resource leak in WebViewTabBehavior leaving web view tabs open after changing scenes. 
+- Fixed cleanup of YcbcrRenderer when MediaPlayer is reset. 
+- Fixed MLAudioInput capture delay.
+- Fixed use of TryGetBestFitStreamCapability. 
+- Fixed multiple warnings due to unused variables.
+- Fixed errors with MLCamera asynchronous APIs by adding locking mechanisms. 
+- Fixed performance issues with executing LabDriver to get relative paths for Magic Leap App Sim. 
+- Fixed cleanup of callback handlers on video player teardown.  
+- Fixed RenderTexture read-write settings and YcbcrRenderer output color space determination. 
+- Fixed MLWebView link click precision issues. 
+
+### Deprecations & Removals
+- Removed WorldScale support. This was causing issues with transforms coming from the Magic Leap SDK and was not uniformally applied. Recommended to use custom scaling of objects instead of camera parent scale. 
+- Removed APIs for deprecated features (Hand Meshing, Raycast, Image Tracking)
+- Removed deprecated Planes setting Max Hole Size. 
+
+### Known Issues / Limitations
+- Eye blinking state is not reported either by the eye tracking API or the gaze recognition API (awaiting platform support). 
+- WebRTC LocalAppDefinedAudioSourceBehavior is restricted to 1 audio channel.
+- To use Geometry Shaders, Force Multipass must be set in Project Settings -> XR Plug-in Management -> Magic Leap Settings -> Force Multipass. Otherwise geometry shader passes cause vulkan exception in Unity player.
+- Keypoint mask values in ML App Sim are temporarily ignored and overridden to true. 
+- XR Framework Meshing subsystem crashes when attempting to load mesh blocks for rendering.
+- Detecting simultaneous controller input buttons does not work in Unity Input System 1.2.
+- Marker tracker transforms are upside down requiring users to rotate them by 180 degrees about the forward vector.
+- Camera capture can freeze app after multiple captures.
+- MLCamera.CaptureVideoStop fails with UnspecifiedFailure when called by WebRTC CameraVideoSource using NativeBuffers. When using YUV CaptureVideoStop returns successfully. 
+- Some configurations of camera capture can produce distorted images.
+- WebRTC video sink rendering fails when non-white material is assigned.
+- MLGestureClassification's GestureTransformRotation and GestureInteractionRotation are not implemented yet and data will not be guaranteed accurate. Currently only the Positions of the Hand Transform and Interaction Point will be recommended to use.
+- MLWebView first tab creation causes framerate drop.
+- If HandTracking is enabled, the Controller position/rotation actions fail to work properly when binding with the generic XRController and Right XRController input devices. The work around is to have your actions bind to the MagicLeapController input device instead. The MagicLeapInputs input asset already does this with it's action fallbacks.  
+- MLAudio is not fully supported in the 2022.2.0b8 version of the Unity Engine, make sure you don't check the "MLAudio" check box in Magic Leap XR settings (to utilize the Java AudioTrack fallback). Also use the following audio settings: Sample rate to 48000, buffer size to Good Latency.
+- When changing audio settings Unity crashes often or starts making noises.
+- Unity applications currently experience aproximately 19 MB/hr - 190 MB/hr memeory leak (varies by app). This appears to be true for all Android based Unity applications. 
+- WebRTC session can not be reconnected to if user navigates to another scene during an active session. 
+
 ## [0.53.3]
 
 ### Features
@@ -9,7 +58,7 @@
 - Added MLCameraIntrinsics OnPreviewBufferAvailable callback. 
 - Added better support for OnApplicationPause in MLWebRTCCameraVideoSource to manage camera resouces during pause and resume.
 - Added Trigger Hold action to MagicLeap input actions.
-- Updated LuminXrProvider with normal permission checks. 
+- Updated MagicLeapXrProvider with normal permission checks. 
 - Added boot settings for OpenXR. 
 - Added support for high precision marker tracking. 
 - Added MediaPlayer.VideoRenderer.OnFrameRendered callback to media player renderer. 
@@ -20,7 +69,6 @@
 
 ### Bugfixes
 - Fixed OnSourceEnabled when not using native buffers for WebRTC.
-- Fixed MSA support for CreateAudioBuffer by adding function overload instead of optional parameter.
 - Fixed hand tracking keypoint detection under ML App Sim. 
 - Fixed native platform error logging. 
 - Fixed event delegate initialization in MLCamera.
@@ -36,6 +84,7 @@
 - Fixed MLAnchor duration checks and updated documentation.
 - Fixed controller Menu button and touchpad actions. 
 - Refactored controller action layout to remove touch point 2 and cleanup supported actions. 
+- Fixed YcbcrRenderer.Cleanup() not fully cleaning up resources.
 
 ### Deprecations & Removals
 - Removed MLAutoAPISingleton inheritance from MLAudioPlayback. Uses normal singleton pattern. Callers still need to drive its lifecycle functions. 
@@ -45,7 +94,6 @@
 
 ### Known Issues / Limitations
 - Image tracking, World Raycast & Hand Meshing support has been temporarily disabled in this release. None of these are currently supported on the device. Once re-enabled, developers can use some of these in ML App Sim.
-- Media player currently only supports playback for web URLs. Support for files packaged in the apk will be added later.
 - Eye blinking state is not reported either by the eye tracking API or the gaze recognition API (awaiting platform support). 
 - WebRTC LocalAppDefinedAudioSourceBehavior is restricted to 1 audio channel.
 - To use Geometry Shaders, Force Multipass must be set in Project Settings -> XR Plug-in Management -> Magic Leap Settings -> Force Multipass. Otherwise geometry shader passes cause vulkan exception in Unity player.
@@ -55,10 +103,8 @@
 - Marker tracker transforms are upside down requiring users to rotate them by 180 degrees about the forward vector.
 - Camera capture can freeze app after multiple captures.
 - MLCamera.CaptureVideoStop fails with UnspecifiedFailure when called by WebRTC CameraVideoSource using NativeBuffers. When using YUV CaptureVideoStop returns successfully. 
-- YcbcrRenderer.Cleanup() not fully cleaning up resources.
 - Some configurations of camera capture can produce distorted images.
-- WebRTC video sync rendering fails when non-white material is assigned.
-- Spatial anchors report incorrect location for a single frame.
+- WebRTC video sink rendering fails when non-white material is assigned.
 - MLGestureClassification's GestureTransformRotation and GestureInteractionRotation are not implemented yet and data will not be guaranteed accurate. Currently only the Positions of the Hand Transform and Interaction Point will be recommended to use.
 - MLWebView first tab creation causes framerate drop.
 - MLWebView has challenges clicking on web links on page due to noisy controller position cancelling click operations (treats it as a drag operation). 
@@ -66,6 +112,9 @@
 - MLAudio is not fully supported in the 2022.2.0b5 version of the Unity Engine, make sure you don't check the "MLAudio" check box in Magic Leap XR settings (to utilize the Java AudioTrack fallback). Also use the following audio settings: Sample rate to 48000, buffer size to Good Latency.
 - When changing audio settings Unity crashes often or starts making noises.
 - Unity applications currently experience aproximately 190 MB/hr memeory leak. 
+- Black texture can be seen during the first few frames of video playback with MLMediaPlayerBehavior.
+- Trying to get the pose of the space origin after calling MLSpatialAnchorGetLocalizationInfo fails the first time.
+- Unity XRI haptics currently not supported.
 
 ## [0.53.2]
 

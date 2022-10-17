@@ -53,10 +53,10 @@ namespace UnityEngine.XR.MagicLeap
 		private MLResult.Code GetLocalizationInformation(out MLAnchors.LocalizationInfo info)
 		{
 #if UNITY_MAGICLEAP || UNITY_ANDROID
-			var resultCode = NativeBindings.MLSpatialAnchorGetLocalizationInfo(this.Handle, out NativeBindings.MLSpatialAnchorLocalizationInfo nativeInfo);
+			var nativeInfo = NativeBindings.MLSpatialAnchorLocalizationInfo.Create();
+			var resultCode = NativeBindings.MLSpatialAnchorGetLocalizationInfo(this.Handle, ref nativeInfo);
 			MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLSpatialAnchorGetLocalizationInfo));
 			info = new LocalizationInfo(nativeInfo);
-
 			return resultCode;
 #else
 			info = default;

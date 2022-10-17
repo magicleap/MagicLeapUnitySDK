@@ -74,19 +74,12 @@ namespace UnityEngine.XR.MagicLeap
         /// Initialize the native api handle & the graphics command buffers.
         /// </summary>
         /// <param name="colorSpace">Color space to render in</param>
-        protected void Initialize(UnityEngine.ColorSpace colorSpace, bool waitForQueueIdleOnSubmit = false)
+        protected void Initialize(bool waitForQueueIdleOnSubmit = false)
         {
             eventDataPtr = Marshal.AllocHGlobal(Marshal.SizeOf<NativeBindings.PluginEventData>());
             this.gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
 
-            NativeBindings.ColorSpace nativeColorSpace = NativeBindings.ColorSpace.Linear;
-            // TODO : can this be auto-interpretted via the Texture2D supplied to SetTexture()?
-            if (colorSpace == ColorSpace.Gamma)
-            {
-                nativeColorSpace = NativeBindings.ColorSpace.Gamma;
-            }
-
-            NativeBindings.CreateInfo createInfo = new NativeBindings.CreateInfo(nativeColorSpace, gcHandle, this, waitForQueueIdleOnSubmit);
+            NativeBindings.CreateInfo createInfo = new NativeBindings.CreateInfo(gcHandle, this, waitForQueueIdleOnSubmit);
             MLResult.Code result = NativeBindings.MLYcbcrRendererCreate(ref createInfo, out handle);
             if (MLResult.IsOK(result))
             {

@@ -154,6 +154,16 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             PoseNotFound,
 
+            /// <summary>
+            /// Operation failed because feature isn't supported on current device version.
+            /// </summary>
+            IncompatibleSKU,
+
+            /// <summary>
+            /// Operation failed because the Perception System was not started.
+            /// </summary>
+            PerceptionSystemNotStarted,
+
             // MLAudioResult
 
             /// <summary>
@@ -378,6 +388,44 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             MediaInvalidResourceRequest,
 
+            /// <summary>
+            /// Only Hardware Media Codec Resources are available. This error code 
+            /// is a result of requesting for Software Media Codec Resource that is 
+            /// not available.
+            /// </summary>
+            MediaOnlyHWResourceAvailable,
+
+            /// <summary>
+            /// Only Software Media Codec Resources are available. This error code 
+            /// is a result of requesting for Hardware Media Codec Resource that is 
+            /// not available.
+            /// </summary>
+            MediaOnlySWResourceAvailable,
+
+            /// <summary>
+            /// No more (Hardware or Software) Media Codec Resources available.
+            /// </summary> 
+            MediaNoMoreResources,
+
+            /// <summary>
+            /// No more Hardware Media Codec Resources available
+            /// </summary>
+            MediaNoMoreHWResources,
+
+            /// <summary>
+            /// No more Software Media Codec Resources available.
+            /// </summary>
+            MediaNoMoreSWResources,
+
+            /// <summary>
+            /// Media Codec Resource request made with Invalid Codec parameters. 
+            /// This error code could be a result of one of these cases (not limited to)
+            /// 1) Requested video frame width or height is beyond the maximum 
+            /// resolution (width or height) supported. 
+            /// 2) Requested Framerate/Sample rate/Bitratre/Channel count is not supported.
+            /// </summary>
+            MediaInvalidCodecParam,
+
             // MLMediaDRMResult
 
             /// <summary>
@@ -572,6 +620,8 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             WebRTCDataChannelIsClosed,
 
+            // MLSpatialAnchorResult
+
             /// <summary>
             /// The maximum number of anchors for the current space has been reached.
             /// </summary>
@@ -612,10 +662,14 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             AnchorsServiceUnavailable,
 
+            // MLVoiceResult
+
             /// <summary>
             /// Operation failed because a required voice intent feature is disabled in system settings.
             /// </summary>
             VoiceIntentDisabled = (CodePrefix.MLVoiceResult << 16),
+
+            // MLWebViewResult
 
             /// <summary>
             /// Operation failed because zoom limit was reached.

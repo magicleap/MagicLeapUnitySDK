@@ -13,7 +13,7 @@ namespace UnityEngine.XR.MagicLeap.Native
 {
     public partial class MagicLeapNativeBindings
     {
-// Use SDK loader lib for features that will work in ML App Sim
+        // Use SDK loader lib for features that will work in ML App Sim
 #if UNITY_EDITOR
         public const string MLSdkLoaderDll = "ml_sdk_loader";
         /// <summary>
@@ -112,21 +112,6 @@ namespace UnityEngine.XR.MagicLeap.Native
         public const string UnityMagicLeapDll = "UnityMagicLeap";
 
         /// <summary>
-        /// The name of the Adapter DLL to retrieve adapter API
-        /// </summary>
-        protected const string MLBluetoothAdapterDll = "bluetooth_adapter.magicleap";
-
-        /// <summary>
-        /// The name of the <c>Gatt</c> DLL to retrieve <c>Gatt</c> API
-        /// </summary>
-        protected const string MLBluetoothGattDll = "bluetooth_gatt.magicleap";
-
-        /// <summary>
-        /// The name of the DLL to look for the core BLE API
-        /// </summary>
-        protected const string MLBluetoothLEDll = "bluetooth_le.magicleap";
-
-        /// <summary>
         /// Internal DLL used by the API.
         /// </summary>
         protected const string MLMediaFormatDll = "media_format.magicleap";
@@ -175,12 +160,12 @@ namespace UnityEngine.XR.MagicLeap.Native
         /// Internal DLL used by the API.
         /// </summary>
         protected const string MLVoiceDll = "input.magicleap";
-        
+
         /// <summary>
         /// Internal DLL used by the API.
         /// </summary>
         protected const string MLWebViewDll = "webview.magicleap";
-        
+
         /// <summary>
         /// Internal DLL used to get Java VM Pointer.
         /// </summary>

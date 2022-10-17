@@ -74,14 +74,6 @@ namespace UnityEngine.XR.MagicLeap
                 public uint MaxResults;
 
                 /// <summary>
-                /// If MLPlanesQueryFlags.IgnoreHoles is not set, holes with a perimeter
-                /// (in meters) smaller than this value will be ignored, and can be part of
-                /// the plane. This value cannot be lower than 0 (lower values will be
-                /// capped to this minimum).
-                /// </summary>
-                public float MinHoleLength;
-
-                /// <summary>
                 /// The minimum area (in squared meters) of planes to be returned. This value
                 /// cannot be lower than 0.04 (lower values will be capped to this minimum).
                 /// </summary>
@@ -122,7 +114,6 @@ namespace UnityEngine.XR.MagicLeap
                             BoundsRotation = Quaternion.identity,
                             BoundsExtents = Vector3.one * 20f,
                             MaxResults = _maxResults,
-                            MinHoleLength = 0.5f,
                             MinPlaneArea = 0.25f
                         };
                     }

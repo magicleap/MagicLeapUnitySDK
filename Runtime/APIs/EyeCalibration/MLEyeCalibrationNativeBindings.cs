@@ -51,7 +51,7 @@ namespace UnityEngine.XR.MagicLeap
             /// Gets information about the user's current eye calibration.
             /// </summary>
             [DllImport(MLPerceptionClientDll, CallingConvention = CallingConvention.Cdecl)]
-            public static extern MLResult.Code MLEyeCalibrationGetState(ulong EyeCalibrationTracker, out MLEyeCalibrationState OutState);
+            public static extern MLResult.Code MLEyeCalibrationGetState(ulong Handle, out MLEyeCalibrationState OutState);
         }
     }
 }

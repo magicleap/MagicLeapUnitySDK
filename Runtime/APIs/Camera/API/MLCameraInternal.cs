@@ -1,11 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file = "MLCameraInternal.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018-present, Magic Leap, Inc. All Rights Reserved.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -117,6 +115,12 @@ namespace UnityEngine.XR.MagicLeap
         private MLCamera.CaptureConfig cameraCaptureConfig;
 
         /// <summary>
+        /// Used by the Async methods to ensure things don't happen concurrently when they shouldn't,
+        /// since C-API is not threadsafe. 
+        /// </summary>
+        private static readonly object apiLock = new object();
+
+        /// <summary>
         /// Gets the texture for the camera preview render.
         /// (null) when preview is not available yet.
         /// </summary>
@@ -163,13 +167,13 @@ namespace UnityEngine.XR.MagicLeap
             }
             if (previewTexture == null)
             {
-                previewTexture = new RenderTexture(width, height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
+                previewTexture = new RenderTexture(width, height, 0, RenderTextureFormat.ARGB32);
             }
 
             // preview rendering not supported under Magic Leap App Simulator
 #if !UNITY_EDITOR
-            previewRenderer.Cleanup();
-            previewRenderer = new MLCamera.Renderer(ColorSpace.Linear);
+            previewRenderer?.Cleanup();
+            previewRenderer = new MLCamera.Renderer();
             previewRenderer.SetRenderBuffer(previewTexture);
 #endif
         }
@@ -177,9 +181,12 @@ namespace UnityEngine.XR.MagicLeap
         private MLResult InternalCapturePreviewStart()
         {
 #if UNITY_MAGICLEAP || UNITY_ANDROID
-            MLResult.Code resultCode = NativeBindings.MLCameraCapturePreviewStart(Handle);
-            isCapturingPreview = MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraCapturePreviewStart));
-            return MLResult.Create(resultCode);
+            lock (apiLock)
+            {
+                MLResult.Code resultCode = NativeBindings.MLCameraCapturePreviewStart(Handle);
+                isCapturingPreview = MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraCapturePreviewStart));
+                return MLResult.Create(resultCode);
+            }
 #else
             return MLResult.Create(MLResult.Code.NotImplemented);
 #endif
@@ -212,7 +219,7 @@ namespace UnityEngine.XR.MagicLeap
         {
             // preview rendering not supported under Magic Leap App Simulator
 #if !UNITY_EDITOR
-            previewRenderer.Render();
+            previewRenderer?.Render();
 #endif
         }
 
@@ -358,7 +365,7 @@ namespace UnityEngine.XR.MagicLeap
 
 #if !UNITY_EDITOR
             // preview rendering not supported under Magic Leap App Simulator
-            MLThreadDispatch.ScheduleMain(() => previewRenderer.Cleanup());
+            MLThreadDispatch.ScheduleMain(() => previewRenderer?.Cleanup());
 #endif
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraDisconnect));
 
@@ -383,12 +390,15 @@ namespace UnityEngine.XR.MagicLeap
         {
 #if UNITY_MAGICLEAP || UNITY_ANDROID
             MLResult.Code resultCode = MLResult.Code.Ok;
-            if (!cameraInited)
+            lock (apiLock)
             {
-                NativeBindings.MLCameraDeviceAvailabilityStatusCallbacks callbacks =
-                    NativeBindings.MLCameraDeviceAvailabilityStatusCallbacks.Create();
-                resultCode = NativeBindings.MLCameraInit(ref callbacks, IntPtr.Zero);
-                cameraInited = MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraInit));
+                if (!cameraInited)
+                {
+                    NativeBindings.MLCameraDeviceAvailabilityStatusCallbacks callbacks =
+                        NativeBindings.MLCameraDeviceAvailabilityStatusCallbacks.Create();
+                    resultCode = NativeBindings.MLCameraInit(ref callbacks, IntPtr.Zero);
+                    cameraInited = MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraInit));
+                }
             }
 
             return MLResult.Create(resultCode);
@@ -432,51 +442,48 @@ namespace UnityEngine.XR.MagicLeap
             this.cameraConnectContext = cameraConnectContext;
 
             NativeBindings.MLCameraConnectContext context = NativeBindings.MLCameraConnectContext.Create(cameraConnectContext);
-           
-            var resultCode = NativeBindings.MLCameraConnect(ref context, out Handle);
 
-            if (! MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraConnect)))
+            MLResult.Code resultCode = MLResult.Code.Ok;
+
+            lock (apiLock)
             {
-                Debug.LogErrorFormat("MLCamera.Connect failed connecting to the camera. Reason: {0}", resultCode);
-                connectPerfMarker.End();
-                return resultCode;
+                if (!cameraConnectionEstablished)
+                {
+                    resultCode = NativeBindings.MLCameraConnect(ref context, out Handle);
+
+                    if (!MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraConnect)))
+                    {
+                        Debug.LogErrorFormat("MLCamera.Connect failed connecting to the camera. Reason: {0}", resultCode);
+                        connectPerfMarker.End();
+                        return resultCode;
+                    }
+
+                    NativeBindings.MLCameraCaptureCallbacks captureCallbacks = NativeBindings.MLCameraCaptureCallbacks.Create();
+
+                    if (!MLResult.DidNativeCallSucceed(NativeBindings.MLCameraSetCaptureCallbacks(Handle, ref captureCallbacks, GCHandle.ToIntPtr(gcHandle)), nameof(NativeBindings.MLCameraSetCaptureCallbacks)))
+                    {
+                        MLPluginLog.ErrorFormat("MLCamera.CaptureCallbacks failed seting the capture callbacks. Reason: {0}", resultCode);
+                        connectPerfMarker.End();
+                        return resultCode;
+                    }
+
+                    NativeBindings.MLCameraDeviceStatusCallbacks deviceCallbacks = NativeBindings.MLCameraDeviceStatusCallbacks.Create();
+
+                    if (!MLResult.DidNativeCallSucceed(NativeBindings.MLCameraSetDeviceStatusCallbacks(Handle, ref deviceCallbacks, GCHandle.ToIntPtr(gcHandle)), nameof(NativeBindings.MLCameraSetDeviceStatusCallbacks)))
+                    {
+                        MLPluginLog.ErrorFormat("MLCamera.DeviceStatusCallbacks failed setting the device callbacks. Reason: {0}", resultCode);
+                        connectPerfMarker.End();
+                        return resultCode;
+                    }
+
+                    cameraConnectionEstablished = MLResult.IsOK(resultCode);
+                }
             }
-
-            NativeBindings.MLCameraCaptureCallbacks captureCallbacks = NativeBindings.MLCameraCaptureCallbacks.Create();
-
-            if (!MLResult.DidNativeCallSucceed(NativeBindings.MLCameraSetCaptureCallbacks(Handle, ref captureCallbacks, GCHandle.ToIntPtr(gcHandle)), nameof(NativeBindings.MLCameraSetCaptureCallbacks)))
-            {
-                MLPluginLog.ErrorFormat("MLCamera.CaptureCallbacks failed seting the capture callbacks. Reason: {0}", resultCode);
-                connectPerfMarker.End();
-                return resultCode;
-            }
-
-            NativeBindings.MLCameraDeviceStatusCallbacks deviceCallbacks = NativeBindings.MLCameraDeviceStatusCallbacks.Create();
-
-            if (!MLResult.DidNativeCallSucceed(NativeBindings.MLCameraSetDeviceStatusCallbacks(Handle, ref deviceCallbacks, GCHandle.ToIntPtr(gcHandle)), nameof(NativeBindings.MLCameraSetDeviceStatusCallbacks)))
-            {
-                MLPluginLog.ErrorFormat("MLCamera.DeviceStatusCallbacks failed setting the device callbacks. Reason: {0}", resultCode);
-                connectPerfMarker.End();
-                return resultCode;
-            }
-
-            cameraConnectionEstablished = MLResult.IsOK(resultCode);
-
             if (!MLResult.IsOK(resultCode))
             {
                 MLPluginLog.ErrorFormat("MLCamera.InternalConnect failed to populate characteristics for MLCamera. Reason: {0}", resultCode);
                 connectPerfMarker.End();
                 return resultCode;
-            }
-
-            // preview rendering not supported under Magic Leap App Simulator
-            // TODO : This needs to be tackeled properly during SDKUNITY-4686
-            if (!Application.isEditor)
-            {
-                MLThreadDispatch.ScheduleMain(() =>
-                {
-                    previewRenderer = new MLCamera.Renderer(ColorSpace.Linear);
-                });
             }
 
             connectPerfMarker.End();
@@ -595,16 +602,13 @@ namespace UnityEngine.XR.MagicLeap
             cameraMetadata = null;
 
 #if UNITY_MAGICLEAP || UNITY_ANDROID
-            NativeBindings.MLCameraCaptureConfig nativeCaptureConfig =
-                NativeBindings.MLCameraCaptureConfig.Create(captureConfig);
-            // TODO : do something with the metadata handle
-            MLResult.Code resultCode =
-                NativeBindings.MLCameraPrepareCapture(Handle, ref nativeCaptureConfig, out ulong metadataHandle);
+            MLResult.Code resultCode = MLResult.Code.Ok;
+            NativeBindings.MLCameraCaptureConfig nativeCaptureConfig = NativeBindings.MLCameraCaptureConfig.Create(captureConfig);
+            resultCode = NativeBindings.MLCameraPrepareCapture(Handle, ref nativeCaptureConfig, out ulong metadataHandle);
             if (MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraPrepareCapture)))
             {
                 cameraMetadata = new Metadata(metadataHandle);
             }
-
             return resultCode;
 #else
             cameraMetadata = null;

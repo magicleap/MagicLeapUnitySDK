@@ -131,8 +131,6 @@ namespace UnityEngine.XR.MagicLeap
             /// <returns>An initialized media player object.</returns>
             public Player(out MLResult result)
             {
-                MLDevice.RegisterApplicationPause(this.OnApplicationPause);
-
 #if UNITY_EDITOR
                 // media player not supported under Magic Leap App Simulator
                 MLResult.Code resultCode = MLResult.Code.NotImplemented;
@@ -144,8 +142,9 @@ namespace UnityEngine.XR.MagicLeap
                     result = MLResult.Create(resultCode);
                     return;
                 }
-
-
+                
+                MLDevice.RegisterApplicationPause(this.OnApplicationPause);
+                
                 NativeBindings.MLMediaPlayerEventCallbacksEx callbacks = NativeBindings.MLMediaPlayerEventCallbacksEx.Create();
                 this.gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
                 IntPtr gcHandlePtr = GCHandle.ToIntPtr(this.gcHandle);
@@ -196,6 +195,8 @@ namespace UnityEngine.XR.MagicLeap
                 if (handle == MagicLeapNativeBindings.InvalidHandle)
                     return;
 
+                MLDevice.UnregisterApplicationPause(this.OnApplicationPause);
+                
                 this.parser608.OnText -= On608Text;
                 this.parser708.OnText -= On708Text;
                 
@@ -456,6 +457,7 @@ namespace UnityEngine.XR.MagicLeap
                 if(MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerReset)))
                 {
                     IsPrepared = false;
+                    VideoRenderer?.Cleanup();
                 }
                 return MLResult.Create(resultCode);
             }
@@ -466,6 +468,7 @@ namespace UnityEngine.XR.MagicLeap
                 if(MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerResetAsync)))
                 {
                     IsPrepared = false;
+                    VideoRenderer?.Cleanup();
                 }
                 return MLResult.Create(resultCode);
             }
@@ -585,7 +588,7 @@ namespace UnityEngine.XR.MagicLeap
 
             public void CreateVideoRenderer(uint width, uint height)
             {
-                this.VideoRenderer = new MLNativeSurfaceYcbcrRenderer(ColorSpace.Linear, width, height);
+                this.VideoRenderer = new MLNativeSurfaceYcbcrRenderer(width, height);
                 // TODO : see if we need to add checks to confirm if source has been set.
                 // Technically it would be, becayse we get width and height only after that.
                 MLResult.Code resultCode = NativeBindings.MLMediaPlayerSetSurface(this.handle, VideoRenderer.Surface.Handle);

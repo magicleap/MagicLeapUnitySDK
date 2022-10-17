@@ -422,15 +422,21 @@ namespace UnityEngine.XR.MagicLeap
 			public readonly string SpaceId => this.spaceId.ToString();
 
 			/// <summary>
-			/// If localized, this will contain the identifier of the transform of
+			/// If localized, this will contain the pose info of
 			///	the target space's origin relative to the world origin.
 			/// </summary>
-			public readonly MagicLeapNativeBindings.MLCoordinateFrameUID TargetSpaceOrigin;
+			public readonly Pose SpaceOrigin;
 
 			/// <summary>
 			/// If localized, this will contain the unique ID of the current space.
 			/// </summary>
 			internal readonly NativeBindings.MLUUIDBytes spaceId;
+
+			/// <summary>
+			/// If localized, this will contain the identifier of the transform of
+			///	the target space's origin relative to the world origin.
+			/// </summary>
+			internal readonly MagicLeapNativeBindings.MLCoordinateFrameUID spaceOrigin;
 
 			public LocalizationInfo(NativeBindings.MLSpatialAnchorLocalizationInfo nativeInfo)
             {
@@ -438,10 +444,18 @@ namespace UnityEngine.XR.MagicLeap
 				this.MappingMode = nativeInfo.MappingMode;
 				this.SpaceName = nativeInfo.SpaceName;
 				this.spaceId = nativeInfo.SpaceId;
-				this.TargetSpaceOrigin = nativeInfo.TargetSpaceOrigin;
+				this.spaceOrigin = nativeInfo.TargetSpaceOrigin;
+
+#if UNITY_MAGICLEAP || UNITY_ANDROID
+				var resultCode = MagicLeapXrProviderNativeBindings.GetUnityPose(spaceOrigin, out SpaceOrigin);
+				MLResult.DidNativeCallSucceed(resultCode, nameof(MagicLeapXrProviderNativeBindings.GetUnityPose));
+#else
+				SpaceOrigin = default;
+#endif
+
 			}
 
-			public override string ToString() => $"LocalizationStatus: {this.LocalizationStatus},\nMappingMode: {this.MappingMode},\nSpaceName: {this.SpaceName},\nSpaceId: {this.SpaceId}, \nTargetSpaceOrigin: {this.TargetSpaceOrigin}";
+			public override string ToString() => $"LocalizationStatus: {this.LocalizationStatus},\nMappingMode: {this.MappingMode},\nSpaceName: {this.SpaceName},\nSpaceId: {this.SpaceId}, \nSpaceOriginId: {this.spaceOrigin}, \nSpaceOrigin: {this.SpaceOrigin}";
 
 		}
 	}

@@ -18,8 +18,7 @@ namespace UnityEngine.XR.MagicLeap
     {
         const Feature kUniversallySupportedFeatures = Feature.AnyTrackingMode
             | Feature.WorldFacingCamera
-            | Feature.PlaneTracking
-            | Feature.ImageTracking;
+            | Feature.PlaneTracking;
 
         // Features rank in order of power usage typically
         static readonly ConfigurationDescriptor[] s_ConfigurationsDescriptors = {

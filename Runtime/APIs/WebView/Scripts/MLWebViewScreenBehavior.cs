@@ -443,13 +443,13 @@ namespace MagicLeap.Core
             if (webViewTexture == null)
             {
                 // Create texture with given dimensions
-                webViewTexture = new RenderTexture(width, height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
+                webViewTexture = new RenderTexture(width, height, 0, RenderTextureFormat.ARGB32);
 
                 // Set texture on quad
                 webViewMeshRenderer.material.mainTexture = this.webViewTexture;
             }
 
-            webViewRenderer = new MLWebView.Renderer(ColorSpace.Linear);
+            webViewRenderer = new MLWebView.Renderer();
             webViewRenderer.SetRenderBuffer(this.webViewTexture);
         }
 #endif

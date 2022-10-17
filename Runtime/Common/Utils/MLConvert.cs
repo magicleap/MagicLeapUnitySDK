@@ -1,11 +1,9 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// <copyright file = "MLConvert.cs" company="Magic Leap, Inc">
-//
-// Copyright (c) 2018-present, Magic Leap, Inc. All Rights Reserved.
-//
-// </copyright>
+// Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
@@ -29,39 +27,13 @@ namespace UnityEngine.XR.MagicLeap.Native
         public static readonly float[] IdentityMatrixColMajor = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
 
         /// <summary>
-        /// Gets a float value converted from meters to Unity units.
-        /// </summary>
-        /// <param name="value">Value to convert</param>
-        /// <returns>value converted to Unity units</returns>
-        public static float ToUnity(float value)
-        {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-            return value * MagicLeapCamera.WorldScale;
-#else
-            return value;
-#endif
-        }
-
-        /// <summary>
         /// Converts a Vector3 to Unity coordinate space and scale.
         /// </summary>
         /// <param name="vec">Vector to convert</param>
         /// <param name="transformToRUF">If coordinate space should change.</param>
         /// <param name="applyScale">If world scale should be applied.</param>
         /// <returns>Converted Vector</returns>
-        public static Vector3 ToUnity(Vector3 vec, bool transformToRUF = true, bool applyScale = true)
-        {
-            Vector3 result = new Vector3(vec.x, vec.y, (transformToRUF) ? -vec.z : vec.z);
-
-            if (applyScale)
-            {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-                result *= MagicLeapCamera.WorldScale;
-#endif
-            }
-
-            return result;
-        }
+        public static Vector3 ToUnity(Vector3 vec, bool transformToRUF = true) => new Vector3(vec.x, vec.y, (transformToRUF) ? -vec.z : vec.z);
 
         /// <summary>
         /// Creates a Unity 3D vector from a native vector.
@@ -70,10 +42,7 @@ namespace UnityEngine.XR.MagicLeap.Native
         /// <param name="transformToRUF">(Optional) If false, prevents conversion to Unity's coordinate system.</param>
         /// <param name="applyScale">(Optional) If false, prevents scaling to Unity's unit per meter scale.</param>
         /// <returns>A Unity vector.</returns>
-        public static Vector3 ToUnity(MagicLeapNativeBindings.MLVec3f vec, bool transformToRUF = true, bool applyScale = true)
-        {
-            return ToUnity(vec.X, vec.Y, vec.Z, transformToRUF, applyScale);
-        }
+        public static Vector3 ToUnity(MagicLeapNativeBindings.MLVec3f vec, bool transformToRUF = true) => ToUnity(vec.X, vec.Y, vec.Z, transformToRUF);
 
 
         /// <summary>
@@ -83,11 +52,7 @@ namespace UnityEngine.XR.MagicLeap.Native
         /// <param name="transformToRUF">(Optional) If false, prevents conversion to Unity's coordinate system.</param>
         /// <param name="applyScale">(Optional) If false, prevents scaling to Unity's unit per meter scale.</param>
         /// <returns>A Unity vector.</returns>
-        public static Vector2 ToUnity(MagicLeapNativeBindings.MLVec2f vec, bool transformToRUF = true, bool applyScale = true)
-        {
-            return ToUnity(vec.X, vec.Y, 0, transformToRUF, applyScale);
-        }
-
+        public static Vector2 ToUnity(MagicLeapNativeBindings.MLVec2f vec, bool transformToRUF = true) => ToUnity(vec.X, vec.Y, 0, transformToRUF);
         /// <summary>
         /// Creates a Unity 3D vector from a x, y and z parameters.
         /// </summary>
@@ -97,19 +62,7 @@ namespace UnityEngine.XR.MagicLeap.Native
         /// <param name="transformToRUF">(Optional) If false, prevents conversion to Unity's coordinate system.</param>
         /// <param name="applyScale">(Optional) If false, prevents scaling to Unity's unit per meter scale.</param>
         /// <returns>A Unity vector.</returns>
-        public static Vector3 ToUnity(float x, float y, float z, bool transformToRUF = true, bool applyScale = true)
-        {
-            Vector3 unityVec = new Vector3(x, y, transformToRUF ? -z : z);
-
-            if (applyScale)
-            {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-                unityVec = unityVec * MagicLeapCamera.WorldScale;
-#endif
-            }
-
-            return unityVec;
-        }
+        public static Vector3 ToUnity(float x, float y, float z, bool transformToRUF = true) => new Vector3(x, y, transformToRUF ? -z : z);
 
         /// <summary>
         /// Creates a Unity quaternion from a native quaternion.
@@ -117,17 +70,8 @@ namespace UnityEngine.XR.MagicLeap.Native
         /// <param name="quat">A native quaternion.</param>
         /// <param name="transformToRUF">(Optional) If false, prevents conversion to Unity's coordinate system.</param>
         /// <returns>A Unity quaternion.</returns>
-        public static Quaternion ToUnity(MagicLeapNativeBindings.MLQuaternionf quat, bool transformToRUF = true)
-        {
-            if (transformToRUF)
-            {
-                return new Quaternion(quat.X, quat.Y, -quat.Z, -quat.W);
-            }
-            else
-            {
-                return new Quaternion(quat.X, quat.Y, quat.Z, quat.W);
-            }
-        }
+        public static Quaternion ToUnity(MagicLeapNativeBindings.MLQuaternionf quat, bool transformToRUF = true) => new Quaternion(quat.X, quat.Y, transformToRUF ? -quat.Z : quat.Z, transformToRUF ? -quat.W : quat.W);
+
 
         /// <summary>
         /// Converts a Quaternion to unity space.
@@ -162,9 +106,9 @@ namespace UnityEngine.XR.MagicLeap.Native
         /// <param name="transformToRUF">(Optional) If false, prevents conversion to Unity's coordinate system.</param>
         /// <param name="applyScale">(Optional) If false, prevents scaling to Unity's unit per meter scale.</param>
         /// <returns>A Unity matrix.</returns>
-        public static Matrix4x4 ToUnity(MagicLeapNativeBindings.MLTransform transform, bool transformToRUF = true, bool applyScale = true)
+        public static Matrix4x4 ToUnity(MagicLeapNativeBindings.MLTransform transform, bool transformToRUF = true)
         {
-            Vector3 position = ToUnity(transform.Position, transformToRUF, applyScale);
+            Vector3 position = ToUnity(transform.Position, transformToRUF);
             Quaternion rotation = ToUnity(transform.Rotation, transformToRUF);
 
             return Matrix4x4.TRS(position, rotation, Vector3.one);
@@ -187,11 +131,11 @@ namespace UnityEngine.XR.MagicLeap.Native
         /// <param name="transformFromRUF">(Optional) If false, prevents conversion to the native SDK coordinate system.</param>
         /// <param name="applyScale">(Optional) If false, prevents scaling to the native SDK's unit per meter scale.</param>
         /// <returns>A native transform.</returns>
-        public static MagicLeapNativeBindings.MLTransform FromUnity(Matrix4x4 mat, bool transformFromRUF = true, bool applyScale = true)
+        public static MagicLeapNativeBindings.MLTransform FromUnity(Matrix4x4 mat, bool transformFromRUF = true)
         {
             MagicLeapNativeBindings.MLTransform transform = new MagicLeapNativeBindings.MLTransform();
 
-            transform.Position = FromUnity(GetPositionFromTransformMatrix(mat), transformFromRUF, applyScale);
+            transform.Position = FromUnity(GetPositionFromTransformMatrix(mat), transformFromRUF);
             transform.Rotation = FromUnity(GetRotationFromTransformMatrix(mat), transformFromRUF);
 
             return transform;
@@ -217,26 +161,13 @@ namespace UnityEngine.XR.MagicLeap.Native
         /// <param name="transformFromRUF">(Optional) If false, prevents conversion to the native SDK coordinate system.</param>
         /// <param name="applyScale">(Optional) If false, prevents scaling to the native SDK's unit per meter scale.</param>
         /// <returns>A native vector.</returns>
-        public static MagicLeapNativeBindings.MLVec3f FromUnity(Vector3 vec, bool transformFromRUF = true, bool applyScale = true)
+        public static MagicLeapNativeBindings.MLVec3f FromUnity(Vector3 vec, bool transformFromRUF = true)
         {
             if (transformFromRUF)
             {
                 vec.z = -vec.z;
             }
 
-            if (applyScale)
-            {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-                if (MagicLeapCamera.WorldScale == 0.0f)
-                {
-                    MLPluginLog.Error("Divide by zero, unit scale vector contains 0");
-                }
-                else
-                {
-                    vec = vec / MagicLeapCamera.WorldScale;
-                }
-#endif
-            }
 
             MagicLeapNativeBindings.MLVec3f outVec = new MagicLeapNativeBindings.MLVec3f();
             outVec.X = vec.x;
@@ -271,27 +202,6 @@ namespace UnityEngine.XR.MagicLeap.Native
             }
 
             return outQuat;
-        }
-
-        /// <summary>
-        /// Gets a float value converted from Unity units to meters.
-        /// </summary>
-        /// <param name="value">Value to convert</param>
-        /// <returns>Returns the Unity value to meters</returns>
-        public static float FromUnity(float value)
-        {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-            float scale = MagicLeapCamera.WorldScale;
-#else
-            float scale = 1.0f;
-#endif
-
-            if (scale == 0.0f)
-            {
-                scale = 1.0f;
-            }
-
-            return value / scale;
         }
 
         /// <summary>

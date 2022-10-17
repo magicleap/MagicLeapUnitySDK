@@ -20,12 +20,19 @@ namespace UnityEngine.XR.MagicLeap
         public MLNativeSurface Surface { get; private set; }
         private int isNewFrameAvailable;
 
-        public MLNativeSurfaceYcbcrRenderer(UnityEngine.ColorSpace colorSpace, uint width, uint height)
+        public MLNativeSurfaceYcbcrRenderer(uint width, uint height)
         {
-            Initialize(colorSpace);
+            Initialize();
             // 3 buffer count because MLGraphics uses 3 buffer count
             Surface = new MLNativeSurface(MLNativeSurface.PixelFormat.Rgb888, 3, width, height);
             Surface.OnFrameAvailable += OnFrameAvailable;
+            this.OnCleanupComplete += OnResourceCleanupComplete;
+        }
+
+        private void OnResourceCleanupComplete()
+        {
+            Surface.OnFrameAvailable -= OnFrameAvailable;
+            Surface.Destroy();
         }
 
         private void OnFrameAvailable()

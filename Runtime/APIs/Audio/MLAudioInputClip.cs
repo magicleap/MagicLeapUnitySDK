@@ -56,11 +56,6 @@ namespace UnityEngine.XR.MagicLeap
         }
 
         /// <summary>
-        /// Stores list of audio clips to prevent premature garbage collection.
-        /// </summary>
-        private List<Clip> mlAudioClips = new List<Clip>();
-
-        /// <summary>
         /// Gets the sample rate preferences of the device based on the capture type.
         /// </summary>
         public static int GetSampleRate(MicCaptureType captureType)
@@ -110,68 +105,25 @@ namespace UnityEngine.XR.MagicLeap
         }
 
         /// <summary>
-        /// Returns an object that streams audio into it's AudioClip member.
-        /// TODO: Create a non-streamed audio clip for when loop is set to false and use audioClip.SetData() instead.
-        /// </summary>
-        public static Clip CreateClip(MicCaptureType captureType, bool loop, int lengthSec, int frequency) => Instance.CreateClipInternal(captureType, loop, lengthSec, frequency);
-
-        private Clip CreateClipInternal(MicCaptureType captureType, bool loop, int lengthSec, int frequency)
-        {
-            var streamedClip = new Clip(captureType, loop, (uint)lengthSec, (uint)frequency, (uint)MLAudioInput.GetChannels(captureType));
-            mlAudioClips.Add(streamedClip);
-            return streamedClip;
-        }
-
-
-        /// <summary>
         /// Streams audio input data into an AudioClip.
         /// </summary>
-        public class Clip
+        public abstract class Clip : IDisposable
         {
-            private const uint CIRCULAR_BUFFER_SIZE_MULTIPLIER = 12;
+            private static readonly HashSet<Clip> mlAudioClips = new();
 
-            public AudioClip UnityAudioClip => this.audioClip;
-
-            // This is only tracked for a streamed audio clip (when "loop" is set to true in CreateClip)
-            public int SamplesPosition
-            {
-                get;
-                private set;
-            }
-
-            public int ReadPosition
-            {
-                get;
-                private set;
-            }
-
-            private readonly AudioClip audioClip;
             private readonly GCHandle gcHandle;
-            private readonly bool isStreamed;
-            private readonly object lockObject;
-            private readonly CircularBuffer<float> circularBuffer;
             private readonly uint numSamples;
 
             private ulong captureHandle = Native.MagicLeapNativeBindings.InvalidHandle;
-            private float[] mlAudioSamplesFloats = new float[0];
 
-            public Clip(MicCaptureType captureType, bool stream, uint samplesLengthInSeconds, uint sampleRate, uint channels)
+            public Clip(MicCaptureType captureType, uint samplesLengthInSeconds, uint channels)
             {
-                isStreamed = stream;
-                lockObject = new object();
+                mlAudioClips.Add(this);
                 gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
-
-                // calculate appropriate circular buffer size
-                numSamples = samplesLengthInSeconds * sampleRate;
-                uint circularBufferSize = numSamples * CIRCULAR_BUFFER_SIZE_MULTIPLIER;
-                circularBuffer = new CircularBuffer<float>(circularBufferSize);
-
-                // create an audio clip to stream to with the registered callbacks or not based on if it should loop it's audio data
-                audioClip = AudioClip.Create(string.Empty, (int)numSamples, (int)channels, (int)sampleRate, isStreamed, isStreamed ? OnAudioDataRead : null, OnAudioDataPosition);
 
 #if UNITY_ANDROID
                 // get the best buffer format to use
-                MLResult.Code resultCode = NativeBindings.MLAudioGetBufferedInputDefaults(channels, (uint)MLAudioInput.GetSampleRate(captureType), out MLAudioOutput.NativeBindings.MLAudioBufferFormat bufferFormat, out uint recommendedSizeInBytes, out uint minimumSizeInBytes);
+                MLResult.Code resultCode = NativeBindings.MLAudioGetBufferedInputDefaults(channels, (uint)GetSampleRate(captureType), out MLAudioOutput.NativeBindings.MLAudioBufferFormat bufferFormat, out uint recommendedSizeInBytes, out uint minimumSizeInBytes);
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLAudioGetBufferedInputDefaults));
 
                 // create the audio input stream 
@@ -184,30 +136,15 @@ namespace UnityEngine.XR.MagicLeap
 #endif
             }
 
-            ~Clip() => Stop();
-
-            /// <summary>
-            /// Gets the current data of the audio clip.
-            /// </summary>
-            public void GetData(float[] audioData, int offsetSamples)
-            {
-                if (!isStreamed)
-                {
-                    audioClip.GetData(audioData, offsetSamples);
-                }
-                else
-                {
-                    var lengthToCopy = Math.Min(mlAudioSamplesFloats.Length, audioData.Length);
-                    offsetSamples %= lengthToCopy;
-                    Array.Copy(mlAudioSamplesFloats, offsetSamples, audioData, 0, lengthToCopy);
-                }
-            }
+            ~Clip() => Dispose();
 
             /// <summary>
             /// Stops streaming data.
             /// </summary>
-            public void Stop()
+            public void Dispose()
             {
+                mlAudioClips.Remove(this);
+
                 if (!Native.MagicLeapNativeBindings.MLHandleIsValid(captureHandle))
                     return;
 
@@ -220,40 +157,6 @@ namespace UnityEngine.XR.MagicLeap
             }
 
             /// <summary>
-            /// Callback for when an audio clip's read position is updated.
-            /// </summary>
-            private void OnAudioDataPosition(int newPosition)
-            {
-                ReadPosition = newPosition;
-            }
-
-            /// <summary>
-            /// Callback for when an audio clip's data is available to alter.
-            /// Only called when an audio clip is streaming.
-            /// </summary>
-            private void OnAudioDataRead(float[] audioClipData)
-            {
-                if (!Native.MagicLeapNativeBindings.MLHandleIsValid(captureHandle))
-                    return;
-
-                int numDequeued = 0;
-
-                // dequeue buffered audio data into the audio clip's data
-                lock (lockObject)
-                    numDequeued = circularBuffer.Dequeue(audioClipData);
-
-                SamplesPosition = (SamplesPosition + numDequeued) % (int)numSamples;
-
-                // mute the rest of the audio clip's data that wasn't copied over
-                if (numDequeued < audioClipData.Length)
-                {
-                    for (int i = numDequeued; i < audioClipData.Length; ++i)
-                        audioClipData[i] = 0;
-                }
-            }
-
-
-            /// <summary>
             /// Converts MLAudioInput's buffer into float samples that get enqueued into the circular buffer to be pushed to the audio clip later.
             /// </summary>
             private void CopyMLAudioInputBuffer()
@@ -262,6 +165,7 @@ namespace UnityEngine.XR.MagicLeap
                 var resultCode = NativeBindings.MLAudioGetInputBuffer(captureHandle, out MLAudioOutput.NativeBindings.MLAudioBuffer buffer);
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLAudioGetInputBuffer));
 
+                float[] samples;
                 // copy ml audio input buffer
                 unsafe
                 {
@@ -270,45 +174,15 @@ namespace UnityEngine.XR.MagicLeap
                     uint shortSamplesSize = buffer.Size / sizeof(short);
 
                     // init float array if needed
-                    if (mlAudioSamplesFloats.Length != shortSamplesSize)
-                        mlAudioSamplesFloats = new float[shortSamplesSize];
+                    samples = new float[shortSamplesSize];
 
                     // convert the short samples into normalized float samples
                     for (int i = 0; i < shortSamplesSize; i++)
-                        mlAudioSamplesFloats[i] = (float)shortSamples[i] / short.MaxValue;
-                }
-#endif
-
-                if (isStreamed)
-                {
-                    // enqueue into circular buffer with lock because OnAudioDataRead runs on another thread
-                    lock (lockObject)
-                        circularBuffer.Enqueue(mlAudioSamplesFloats);
-                }
-                else
-                {
-                    // enqueue audio samples until buffer has had numSamples amount of samples pushed into it
-                    for (int i = 0; i < mlAudioSamplesFloats.Length; i++)
-                    {
-                        circularBuffer.Enqueue(mlAudioSamplesFloats[i]);
-
-                        if (circularBuffer.Count >= numSamples)
-                        {
-                            var recordedSamples = new float[numSamples];
-                            circularBuffer.Dequeue(recordedSamples);
-#if UNITY_ANDROID
-                            Native.MLThreadDispatch.ScheduleMain(() => audioClip.SetData(recordedSamples, 0));
-                            circularBuffer.Clear();
-                            resultCode = NativeBindings.MLAudioReleaseInputBuffer(captureHandle);
-                            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLAudioReleaseInputBuffer));
-#endif
-                            Stop();
-                            return;
-                        }
-                    }
+                        samples[i] = (float)shortSamples[i] / short.MaxValue;
                 }
 
-#if UNITY_ANDROID
+                OnReceiveSamples(samples);
+
                 resultCode = NativeBindings.MLAudioReleaseInputBuffer(captureHandle);
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLAudioReleaseInputBuffer));
 #endif
@@ -330,6 +204,11 @@ namespace UnityEngine.XR.MagicLeap
                 mlAudioInputClip.CopyMLAudioInputBuffer();
             }
 #endif
+
+            /// <summary>
+            /// Gets called from a thread when new samples are recorded.
+            /// </summary>
+            protected abstract void OnReceiveSamples(float[] samples);
         }
     }
 }

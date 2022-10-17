@@ -24,6 +24,42 @@
                     "initialStateCheck": true
                 },
                 {
+                    "name": "Velocity",
+                    "type": "Value",
+                    "id": "95e5eff8-9fa6-452e-b4a7-c0c188e9d309",
+                    "expectedControlType": "Vector3",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "AngularVelocity",
+                    "type": "Value",
+                    "id": "381d77d8-cbb0-4ef1-8d16-06f5c61502dc",
+                    "expectedControlType": "Vector3",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Acceleration",
+                    "type": "Value",
+                    "id": "8c1cc915-583a-4678-a2df-bfa0bec177e2",
+                    "expectedControlType": "Vector3",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "AngularAcceleration",
+                    "type": "Value",
+                    "id": "846b9105-98b1-4d2f-8df9-f72b4b4f4acf",
+                    "expectedControlType": "Vector3",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
                     "name": "Menu",
                     "type": "Button",
                     "id": "9df2a2c8-6ddc-45b2-9d58-e51400007121",
@@ -343,6 +379,138 @@
                     "action": "TriggerHold",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "Vector 3 Fallback",
+                    "id": "461cdbcc-0a4f-49b6-862b-6348d7d28003",
+                    "path": "Vector3Fallback",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Velocity",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "first",
+                    "id": "45f5e3f3-95f8-4009-9abc-fd8c5e1623c1",
+                    "path": "<MagicLeapController>/deviceVelocity",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Velocity",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "second",
+                    "id": "006cfbf8-ce0f-494c-afee-bf7a832ac8e5",
+                    "path": "<XRController>{RightHand}/deviceVelocity",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Velocity",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "Vector 3 Fallback",
+                    "id": "ac45a114-3d9b-4c20-af7a-18cf907b694e",
+                    "path": "Vector3Fallback",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Acceleration",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "first",
+                    "id": "4854d33c-c430-4bd7-ba07-4d3f761f0712",
+                    "path": "<MagicLeapController>/deviceAcceleration",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Acceleration",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "second",
+                    "id": "84b848e0-d367-4fe6-9a71-5beda8307e3d",
+                    "path": "<XRController>{RightHand}/deviceAcceleration",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Acceleration",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "Vector 3 Fallback",
+                    "id": "be958df2-a832-4ea3-bfc8-a5802a9ca6af",
+                    "path": "Vector3Fallback",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "AngularVelocity",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "first",
+                    "id": "dbdb9f13-a2be-41e7-aecf-5e8db53b8edd",
+                    "path": "<MagicLeapController>/deviceAngularVelocity",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "AngularVelocity",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "second",
+                    "id": "9be70333-bde9-446e-9882-bbe8b3fdd45e",
+                    "path": "<XRController>{RightHand}/deviceAngularVelocity",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "AngularVelocity",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "Vector 3 Fallback",
+                    "id": "12b91cf2-914c-4e30-84e4-9ba58924ac3c",
+                    "path": "Vector3Fallback",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "AngularAcceleration",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "first",
+                    "id": "48f3c03d-5994-4119-b053-7ed237b8e713",
+                    "path": "<MagicLeapController>/deviceAngularAcceleration",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "AngularAcceleration",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "second",
+                    "id": "e04e34c0-77e2-466f-9051-b9dba998acd9",
+                    "path": "<XRController>{RightHand}/deviceAngularAcceleration",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "AngularAcceleration",
+                    "isComposite": false,
+                    "isPartOfComposite": true
                 }
             ]
         },

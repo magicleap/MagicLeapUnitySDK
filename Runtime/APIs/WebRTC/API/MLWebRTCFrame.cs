@@ -128,14 +128,16 @@ namespace UnityEngine.XR.MagicLeap
 
                     if (frame.Format == OutputFormat.NativeBuffer)
                     {
-                        frame.NativeFrame = NativeBufferInfo.Create(nativeFrame.FrameData.NativeFrameInfo);
+                        var frameData = Marshal.PtrToStructure<NativeBindings.MLWebRTCNativeFrameInfo>(nativeFrame.FrameData);
+                        frame.NativeFrame = NativeBufferInfo.Create(frameData);
                     }
                     else
                     {
-                        frame.ImagePlanes = (imagePlanes == null) ? new PlaneInfo[nativeFrame.FrameData.PlaneCount] : imagePlanes;
-                        for (ushort i = 0; i < nativeFrame.FrameData.PlaneCount; ++i)
+                        var frameData = Marshal.PtrToStructure<NativeBindings.MLWebRTCFramePlanes>(nativeFrame.FrameData);
+                        frame.ImagePlanes = (imagePlanes == null) ? new PlaneInfo[frameData.PlaneCount] : imagePlanes;
+                        for (ushort i = 0; i < frameData.PlaneCount; ++i)
                         {
-                            var src = nativeFrame.FrameData.GetPlaneAtIndex(i);
+                            var src = frameData.ImagePlanes[i];
                             frame.ImagePlanes[i] = PlaneInfo.Create(src.Width, src.Height, src.Stride, src.BytesPerPixel, src.Size, src.ImageDataPtr);
                         }
                     }

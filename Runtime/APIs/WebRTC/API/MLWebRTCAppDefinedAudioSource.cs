@@ -34,7 +34,6 @@ namespace UnityEngine.XR.MagicLeap
 #endif
             private int audioBufferCapacity;
             private short[] intSamples;
-            private int nextSampleIndex;
 
             protected AppDefinedAudioSource(string trackId)
                 : base(trackId)
@@ -58,7 +57,6 @@ namespace UnityEngine.XR.MagicLeap
                     appDefinedAudioSource.audioBufferNative = new MLAudioOutput.NativeBindings.MLAudioBuffer();
                     appDefinedAudioSource.audioBufferCapacity = 0;
                     appDefinedAudioSource.intSamples = null;
-                    appDefinedAudioSource.nextSampleIndex = 0;
                     appDefinedAudioSource.isEnabled = true;
                 }
 

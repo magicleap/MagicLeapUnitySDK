@@ -12,8 +12,8 @@
 namespace UnityEngine.XR.MagicLeap.Native
 {
     using System;
-    using System.Text;
     using System.Runtime.InteropServices;
+    using System.Text;
 
     /// <summary>
     /// Defines C# API interface to C-API layer.
@@ -130,6 +130,16 @@ namespace UnityEngine.XR.MagicLeap.Native
                 case MLResult.Code.APISymbolsNotFound:
                     {
                         return "MLResult_APISymbolsNotFound";
+                    }
+
+                case MLResult.Code.IncompatibleSKU:
+                    {
+                        return "MLResult_IncompatibleSKU";
+                    }
+
+                case MLResult.Code.PerceptionSystemNotStarted:
+                    {
+                        return "MLResult_PerceptionSystemNotStarted";
                     }
 
                 default:

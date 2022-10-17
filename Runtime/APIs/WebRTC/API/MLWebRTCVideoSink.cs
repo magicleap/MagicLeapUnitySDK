@@ -40,18 +40,18 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private ulong newFrameHandle;
 
-            private uint prevWidth = 0;
-            private uint prevHeight = 0;
+            private uint streamWidth = 0;
+            private uint streamHeight = 0;
 
             private AutoResetEvent updateVideoEvent = new AutoResetEvent(true);
 
+            public delegate void OnFrameResolutionChangedDelegate(uint newWidth, uint newHeight);
             public delegate void OnDestroySinkDelegate(VideoSink videoSink);
+            public delegate void OnStreamChangedDelegate(MediaStream stream);
 
             public event OnDestroySinkDelegate OnDestroySink = delegate { };
-
-            public delegate void OnFrameResolutionChangedDelegate(uint newWidth, uint newHeight);
-
             public event OnFrameResolutionChangedDelegate OnFrameResolutionChanged = delegate { };
+            public event OnStreamChangedDelegate OnStreamChanged;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="VideoSink" /> class.
@@ -130,9 +130,12 @@ namespace UnityEngine.XR.MagicLeap
                     newFrameHandle = frameHandle;
                     newFrame = Frame.Create(frameHandle, nativeFrame, imagePlanesBuffer.Get());
 
-                    if (prevWidth != newFrame.NativeFrame.Width || prevHeight != newFrame.NativeFrame.Height)
+                    if (streamWidth != newFrame.NativeFrame.Width || streamHeight != newFrame.NativeFrame.Height)
                     {
+                        streamWidth = newFrame.NativeFrame.Width;
+                        streamHeight = newFrame.NativeFrame.Height;
                         MLThreadDispatch.Call(newFrame.NativeFrame.Width, newFrame.NativeFrame.Height, OnFrameResolutionChanged);
+                        Debug.LogWarning($"new frame acquired has new size: {streamWidth} x {streamHeight}");
                     }
                     return true;
                 }
@@ -187,14 +190,17 @@ namespace UnityEngine.XR.MagicLeap
             /// </returns>
             public MLResult SetStream(MediaStream stream)
             {
-                if (Stream == stream)
+                if (stream == Stream)
                 {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-                    return MLResult.Create(MLResult.Code.InvalidParam);
-#endif
+                    return MLResult.Create(MLResult.Code.Ok);
                 }
 
                 Stream = stream;
+                if (OnStreamChanged != null)
+                {
+                    OnStreamChanged(Stream);
+                }
+
                 if (Stream == null)
                 {
                     return SetTrack(null);

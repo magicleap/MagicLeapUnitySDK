@@ -373,7 +373,7 @@ namespace UnityEngine.XR.MagicLeap
 			/// Get the current localization status of the device.
 			/// </summary>
 			[DllImport(MLPerceptionClientDll, CallingConvention = CallingConvention.Cdecl)]
-			public static extern MLResult.Code MLSpatialAnchorGetLocalizationInfo(ulong handle, out MLSpatialAnchorLocalizationInfo localizationInfo);
+			public static extern MLResult.Code MLSpatialAnchorGetLocalizationInfo(ulong handle, ref MLSpatialAnchorLocalizationInfo localizationInfo);
 		}
 	}
 }

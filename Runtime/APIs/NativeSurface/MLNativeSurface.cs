@@ -82,14 +82,21 @@ namespace UnityEngine.XR.MagicLeap
 
         ~MLNativeSurface()
         {
+            Destroy();
+        }
+
+        public MLResult Destroy()
+        {
+            MLResult.Code resultCode = MLResult.Code.NotImplemented;
 #if UNITY_MAGICLEAP || UNITY_ANDROID
             if (!isExternallyOwned && Native.MagicLeapNativeBindings.MLHandleIsValid(Handle))
             {
-                MLResult.Code resultCode = NativeBindings.MLNativeSurfaceRelease(Handle);
+                resultCode = NativeBindings.MLNativeSurfaceRelease(Handle);
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLNativeSurfaceRelease));
                 Handle = Native.MagicLeapNativeBindings.InvalidHandle;
             }
 #endif
+            return MLResult.Create(resultCode);
         }
 
         public MLResult AcquireNextAvailableFrame(out ulong nativeBuffer)

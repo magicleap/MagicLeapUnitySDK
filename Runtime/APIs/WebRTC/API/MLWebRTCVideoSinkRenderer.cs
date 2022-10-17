@@ -37,7 +37,7 @@ namespace UnityEngine.XR.MagicLeap
 
                 public Renderer(VideoSink videoSink)
                 {
-                    Initialize(ColorSpace.Linear);
+                    Initialize();
                     this.videoSink = videoSink;
                 }
 

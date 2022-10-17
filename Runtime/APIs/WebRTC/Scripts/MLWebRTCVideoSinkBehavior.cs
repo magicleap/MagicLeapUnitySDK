@@ -29,13 +29,15 @@ namespace MagicLeap.Core
         [SerializeField]
         private UnityEngine.UI.Text fpsText;
 
+        [SerializeField]
+        private bool autoResizeNativeRenderer = false;
+
         // Only relevant for YUV / RGB frames
         private MLWebRTC.VideoSink.Frame currentFrame;
 
         private bool hasDeterminedFrameFormat;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
+
         private Timer fpsTimer;
-#endif
 
         private Texture2D[] rawVideoTexturesYUV = new Texture2D[MLWebRTC.VideoSink.Frame.NativeImagePlanesLength[MLWebRTC.VideoSink.Frame.OutputFormat.YUV_420_888]];
         private Texture2D[] rawVideoTexturesRGB = new Texture2D[MLWebRTC.VideoSink.Frame.NativeImagePlanesLength[MLWebRTC.VideoSink.Frame.OutputFormat.RGBA_8888]];
@@ -50,13 +52,15 @@ namespace MagicLeap.Core
 
         public MLWebRTC.VideoSink VideoSink { get; set; }
 
-        private static bool loggedOnce = false;
-
         void Awake()
         {
 #if UNITY_MAGICLEAP || UNITY_ANDROID
             VideoSink = MLWebRTC.VideoSink.Create(out MLResult result);
-            VideoSink.OnFrameResolutionChanged += OnFrameResolutionChanged;
+            if (autoResizeNativeRenderer)
+            {
+                VideoSink.OnFrameResolutionChanged += OnFrameResolutionChanged;
+            }
+            VideoSink.OnStreamChanged += OnVideoSinkStreamChanged;
             fpsTimer = new Timer(1000);
             hasDeterminedFrameFormat = false;
 #endif
@@ -67,32 +71,44 @@ namespace MagicLeap.Core
             CreateNativeBufferRenderTarget(newWidth, newHeight);
         }
 
+        private void OnVideoSinkStreamChanged(MLWebRTC.MediaStream stream)
+        {
+            if (nativeBufferRenderer != null)
+            {
+                nativeBufferRenderer.Cleanup();
+            }
+
+            if (rawVideoTextureNative != null)
+            {
+                rawVideoTextureNative.Release();
+            }
+
+            nativeBufferRenderer = null;
+            rawVideoTextureNative = null;
+            hasDeterminedFrameFormat = false;
+
+            if (stream == null)
+            {
+                nativeRenderer.enabled = false;
+                yuvRenderer.enabled = false;
+                rgbRenderer.enabled = false;
+            }
+        }
+
         private void Update()
         {
-            // TODO : also impl for VideoSink.Renderer.
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-            float fps = 1.0f / fpsTimer.Elapsed();
-
-            if (fpsText != null)
+            if (VideoSink.Stream == null)
             {
-                fpsText.text = string.Format("{0:0.00}", fps);
-                if (fps >= 24f)
-                {
-                    fpsText.color = Color.green;
-                }
-                else if (fps >= 16f)
-                {
-                    fpsText.color = Color.yellow;
-                }
-                else
-                {
-                    fpsText.color = Color.red;
-                }
-
+                // nothing to do
+                return;
             }
-#endif
 
-            if (!hasDeterminedFrameFormat)
+            StartFrameTimer();
+
+            // Only check for and acquire frame from VideoSink here if we have not determined
+            // the format for the stream to be NativeSurface - in which case nativeBufferRenderer 
+            // will be initialized
+            if (nativeBufferRenderer == null)
             {
                 if (VideoSink.IsNewFrameAvailable())
                 {
@@ -102,50 +118,24 @@ namespace MagicLeap.Core
 
                         if (currentFrame.Format == MLWebRTC.VideoSink.Frame.OutputFormat.NativeBuffer)
                         {
-                            nativeBufferRenderer = new MLWebRTC.VideoSink.Renderer(VideoSink);
-                            // TODO : we're only doing this once, need to do this every time
-                            // a new frame is acquired to be sure that our render target is of the
-                            // right size.
-                            CreateNativeBufferRenderTarget(currentFrame.NativeFrame.Width, currentFrame.NativeFrame.Height);
-
-                            nativeRenderer.enabled = true;
-                            yuvRenderer.enabled = false;
-                            rgbRenderer.enabled = false;
-
-                            // We release the frame immediately so that from next frame onwards
-                            // the ycbcrrenderer can drive the acquisition and release.
-                            // TODO : change so that we dont waste the first frame here.
+                            // We release the frame immediately so that the
+                            // YcbcrRenderer can drive the acquisition and release.
                             VideoSink.ReleaseFrame();
+
+                            nativeBufferRenderer = new MLWebRTC.VideoSink.Renderer(VideoSink);
+
+                            CreateNativeBufferRenderTarget(currentFrame.NativeFrame.Width, currentFrame.NativeFrame.Height);
                         }
-                        else
-                        {
-                            hasDeterminedFrameFormat = false;
-                            nativeRenderer.enabled = false;
-                            RenderWebRTCFrame(currentFrame);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                if (nativeBufferRenderer != null)
-                {
-                    nativeBufferRenderer.Render();
-                }
-                else
-                {
-                    // TODO : do the frame acquisition & release cycle here and
-                    // call the render func of the appropriate format.
-                    if (!loggedOnce)
-                    {
-                        Debug.LogError("Frame of unsupported type.");
                     }
                 }
             }
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-            fpsTimer.Reset();
-#endif
+            if (hasDeterminedFrameFormat)
+            {
+                RenderWebRTCFrame(currentFrame);
+            }
+
+            ResetFrameTimer();
         }
 
         public void ToggleVisible(bool showRenderer)
@@ -164,31 +154,7 @@ namespace MagicLeap.Core
                 {
                     return;
                 }
-            }
 
-            // TODO : also impl for VideoSink.Renderer.
-            float fps = 1.0f / fpsTimer.Elapsed();
-            
-            if (fpsText != null)
-            {
-                fpsText.text = string.Format("{0:0.00}", fps);
-                if (fps >= 24f)
-                {
-                    fpsText.color = Color.green;
-                }
-                else if (fps >= 16f)
-                {
-                    fpsText.color = Color.yellow;
-                }
-                else
-                {
-                    fpsText.color = Color.red;
-                }
-
-            }
-
-            if (frame.Format != MLWebRTC.VideoSink.Frame.OutputFormat.NativeBuffer)
-            {
                 if (frame.ImagePlanes.Length >= 1)
                 {
                     float aspectRatio = frame.ImagePlanes[0].Width / (float)frame.ImagePlanes[0].Height;
@@ -212,25 +178,27 @@ namespace MagicLeap.Core
             switch (frame.Format)
             {
                 case MLWebRTC.VideoSink.Frame.OutputFormat.YUV_420_888:
-                    {
-                        nativeRenderer.enabled = false;
-                        rgbRenderer.enabled = false;
-                        yuvRenderer.enabled = true;
-                        RenderWebRTCFrameYUV(frame);
-                        break;
-                    }
-
+                    nativeRenderer.enabled = false;
+                    rgbRenderer.enabled = false;
+                    yuvRenderer.enabled = true;
+                    RenderWebRTCFrameYUV(frame);
+                    break;
                 case MLWebRTC.VideoSink.Frame.OutputFormat.RGBA_8888:
+                    nativeRenderer.enabled = false;
+                    yuvRenderer.enabled = false;
+                    rgbRenderer.enabled = true;
+                    RenderWebRTCFrameRGB(frame);
+                    break;
+                case MLWebRTC.VideoSink.Frame.OutputFormat.NativeBuffer:
+                    nativeRenderer.enabled = true;
+                    yuvRenderer.enabled = false;
+                    rgbRenderer.enabled = false;
+                    if (nativeBufferRenderer != null)
                     {
-                        nativeRenderer.enabled = false;
-                        yuvRenderer.enabled = false;
-                        rgbRenderer.enabled = true;
-                        RenderWebRTCFrameRGB(frame);
-                        break;
+                        nativeBufferRenderer.Render();
                     }
+                    break;
             }
-
-            fpsTimer.Reset();
 #endif
         }
 
@@ -246,7 +214,7 @@ namespace MagicLeap.Core
         {
             byte[] planeData = new byte[planeInfo.Stride * planeInfo.Height * planeInfo.BytesPerPixel];
             Marshal.Copy(planeInfo.DataPtr, planeData, 0, planeData.Length);
-            if(planeData == null)
+            if (planeData == null)
             {
                 return;
             }
@@ -265,7 +233,7 @@ namespace MagicLeap.Core
 
                 renderer.material.SetTexture(samplerName, channelTexture);
             }
-            
+
             int pixelStride = (int)(planeInfo.Stride / planeInfo.Width);
 
             if (pixelStride == 1)
@@ -316,9 +284,14 @@ namespace MagicLeap.Core
 
         private void CreateNativeBufferRenderTarget(uint frameWidth, uint frameHeight)
         {
+            if (frameWidth == 0 || frameHeight == 0)
+            {
+                return;
+            }
+
             if (rawVideoTextureNative == null || rawVideoTextureNative.width != frameWidth || rawVideoTextureNative.height != frameHeight)
             {
-                rawVideoTextureNative = new RenderTexture((int)frameWidth, (int)frameHeight, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
+                rawVideoTextureNative = new RenderTexture((int)frameWidth, (int)frameHeight, 0, RenderTextureFormat.ARGB32);
                 nativeRenderer.material.mainTexture = rawVideoTextureNative;
                 nativeBufferRenderer.SetRenderBuffer(rawVideoTextureNative);
 
@@ -342,6 +315,33 @@ namespace MagicLeap.Core
             {
                 nativeBufferRenderer.Cleanup();
             }
+        }
+
+        private void StartFrameTimer()
+        {
+            float fps = 1.0f / fpsTimer.Elapsed();
+
+            if (fpsText != null)
+            {
+                fpsText.text = string.Format("{0:0.00}", fps);
+                if (fps >= 24f)
+                {
+                    fpsText.color = Color.green;
+                }
+                else if (fps >= 16f)
+                {
+                    fpsText.color = Color.yellow;
+                }
+                else
+                {
+                    fpsText.color = Color.red;
+                }
+            }
+        }
+
+        private void ResetFrameTimer()
+        {
+            fpsTimer.Reset();
         }
     }
 

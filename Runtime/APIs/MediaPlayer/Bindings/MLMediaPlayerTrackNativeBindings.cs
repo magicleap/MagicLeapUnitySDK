@@ -39,11 +39,6 @@ namespace UnityEngine.XR.MagicLeap
                 internal class NativeBindings : MagicLeapNativeBindings
                 {
                     public const uint MAX_KEY_STRING_SIZE = 64;
-
-                    /// <summary>
-                    /// Internal DLL used to free strings.
-                    /// </summary>
-                    private const string CUtilsDLL = "ml_c_utils";
                     
                     public static string GetTrackLanguage(ulong mediaPlayerHandle, uint trackIndex)
                     {

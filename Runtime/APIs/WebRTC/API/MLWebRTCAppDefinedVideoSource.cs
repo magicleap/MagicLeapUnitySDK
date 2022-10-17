@@ -76,23 +76,28 @@ namespace UnityEngine.XR.MagicLeap
 
                 pushFrameEvent.Reset();
 
+                MLResult.Code resultCode = MLResult.Code.UnspecifiedFailure;
+
                 var frameNative = VideoSink.Frame.NativeBindings.MLWebRTCFrame.Create(frame);
 
                 try
                 {
-                    var resultCode = NativeBindings.MLWebRTCSourceAppDefinedVideoSourcePushFrame(Handle, in frameNative);
+                    resultCode = NativeBindings.MLWebRTCSourceAppDefinedVideoSourcePushFrame(Handle, in frameNative);
 
                     MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCSourceAppDefinedVideoSourcePushFrame));
-
-                    return MLResult.Create(resultCode);
                 }
                 catch(System.Exception e)
                 {
                     Debug.LogException(e);
                 }
+                finally
+                {
+                    frameNative.FreeUnmanagedMemory();
+                }
+
                 pushFrameEvent.Set();
 
-                return MLResult.Create(MLResult.Code.InvalidParam);
+                return MLResult.Create(resultCode);
             }
 
             public override MLResult DestroyLocal()

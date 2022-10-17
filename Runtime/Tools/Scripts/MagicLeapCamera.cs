@@ -40,8 +40,6 @@ namespace UnityEngine.XR.MagicLeap
         [SerializeField]
         private bool fixProblemsOnStartup = true;
 
-        private static float worldScale = 1.0f;
-
         /// <summary>
         /// The minimum recommended near clip value
         /// </summary>
@@ -99,21 +97,11 @@ namespace UnityEngine.XR.MagicLeap
         {
             camera = GetComponent<Camera>();
             FixupCamera(fixProblemsOnStartup);
-            CalculateWorldScale();
         }
 
         private void Reset()
         {
-            CalculateWorldScale();
             FixupCamera(fixProblemsOnStartup);
-        }
-
-        private void OnTransformParentChanged()
-        {
-            if (camera == Camera.main)
-            {
-                CalculateWorldScale();
-            }
         }
 
         private void LateUpdate()
@@ -164,15 +152,6 @@ namespace UnityEngine.XR.MagicLeap
                 {
                     camera.nearClipPlane = min;
                 }
-            }
-        }
-
-        private void CalculateWorldScale()
-        {
-            var cameraLossyScale = GetCameraScale();
-            if (camera && camera == Camera.main)
-            {
-                worldScale = (cameraLossyScale.x + cameraLossyScale.y + cameraLossyScale.z) / 3.0f;
             }
         }
 
@@ -281,11 +260,5 @@ namespace UnityEngine.XR.MagicLeap
 
             return scale;
         }
-
-        /// <summary>
-        /// Gets the last scale assigned from the main camera's parent.
-        /// This value is the average of any lossy scale value of the main camera's parent transform.
-        /// </summary>
-        public static float WorldScale => worldScale;
     }
 }

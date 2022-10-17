@@ -31,9 +31,9 @@ namespace UnityEngine.XR.MagicLeap
             public ulong PreviewBuffer;
 
 #endif
-            public Renderer(ColorSpace colorSpace)
+            public Renderer()
             {
-                Initialize(colorSpace);
+                Initialize();
             }
 
             bool INativeBufferProvider.AcquireNextAvailableBuffer(out ulong nativeBufferHandle)

@@ -33,14 +33,6 @@ namespace UnityEngine.XR.MagicLeap
                     the minimum expected size of the array of results passed to the
                     MLPlanesGetResult function. */
                 internal readonly uint max_results;
-                /*!
-                \brief If #MLPlanesQueryFlag_IgnoreHoles is set to false, holes with a perimeter
-                    (in world scale units - meters by default) smaller than this value will be ignored, 
-                    and can be part of the plane. This value cannot be lower than 0 (lower values will be capped to
-                    this minimum). A good default value is 0.5.
-                \deprecated Deprecated since 0.15.0.
-                */
-                internal readonly float min_hole_length;
                 /*! The minimum area (in squared world scale units - meters by default) of planes to be returned. 
                     This value cannot be lower than 0.04 (lower values will be capped to this minimum).
                     A good default value is 0.25. */
@@ -53,8 +45,7 @@ namespace UnityEngine.XR.MagicLeap
                     this.bounds_rotation = Native.MLConvert.FromUnity(planesQuery.BoundsRotation);
                     this.bounds_extents = Native.MLConvert.FromUnity(planesQuery.BoundsExtents);
                     this.max_results = planesQuery.MaxResults;
-                    this.min_hole_length = Native.MLConvert.FromUnity(planesQuery.MinHoleLength);
-                    this.min_plane_area = Native.MLConvert.FromUnity(planesQuery.MinPlaneArea);
+                    this.min_plane_area = planesQuery.MinPlaneArea;
                 }
             }
         }

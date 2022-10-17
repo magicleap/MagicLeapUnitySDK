@@ -55,6 +55,14 @@ namespace UnityEditor.XR.MagicLeap
             set { SetSDKPath(kBuildTarget, value); }
         }
 
+        public static string AppSimRuntimePath => MagicLeapEditorPreferences.ZeroIterationRuntimePath;
+        public static bool SearchingForZI => MagicLeapEditorPreferences.RunningLabdriver;
+        public static event Action<string> OnZeroIterationPathChanged
+        {
+            add { MagicLeapEditorPreferences.ZIRuntimePathChangeEvt += value; }
+            remove { MagicLeapEditorPreferences.ZIRuntimePathChangeEvt -= value; }
+        }
+
         /// <summary>
         /// MLSDK version
         /// </summary>

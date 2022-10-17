@@ -119,7 +119,7 @@ namespace UnityEngine.XR.MagicLeap
                         {
                             Width = nativeFrameInfo.Width,
                             Height = nativeFrameInfo.Height,
-                            Transform = nativeFrameInfo.GetTransformArray(),
+                            Transform = nativeFrameInfo.Transform,
                             SurfaceHandle = nativeFrameInfo.SurfaceHandle,
                             NativeBufferHandle = nativeFrameInfo.NativeBufferHandle
                         };

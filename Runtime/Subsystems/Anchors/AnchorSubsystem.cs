@@ -76,7 +76,6 @@ namespace UnityEngine.XR.MagicLeap
 
             public override void Start()
             {
-                return;
 #if UNITY_MAGICLEAP || UNITY_ANDROID
                 var resultCode = MLAnchors.NativeBindings.MLSpatialAnchorTrackerCreate(out m_TrackerHandle);
                 //Debug.Log("created");
@@ -90,7 +89,6 @@ namespace UnityEngine.XR.MagicLeap
 
             public override void Stop()
             {
-                return;
 #if UNITY_MAGICLEAP || UNITY_ANDROID
                 if (m_TrackerHandle != Native.MagicLeapNativeBindings.InvalidHandle)
                 {

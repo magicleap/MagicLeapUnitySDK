@@ -60,8 +60,8 @@ namespace UnityEngine.XR.MagicLeap
                     /// Buffer for native image plane arrays.
                     /// </summary>
                     private static readonly CircularBuffer<ImagePlaneInfoNative[]> nativeImagePlanesBuffer = CircularBuffer<ImagePlaneInfoNative[]>.Create(
-                        new ImagePlaneInfoNative[PlaneInfo.MaxImagePlanes], 
-                        new ImagePlaneInfoNative[PlaneInfo.MaxImagePlanes], 
+                        new ImagePlaneInfoNative[PlaneInfo.MaxImagePlanes],
+                        new ImagePlaneInfoNative[PlaneInfo.MaxImagePlanes],
                         new ImagePlaneInfoNative[PlaneInfo.MaxImagePlanes]);
 
                     /// <summary>
@@ -81,12 +81,11 @@ namespace UnityEngine.XR.MagicLeap
                         public uint Version;
 
                         /// <summary>
-                        /// Frame data, can be CPU based image planes or
-                        /// gpu based native surface. Check MLWebRTCFrame.Format
-                        /// to confirm how this memory should be read.
+                        /// Frame data to be interpreted as a <see cref="MLWebRTCNativeFrameInfo"/> if Format is <see cref="OutputFormat.NativeBuffer"/>,
+                        /// otherwise interpreted as a <see cref="MLWebRTCFramePlanes"/>.
                         /// </summary>
-                        public FrameUnion FrameData;
-                        
+                        public IntPtr FrameData;
+
                         /// <summary>
                         /// Timestamp of the frame.
                         /// </summary>
@@ -100,14 +99,15 @@ namespace UnityEngine.XR.MagicLeap
                         public static MLWebRTCFrame Create(OutputFormat format)
                         {
                             MLWebRTCFrame frameNative = new MLWebRTCFrame();
-                            frameNative.Version = 1;
+                            frameNative.Version = 2;
                             frameNative.Format = format;
-                            frameNative.FrameData.PlaneCount = NativeImagePlanesLength[format];
                             return frameNative;
                         }
 
                         /// <summary>
-                        /// Creates and returns an initialized version of this struct from a MLWebRTC.VideoSink.Frame object.
+                        /// Caller MUST call <c>FreeUnmanagedMemory</c> when finished with the returned <c>MLWebRTCFrame</c>! Unmanaged memory 
+                        /// will be allocated for the <c>FrameData</c> pointer.<br/><br/>
+                        /// Creates and returns an initialized version of this struct from a <see cref="MLWebRTC.VideoSink.Frame"/> object.
                         /// </summary>
                         /// <param name="frame">The frame object to use for initializing.</param>
                         /// <returns>An initialized version of this struct.</returns>
@@ -117,28 +117,45 @@ namespace UnityEngine.XR.MagicLeap
                             frameNative.TimeStamp = frame.TimeStampUs;
                             if (frame.Format == OutputFormat.NativeBuffer)
                             {
-                                frameNative.FrameData.NativeFrameInfo.Width = frame.NativeFrame.Width;
-                                frameNative.FrameData.NativeFrameInfo.Height = frame.NativeFrame.Height;
-                                frameNative.FrameData.NativeFrameInfo.SurfaceHandle = frame.NativeFrame.SurfaceHandle;
-                                frameNative.FrameData.NativeFrameInfo.NativeBufferHandle = frame.NativeFrame.NativeBufferHandle;
-                                unsafe 
+                                MLWebRTCNativeFrameInfo frameData = new MLWebRTCNativeFrameInfo()
                                 {
-                                    for(int i = 0; i < TransformMatrixLength; i++)
-                                    {
-                                        frameNative.FrameData.NativeFrameInfo.Transform[i] = frame.NativeFrame.Transform[i];
-                                    }
-                                }
+                                    Width = frame.NativeFrame.Width,
+                                    Height = frame.NativeFrame.Height,
+                                    SurfaceHandle = frame.NativeFrame.SurfaceHandle,
+                                    NativeBufferHandle = frame.NativeFrame.NativeBufferHandle,
+                                    Transform = new float[frame.NativeFrame.Transform.Length]
+                                };
+                                Array.Copy(frame.NativeFrame.Transform, frameData.Transform, frame.NativeFrame.Transform.Length);
+
+                                frameNative.FrameData = Marshal.AllocHGlobal(Marshal.SizeOf(frameData));
+                                Marshal.StructureToPtr(frameData, frameNative.FrameData, false);
                             }
                             else
                             {
-                                var planes = nativeImagePlanesBuffer.Get();
-                                for (int i = 0; i < frameNative.FrameData.PlaneCount; ++i)
+                                MLWebRTCFramePlanes frameData = new MLWebRTCFramePlanes()
                                 {
-                                    frameNative.FrameData.SetPlaneAtIndex(i, new ImagePlaneInfoNative(frame.ImagePlanes[i]));
+                                    PlaneCount = (byte)((frame.Format == OutputFormat.YUV_420_888) ? 3 : 1),
+                                    ImagePlanes = nativeImagePlanesBuffer.Get()
+                                };
+                                for (int i = 0; i < frame.ImagePlanes.Length; i++)
+                                {
+                                    frameData.ImagePlanes[i] = new ImagePlaneInfoNative(frame.ImagePlanes[i]);
                                 }
+
+                                frameNative.FrameData = Marshal.AllocHGlobal(Marshal.SizeOf(frameData));
+                                Marshal.StructureToPtr(frameData, frameNative.FrameData, false);
                             }
 
                             return frameNative;
+                        }
+
+                        public void FreeUnmanagedMemory()
+                        {
+                            if(FrameData != IntPtr.Zero)
+                            {
+                                Marshal.FreeHGlobal(FrameData);
+                                FrameData = IntPtr.Zero;
+                            }
                         }
 
                         public override string ToString()
@@ -149,77 +166,29 @@ namespace UnityEngine.XR.MagicLeap
                         }
                     }
 
-                    [StructLayout(LayoutKind.Explicit)]
-                    public struct FrameUnion
+                    [StructLayout(LayoutKind.Sequential)]
+                    public struct MLWebRTCFramePlanes
                     {
                         /// <summary>
-                        /// Number of valid planes in the ImageFrame. 
-                        /// 1 for RGB, 2 for YUV
+                        /// Number of output image planes. 3 for <see cref="OutputFormat.YUV_420_888"/>, 1 for <see cref="OutputFormat.RGBA_8888"/>
                         /// </summary>
-                        [FieldOffset(0)]
                         public byte PlaneCount;
 
                         /// <summary>
-                        /// The RGB plane or Y plane in a YUV buffer
+                        /// The image planes making up the output image. Array length is constant, actual number of planes is specified by PlaneCount.
                         /// </summary>
-                        [FieldOffset(8)]
-                        public ImagePlaneInfoNative ImagePlanes_0;
-
-                        /// <summary>
-                        /// The U plane in a YUV buffer
-                        /// </summary>
-                        [FieldOffset(40)]
-                        public ImagePlaneInfoNative ImagePlanes_1;
-
-                        /// <summary>
-                        /// The V plane in a YUV buffer
-                        /// </summary>
-                        [FieldOffset(72)]
-                        public ImagePlaneInfoNative ImagePlanes_2;
-
-                        /// <summary>
-                        /// Structure representing a native surface HW buffer. 
-                        /// </summary>
-                        [FieldOffset(0)]
-                        public MLWebRTCNativeFrameInfo NativeFrameInfo;
-
-                        public ImagePlaneInfoNative GetPlaneAtIndex(int index)
-                        {
-                            return index switch
-                            {
-                                0 => ImagePlanes_0,
-                                1 => ImagePlanes_1,
-                                2 => ImagePlanes_2,
-                                _ => new ImagePlaneInfoNative(),
-                            };
-                        }
-
-                        public void SetPlaneAtIndex(int index, ImagePlaneInfoNative plane)
-                        {
-                            if (index == 0) ImagePlanes_0 = plane;
-                            if (index == 1) ImagePlanes_1 = plane;
-                            if (index == 2) ImagePlanes_2 = plane;
-                        }
-
-                        public ImagePlaneInfoNative[] GetPlanesArray() => new ImagePlaneInfoNative[] { ImagePlanes_0, ImagePlanes_1, ImagePlanes_2 };
-
-                        public override string ToString()
-                        {
-                            var str = new System.Text.StringBuilder($"[FrameUnion: PlaneCount={PlaneCount}\n");
-                            str.AppendLine($"\t\t{string.Join("\n\t\t", GetPlanesArray())}");
-                            str.AppendLine($"\t\tNativeFrameInfo:{NativeFrameInfo}\n]");
-                            return str.ToString();
-                        }
+                        [MarshalAs(UnmanagedType.ByValArray, SizeConst = PlaneInfo.MaxImagePlanes)]
+                        public ImagePlaneInfoNative[] ImagePlanes;
                     }
 
-                    [StructLayout(LayoutKind.Sequential, Pack = 4)]
-                    public struct MLWebRTCNativeFrameInfo 
+                    [StructLayout(LayoutKind.Sequential)]
+                    public struct MLWebRTCNativeFrameInfo
                     {
                         /// <summary>
                         /// Width of the native frame
                         /// </summary>
                         public uint Width;
-                        
+
                         /// <summary>
                         /// Height of the native frame
                         /// </summary>
@@ -229,7 +198,7 @@ namespace UnityEngine.XR.MagicLeap
                         /// The 4x4 column-major tranformation matrix for the native frame
                         /// </summary>
                         [MarshalAs(UnmanagedType.ByValArray, SizeConst = TransformMatrixLength)]
-                        public unsafe fixed float Transform[TransformMatrixLength];
+                        public float[] Transform;
 
                         /// <summary>
                         /// Surface handle, from which native handle is acquired
@@ -246,22 +215,9 @@ namespace UnityEngine.XR.MagicLeap
                         /// </summary>
                         public ulong NativeBufferHandle;
 
-                        public unsafe float[] GetTransformArray()
-                        {
-                            float[] buffer = new float[TransformMatrixLength];
-                            fixed(float* ptr = Transform)
-                            {
-                                for(int i = 0; i < TransformMatrixLength; i++)
-                                {
-                                    buffer[i] = *(ptr + i);
-                                }
-                            }
-                            return buffer;
-                        }
-
                         public override string ToString()
                         {
-                            return $"[MLWebRTCNativeFrameInfo: Width={Width}, Height={Height},\n\t\t\tTransform=({string.Join(',', GetTransformArray())}),\n\t\t\tSurfaceHandle={SurfaceHandle}, NativeBufferHandle={NativeBufferHandle}]";
+                            return $"[MLWebRTCNativeFrameInfo: Width={Width}, Height={Height},\n\t\t\tTransform=({string.Join(',', Transform)}),\n\t\t\tSurfaceHandle={SurfaceHandle}, NativeBufferHandle={NativeBufferHandle}]";
                         }
                     }
 
@@ -304,7 +260,7 @@ namespace UnityEngine.XR.MagicLeap
                         /// <summary>
                         /// Sets data from an MLWebRTC.VideoSink.Frame.ImagePlane object.
                         /// </summary>
-                        public ImagePlaneInfoNative (PlaneInfo planeInfo)
+                        public ImagePlaneInfoNative(PlaneInfo planeInfo)
                         {
                             Width = planeInfo.Width;
                             Height = planeInfo.Height;

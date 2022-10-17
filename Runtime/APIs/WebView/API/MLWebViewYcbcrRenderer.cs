@@ -25,10 +25,10 @@ namespace UnityEngine.XR.MagicLeap
 
             private Queue<ulong> acquiredFrameWebViewHandles = new Queue<ulong>();
 
-            public Renderer(UnityEngine.ColorSpace colorSpace)
+            public Renderer()
             {
 #if UNITY_MAGICLEAP || UNITY_ANDROID
-                Initialize(colorSpace);
+                Initialize();
 #endif
             }
 

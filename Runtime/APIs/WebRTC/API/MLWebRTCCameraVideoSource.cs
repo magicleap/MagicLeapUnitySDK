@@ -99,11 +99,6 @@ namespace UnityEngine.XR.MagicLeap
 
                 MLCameraVideoSource mlCameraVideoSource = new MLCameraVideoSource(camera, captureConfig, trackId, localRenderer, nativeBuffers);
 
-                if (localRenderer != null)
-                {
-                    localRenderer.enabled = nativeBuffers;
-                }
-
                 result = InitializeLocal(mlCameraVideoSource);
                 if (!result.IsOk)
                 {
@@ -197,40 +192,27 @@ namespace UnityEngine.XR.MagicLeap
                     MLResult result = camera.PrepareCapture(captureConfig, cameraMetadata: out _);
                     if (result.IsOk)
                     {
-                        await Task.Run(async() =>
+                        await camera.PreCaptureAEAWBAsync();
+                        if (MLCamera.IsCaptureTypeSupported(camera, MLCamera.CaptureType.Preview))
                         {
-                            await camera.PreCaptureAEAWBAsync();
-                            bool needsPreview = false;
-                            foreach (var config in captureConfig.StreamConfigs)
+                            result = await camera.CapturePreviewStartAsync();
+                            if (result.IsOk)
                             {
-                                if (config.CaptureType == MLCamera.CaptureType.Preview)
-                                {
-                                    needsPreview = true;
-                                    break;
-                                }
+                                isCapturingPreview = true;
                             }
-                            if (needsPreview)
-                            {
-                                result = await camera.CapturePreviewStartAsync();
-                                if (result.IsOk)
-                                {
-                                    isCapturingPreview = true;
-                                }
-                            }
-                            if (isCapturingPreview && previewRenderer != null)
-                            {
-                                AdjustPreviewDimensions(camera.PreviewTexture.width, camera.PreviewTexture.height, previewRenderer);
-                                previewRenderer.enabled = true;
-                                previewRenderer.material.mainTexture = camera.PreviewTexture;
-                            }
-                            result = await camera.CaptureVideoStartAsync();
-                        });
+                        }
+                        if (isCapturingPreview && previewRenderer != null)
+                        {
+                            AdjustPreviewDimensions(camera.PreviewTexture.width, camera.PreviewTexture.height, previewRenderer);
+                            previewRenderer.enabled = true;
+                            previewRenderer.material.mainTexture = camera.PreviewTexture;
+                        }
+                        result = await camera.CaptureVideoStartAsync();
                     }
 
                     isCapturing = result.IsOk;
                     if(IsCapturing)
                     {
-                        Debug.Log("\nsetting up camera callbacks...");
                         SetupCameraCallbacks();
                     }
                 }
@@ -365,15 +347,10 @@ namespace UnityEngine.XR.MagicLeap
                     imagePlaneArray[i] = PlaneInfo.Create(cameraOutput.Planes[i].Width, cameraOutput.Planes[i].Height, cameraOutput.Planes[i].Stride, cameraOutput.Planes[i].BytesPerPixel, cameraOutput.Planes[i].Size, cameraOutput.Planes[i].DataPtr);
                 }
 
-                OutputFormat outFmt = OutputFormat.NativeBuffer;
-                switch (cameraOutput.Format)
-                {
-                    case MLCamera.OutputFormat.YUV_420_888:
-                        outFmt = OutputFormat.YUV_420_888;
-                        break;
-                    case MLCamera.OutputFormat.RGBA_8888:
-                        outFmt = OutputFormat.RGBA_8888;
-                        break;
+                OutputFormat outFmt = OutputFormat.YUV_420_888;
+                if (cameraOutput.Format == MLCamera.OutputFormat.RGBA_8888)
+                { 
+                    outFmt = OutputFormat.RGBA_8888;
                 }
 
                 MLTime.ConvertMLTimeToSystemTime(results.VCamTimestamp, out long nanoseconds);

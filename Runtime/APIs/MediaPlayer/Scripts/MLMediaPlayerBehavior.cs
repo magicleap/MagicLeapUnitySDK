@@ -223,6 +223,7 @@ namespace MagicLeap.Core
             if (_mediaPlayer.IsPrepared)
             {
                 _mediaPlayer.Stop();
+                _mediaPlayer.VideoRenderer?.Cleanup();
             }
         }
 
@@ -294,7 +295,7 @@ namespace MagicLeap.Core
             if (mediaPlayerTexture == null)
             {
                 // Create texture with given dimensions
-                mediaPlayerTexture = new RenderTexture(width, height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
+                mediaPlayerTexture = new RenderTexture(width, height, 0, RenderTextureFormat.ARGB32);
 
                 // Set texture on quad
                 screen.material.SetTexture("_MainTex", this.mediaPlayerTexture);

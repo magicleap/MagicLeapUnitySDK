@@ -11,8 +11,8 @@
 
 namespace UnityEngine.XR.MagicLeap
 {
-    using UnityEngine;
     using System.Runtime.InteropServices;
+    using UnityEngine;
 
     /// <summary>
     ///	APIs for the voice service system.
