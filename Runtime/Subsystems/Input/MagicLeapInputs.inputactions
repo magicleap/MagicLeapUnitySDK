@@ -294,6 +294,17 @@
                 },
                 {
                     "name": "first",
+                    "id": "a1240932-fca5-4cc1-a010-e7cedee497ba",
+                    "path": "<XRController>{RightHand}/devicePosition",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Position",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "second",
                     "id": "fe13a61d-ab1e-4f06-b282-d3c1d2d98d9a",
                     "path": "<MagicLeapController>/devicePosition",
                     "interactions": "",
@@ -304,20 +315,9 @@
                     "isPartOfComposite": true
                 },
                 {
-                    "name": "second",
+                    "name": "third",
                     "id": "f97f494e-8fa8-4be4-826c-aa3c45127f54",
                     "path": "<XRController>{RightHand}/pointerPosition",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Position",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "third",
-                    "id": "a1240932-fca5-4cc1-a010-e7cedee497ba",
-                    "path": "<XRController>{RightHand}/devicePosition",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -716,6 +716,15 @@
                     "initialStateCheck": true
                 },
                 {
+                    "name": "IndexCMC",
+                    "type": "Value",
+                    "id": "8e33eaec-1368-4e14-be77-8e4876139c01",
+                    "expectedControlType": "Bone",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
                     "name": "MiddleTIP",
                     "type": "Value",
                     "id": "37803418-3231-4ba2-9589-1217bc042b2f",
@@ -746,6 +755,15 @@
                     "name": "MiddleMCP",
                     "type": "Value",
                     "id": "bf51c96a-5b6a-4312-a7b7-92f8b94a9c8d",
+                    "expectedControlType": "Bone",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "MiddleCMC",
+                    "type": "Value",
+                    "id": "e2baac14-7009-49f9-8e26-53f244b7cbe7",
                     "expectedControlType": "Bone",
                     "processors": "",
                     "interactions": "",
@@ -788,6 +806,15 @@
                     "initialStateCheck": true
                 },
                 {
+                    "name": "RingCMC",
+                    "type": "Value",
+                    "id": "d785c3bc-8a24-4023-90a0-66378b128559",
+                    "expectedControlType": "Bone",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
                     "name": "PinkyTIP",
                     "type": "Value",
                     "id": "13e2b7f6-2333-4a05-983f-bae507f89f56",
@@ -818,6 +845,15 @@
                     "name": "PinkyMCP",
                     "type": "Value",
                     "id": "3bec5b0c-7605-41fb-9f68-d9b776d044ce",
+                    "expectedControlType": "Bone",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "PinkyCMC",
+                    "type": "Value",
+                    "id": "13e64870-fab5-4f1d-a003-f754c469cc85",
                     "expectedControlType": "Bone",
                     "processors": "",
                     "interactions": "",
@@ -1077,6 +1113,50 @@
                     "action": "PinkyPIP",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "da121852-fe32-4452-98e8-23b658c8ef92",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>/boneindexcmc",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "IndexCMC",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "293c10c0-0079-4867-9f90-0791eb03e6f9",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>/bonemiddlecmc",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MiddleCMC",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "00fdc54d-9a7c-4176-b0b7-3022c4634a21",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>/boneringcmc",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RingCMC",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "253ec94e-623a-46af-a847-a9e250d9bb78",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>/bonepinkycmc",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PinkyCMC",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },
@@ -1184,6 +1264,15 @@
                     "initialStateCheck": true
                 },
                 {
+                    "name": "IndexCMC",
+                    "type": "Value",
+                    "id": "f43de7e0-9801-463f-97eb-05d57aeec2fc",
+                    "expectedControlType": "Bone",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
                     "name": "MiddleTIP",
                     "type": "Value",
                     "id": "93d43d05-9268-48e0-8ff8-24e6fa0bbdc2",
@@ -1214,6 +1303,15 @@
                     "name": "MiddleMCP",
                     "type": "Value",
                     "id": "4aba5635-767f-46bd-b0eb-8d0e1ae89f0f",
+                    "expectedControlType": "Bone",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "MiddleCMC",
+                    "type": "Value",
+                    "id": "c0424f1b-08db-4f8e-bff7-8a20c097fe38",
                     "expectedControlType": "Bone",
                     "processors": "",
                     "interactions": "",
@@ -1256,6 +1354,15 @@
                     "initialStateCheck": true
                 },
                 {
+                    "name": "RingCMC",
+                    "type": "Value",
+                    "id": "0820d01c-18c0-40cc-a34b-1ca54bac814f",
+                    "expectedControlType": "Bone",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
                     "name": "PinkyTIP",
                     "type": "Value",
                     "id": "31cee515-95dd-4ba4-893d-8930b505c405",
@@ -1286,6 +1393,15 @@
                     "name": "PinkyMCP",
                     "type": "Value",
                     "id": "e604aeb4-8d74-43c0-a772-840f8f5dfa6d",
+                    "expectedControlType": "Bone",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "PinkyCMC",
+                    "type": "Value",
+                    "id": "3aca4390-aec8-4bcd-9207-d4474025ff08",
                     "expectedControlType": "Bone",
                     "processors": "",
                     "interactions": "",
@@ -1543,6 +1659,50 @@
                     "processors": "",
                     "groups": "",
                     "action": "PinkyPIP",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f2aa13d9-cf4c-410a-82c1-5681f71389d2",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>/boneindexcmc",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "IndexCMC",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e5ecc97a-f996-4b26-aab1-dbfa22dc2686",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>/bonemiddlecmc",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MiddleCMC",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "be0b1993-bdd8-49b5-9e50-a1c6636bf56a",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>/boneringcmc",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RingCMC",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b21c9759-e189-4b6f-8e03-69e87783b31d",
+                    "path": "<XRInputV1::MagicLeap::MagicLeapHandLeft>/bonepinkycmc",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PinkyCMC",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

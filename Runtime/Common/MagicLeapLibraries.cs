@@ -14,8 +14,9 @@ namespace UnityEngine.XR.MagicLeap.Native
     public partial class MagicLeapNativeBindings
     {
         // Use SDK loader lib for features that will work in ML App Sim
-#if UNITY_EDITOR
         public const string MLSdkLoaderDll = "ml_sdk_loader";
+
+#if UNITY_EDITOR
         /// <summary>
         /// Perception library name string.
         /// </summary>

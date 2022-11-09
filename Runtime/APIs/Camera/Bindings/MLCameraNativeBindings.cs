@@ -45,7 +45,7 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private const int MLCameraMaxStreams = 2;
 
-            #region V2
+#region V2
 
             [DllImport(MLCameraDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLCameraInit(ref MLCameraDeviceAvailabilityStatusCallbacks deviceAvailabilityStatusCallback, IntPtr userData);
@@ -226,7 +226,7 @@ namespace UnityEngine.XR.MagicLeap
             [DllImport(MLCameraDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLCameraGetCameraCharacteristics(ulong contextHandle, out ulong outMetadataHandle);
 
-            #endregion
+#endregion
         }
     }
 }

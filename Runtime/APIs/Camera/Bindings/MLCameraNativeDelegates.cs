@@ -71,7 +71,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="metadataHandle">A handle to the metadata.</param>
             /// <param name="extra">A structure containing extra result information.</param>
             /// <param name="data">Custom data returned when the callback is triggered, user metadata.</param>
-            public delegate void OnHandleAndResultExtrasRefDataCallback(ulong metadataHandle,
+            public delegate void OnHandleAndResultExtrasRefDataCallback(Metadata metadataHandle,
                 ref MLCameraResultExtras extra, IntPtr data);
 
             public delegate void OnCaptureFailedDelegate(ref MLCameraResultExtras extra, IntPtr data);

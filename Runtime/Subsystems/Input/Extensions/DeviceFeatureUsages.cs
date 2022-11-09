@@ -40,9 +40,9 @@ namespace UnityEngine.XR.MagicLeap
                 {
                     public static InputFeatureUsage<float> Confidence = new InputFeatureUsage<float>("MLHandConfidence");
 
-                    public static InputFeatureUsage<Vector3> WristCenter = new InputFeatureUsage<Vector3>("MLHandWristCenter");
-                    public static InputFeatureUsage<Vector3> WristUlnar = new InputFeatureUsage<Vector3>("MLHandWristUlnar");
-                    public static InputFeatureUsage<Vector3> WristRadial = new InputFeatureUsage<Vector3>("MLHandWristRadial");
+                    public static InputFeatureUsage<Bone> WristCenter = new InputFeatureUsage<Bone>("MLHandWristCenter");
+                    public static InputFeatureUsage<Bone> WristUlnar = new InputFeatureUsage<Bone>("MLHandWristUlnar");
+                    public static InputFeatureUsage<Bone> WristRadial = new InputFeatureUsage<Bone>("MLHandWristRadial");
 
                     public static InputFeatureUsage<byte[]> KeyPointsMask = new InputFeatureUsage<byte[]>("MLHandKeyPointsMask");
                 }

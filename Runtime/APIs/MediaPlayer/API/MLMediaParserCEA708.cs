@@ -54,9 +54,8 @@ namespace UnityEngine.XR.MagicLeap
             ~ParserCEA708()
             {
 #if UNITY_MAGICLEAP || UNITY_ANDROID
-                MLResult.Code resultCode = NativeBindings.MLMediaCea708ParserSetEmitEventCallback(this.Handle, null, IntPtr.Zero);
-                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaCea708ParserSetEmitEventCallback));
-                resultCode = NativeBindings.MLMediaCea708ParserDestroy(this.Handle);
+                // MLMediaCea708ParserSetEmitEventCallback does not need to be called during tear down.
+                MLResult.Code resultCode = NativeBindings.MLMediaCea708ParserDestroy(this.Handle);
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaCea708ParserDestroy));
                 this.gcHandle.Free();
 #endif

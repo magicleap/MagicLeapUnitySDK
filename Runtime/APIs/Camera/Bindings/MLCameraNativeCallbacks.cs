@@ -132,7 +132,7 @@ namespace UnityEngine.XR.MagicLeap
                     camera.previousCaptureTimestamp = DateTime.Now.Millisecond;
                     MLCamera.IntrinsicCalibrationParameters? lambdaIntrinsics = CreateIntrinsicParameters(extra.Intrinsics);
                     ResultExtras lambdaExtra = new ResultExtras(extra.FrameNumber, extra.VcamTimestamp, lambdaIntrinsics);
-                    MLThreadDispatch.Call(metadataHandle, lambdaExtra, camera.OnCaptureCompleted);
+                    MLThreadDispatch.Call(new Metadata(metadataHandle), lambdaExtra, camera.OnCaptureCompleted);
                 }
             }
 
@@ -152,7 +152,7 @@ namespace UnityEngine.XR.MagicLeap
                     // once this callback exits.
                     // TODO : revisit to see if we wanna use the circular buffer here. How frequently would image captures be taken
                     // to warrant the use of a circular buffer?
-                    MLThreadDispatch.Call<CameraOutput, ResultExtras>(output.CreateFrameInfo(copyToManagedMemory: true), lambdaExtra, camera.OnRawImageAvailable);
+                    MLThreadDispatch.Call<CameraOutput, ResultExtras, Metadata>(output.CreateFrameInfo(copyToManagedMemory: true), lambdaExtra, new Metadata(metadataHandle), camera.OnRawImageAvailable);
                 }
             }
 
@@ -178,11 +178,11 @@ namespace UnityEngine.XR.MagicLeap
                     }
                 }
                 CameraOutput frameInfo = output.CreateFrameInfo(shouldCopyToManaged, shouldCopyToManaged ? camera.byteArrays : null);
-                camera.OnRawVideoFrameAvailable_NativeCallbackThread?.Invoke(frameInfo, lambdaExtra);
+                camera.OnRawVideoFrameAvailable_NativeCallbackThread?.Invoke(frameInfo, lambdaExtra, new Metadata(metadataHandle));
 
                 if (shouldCopyToManaged)
                 {
-                    MLThreadDispatch.Call(frameInfo, lambdaExtra, camera.OnRawVideoFrameAvailable);
+                    MLThreadDispatch.Call(frameInfo, lambdaExtra, new Metadata(metadataHandle), camera.OnRawVideoFrameAvailable);
                 }
             }
 
@@ -207,7 +207,7 @@ namespace UnityEngine.XR.MagicLeap
 
                 MLThreadDispatch.Call(camera.GLPluginEvent);
 
-                MLThreadDispatch.Call(metadataHandle, lambdaExtra, camera.OnPreviewBufferAvailable);
+                MLThreadDispatch.Call(new Metadata(metadataHandle), lambdaExtra, camera.OnPreviewBufferAvailable);
             }
         }
     }

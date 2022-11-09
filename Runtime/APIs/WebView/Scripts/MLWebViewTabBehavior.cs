@@ -25,6 +25,8 @@ namespace MagicLeap.Core
         private Toggle toggle;
         private Text text;
 
+        private bool loadOnServiceConnected = false;
+
         public string tabUrl
         {
             get; private set;
@@ -137,14 +139,23 @@ namespace MagicLeap.Core
 #if UNITY_MAGICLEAP || UNITY_ANDROID
             if (WebView != null)
             {
-                if (!WebView.GoTo(url).IsOk)
+                if (webViewScreen.IsConnected)
                 {
-                    Debug.LogError("Failed to navigate to url " + url);
+                    if (!WebView.GoTo(url).IsOk)
+                    {
+                        Debug.LogError("Failed to navigate to url " + url);
+                    }
+                    else
+                    {
+                        tabUrl = url;
+                    }
                 }
                 else
                 {
                     tabUrl = url;
+                    loadOnServiceConnected = true;
                 }
+
             }
 #endif
         }
@@ -167,6 +178,18 @@ namespace MagicLeap.Core
             if (webViewScreen != null)
             {
                 webViewScreen.ServiceConnected();
+            }
+
+            if (loadOnServiceConnected)
+            {
+                loadOnServiceConnected = false;
+                if (!String.IsNullOrEmpty(tabUrl))
+                {
+                    if (!WebView.GoTo(tabUrl).IsOk)
+                    {
+                        Debug.LogError("Failed to navigate to url " + tabUrl);
+                    }
+                }
             }
 #endif
         }

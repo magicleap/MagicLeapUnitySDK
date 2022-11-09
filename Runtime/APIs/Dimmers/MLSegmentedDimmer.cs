@@ -1,7 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Reflection;
-using UnityEngine;
 using UnityEngine.Rendering;
 #if URP_14_0_0_OR_NEWER
 using UnityEngine.Rendering.Universal;
@@ -10,230 +6,98 @@ using SegmentedDimmerFeature = URP.SegmentedDimmer.SegmentedDimmer;
 
 namespace UnityEngine.XR.MagicLeap
 {
-    public class MLSegmentedDimmer
+    public partial class MLSegmentedDimmer
     {
 #if URP_14_0_0_OR_NEWER
         /// <summary>
         /// The actual URP feature that represents the Segmented Dimmer to Unity
         /// </summary>
-        private static SegmentedDimmerFeature dimmerInstance;
-        private static SegmentedDimmerFeature DimmerInstance
+        private static SegmentedDimmerFeature urpFeature;
+        private static SegmentedDimmerFeature Feature
         {
             get
             {
-                if(dimmerInstance == null)
+                if(urpFeature == null)
                 {
                     var urp = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
                     if(urp != null)
                     {
-                        dimmerInstance = urp.GetRendererFeature<SegmentedDimmerFeature>() as SegmentedDimmerFeature;
+                        urpFeature = urp.GetRendererFeature<SegmentedDimmerFeature>() as SegmentedDimmerFeature;
                     }
                 }
-                return dimmerInstance;
+                return urpFeature;
             }
         }
 #endif
+
+        private static int defaultLayer = -1;
+
+        /// <summary>
+        /// Turn on the ability to display Segmented Dimmer in your scenes by requesting support from the ML Graphics API
+        /// </summary>
+        public static void Activate()
+        {
+            MLGraphicsHooks.RequestAlphaBlendFrameRendering(true);
+        }
+
+        /// <summary>
+        /// Inform the ML Graphics API to turn off the ability to display Segmented Dimmer
+        /// </summary>
+        public static void Deactivate()
+        {
+            MLGraphicsHooks.RequestAlphaBlendFrameRendering(false);
+        }
 
         /// <summary>
         /// Does the Universal Render Pipeline contain a Segmented Dimmer feature in its renderers
         /// </summary>
 #if URP_14_0_0_OR_NEWER
-        public static bool Exists => DimmerInstance != null;
+        public static bool Exists => Feature != null;
 #else
         public static bool Exists => false;
 #endif
 
         /// <summary>
-        /// Is the Segmented Dimmer feature enabled in the render pipeline
+        /// Enables or disables all Mesh Renderers in the current scene which are on a SegmentedDimmer layer. <br/>
+        /// WARNING: This is expensive and it is recommended not to use it often! 
         /// </summary>
-        public static bool IsEnabled
+        /// <param name="enabled"></param>
+        public static void SetEnabled(bool enabled)
         {
-            get
+            var renderers = GameObject.FindObjectsOfType<MeshRenderer>();
+            foreach(var r in renderers)
             {
-#if URP_14_0_0_OR_NEWER
-                if (DimmerInstance != null)
+                if((Feature.settings.layerMask & (1 << r.gameObject.layer)) != 0)
                 {
-                    return DimmerInstance.settings.isEnabled;
+                    r.enabled = enabled;
                 }
-#endif
-                return false;
             }
-            set
-            {
-#if URP_14_0_0_OR_NEWER
-                if (DimmerInstance != null)
-                {
-                    DimmerInstance.settings.isEnabled = value;
-                }
-#endif
-            }
-        }
+        }        
 
         /// <summary>
-        /// LayerMask for filtering the rendering of the dimmer by URP. 
+        /// Returns the first available Unity Layer specified in the LayerMask for the SegmentedDimmer Feature. This will be the default layer SegmentedDimmer mesh objects
+        /// will be assigned to when first configured.
         /// </summary>
-        public static LayerMask LayerMask
+        /// <returns></returns>
+        public static int GetDefaultLayer()
         {
-            get
-            {
 #if URP_14_0_0_OR_NEWER
-                if (DimmerInstance != null)
-                {
-                    return DimmerInstance.settings.layerMask;
-                }
-#endif
-                return -1;
-            }
-            set
+            if (defaultLayer >= 0)
             {
-#if URP_14_0_0_OR_NEWER
-                if (DimmerInstance != null)
-                {
-                    DimmerInstance.settings.layerMask = value;
-                }
-#endif
+                return defaultLayer;
             }
+            for (int i = 0; i < 32; i++)
+            {
+                if (Feature.settings.layerMask == (Feature.settings.layerMask | (1 << i)))
+                {
+                    defaultLayer = i;
+                    break;
+                }
+            }
+#endif
+            return defaultLayer;
         }
 
-        /// <summary>
-        /// Clear value for the Segmented Dimmer texture. Can be between 0 and 1.
-        /// </summary>
-        public static float ClearValue
-        {
-            get
-            {
-#if URP_14_0_0_OR_NEWER
-                if (DimmerInstance != null)
-                {
-                    return DimmerInstance.settings.clearValue;
-                }
-#endif
-                return -1;
-            }
-            set
-            {
-#if URP_14_0_0_OR_NEWER
-                if (DimmerInstance != null)
-                {
-                    if (value < 0)
-                    {
-                        DimmerInstance.settings.clearValue = 0;
-                    }
-                    else if (value > 1)
-                    {
-                        DimmerInstance.settings.clearValue = 1;
-                    }
-                    else
-                    {
-                        DimmerInstance.settings.clearValue = value;
-                    }
-                }
-#endif
-            }
-        }
-
-        /// <summary>
-        /// Should the render pipeline override any materials on dimmer meshes and apply a fully opaque shader instead
-        /// </summary>
-        public static bool IgnoreMaterials
-        {
-            get
-            {
-#if URP_14_0_0_OR_NEWER
-                if (DimmerInstance != null)
-                {
-                    return DimmerInstance.settings.overrideMaterial;
-                }
-#endif
-                return false;
-            }
-            set
-            {
-#if URP_14_0_0_OR_NEWER
-                if (DimmerInstance != null)
-                {
-                    DimmerInstance.settings.overrideMaterial = value;
-                }
-#endif
-            }
-        }
-
-        /// <summary>
-        /// Using the full rsolution will try to render the mask directly in the alpha channel of the color target, if possible.
-        /// </summary>
-        public static bool UseFullResolution
-        {
-            get
-            {
-#if URP_14_0_0_OR_NEWER
-                if (DimmerInstance != null)
-                {
-                    return DimmerInstance.settings.useFullResolution;
-                }
-#endif
-                return false;
-            }
-            set
-            {
-#if URP_14_0_0_OR_NEWER
-                if (DimmerInstance != null)
-                {
-                    DimmerInstance.settings.useFullResolution = value;
-                }
-#endif
-            }
-        }
-
-        /// <summary>
-        /// Only applicable if <see cref="UseFullResolution"/> is false. Width of the render target to use for the dimmer.
-        /// </summary>
-        public static int RenderTargetWidth
-        {
-            get
-            {
-#if URP_14_0_0_OR_NEWER
-                if (DimmerInstance != null)
-                {
-                    return DimmerInstance.settings.renderTextureSize.x;
-                }
-#endif
-                return -1;
-            }
-            set
-            {
-#if URP_14_0_0_OR_NEWER
-                if (DimmerInstance != null)
-                {
-                    DimmerInstance.settings.renderTextureSize.x = value;
-                }
-#endif
-            }
-        }
-
-        /// <summary>
-        /// Only applicable if <see cref="UseFullResolution"/> is false. Height of the render target to use for the dimmer.
-        /// </summary>
-        public static int RenderTargetHeight
-        {
-            get
-            {
-#if URP_14_0_0_OR_NEWER
-                if (DimmerInstance != null)
-                {
-                    return DimmerInstance.settings.renderTextureSize.y;
-                }
-#endif
-                return -1;
-            }
-            set
-            {
-#if URP_14_0_0_OR_NEWER
-                if (DimmerInstance != null)
-                {
-                    DimmerInstance.settings.renderTextureSize.y = value;
-                }
-#endif
-            }
-        }
+        
     }
 }

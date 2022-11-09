@@ -87,6 +87,13 @@ namespace UnityEngine.XR.MagicLeap
         public delegate void OnServiceDisconnectedDelegate(MLWebView webView);
 
         /// <summary>
+        /// The delegate for the webview service failed event.
+        /// </summary>
+        /// <param name="webView">The MLWebView associated with this callback.</param>
+        /// <param name="result">The MLResult code associated with the failure.</param>
+        public delegate void OnServiceFailedDelegate(MLWebView webView, MLResult result);
+
+        /// <summary>
         /// Event raised just before resources are loaded.
         /// </summary>
         public event OnBeforeResourceLoadDelegate OnBeforeResourceLoaded = delegate { };
@@ -122,14 +129,19 @@ namespace UnityEngine.XR.MagicLeap
         public event OnDestroyDelegate OnWebViewDestroyed = delegate { };
 
         /// <summary>
-        /// Event raised when WebView is destroyed.
+        /// Event raised when WebView service is connected.
         /// </summary>
         public event OnServiceConnectedDelegate OnServiceConnected = delegate { };
 
         /// <summary>
-        /// Event raised when WebView is destroyed.
+        /// Event raised when WebView service is disconnected.
         /// </summary>
         public event OnServiceDisconnectedDelegate OnServiceDisconnected = delegate { };
+
+        /// <summary>
+        /// Event raised when WebView service fails to connect.
+        /// </summary>
+        public event OnServiceFailedDelegate OnServiceFailed = delegate { };
     }
 }
 

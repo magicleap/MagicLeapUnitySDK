@@ -121,6 +121,8 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public void Delete()
         {
+            OnCharacterDeleted?.Invoke();
+
             if (_inputField.text.Length <= 0)
             {
                 return;
@@ -128,8 +130,6 @@ namespace UnityEngine.XR.MagicLeap
 
             _inputField.text = _inputField.text.Remove(_inputField.text.Length - 1);
             OnInputValueChange?.Invoke(_inputField.text);
-            OnCharacterDeleted?.Invoke();
-
         }
 
         /// <summary>

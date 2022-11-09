@@ -23,7 +23,7 @@ namespace UnityEngine.XR.MagicLeap
                 /// <summary>
                 /// The max number of key points to track.
                 /// </summary>
-                public const int MaxKeyPoints = 24;
+                public const int MaxKeyPoints = 28;
 
                 /// <summary>
                 /// Represents if a hand is the right or left hand.
@@ -66,7 +66,11 @@ namespace UnityEngine.XR.MagicLeap
                     Wrist_Center,
                     Wrist_Ulnar,
                     Wrist_Radial,
-                    Hand_Center
+                    Hand_Center,
+                    Index_CMC,
+                    Middle_CMC,
+                    Ring_CMC,
+                    Pinky_CMC
                 }
 
                 public enum KeyPointLocation
@@ -77,7 +81,8 @@ namespace UnityEngine.XR.MagicLeap
                     Ring = 12,
                     Pinky = 16,
                     Wrist = 20,
-                    Center = 23
+                    Center = 23,
+                    FifthBone = 24
                 }
 
                 public static void StartTracking()
@@ -146,6 +151,12 @@ namespace UnityEngine.XR.MagicLeap
                     {
                         int keypointEnum = (int)location + keyPointIndex;
 
+                        if ((int)location > 0 && keyPointIndex == 4)
+                        {
+                            keypointEnum = FifthBoneKeypointValue(location);
+                            location = KeyPointLocation.FifthBone;
+                        }
+
                         if (!CheckKeypointEnumValid(location, keypointEnum))
                         {
                             return "Invalid KeyPoint";
@@ -159,6 +170,12 @@ namespace UnityEngine.XR.MagicLeap
                         if (TryGetKeyPointsMask(handDevice, out bool[] handKeyPoints))
                         {
                             int keypointEnum = (int)location + keyPointIndex;
+
+                            if((int)location > 0 && keyPointIndex == 4)
+                            {
+                                keypointEnum = FifthBoneKeypointValue(location);
+                                location = KeyPointLocation.FifthBone;
+                            }
 
                             if (!CheckKeypointEnumValid(location, keypointEnum))
                             {
@@ -196,6 +213,24 @@ namespace UnityEngine.XR.MagicLeap
                         }
 
                         return true;
+                    }
+
+                    // Should not be used for Thumb.
+                    private static int FifthBoneKeypointValue(KeyPointLocation location)
+                    {
+                        switch(location)
+                        {
+                            case KeyPointLocation.Index:
+                                return (int)KeyPointLocation.FifthBone;
+                            case KeyPointLocation.Middle:
+                                return ((int)KeyPointLocation.FifthBone + 1);
+                            case KeyPointLocation.Ring:
+                                return ((int)KeyPointLocation.FifthBone + 2);
+                            case KeyPointLocation.Pinky:
+                                return ((int)KeyPointLocation.FifthBone + 3);
+                            default:
+                                return (int)location;
+                        }
                     }
 
 #if UNITY_MAGICLEAP || UNITY_ANDROID

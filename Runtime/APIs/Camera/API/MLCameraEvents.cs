@@ -191,7 +191,7 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         /// <param name="metadataHandle">Handle to metadata of captured frame.</param>
         /// <param name="extra">Carries capture result information of current captured frame.</param>
-        public delegate void OnCaptureCompletedDelegate(ulong metadataHandle, ResultExtras extra);
+        public delegate void OnCaptureCompletedDelegate(Metadata metadataHandle, ResultExtras extra);
 
         /// <summary>
         /// Delegate to notify the app when the result of a preview capture is available.
@@ -205,14 +205,14 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         /// <param name="frameInfo">Frame data</param>
         /// <param name="extra">Carries capture result information of current captured frame.</param>
-        public delegate void OnCapturedFrameAvailableDelegate(CameraOutput frameInfo, ResultExtras resultExtras);
+        public delegate void OnCapturedFrameAvailableDelegate(CameraOutput frameInfo, ResultExtras resultExtras, Metadata metadataHandle);
 
         /// <summary>
         /// Delegate to notify the app when the frame data of a preview is available.
         /// </summary>
         /// <param name="metadataHandle">Handle to metadata of captured frame.</param>
         /// <param name="extra">Carries capture result information of current captured frame.</param>
-        public delegate void OnPreviewBufferAvailableDelegate(ulong metadataHandle, ResultExtras extra);
+        public delegate void OnPreviewBufferAvailableDelegate(Metadata metadataHandle, ResultExtras extra);
 
         #endregion
     }

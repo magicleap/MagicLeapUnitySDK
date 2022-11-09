@@ -174,7 +174,7 @@ namespace UnityEngine.XR.MagicLeap
 
                 [Preserve]
                 [InputControlLayout(commonUsages = new[] { "LeftHand", "RightHand" }, displayName = "MagicLeapHand")]
-                public class MagicLeapHandDevice : XRController
+                public class MagicLeapHandDevice : UnityEngine.InputSystem.InputDevice
                 {
                     [Preserve]
                     [InputControl]
@@ -184,13 +184,13 @@ namespace UnityEngine.XR.MagicLeap
                     public Vector3Control normalizeCenter { get; private set; }
                     [Preserve]
                     [InputControl]
-                    public Vector3Control wristCenter { get; private set; }
+                    public BoneControl wristCenter { get; private set; }
                     [Preserve]
                     [InputControl]
-                    public Vector3Control wristUlnar { get; private set; }
+                    public BoneControl wristUlnar { get; private set; }
                     [Preserve]
                     [InputControl]
-                    public Vector3Control wristRadial { get; private set; }
+                    public BoneControl wristRadial { get; private set; }
                     [Preserve]
                     [InputControl]
                     public IntegerControl keyPose { get; private set; }
@@ -203,9 +203,9 @@ namespace UnityEngine.XR.MagicLeap
 
                         handConfidence = GetChildControl<AxisControl>("handConfidence");
                         normalizeCenter = GetChildControl<Vector3Control>("normalizeCenter");
-                        wristCenter = GetChildControl<Vector3Control>("wristCenter");
-                        wristUlnar = GetChildControl<Vector3Control>("wristUlnar");
-                        wristRadial = GetChildControl<Vector3Control>("wristRadial");
+                        wristCenter = GetChildControl<BoneControl>("wristCenter");
+                        wristUlnar = GetChildControl<BoneControl>("wristUlnar");
+                        wristRadial = GetChildControl<BoneControl>("wristRadial");
                         keyPose = GetChildControl<IntegerControl>("keyPose");
                     }
                 }

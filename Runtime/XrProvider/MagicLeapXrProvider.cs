@@ -143,6 +143,19 @@ namespace UnityEngine.XR.MagicLeap
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void SetupLoaderLibPathInXRPackage()
+        {
+#if UNITY_ANDROID && !UNITY_EDITOR
+            // AddLibrarySearchPaths() is only invoked by AppSimShimLibSupport.cs and contains more complex logic to setting the various
+            // lib search paths which isnt really required when running on device. On device, we need to simply set a dummy path in the
+            // xr package (because on android we don't need to dlopen() on full lib paths, all valid paths are already in LD_LIBRARY_PATH
+            // env var) so that it loads the sdk loader lib enabling us to intercept ml_graphics funcs.
+            Debug.Log("Setting loading lib path in xr package");
+            MagicLeapXrProviderNativeBindings.UnityMagicLeap_SetLibraryPath("some/dummy/path");
+#endif
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void AddSubsystemOverrides()
         {
             // IMPORTANT!! Override any and all perception related subsystems that are instantiated by
