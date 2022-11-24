@@ -52,6 +52,13 @@ namespace UnityEngine.XR.MagicLeap
 #endif
                 }
 
+                public static void StopTracking()
+                {
+#if UNITY_ANDROID
+                    MagicLeapXrProviderNativeBindings.StopEyeTracking();
+#endif
+                }
+
                 public static bool TryGetState(InputDevice eyesDevice, out State state) => NativeBindings.TryGetState(eyesDevice, out state);
 
                 public readonly struct State

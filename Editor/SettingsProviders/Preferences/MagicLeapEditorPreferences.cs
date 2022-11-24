@@ -193,7 +193,16 @@ namespace UnityEditor.XR.MagicLeap
 
         private static void ZIPathBrowseBtn_clicked()
         {
-            string startingPath = Path.IsPathFullyQualified(ziInputField.value) ? Path.GetFullPath(ziInputField.value) : Directory.GetCurrentDirectory();
+            string startingPath;
+            if (string.IsNullOrEmpty(ziInputField.value))
+            {
+                startingPath = Directory.GetCurrentDirectory();
+            }
+            else
+            {
+                startingPath = Path.IsPathFullyQualified(ziInputField.value) ? Path.GetFullPath(ziInputField.value) : Directory.GetCurrentDirectory();
+            }
+
             if(!Directory.Exists(startingPath))
             {
                 startingPath = "";
@@ -207,7 +216,7 @@ namespace UnityEditor.XR.MagicLeap
 
         private static void ZIPathChanged(ChangeEvent<string> textFieldChangedEvt)
         {
-            if(ziPathOverrideToggle.value)
+            if (ziPathOverrideToggle.value)
             {
                 usingLabdriverFoundPath = false;
                 ziRuntimePath = textFieldChangedEvt.newValue;
@@ -217,6 +226,8 @@ namespace UnityEditor.XR.MagicLeap
                     EditorPrefs.SetString(UserCustomZIBackendPath, textFieldChangedEvt.newValue);
                 }
             }
+
+            MagicLeapEditorPreferencesProvider.OnZIPathChanged?.Invoke(textFieldChangedEvt.newValue);
         }
 
         private static void SdkPathChanged(ChangeEvent<string> textFieldChangedEvt)
@@ -226,6 +237,8 @@ namespace UnityEditor.XR.MagicLeap
             {
                 SaveNewSDKPath(textFieldChangedEvt.newValue);
             }
+
+            MagicLeapEditorPreferencesProvider.OnSDKPathChanged?.Invoke(textFieldChangedEvt.newValue);
         }
 
         private static void SdkPathBrowseBtn_clicked()

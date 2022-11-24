@@ -72,7 +72,8 @@ namespace UnityEngine.XR.MagicLeap
         {
             try
             {
-                var resultCode = NativeBindings.MLMarkerTrackerGetResult(Instance.Handle, out NativeBindings.MLMarkerTrackerResultArray scannerResults);
+                var scannerResults = new NativeBindings.MLMarkerTrackerResultArray(1);
+                var resultCode = NativeBindings.MLMarkerTrackerGetResult(Instance.Handle, ref scannerResults);
                 
                 // get results from native api
                 if (MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMarkerTrackerGetResult)))
@@ -84,7 +85,6 @@ namespace UnityEngine.XR.MagicLeap
                         long address = scannerResults.Detections.ToInt64() + (Marshal.SizeOf<IntPtr>() * (int)i);
                         NativeBindings.MLMarkerTrackerResult detectedResult = Marshal.PtrToStructure<NativeBindings.MLMarkerTrackerResult>(Marshal.ReadIntPtr(new IntPtr(address)));
                         Pose pose = Pose.identity;
-
                         if (detectedResult.IsValidPose)
                         {
                             resultCode = MagicLeapXrProviderNativeBindings.GetUnityPose(detectedResult.CoordinateFrameUID, out pose);
@@ -251,7 +251,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <returns> MLResult_Ok Successfully fetched and returned all detections. </returns>
             /// \retval MLResult_UnspecifiedFailure Failed to return detections due to an internal error.
             [DllImport(MLPerceptionClientDll, CallingConvention = CallingConvention.Cdecl)]
-            public static extern MLResult.Code MLMarkerTrackerGetResult(ulong scanner_handle, out MLMarkerTrackerResultArray data);
+            public static extern MLResult.Code MLMarkerTrackerGetResult(ulong scanner_handle, ref MLMarkerTrackerResultArray data);
 
             /// <summary>
             ///     Release the resources for the results array.
@@ -432,6 +432,13 @@ namespace UnityEngine.XR.MagicLeap
                 ///     Number of markers being tracked.
                 /// </summary>
                 public readonly UIntPtr Count;
+
+                public MLMarkerTrackerResultArray(uint version)
+                {
+                    Version = version;
+                    Detections = IntPtr.Zero;
+                    Count = UIntPtr.Zero;
+                }
             }
 
             /// <summary>
@@ -538,11 +545,17 @@ namespace UnityEngine.XR.MagicLeap
                 public readonly FullAnalysisIntervalHint FullAnalysisIntervalHint;
 
                 /// <summary>
+                ///     Determines which camera to use for aruco marker tracking.
+                ///     0 uses the world cameras and 1 uses the RGB camera.
+                /// </summary>
+                public readonly int ArucoTrackingCamera;
+
+                /// <summary>
                 ///     Sets the native structures from the user facing properties.
                 /// </summary>
                 public MLMarkerTrackerSettings(Settings settings)
                 {
-                    this.Version = 3;
+                    this.Version = 4;
                     this.EnableMarkerScanning = settings.EnableMarkerScanning;
                     this.FPSHint = settings.FPSHint;
                     this.ResolutionHint = settings.ResolutionHint;
@@ -553,6 +566,7 @@ namespace UnityEngine.XR.MagicLeap
                     this.ArucoMarkerSize = settings.ArucoMarkerSize;
                     this.FullAnalysisIntervalHint = settings.FullAnalysisIntervalHint;
                     this.QRCodeSize = settings.QRCodeSize;
+                    this.ArucoTrackingCamera = 0;
                 }
             }
         }

@@ -588,6 +588,7 @@ namespace UnityEngine.XR.MagicLeap
 
             public void CreateVideoRenderer(uint width, uint height)
             {
+                this.VideoRenderer?.Cleanup();
                 this.VideoRenderer = new MLNativeSurfaceYcbcrRenderer(width, height);
                 // TODO : see if we need to add checks to confirm if source has been set.
                 // Technically it would be, becayse we get width and height only after that.

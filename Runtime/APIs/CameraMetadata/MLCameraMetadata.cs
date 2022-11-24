@@ -10,85 +10,75 @@
 
 namespace UnityEngine.XR.MagicLeap
 {
-	using System;
+    using System;
 #if UNITY_MAGICLEAP || UNITY_ANDROID
-	using UnityEngine.XR.MagicLeap.Native;
+    using UnityEngine.XR.MagicLeap.Native;
 #endif
 
-	public partial class MLCamera
-	{
-		/// <summary>
-		/// MLCameraMetadata Summary placeholder.
-		/// </summary>
-		public partial class Metadata
-		{
-			/// <summary>
-			/// Rational data type.
-			/// </summary>
-			public struct Rational
-			{
-
-				/// <summary>
-				/// Numerator.
-				/// </summary>
-				public int Numerator;
-
-				/// <summary>
-				/// Denominator.
-				/// </summary>
-				public int Denominator;
-
-				/// <summary>
-				/// Provides a string representation of the numerator and denominator.
-				/// </summary>
-				/// <returns>A string representation of the numerator and denominator.</returns>
-				public override string ToString()
-				{
-					return this.Numerator + "/" + this.Denominator;
-				}
-
-				/// <summary>
-				/// Returns the rational value as a decimal.
-				/// </summary>
-				/// <returns>The rational value.</returns>
-				public float ToFloat()
-				{
-					if (this.Denominator == 0)
-					{
-						Debug.LogError("MLCameraMetadataRationalNative has a Denominator of 0. Cannot divide by zero!");
-						return 0.0f;
-					}
-
-					return (float)this.Numerator / (float)this.Denominator;
-				}
-
-				/// <summary>
-				/// Sets the numerator and denominator based on the decimal rational and with the provided denominator.
-				/// </summary>
-				/// <param name="value">The decimal rational value.</param>
-				/// <param name="denominator">The denominator used in the rational.</param>
-				public void FromFloat(float value, int denominator)
-				{
-					this.Numerator = (int)(value * denominator);
-					this.Denominator = denominator;
-				}
-			};
-
-			public ulong Handle { get; private set; }
-
-			internal Metadata(ulong handle)
+    public partial class MLCamera
+    {
+        /// <summary>
+        /// MLCameraMetadata Summary placeholder.
+        /// </summary>
+        public partial class Metadata
+        {
+            /// <summary>
+            /// Rational data type.
+            /// </summary>
+            public struct Rational
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-                if (MLResult.DidNativeCallSucceed(MLPermissions.CheckPermission(MLPermission.Camera).Result, nameof(MLPermissions.CheckPermission)))
+
+                /// <summary>
+                /// Numerator.
+                /// </summary>
+                public int Numerator;
+
+                /// <summary>
+                /// Denominator.
+                /// </summary>
+                public int Denominator;
+
+                /// <summary>
+                /// Provides a string representation of the numerator and denominator.
+                /// </summary>
+                /// <returns>A string representation of the numerator and denominator.</returns>
+                public override string ToString()
                 {
-                    Handle = handle;
+                    return this.Numerator + "/" + this.Denominator;
                 }
-                else
+
+                /// <summary>
+                /// Returns the rational value as a decimal.
+                /// </summary>
+                /// <returns>The rational value.</returns>
+                public float ToFloat()
                 {
-                    MLPluginLog.Error($"Constructing a new {typeof(Metadata).FullName} requires missing permission {MLPermission.Camera}");
-                    Handle = MagicLeapNativeBindings.InvalidHandle;
+                    if (this.Denominator == 0)
+                    {
+                        Debug.LogError("MLCameraMetadataRationalNative has a Denominator of 0. Cannot divide by zero!");
+                        return 0.0f;
+                    }
+
+                    return (float)this.Numerator / (float)this.Denominator;
                 }
-#endif
+
+                /// <summary>
+                /// Sets the numerator and denominator based on the decimal rational and with the provided denominator.
+                /// </summary>
+                /// <param name="value">The decimal rational value.</param>
+                /// <param name="denominator">The denominator used in the rational.</param>
+                public void FromFloat(float value, int denominator)
+                {
+                    this.Numerator = (int)(value * denominator);
+                    this.Denominator = denominator;
+                }
+            };
+
+            public ulong Handle { get; private set; }
+
+            internal Metadata(ulong handle)
+            {
+                Handle = handle;
             }
 
             /// <summary>

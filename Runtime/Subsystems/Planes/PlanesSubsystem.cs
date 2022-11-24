@@ -127,7 +127,7 @@ namespace UnityEngine.XR.MagicLeap
             uint _lastNumResults;
             uint _previousLastNumResults = 0;
 
-            Extensions.MLPlanesQueryFlags _defaultQueryFlags = Extensions.MLPlanesQueryFlags.None;
+            Extensions.MLPlanesQueryFlags _defaultQueryFlags = Extensions.MLPlanesQueryFlags.Polygons | Extensions.MLPlanesQueryFlags.Semantic_All;
 
             Dictionary<TrackableId, BoundedPlane> _planes = new Dictionary<TrackableId, BoundedPlane>();
 
@@ -147,7 +147,11 @@ namespace UnityEngine.XR.MagicLeap
             public override PlaneDetectionMode requestedPlaneDetectionMode
             {
                 get => _requestedPlaneDetectionMode.ToPlaneDetectionMode();
-                set => _requestedPlaneDetectionMode = value.ToMLQueryFlags();
+                set
+                {
+                    _requestedPlaneDetectionMode = value.ToMLQueryFlags();
+                    _defaultQueryFlags = _requestedPlaneDetectionMode | Extensions.MLPlanesQueryFlags.Polygons | Extensions.MLPlanesQueryFlags.Semantic_All;
+                }
             }
 
             public override PlaneDetectionMode currentPlaneDetectionMode => _currentPlaneDetectionMode.ToPlaneDetectionMode();
@@ -309,11 +313,6 @@ namespace UnityEngine.XR.MagicLeap
                             _planesTracker, _QueryHandle,
                             (Extensions.MLPlane*)mlPlanes.GetUnsafePtr(), out uint numResults, ref _boundariesList);
 
-                        if (_defaultQueryFlags == Extensions.MLPlanesQueryFlags.None)
-                        {
-                            _defaultQueryFlags = _requestedPlaneDetectionMode | Extensions.MLPlanesQueryFlags.Polygons | Extensions.MLPlanesQueryFlags.Semantic_All;
-                        }
-
                         switch (result)
                         {
                             case MLResult.Code.Ok:
@@ -347,6 +346,8 @@ namespace UnityEngine.XR.MagicLeap
                                             planesIn = mlPlanes,
                                             planesOut = uPlanes
                                         }.Schedule((int)numResults, 1).Complete();
+
+                                        planeTrackableIds.Dispose();
 
                                         // Update plane states
                                         var added = new NativeFixedList<BoundedPlane>((int)numResults, Allocator.Temp);

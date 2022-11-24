@@ -66,8 +66,13 @@ namespace UnityEngine.XR.MagicLeap
             private float previewAspectRatio = 0;
             private bool useNativeBuffers = true;
             private bool applicationPause = false;
+            private bool destroyed = false;
 
             public bool IsCapturing => isCapturing;
+
+            public delegate void CaptureStatusChangedDelegate(bool isDestroying);
+
+            public event CaptureStatusChangedDelegate OnCaptureStatusChanged;
 
             private static readonly ushort captureBufferCount = 4;
 
@@ -125,6 +130,7 @@ namespace UnityEngine.XR.MagicLeap
 
             protected override void OnSourceDestroy()
             {
+                destroyed = true;
                 StopCapture();
             }
 
@@ -193,7 +199,7 @@ namespace UnityEngine.XR.MagicLeap
                     if (result.IsOk)
                     {
                         await camera.PreCaptureAEAWBAsync();
-                        if (MLCamera.IsCaptureTypeSupported(camera, MLCamera.CaptureType.Preview))
+                        if (captureConfig.StreamConfigs.Length == 2 && captureConfig.StreamConfigs[1].CaptureType == MLCamera.CaptureType.Preview)
                         {
                             result = await camera.CapturePreviewStartAsync();
                             if (result.IsOk)
@@ -214,6 +220,7 @@ namespace UnityEngine.XR.MagicLeap
                     if(IsCapturing)
                     {
                         SetupCameraCallbacks();
+                        OnCaptureStatusChanged?.Invoke(false);
                     }
                 }
             }
@@ -332,9 +339,10 @@ namespace UnityEngine.XR.MagicLeap
                 RemoveCameraCallbacks();
                 cameraRecorderSurface = null;
                 captureConfig.StreamConfigs[0].Surface = null;
+                OnCaptureStatusChanged?.Invoke(destroyed);
             }
 
-            private void Camera_OnRawVideoFrameAvailable_NativeCallbackThread(MLCamera.CameraOutput cameraOutput, MLCamera.ResultExtras results)
+            private void Camera_OnRawVideoFrameAvailable_NativeCallbackThread(MLCamera.CameraOutput cameraOutput, MLCamera.ResultExtras results, MLCamera.Metadata metadataHandle)
             {
                 if (useNativeBuffers || !isCapturing)
                 {

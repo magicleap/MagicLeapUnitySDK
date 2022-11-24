@@ -149,7 +149,7 @@ namespace UnityEngine.XR.MagicLeap
             {
                 var u = lB - lA;
                 var v = point - lA;
-                return (u.x * v.y - u.y * v.x) > 0.00001f;
+                return (u.x * v.y - u.y * v.x) > 0f;
             }
 
             /// <summary>
@@ -168,7 +168,7 @@ namespace UnityEngine.XR.MagicLeap
                 int pointOnHull = 0;
                 for (int i = 1; i < points.Length; ++i)
                 {
-                    if (points[i].x < points[pointOnHull].x)
+                    if (points[i].x < points[pointOnHull].x || (points[i].x == points[pointOnHull].x && points[i].y < points[pointOnHull].y))
                     {
                         pointOnHull = i;
                     }
@@ -179,6 +179,20 @@ namespace UnityEngine.XR.MagicLeap
                     int endpoint = 0;
                     do
                     {
+                        bool endpointAlreadyOnHull = false;
+                        for (int j = 0; j < hullIndices.Length; j++)
+                        {
+                            if (hullIndices[j] == pointOnHull)
+                            {
+                                endpointAlreadyOnHull = true;
+                                break;
+                            }
+                        }
+                        if (endpointAlreadyOnHull)
+                        {
+                            break;
+                        }
+
                         hullIndices.Add(pointOnHull);
                         endpoint = 0;      // initial endpoint for a candidate edge on the hull
                         for (int j = 1; j < points.Length; ++j)
@@ -186,7 +200,7 @@ namespace UnityEngine.XR.MagicLeap
                             endpoint = (endpoint == pointOnHull || IsPointLeftOfLine(points[j], points[pointOnHull], points[endpoint])) ? j : endpoint;
                         }
                         pointOnHull = endpoint;
-                    } while (endpoint != hullIndices[0]);      // wrapped around to first hull point
+                    } while (endpoint != hullIndices[0] && hullIndices.Length < hullIndices.Capacity);  // wrapped around to first hull point
 
                     CreateOrResizeNativeArrayIfNecessary<Vector2>(hullIndices.Length, allocator, ref convexHullOut);
                     for (int i = 0; i < hullIndices.Length; ++i)

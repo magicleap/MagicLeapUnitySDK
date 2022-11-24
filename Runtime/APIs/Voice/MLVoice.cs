@@ -154,13 +154,21 @@ namespace UnityEngine.XR.MagicLeap
                 MLPluginLog.Error($"{nameof(MLVoice)} requires missing permission {MLPermission.VoiceInput}");
                 return MLResult.Code.PermissionDenied;
             }
-            
+
             var resultCode = MLVoice.NativeBindings.MLVoiceIntentCreate(out this.Handle);
             MLResult.DidNativeCallSucceed(resultCode, nameof(MLVoice.NativeBindings.MLVoiceIntentCreate));
             return resultCode;
         }
 
-        protected override MLResult.Code StopAPI() => MLVoice.NativeBindings.MLVoiceIntentDestroy(this.Handle);
+        protected override MLResult.Code StopAPI()
+        {
+            var result = MLVoice.NativeBindings.MLVoiceIntentDestroy(this.Handle);
+            if (MLResult.IsOK(result))
+            {
+                this.Handle = Native.MagicLeapNativeBindings.InvalidHandle;
+            }
+            return result;
+        }
 #endif
         /// <summary>
         /// Configures Settings sent, Sets the callbacks for voice intent events, and starts processing.
@@ -180,7 +188,7 @@ namespace UnityEngine.XR.MagicLeap
             string JSONString = voiceConfiguration.GetJSONString();
 
             MLResult result = MLResult.Create(Instance.ConfigureSettings(JSONString));
-            if(!result.IsOk)
+            if (!result.IsOk)
             {
                 MLPluginLog.Error("MLVoice failed to ConfigureSettings: " + result);
                 return result;
@@ -194,7 +202,7 @@ namespace UnityEngine.XR.MagicLeap
             }
 
             var resultCode = NativeBindings.MLVoiceIntentStartProcessing(Instance.Handle);
-            
+
             if (!MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLVoiceIntentStartProcessing)))
             {
                 MLPluginLog.Error("MLVoice failed to StartProcessing: " + result);
@@ -241,7 +249,7 @@ namespace UnityEngine.XR.MagicLeap
             }
 
             var resultCode = NativeBindings.MLVoiceIntentStartProcessing(Instance.Handle);
-            
+
             if (!MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLVoiceIntentStartProcessing)))
             {
                 MLPluginLog.Error("MLVoice failed to StartProcessing: " + result);
@@ -277,7 +285,7 @@ namespace UnityEngine.XR.MagicLeap
                 MLPluginLog.Error("MLVoice.Stop failed to unregister MLVoiceIntentSetCallbacks: " + result);
             }
 
-            var resultCode = NativeBindings.MLVoiceIntentStopProcessing(Instance.Handle);            
+            var resultCode = NativeBindings.MLVoiceIntentStopProcessing(Instance.Handle);
 
             if (!MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLVoiceIntentStopProcessing)))
             {

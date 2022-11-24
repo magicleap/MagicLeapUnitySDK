@@ -69,6 +69,12 @@ namespace UnityEngine.XR.MagicLeap
             public readonly float ArucoMarkerSize;
 
             /// <summary>
+            ///     Determines which camera to use for aruco marker tracking.
+            ///     0 uses the world cameras and 1 uses the RGB camera.
+            /// </summary>
+            public readonly int ArucoCamera;
+
+            /// <summary>
             ///     The physical size of the QR code that shall be tracked (in meters). The physical size is
             ///     important to know, because once a QR code is detected we can only determine its
             ///     3D position when we know its correct size. The size of the QR code is given in
@@ -87,7 +93,7 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             public readonly MarkerType MarkerTypes;
 
-            internal Settings(bool enableMarkerScanning, FPSHint fpsHint, ResolutionHint resolutionHint, FullAnalysisIntervalHint fullAnalysisIntervalHint, CornerRefineMethod cornerRefineMethod, bool useEdgeRefinement, MarkerType markerTypes, float qRCodeSize, ArucoDictionaryName arucoDicitonary, float arucoMarkerSize)
+            internal Settings(bool enableMarkerScanning, FPSHint fpsHint, ResolutionHint resolutionHint, FullAnalysisIntervalHint fullAnalysisIntervalHint, CornerRefineMethod cornerRefineMethod, bool useEdgeRefinement, MarkerType markerTypes, float qRCodeSize, ArucoDictionaryName arucoDicitonary, float arucoMarkerSize, int arucoCamera)
             {
                 this.EnableMarkerScanning = enableMarkerScanning;
                 this.FPSHint = fpsHint;
@@ -99,11 +105,12 @@ namespace UnityEngine.XR.MagicLeap
                 this.ArucoMarkerSize = arucoMarkerSize;
                 this.QRCodeSize = qRCodeSize;
                 this.MarkerTypes = markerTypes;
+                this.ArucoCamera = arucoCamera;
 
             }
 
-            public static Settings Create(bool enableMarkerScanning = true, MarkerType markerTypes = MarkerType.All, float qRCodeSize = 0.1f, ArucoDictionaryName arucoDicitonary = ArucoDictionaryName.DICT_5X5_100, float arucoMarkerSize = 0.1f, FPSHint fpsHint = FPSHint.Medium, ResolutionHint resolutionHint = ResolutionHint.Low, FullAnalysisIntervalHint fullAnalysisIntervalHint = FullAnalysisIntervalHint.Medium, CornerRefineMethod cornerRefineMethod = CornerRefineMethod.None, bool useEdgeRefinement = false) =>
-                new Settings(enableMarkerScanning, fpsHint, resolutionHint, fullAnalysisIntervalHint, cornerRefineMethod, useEdgeRefinement, markerTypes, qRCodeSize, arucoDicitonary, arucoMarkerSize);
+            public static Settings Create(bool enableMarkerScanning = true, MarkerType markerTypes = MarkerType.All, float qRCodeSize = 0.1f, ArucoDictionaryName arucoDicitonary = ArucoDictionaryName.DICT_5X5_100, float arucoMarkerSize = 0.1f, int arucoCamera = 0, FPSHint fpsHint = FPSHint.Medium, ResolutionHint resolutionHint = ResolutionHint.Low, FullAnalysisIntervalHint fullAnalysisIntervalHint = FullAnalysisIntervalHint.Medium, CornerRefineMethod cornerRefineMethod = CornerRefineMethod.None, bool useEdgeRefinement = false) =>
+                new Settings(enableMarkerScanning, fpsHint, resolutionHint, fullAnalysisIntervalHint, cornerRefineMethod, useEdgeRefinement, markerTypes, qRCodeSize, arucoDicitonary, arucoMarkerSize, arucoCamera);
 
             
             public override string ToString() => $"{this.MarkerTypes}, {this.ArucoDicitonary}, {this.QRCodeSize}, {this.ArucoMarkerSize}, {this.EnableMarkerScanning}";

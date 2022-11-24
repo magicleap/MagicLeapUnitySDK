@@ -26,9 +26,11 @@ namespace UnityEngine.XR.MagicLeap
 #if UNITY_MAGICLEAP || UNITY_ANDROID
             bool enableCheck = false;
             MLResult.Code result = MLVoice.NativeBindings.MLVoiceIntentIsEnabled(this.Handle, out enableCheck);
-            
+
             if (!MLResult.DidNativeCallSucceed(result, nameof(MLVoice.NativeBindings.MLVoiceIntentIsEnabled)))
+            {
                 MLPluginLog.Error("MLVoice failed to check MLVoiceIntentIsEnabled: " + result);
+            }
             return enableCheck;
 #else
             return false;
@@ -38,32 +40,56 @@ namespace UnityEngine.XR.MagicLeap
 #if UNITY_MAGICLEAP || UNITY_ANDROID
         protected override void OnApplicationPause(bool pauseStatus)
         {
+            if (this.Handle == Native.MagicLeapNativeBindings.InvalidHandle)
+            {
+                // dont do anything because the API isn't running.
+                return;
+            }
+
+            if (!isEnabled())
+            {
+                // dont do anything because the voice intent system isn't enabled.
+                return;
+            }
+
             MLResult.Code result;
             if (pauseStatus)
             {
-                result = result = SetCallbacks(true);
+                result = SetCallbacks(true);
                 if (!MLResult.IsOK(result))
+                {
                     MLPluginLog.Error("MLVoice during pause failed to unregister MLVoiceIntentSetCallbacks: " + result);
+                }
                 result = MLVoice.NativeBindings.MLVoiceIntentStopProcessing(this.Handle);
-                
+
                 if (!MLResult.DidNativeCallSucceed(result, nameof(MLVoice.NativeBindings.MLVoiceIntentStopProcessing)))
+                {
                     MLPluginLog.Error("MLVoice during pause failed to MLVoiceIntentStopProcessing: " + result);
+                }
                 else
+                {
                     isProcessing = false;
+                }
             }
             else
             {
                 result = SetCallbacks(false);
                 if (!MLResult.IsOK(result))
+                {
                     MLPluginLog.Error("MLVoice during resume failed to register MLVoiceIntentSetCallbacks: " + result);
+                }
                 result = MLVoice.NativeBindings.MLVoiceIntentStartProcessing(this.Handle);
-                
+
                 if (!MLResult.DidNativeCallSucceed(result, nameof(MLVoice.NativeBindings.MLVoiceIntentStartProcessing)))
+                {
                     MLPluginLog.Error("MLVoice during resume failed to MLVoiceIntentStartProcessing: " + result);
+                }
                 else
+                {
                     isProcessing = true;
+                }
             }
-    }
+        }
 #endif
 
         private MLResult.Code ConfigureSettings(string JSONString)
@@ -84,8 +110,8 @@ namespace UnityEngine.XR.MagicLeap
         {
 #if UNITY_MAGICLEAP || UNITY_ANDROID
             NativeBindings.IntentCallbacks newCallbacks = NativeBindings.IntentCallbacks.Create();
-            
-            if(unregister)
+
+            if (unregister)
             {
                 newCallbacks.OnEvent = null;
             }

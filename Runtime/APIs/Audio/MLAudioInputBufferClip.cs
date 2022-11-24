@@ -58,6 +58,7 @@ namespace UnityEngine.XR.MagicLeap
                 }
             }
 
+            // Automatically wraps the data past the BufferPosition index to be at the front of the given samples array.
             public int GetData(float[] samples, int readPosition, out int nextReadPosition)
             {
                 lock (bufferLock)
@@ -83,9 +84,23 @@ namespace UnityEngine.XR.MagicLeap
 
                         nextReadPosition = samplesToRead - samplesToReadFromEnd;
                         System.Array.Copy(buffer, readPosition, samples, 0, samplesToReadFromEnd);
-                        System.Array.Copy(buffer, 0, samples, 0, nextReadPosition);
+                        System.Array.Copy(buffer, 0, samples, samplesToReadFromEnd, nextReadPosition);
                         return samplesToRead;
                     }
+                }
+            }
+            
+            // Does not wrap any data, returns exactly what's in the buffer.
+            public int GetData(float[] samples, int readPosition)
+            {
+                lock (bufferLock)
+                {
+                    if (readPosition > bufferSampleCount || readPosition < 0)
+                        return 0;
+
+                    int samplesToRead = Mathf.Min(bufferSampleCount - readPosition, samples.Length);
+                    System.Array.Copy(buffer, readPosition, samples, 0, samplesToRead);
+                    return samplesToRead;
                 }
             }
 

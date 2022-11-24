@@ -13,11 +13,8 @@
 namespace UnityEngine.XR.MagicLeap.Native
 {
     using System;
-    using System.Collections;
     using System.Collections.Concurrent;
-    using System.Collections.Generic;
     using System.Threading;
-    using UnityEngine;
 
     /// <summary>
     /// Handles dispatching calls from the Magic Leap native thread to the Unity thread
@@ -27,12 +24,19 @@ namespace UnityEngine.XR.MagicLeap.Native
         /// <summary>
         /// A concurrent queue handles the dispatched callbacks in a thread-safe way.
         /// </summary>
-        private static System.Collections.Concurrent.ConcurrentQueue<Dispatcher> actionQueue = new System.Collections.Concurrent.ConcurrentQueue<Dispatcher>();
+        private static ConcurrentQueue<Dispatcher> actionQueue = new ConcurrentQueue<Dispatcher>();
 
         /// <summary>
         /// The concurrent queue for actions to execute on the main thread.
         /// </summary>
-        private static System.Collections.Concurrent.ConcurrentQueue<System.Action> mainActionQueue = new System.Collections.Concurrent.ConcurrentQueue<System.Action>();
+        private static ConcurrentQueue<System.Action> mainActionQueue = new ConcurrentQueue<System.Action>();
+
+        /// <summary>
+        /// The concurrent queue for actions to execute on the graphics thread.
+        /// </summary>
+        private static ConcurrentQueue<System.Action> graphicsActionQueue = new ConcurrentQueue<System.Action>();
+
+        private static bool registeredForGraphicsCallbacks = false;
 
         /// <summary>
         /// The worker thread
@@ -66,6 +70,24 @@ namespace UnityEngine.XR.MagicLeap.Native
             else
             {
                 mainActionQueue.Enqueue(callback);
+            }
+        }
+
+        public static void ScheduleGraphics(System.Action callback)
+        {
+            graphicsActionQueue.Enqueue(callback);
+            if (!registeredForGraphicsCallbacks)
+            {
+                registeredForGraphicsCallbacks = true;
+                MLGraphicsHooks.OnPreBeginRenderFrame += ExecuteOnPreBeginRenderFrameTasks;
+            }
+        }
+
+        private static void ExecuteOnPreBeginRenderFrameTasks()
+        {
+            while (graphicsActionQueue.TryDequeue(out System.Action action))
+            {
+                action();
             }
         }
 

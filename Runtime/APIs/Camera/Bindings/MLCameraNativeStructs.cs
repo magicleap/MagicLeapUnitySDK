@@ -472,7 +472,6 @@ namespace UnityEngine.XR.MagicLeap
                 /// Camera intrinsic parameter.
                 /// Only valid within callback scope.
                 /// The Library allocates and maintains the lifetime of intrinsics. 
-                /// Only valid when camera connected with MLCamera.ConnectFlag.CamOnly flag.
                 /// Only valid for on_image_buffer_available, on_video_buffer_available, on_preview_buffer_available callbacks.
                 /// NULL for on_capture_completed, on_capture_failed callbacks 
                 public readonly IntPtr Intrinsics;

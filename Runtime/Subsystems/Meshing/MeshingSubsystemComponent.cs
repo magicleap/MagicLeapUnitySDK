@@ -357,6 +357,8 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public event Action<MeshId> meshRemoved;
 
+        private InputDevice headDevice;
+
         /// <summary>
         /// Retrieve the confidence values associated with a mesh. Confidence values
         /// range from 0..1. <see cref="requestVertexConfidence"/> must be enabled.
@@ -590,6 +592,23 @@ namespace UnityEngine.XR.MagicLeap
             m_MeshesNeedingGeneration[meshInfo.MeshId] = meshInfo;
         }
 
+        void CheckHeadTrackingMapEvents()
+        {
+            if (!headDevice.isValid)
+            {
+                headDevice = InputSubsystem.Utils.FindMagicLeapDevice(InputDeviceCharacteristics.HeadMounted | InputDeviceCharacteristics.TrackedDevice);
+            }
+
+            if (headDevice.isValid && InputSubsystem.Extensions.MLHeadTracking.TryGetMapEvents(headDevice, out var mapEvents))
+            {
+                if ((uint)(mapEvents & InputSubsystem.Extensions.MLHeadTracking.MapEvents.NewSession) != 0)
+                {
+                    // clear all the meshes if headtracking is starting a new session 
+                    DestroyAllMeshes();
+                }
+            }
+        }
+
         void UpdateSettings()
         {
             DestroyAllMeshes();
@@ -632,6 +651,7 @@ namespace UnityEngine.XR.MagicLeap
 #if UNITY_EDITOR
             m_SettingsDirty |= haveSettingsChanged;
 #endif
+            CheckHeadTrackingMapEvents();
 
             if (m_SettingsDirty)
                 UpdateSettings();

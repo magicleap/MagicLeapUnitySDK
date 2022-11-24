@@ -29,10 +29,10 @@ namespace UnityEngine.XR.MagicLeap
         [DllImport(MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         internal static extern void MagicLeapXrProviderAddLibraryPath([MarshalAs(UnmanagedType.LPStr)] string path);
 
-#if UNITY_EDITOR
         [DllImport(UnityMagicLeapDll, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         internal static extern void UnityMagicLeap_SetLibraryPath([MarshalAs(UnmanagedType.LPStr)] string path);
 
+#if UNITY_EDITOR
         [DllImport(MLSdkLoaderDll, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         internal static extern void MLSdkLoaderResetLibraryPaths();
 
@@ -81,6 +81,9 @@ namespace UnityEngine.XR.MagicLeap
 
         [DllImport(MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
         internal static extern bool StartEyeTracking();
+
+        [DllImport(MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void StopEyeTracking();
 
         [DllImport(MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void StartHandTracking();

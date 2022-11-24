@@ -26,7 +26,7 @@ namespace MagicLeap.Core
         }
 
         [SerializeField, Tooltip("MeshRenderer to display media")]
-        private MeshRenderer screen = null;
+        private Renderer screen = null;
 
         [SerializeField, Tooltip("A reference of media player's renderer's material.")]
         private Material videoRenderMaterial = null;
@@ -34,8 +34,8 @@ namespace MagicLeap.Core
         [SerializeField, Tooltip("Used to indicate the stereo mode set for the media player.")]
         private Video3DLayout stereoMode = Video3DLayout.No3D;
 
-        [Tooltip("Used to set media player content loop.")]
-        public bool isLooping;
+        [SerializeField, Tooltip("Used to set media player content loop.")]
+        private bool isLooping;
 
         [Tooltip("Used to indicate the source path for the media player.")]
         public PathSourceType pathSourceType;
@@ -43,6 +43,9 @@ namespace MagicLeap.Core
         [Tooltip("URI/Path of the media to be played")]
         public string source;
 
+        [SerializeField, Tooltip("A reference of the media player texture.")]
+        private RenderTexture mediaPlayerTexture = null;
+        
         public bool IsBuffering { get; private set; } = false;
         public bool IsSeeking { get; private set; } = false;
         public long DurationInMiliseconds { get; private set; } = 0;
@@ -61,9 +64,11 @@ namespace MagicLeap.Core
         public event Action<float> OnUpdateTimeline;
         public event Action<long> OnUpdateElapsedTime;
         public event Action<bool> OnIsBufferingChanged;
+        public event Action<MLNativeSurfaceYcbcrRenderer> OnVideoRendererInitialized;
 
         private long currentPositionInMiliseconds = 0;
         private bool hasSetSourceURI = false;
+        private int videoWidth, videoHeight;
 
 #if UNITY_MAGICLEAP || UNITY_ANDROID
         /// <summary>
@@ -107,11 +112,6 @@ namespace MagicLeap.Core
 
         private MLMedia.Player _mediaPlayer;
 
-        /// <summary>
-        /// A reference of the media player texture.
-        /// </summary>
-        private RenderTexture mediaPlayerTexture = null;
-
         void Update()
         {
             if (!Application.isEditor && MediaPlayer.IsPlaying && MediaPlayer.VideoRenderer != null)
@@ -126,7 +126,7 @@ namespace MagicLeap.Core
 
         private void OnDestroy()
         {
-            if(_mediaPlayer != null)
+            if (_mediaPlayer != null)
             {
                 _mediaPlayer.OnPrepared -= HandleOnPrepare;
                 _mediaPlayer.OnVideoSizeChanged -= HandleOnVideoSizeChanged;
@@ -226,18 +226,54 @@ namespace MagicLeap.Core
                 _mediaPlayer.VideoRenderer?.Cleanup();
             }
         }
+        
+        /// <summary>
+        /// Uses the texture on the renderer to play the video on <c>Magic Leap</c>.
+        /// </summary>
+        private void SetRendererTexture(RenderTexture texture)
+        {
+            if (mediaPlayerTexture != texture)
+            {
+                Destroy(mediaPlayerTexture);
+                mediaPlayerTexture = null;
+            }
+            
+            if (mediaPlayerTexture == null)
+            {
+                // Create texture with given dimensions
+                mediaPlayerTexture = texture;
+            }
+            
+            // Set texture on quad
+            screen.material.SetTexture("_MainTex", this.mediaPlayerTexture);
+            
+            MediaPlayer.CreateVideoRenderer((uint)texture.width, (uint)texture.height);
+            MediaPlayer.VideoRenderer.SetRenderBuffer(this.mediaPlayerTexture);
+        }
 
         /// <summary>
         /// Initializes rendering resources for the ml media player.
         /// </summary>
         private void InitializeMLMediaPlayerRenders(int width, int height)
         {
-            this.TryApplyVideoRenderMaterial();
-            this.TryApplyStereoMode();
-            this.CreateTexture(width, height);
+            if (videoRenderMaterial == null)
+            {
+                MLPluginLog.Warning($"MLMediaPlayerBehavior failed to initialize, video render material is missing.");
+                return;
+            }
+
+            TryApplyVideoRenderMaterial(videoRenderMaterial);
+            TryApplyStereoMode();
+            
+            if (mediaPlayerTexture == null)
+                CreateTexture(width, height);
+            else
+                SetRendererTexture(mediaPlayerTexture);
 
             float aspectRatio = width / (float)height;
             transform.localScale = new Vector3(transform.localScale.y * aspectRatio, transform.localScale.y, 1);
+
+            OnVideoRendererInitialized?.Invoke(MediaPlayer.VideoRenderer);
         }
 
         /// <summary>
@@ -258,8 +294,8 @@ namespace MagicLeap.Core
                     //// to implement while SideBySide and OverUnder require processing that is
                     //// implemented by supporting the _VideoStereoMode property this relies on.
                     //// The example implementation is distributed in the "StereoVideoRender.shader" shader.
-                    MLPluginLog.WarningFormat(
-                        "MLMediaPlayerBehavior failed to apply {0} StereoMode, material is missing \"_VideoStereoMode\" property", this.stereoMode);
+                    MLPluginLog.Warning(
+                        $"MLMediaPlayerBehavior failed to apply {stereoMode} StereoMode, material is missing \"_VideoStereoMode\" property");
                 }
             }
         }
@@ -267,11 +303,11 @@ namespace MagicLeap.Core
         /// <summary>
         /// Utility method used to create if necessary and apply the currently set VideoRenderMaterial material.
         /// </summary>
-        private void TryApplyVideoRenderMaterial()
+        private void TryApplyVideoRenderMaterial(Material rendererMaterial)
         {
             if (this.screen != null)
             {
-                this.screen.material = this.videoRenderMaterial;
+                this.screen.material = rendererMaterial;
 
                 // Accessing the renderer's material automatically instantiates it and makes it unique to this renderer, so keep a reference.
                 this.videoRenderMaterial = this.screen.material;
@@ -281,7 +317,7 @@ namespace MagicLeap.Core
         /// <summary>
         /// Creates the texture on the renderer to play the video on <c>Magic Leap</c>.
         /// </summary>
-        private bool CreateTexture(int width, int height)
+        private void CreateTexture(int width, int height)
         {
             width = Mathf.Max(width, 1);
             height = Mathf.Max(height, 1);
@@ -303,8 +339,6 @@ namespace MagicLeap.Core
 
             MediaPlayer.CreateVideoRenderer((uint)width, (uint)height);
             MediaPlayer.VideoRenderer.SetRenderBuffer(this.mediaPlayerTexture);
-
-            return true;
         }
 
         /// <summary>
@@ -410,6 +444,11 @@ namespace MagicLeap.Core
         /// <param name="height"></param>
         private void HandleOnVideoSizeChanged(MLMedia.Player player, int width, int height)
         {
+            if (width == videoWidth && height == videoHeight)
+                return;
+
+            videoWidth = width;
+            videoHeight = height;
             InitializeMLMediaPlayerRenders(width, height);
         }
 

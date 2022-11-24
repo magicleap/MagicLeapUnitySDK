@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Unity.Collections;
 using UnityEngine.Scripting;
 using UnityEngine.XR.ARSubsystems;
@@ -16,427 +15,173 @@ namespace UnityEngine.XR.MagicLeap
     [Preserve]
     public sealed partial class AnchorSubsystem : XRAnchorSubsystem
     {
-        const string kLogTag = "Unity-Anchors";
-
-        static void DebugLog(string msg)
-        {
-            MLLog.Debug(kLogTag, msg);
-        }
-
-        static void LogWarning(string msg)
-        {
-            MLLog.Warning(kLogTag, msg);
-        }
-
-        static void LogError(string msg)
-        {
-            MLLog.Error(kLogTag, msg);
-        }
-
-        [Conditional("DEVELOPMENT_BUILD")]
-        static void DebugError(string msg)
-        {
-            LogError(msg);
-        }
-
-        static Vector3 FlipHandedness(Vector3 position)
-        {
-            return new Vector3(position.x, position.y, -position.z);
-        }
-
-        static Quaternion FlipHandedness(Quaternion rotation)
-        {
-            return new Quaternion(rotation.x, rotation.y, -rotation.z, -rotation.w);
-        }
-
 #if !UNITY_2020_2_OR_NEWER
         protected override Provider CreateProvider() => new MagicLeapProvider();
 #endif
 
         class MagicLeapProvider : Provider
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-            ulong m_TrackerHandle = Native.MagicLeapNativeBindings.InvalidHandle;
-#else
-            ulong m_TrackerHandle = 0;
-#endif
-            /// <summary>
-            /// The privilege required to access persistent coordinate frames
-            /// </summary>
-            const uint k_MLPivilegeID_PwFoundObjRead = 201;
-
             /// <summary>
             /// The squared amount by which a coordinate frame has to move for its anchor to be reported as "updated"
             /// </summary>
-            const float k_CoordinateFramePositionEpsilonSquared = .0001f;
+            const float CoordinateFramePositionEpsilonSquared = .0001f;
+
+            const ulong AnchorTrackableIdSalt = 0xf52b75076e45ad88;
+
+            static TrackableId GenerateTrackableId(string id)
+            {
+                var hash = id.GetHashCode();
+                var trackableId = new TrackableId((ulong)hash, AnchorTrackableIdSalt);
+                return trackableId;
+            }
+
+            static bool PosesAreApproximatelyEqual(Pose lhs, Pose rhs)
+            {
+                var positionDelta = lhs.position - rhs.position;
+                var rotationDelta = lhs.rotation * Quaternion.Inverse(rhs.rotation);
+
+                return positionDelta.sqrMagnitude <= CoordinateFramePositionEpsilonSquared;
+            }
+
+            private Camera mainCamera;
+            private MLAnchors.LocalizationInfo localizationInfo;
+            private MLAnchors.Request query = new MLAnchors.Request();
+            private Dictionary<TrackableId, MLAnchors.Anchor> currentAnchors = new Dictionary<TrackableId, MLAnchors.Anchor>();
 
             public MagicLeapProvider()
             {
             }
 
-            public override void Start()
-            {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-                var resultCode = MLAnchors.NativeBindings.MLSpatialAnchorTrackerCreate(out m_TrackerHandle);
-                //Debug.Log("created");
-                if (!MLResult.IsOK(resultCode))
-                {
-                    m_TrackerHandle = Native.MagicLeapNativeBindings.InvalidHandle;
-                    LogWarning($"Could not create a MLSpatialAnchor tracker because '{resultCode}'. Anchors are unavailable.");
-                }
-#endif
-            }
+            public override void Start() => mainCamera = Camera.main;
 
-            public override void Stop()
-            {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-                if (m_TrackerHandle != Native.MagicLeapNativeBindings.InvalidHandle)
-                {
-                    MLAnchors.NativeBindings.MLSpatialAnchorTrackerDestroy(m_TrackerHandle);
-                    m_TrackerHandle = Native.MagicLeapNativeBindings.InvalidHandle;
-                }
-#endif
-            }
+            public override void Stop() => mainCamera = null;
 
             public override void Destroy()
             {
             }
 
-
-            bool PosesAreApproximatelyEqual(Pose lhs, Pose rhs)
+            public override unsafe TrackableChanges<XRAnchor> GetChanges(XRAnchor defaultAnchor, Allocator allocator)
             {
-                // todo 2019-05-21: consider rotation?
-                return (lhs.position - rhs.position).sqrMagnitude <= k_CoordinateFramePositionEpsilonSquared;
-            }
+                if (mainCamera == null)
+                    return default;
 
-            MLResult.Code CreateQueryForClosestAnchor()
-            {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-                var queryFilter = new MLAnchors.NativeBindings.MLSpatialAnchorQueryFilter(Camera.main.transform.position, 50f, IntPtr.Zero, 0, 20, true);
-                var resultCode = MLAnchors.NativeBindings.MLSpatialAnchorQueryCreate(m_TrackerHandle, in queryFilter, out queryHandle, out queryResultsCount);
-                //Debug.Log($"result: {resultCode}, handle: {queryHandle}, resultCount:  {queryResultsCount}");
-                return resultCode;
-#else
-                return MLResult.Code.Ok;
-#endif
-            }
+                MLAnchors.GetLocalizationInfo(out localizationInfo);
+                if (localizationInfo.LocalizationStatus != MLAnchors.LocalizationStatus.Localized)
+                    return default;
 
-            private ulong queryHandle = Native.MagicLeapNativeBindings.InvalidHandle;
+                query.Start(new MLAnchors.Request.Params(mainCamera.transform.position, 0, 0, false));
+                var mlResult = query.TryGetResult(out MLAnchors.Request.Result result);
+                if (!mlResult.IsOk)
+                    return default;
 
-            private uint queryResultsCount = 0;
+                var added = new NativeFixedList<XRAnchor>((int)result.anchors.Length, Allocator.Temp);
+                var updated = new NativeFixedList<XRAnchor>((int)result.anchors.Length, Allocator.Temp);
+                var removed = new NativeFixedList<TrackableId>((int)currentAnchors.Count, Allocator.Temp);
 
-            /// <summary>
-            /// Checks to see if there is a better PCF for a anchor and updates the
-            /// <paramref name="referenceFrame"/> if necessary.
-            /// </summary>
-            /// <returns>true if the reference frame was updated</returns>
-            bool UpdateReferenceFrame(ref ReferenceFrame referenceFrame)
-            {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-                // See if there is a better coordinate frame we could be using
-
-                if (queryHandle == Native.MagicLeapNativeBindings.InvalidHandle)
+                for (int i = 0; i < result.anchors.Length; ++i)
                 {
-                    var r = CreateQueryForClosestAnchor();
-                    return false;
-                }
+                    var anchor = result.anchors[i];
+                    var trackableId = GenerateTrackableId(anchor.Id);
 
-                if (queryResultsCount == 0)
-                    return false;
-
-                uint firstIndex = 0;
-                uint lastIndex = queryResultsCount - 1;
-                uint size = lastIndex - firstIndex + 1;
-                var arr = new MLAnchors.NativeBindings.MLSpatialAnchor[size];
-
-                // Get the ID of the closest PCF to our target position
-                var resultCode = MLAnchors.NativeBindings.MLSpatialAnchorQueryGetResult(m_TrackerHandle, queryHandle, firstIndex, lastIndex, arr);
-
-                if (!MLResult.IsOK(resultCode))
-                {
-                    // No coordinate frame could be found, so set tracking state to None
-                    // and return whether the tracking state changed.d
-#if DEVELOPMENT_BUILD
-                    DebugError("GetClosest failed.");
-#endif
-                    return referenceFrame.SetTrackingState(TrackingState.None);
-                }
-                else if (!MLResult.IsOK(MagicLeapXrProviderNativeBindings.GetUnityPose(arr[0].Cfuid, out Pose pose)))
-                {
-                    DebugError($"TryGetPose for cfuid {arr[0].Cfuid} failed.");
-                    return referenceFrame.SetTrackingState(TrackingState.None);
-                }
-                else if (!arr[0].Cfuid.Equals(referenceFrame.cfuid))
-                {
-                    // A different coordinate frame has been chosen
-#if DEVELOPMENT_BUILD
-                    //DebugLog($"cfuid's changed. Old: {referenceFrame.coordinateFrame} New: {coordinateFrame}.");
-#endif
-                    referenceFrame.trackingState = TrackingState.Tracking;
-                    referenceFrame.SetCoordinateFrame(arr[0].Cfuid, pose);
-                    return true;
-                }
-                // If the CFUIDs are the same, then check to see if the coordinate frame has changed
-                else if (!PosesAreApproximatelyEqual(pose, referenceFrame.coordinateFrame))
-                {
-                    // Coordinate frame has changed
-#if DEVELOPMENT_BUILD
-                    //DebugLog($"Coordinate frame updated. Old: {referenceFrame.coordinateFrame} New: {coordinateFrame}.");
-#endif
-                    referenceFrame.trackingState = TrackingState.Tracking;
-                    referenceFrame.coordinateFrame = pose;
-
-                    var re = MLAnchors.NativeBindings.MLSpatialAnchorQueryDestroy(m_TrackerHandle, queryHandle);
-                    //Debug.Log("query destryed in UpdateReferenceFrame: " + re);
-                    queryHandle = Native.MagicLeapNativeBindings.InvalidHandle;
-                    return true;
-                }
-                else
-                {
-                    // Common case: pose was retrieved, but nothing has changed.
-                    return referenceFrame.SetTrackingState(TrackingState.Tracking);
-                }
-#else
-                return false;
-#endif
-            }
-
-            /// <summary>
-            /// Populates <paramref name="added"/> with all the anchors
-            /// which have been added since the last call to <see cref="GetChanges(XRAnchor, Allocator)"/>.
-            /// </summary>
-            /// <param name="added">An already created array to populate. Its length must match <see cref="m_PendingAdds"/>.</param>
-            void GetAdded(NativeArray<XRAnchor> added)
-            {
-                if (!added.IsCreated)
-                    throw new ArgumentException("Array has not been created.", nameof(added));
-
-                if (added.Length != m_PendingAdds.Count)
-                    throw new ArgumentException($"Array is not the correct size. Should be {m_PendingAdds.Count} but is {added.Length}.", nameof(added));
-
-                for (int i = 0; i < m_PendingAdds.Count; ++i)
-                {
-                    var referenceFrame = m_PendingAdds[i];
-                    UpdateReferenceFrame(ref referenceFrame);
-
-                    // Store it in the list of changes for this frame.
-                    added[i] = referenceFrame.anchor;
-
-                    // Add it to persistent storage for subsequent frames.
-                    m_ReferenceFrames.Add(referenceFrame);
-                }
-
-                m_PendingAdds.Clear();
-            }
-
-            /// <summary>
-            /// Returns an array containing all the updated anchors since the last
-            /// call to <see cref="GetChanges(XRAnchor, Allocator)"/>.
-            /// This method considers all <see cref="m_ReferenceFrames"/>, so it should
-            /// be called before <see cref="GetAdded(NativeArray<XRAnchor>)"/> since
-            /// that method will add elements to <see cref="m_ReferenceFrames"/>.
-            /// </summary>
-            /// <param name="allocator">The allocator to use for the returned array.</param>
-            /// <param name="length">The number of updated anchors.</param>
-            /// <returns>An array of updated anchors. Note the array's length
-            /// will always be the total number of anchors. Use <paramref name="length"/>
-            /// for the true number of updated anchors.</returns>
-            NativeArray<XRAnchor> GetUpdated(Allocator allocator, out int length)
-            {
-                var updated = new NativeArray<XRAnchor>(m_ReferenceFrames.Count, allocator);
-                length = 0;
-
-                for (int i = 0; i < m_ReferenceFrames.Count; ++i)
-                {
-                    var referenceFrame = m_ReferenceFrames[i];
-                    if (UpdateReferenceFrame(ref referenceFrame))
+                    // added
+                    if (!currentAnchors.ContainsKey(trackableId))
                     {
-                        // Update the version in our persistent storage container
-                        m_ReferenceFrames[i] = referenceFrame;
-                        updated[length++] = referenceFrame.anchor;
+                        var xrAnchor = new XRAnchor(trackableId, anchor.Pose, TrackingState.Tracking, IntPtr.Zero);
+                        added.Add(xrAnchor);
+                    }
+
+                    // updated
+                    else
+                    {
+                        var currentAnchor = currentAnchors[trackableId];
+                        currentAnchors.Remove(trackableId);
+
+                        if (!PosesAreApproximatelyEqual(currentAnchor.Pose, anchor.Pose))
+                        {
+                            var xrAnchor = new XRAnchor(trackableId, anchor.Pose, TrackingState.Tracking, IntPtr.Zero);
+                            updated.Add(xrAnchor);
+                        }
                     }
                 }
 
-                return updated;
-            }
-
-            /// <summary>
-            /// Populates <paramref name="removed"/> with the ids of the anchors
-            /// removed since the last call to <see cref="GetChanges(XRAnchor, Allocator)"/>.
-            /// </summary>
-            /// <param name="removed">An already created array to populate. Its length must match <see cref="m_PendingRemoves"/>.</param>
-            void GetRemoved(NativeArray<TrackableId> removed)
-            {
-                if (!removed.IsCreated)
-                    throw new ArgumentException("Array has not been created.", nameof(removed));
-
-                if (removed.Length != m_PendingRemoves.Count)
-                    throw new ArgumentException($"Array is not the correct size. Should be {m_PendingRemoves.Count} but is {removed.Length}.", nameof(removed));
-
-                for (int i = 0; i < removed.Length; ++i)
+                // removed
+                foreach (var remainingAnchor in currentAnchors.Values)
                 {
-                    removed[i] = m_PendingRemoves[i];
+                    var trackableId = GenerateTrackableId(remainingAnchor.Id);
+                    removed.Add(trackableId);
                 }
 
-                m_PendingRemoves.Clear();
-            }
+                // reinitialize currentAnchors in place to avoid garbage collection.
+                // cannot just add the updated anchors back in because some exiting anchors may not have qualified into the updated list.
+                currentAnchors.Clear();
+                foreach (var newAnchor in result.anchors)
+                {
+                    var trackableId = GenerateTrackableId(newAnchor.Id);
+                    currentAnchors.Add(trackableId, newAnchor);
+                }
 
-            public override unsafe TrackableChanges<XRAnchor> GetChanges(
-                XRAnchor defaultAnchor,
-                Allocator allocator)
-            {
-                using (var updated = GetUpdated(Allocator.Temp, out int updatedCount))
+                using (added)
+                using (updated)
+                using (removed)
                 {
                     var changes = new TrackableChanges<XRAnchor>(
-                        m_PendingAdds.Count,
-                        updatedCount,
-                        m_PendingRemoves.Count,
+                        added.Length,
+                        updated.Length,
+                        removed.Length,
                         allocator);
 
-                    GetAdded(changes.added);
-                    NativeArray<XRAnchor>.Copy(updated, changes.updated, updatedCount);
-                    GetRemoved(changes.removed);
+                    added.CopyTo(changes.added);
+                    updated.CopyTo(changes.updated);
+                    removed.CopyTo(changes.removed);
 
+                    Debug.Log("num added: " + added.Length + ", num updated: " + updated.Length + ", num removed: " + removed.Length);
                     return changes;
                 }
+
+
             }
 
-            public override unsafe bool TryAddAnchor(Pose pose, out XRAnchor anchor)
+            public override unsafe bool TryAddAnchor(Pose pose, out XRAnchor xrAnchor)
             {
 #if UNITY_MAGICLEAP || UNITY_ANDROID
-                if (m_TrackerHandle == Native.MagicLeapNativeBindings.InvalidHandle)
+                if (localizationInfo.LocalizationStatus != MLAnchors.LocalizationStatus.Localized)
                 {
-                    anchor = default;
+                    xrAnchor = default;
                     return false;
                 }
 
-
-                var unixTimestamp = (Int32)(DateTime.UtcNow.AddMinutes(10).Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
-                var createInfo = new MLAnchors.NativeBindings.MLSpatialAnchorCreateInfo(pose, (ulong)unixTimestamp);
-                var resultCode = MLAnchors.NativeBindings.MLSpatialAnchorCreate(m_TrackerHandle, in createInfo, out MLAnchors.NativeBindings.MLSpatialAnchor mlAnchor);
-                //Debug.Log($"MLSpatialAnchorCreate: {resultCode}");
-                Pose cloestAnchorPose = default;
-
-
-                // Get the pose position in right-handed coordinateds
-                //var mlTarget = FlipHandedness(pose.position);
-
-                if (queryHandle == Native.MagicLeapNativeBindings.InvalidHandle)
+                var result = MLAnchors.Anchor.Create(pose, 100, out MLAnchors.Anchor anchor);
+                if (!result.IsOk)
                 {
-                    //Debug.Log("queryHandle invalid, create nother");
-
-                    var r = CreateQueryForClosestAnchor();
-                    //Debug.Log("CreateQueryForClosestAnchor count: " + queryResultsCount);
-
-                    if (!MLResult.IsOK(r))
-                    {
-                        //Debug.Log("queryHandle still invalid");
-
-                        anchor = default;
-                        return false;
-                    }
+                    xrAnchor = default;
+                    return false;
+                }
+                
+                result = anchor.Publish();
+                if (!result.IsOk)
+                {
+                    xrAnchor = default;
+                    return false;
                 }
 
-                if (queryResultsCount > 0)
-                {
-                    //Debug.Log("results count: " + queryResultsCount);
-                    uint firstIndex = 0;
-                    uint lastIndex = queryResultsCount - 1;
-                    uint size = lastIndex - firstIndex + 1;
-                    var arr = new MLAnchors.NativeBindings.MLSpatialAnchor[size];
-                    resultCode = MLAnchors.NativeBindings.MLSpatialAnchorQueryGetResult(m_TrackerHandle, queryHandle, firstIndex, lastIndex, arr);
-
-                    if (!MLResult.IsOK(resultCode))
-                    {
-                        LogWarning($"Could not create anchor because MLSpatialAnchorQueryGetResult returned {resultCode}.");
-                        anchor = default;
-                        return false;
-                    }
-
-                    // Get the pose of the anchor
-                    if (!MLResult.IsOK(MagicLeapXrProviderNativeBindings.GetUnityPose(arr[0].Cfuid, out cloestAnchorPose)))
-                    {
-                        LogWarning($"Could not create anchor because no pose could be determined for coordinate frame {arr[0].Cfuid}.");
-                        anchor = default;
-                        return false;
-                    }
-                }
-
-                var referenceFrame = new ReferenceFrame(new ReferenceFrame.Cinfo
-                {
-                    closetCoordinateFrame = cloestAnchorPose,
-                    cfuid = mlAnchor.Cfuid,
-                    trackingState = TrackingState.Tracking,
-                    initialAnchorPose = pose
-                });
-
-                m_PendingAdds.Add(referenceFrame);
-                anchor = referenceFrame.anchor;
-                resultCode = MLAnchors.NativeBindings.MLSpatialAnchorQueryDestroy(m_TrackerHandle, queryHandle);
-                //Debug.Log("query destryed: " + resultCode);
-                queryHandle = Native.MagicLeapNativeBindings.InvalidHandle;
-
-                resultCode = MLAnchors.NativeBindings.MLSpatialAnchorPublish(m_TrackerHandle, mlAnchor.Id);
-                //Debug.Log("publishing anchor: " + resultCode);
-
-                return true;
+                xrAnchor = new XRAnchor(GenerateTrackableId(anchor.Id), anchor.Pose, TrackingState.Tracking, IntPtr.Zero);
+                return result.IsOk;
 #else
-                anchor = default;
+                xrAnchor = default;
                 return false;
 #endif
-            }
-
-            /// <summary>
-            /// Removes <paramref name="trackableId"/> from <paramref name="referenceFrames"/>
-            /// or returns false if the reference frame with <paramref name="trackableId"/>
-            /// is not found. If <paramref name="trackableId"/> is found, the dictionary
-            /// of coordinate frames <see cref="m_CoordinateFrames"/> is also updated.
-            /// </summary>
-            /// <param name="trackableId">The id of the reference frame to remove.</param>
-            /// <param name="referenceFrames">The list of reference frames to search.</param>
-            /// <returns><c>true</c> if found, <c>false</c> otherwise.</returns>
-            bool Remove(TrackableId trackableId, List<ReferenceFrame> referenceFrames)
-            {
-                // Removal is uncommon and we don't expect that many anchors,
-                // so a linear search should do.
-                for (int i = 0; i < referenceFrames.Count; ++i)
-                {
-                    var referenceFrame = referenceFrames[i];
-                    if (referenceFrame.trackableId.Equals(trackableId))
-                    {
-                        referenceFrames.RemoveAt(i);
-                        return true;
-                    }
-                }
-
-                return false;
             }
 
             public override bool TryRemoveAnchor(TrackableId trackableId)
             {
-                if (Remove(trackableId, m_PendingAdds))
-                {
-                    // Since it was pending, we have never reported it as added.
-                    // That means we should not report it as removed, so take no action.
-                    return true;
-                }
-                else if (Remove(trackableId, m_ReferenceFrames))
-                {
-                    // We must remember that we removed it here so that
-                    // we can report it as removed in the next call to GetChanges
-                    m_PendingRemoves.Add(trackableId);
-                    return true;
-                }
-                else
-                {
-                    // We don't know about this anchor
+                if (!currentAnchors.ContainsKey(trackableId))
                     return false;
-                }
-            }
 
-            List<ReferenceFrame> m_PendingAdds = new List<ReferenceFrame>();
-            List<ReferenceFrame> m_ReferenceFrames = new List<ReferenceFrame>();
-            List<TrackableId> m_PendingRemoves = new List<TrackableId>();
+                var anchor = currentAnchors[trackableId];
+
+                var result = anchor.Delete();
+                return result.IsOk;
+            }
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]

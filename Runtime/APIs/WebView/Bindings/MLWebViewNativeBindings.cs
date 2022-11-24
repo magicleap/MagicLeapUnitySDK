@@ -98,6 +98,11 @@ namespace UnityEngine.XR.MagicLeap
             public delegate void OnServiceDisconnectedCallback(IntPtr userData);
 
             /// <summary>
+            /// The delegate for the webview service failed event.
+            /// </summary>
+            public delegate void OnServiceFailedCallback(MLResult result, IntPtr userData);
+
+            /// <summary>
             /// Struct to define the cursor's state.
             /// </summary>
             [StructLayout(LayoutKind.Sequential)]
@@ -256,6 +261,11 @@ namespace UnityEngine.XR.MagicLeap
                 public OnServiceDisconnectedCallback OnServiceDisconnected;
 
                 /// <summary>
+                /// This callback is used to notify user that service failed to connect.
+                /// </summary>
+                public OnServiceFailedCallback OnServiceFailed;
+
+                /// <summary>
                 /// Create and return an initialized version of this struct.
                 /// <param name="userData">Pointer to user data to be used to reference the originating web view tab</param>
                 /// </summary>
@@ -264,7 +274,7 @@ namespace UnityEngine.XR.MagicLeap
                 {
                     return new EventCallbacks()
                     {
-                        Version = 1u,
+                        Version = 2u,
                         UserData = GCHandle.ToIntPtr(gcHandle),
                         OnBeforeResourceLoad = HandleOnBeforeResourceLoad,
                         OnLoadEnd = HandleOnLoadEnd,
@@ -274,7 +284,8 @@ namespace UnityEngine.XR.MagicLeap
                         OnKeyboardDismiss = HandleOnKeyboardDismiss,
                         OnDestroy = HandleOnDestroy,
                         OnServiceConnected = HandleServiceConnected,
-                        OnServiceDisconnected = HandleServiceDisconnected
+                        OnServiceDisconnected = HandleServiceDisconnected,
+                        OnServiceFailed = HandleServiceFailed
                     };
                 }
             };
@@ -323,6 +334,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="userData">Data that will be passed to your event handler when triggered.</param>
             /// <returns>MLResult.Code.Ok if event handler was set.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
+            /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLWebViewSetEventCallbacks(ulong handle, EventCallbacks callbacks, IntPtr userData);
 
@@ -332,7 +344,8 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="handle">The webview being accessed.</param>
             /// <param name="bufferHandle">The buffer that is ready to be rendered. A value of 0 indicates no frame is ready.</param>
             /// <returns>MLResult.Code.Ok if frame is ready.</returns>
-            /// <returns>MLResult.Code.InvalidParam if its nable to find the specified MLWebView handle..</returns>
+            /// <returns>MLResult.Code.InvalidParam if its nable to find the specified MLWebView handle.</returns>
+            /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLWebViewAcquireNextAvailableFrame(ulong handle, out IntPtr hwBuffer);
 
@@ -344,6 +357,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <returns>MLResult.Code.Ok if frame was successfully released.</returns>
             /// <returns>MLResult.Code.UnspecifiedFailure if error occurred releasing the frame.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
+            /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLWebViewReleaseFrame(ulong handle, IntPtr hwBuffer);
 
@@ -355,6 +369,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="url">URL that will be loaded.</param>
             /// <returns>MLResult.Code.Ok if WebView is attempting to load the specified URL.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
+            /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLWebViewGoTo(ulong handle, [MarshalAs(UnmanagedType.LPStr)] string url);
 
@@ -365,6 +380,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="handle">The webview being accessed.</param>
             /// <returns>MLResult.Code.Ok if WebView Back action was initiated or cannot go back any further.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
+            /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLWebViewGoBack(ulong handle);
 
@@ -375,6 +391,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="handle">The webview being accessed.</param>
             /// <returns>MLResult.Code.Ok if WebView Forward action was initiated or cannot go forward any further.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
+            /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLWebViewGoForward(ulong handle);
 
@@ -384,6 +401,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="handle">The webview being accessed.</param>
             /// <returns>MLResult.Code.Ok if WebView Reload action was initiated.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
+            /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLWebViewReload(ulong handle);
 
@@ -395,6 +413,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="outUrl">The URL up to inoutSize of characters.</param>
             /// <returns>MLResult.Code.Ok if WebView URL was acquired.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
+            /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLWebViewGetUrl(ulong handle, out uint inoutSize, IntPtr outUrl);
 
@@ -405,6 +424,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="outCanGoBack">True if "Back" has a valid page to go to.</param>
             /// <returns>MLResult.Code.Ok if status of going "Back" was acquired.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
+            /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLWebViewCanGoBack(ulong handle, [MarshalAs(UnmanagedType.I1)] out bool outCanGoBack);
 
@@ -415,6 +435,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="outCanGoForward">True if "Forward" has a valid page to go to.</param>
             /// <returns>MLResult.Code.Ok if status of going "Forward" was acquired.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
+            /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLWebViewCanGoForward(ulong handle, [MarshalAs(UnmanagedType.I1)] out bool outCanGoForward);
 
@@ -425,6 +446,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="cursorState">Information about the mouse movement.</param>
             /// <returns>MLResult.Code.Ok if internal mouse was moved.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
+            /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
 
             public static extern MLResult.Code MLWebViewInjectMouseMove(ulong handle, ref CursorState cursorState);
@@ -436,6 +458,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="cursorState">Information about the mouse button event.</param>
             /// <returns>MLResult.Code.Ok if successful.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
+            /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLWebViewInjectMouseButtonDown(ulong handle, ref CursorState cursorState);
 
@@ -446,6 +469,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="cursorState">Information about the mouse button event.</param>
             /// <returns>MLResult.Code.Ok if successful.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
+            /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLWebViewInjectMouseButtonUp(ulong handle, ref CursorState cursorState);
 
@@ -456,6 +480,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="charUtf32">printable char utf code</param>
             /// <returns>MLResult.Code.Ok if key event was injected.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
+            /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLWebViewInjectChar(ulong handle, uint charUtf32);
 
@@ -467,6 +492,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="modifierMask">Should be one or combination of MLWebView.EventFlags.</param>
             /// <returns>MLResult.Code.Ok if key event was injected.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
+            /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLWebViewInjectKeyDown(ulong handle, MLWebView.KeyCode keyCode, uint modifierMask);
 
@@ -478,6 +504,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="modifierMask">Should be one or combination of MLWebView.EventFlags.</param>
             /// <returns>MLResult.Code.Ok if key event was injected.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
+            /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLWebViewInjectKeyUp(ulong handle, MLWebView.KeyCode keyCode, uint modifierMask);
 
@@ -488,6 +515,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <returns>MLResult.Code.Ok if MLWebView zoom was reset.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
             /// <returns>MLResult.Code.UnspecifiedFailure if it failed to reset zoom due to an internal error.</returns>
+            /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLWebViewResetZoom(ulong handle);
 
@@ -499,6 +527,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
             /// <returns>MLResult.Code.WebViewResultZoomLimitReached if cannot zoom in any further.</returns>
             /// <returns>MLResult.Code.UnspecifiedFailure if it failed to reset zoom due to an internal error.</returns>
+            /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLWebViewZoomIn(ulong handle);
 
@@ -510,6 +539,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
             /// <returns>MLResult.Code.WebViewResultZoomLimitReached if cannot zoom out any further.</returns>
             /// <returns>MLResult.Code.UnspecifiedFailure if it failed to reset zoom due to an internal error.</returns>
+            /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLWebViewZoomOut(ulong handle);
 
@@ -521,6 +551,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <returns>MLResult.Code.Ok if outZoomFactor parameter was updated with the current zoom value.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
             /// <returns>MLResult.Code.UnspecifiedFailure if failed to get the zoom factor due to an internal error.</returns>
+            /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLWebViewGetZoomFactor(ulong handle, out double outZoomFactor);
 
@@ -532,6 +563,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="yPixels">The number of pixels to scroll on the y axis.</param>
             /// <returns>MLResult.Code.Ok if MLWebView was scrolled.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
+            /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLWebViewScrollBy(ulong handle, uint xPixels, uint yPixels);
 
@@ -544,7 +576,8 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="handle">The webview being accessed.</param>
             /// <param name="width">The number representing the entire width of the webview, in pixels.</param>
             /// <param name="height">The number representing the entire height of the webview, in pixels.</param>
-            /// <returns></returns>
+            /// <returns>MLResult.Code.Ok if MLWebView scroll size values were retrieved.</returns>
+            /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLWebViewGetScrollSize(ulong handle, out int width, out int height);
 
@@ -554,7 +587,8 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="handle">The webview being accessed.</param>
             /// <param name="x">The number representing the horizontal offset of the webview, in pixels.</param>
             /// <param name="y">The number representing the vertical offset of the webview, in pixels.</param>
-            /// <returns></returns>
+            /// <returns>MLResult.Code.Ok if MLWebView scroll offset values were retrieved.</returns>
+            /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLWebViewGetScrollOffset(ulong handle, out int x, out int y);
 
@@ -568,6 +602,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="handle">The webview being accessed.</param>
             /// <param name="outMtx">The retrieved matrix.</param>
             /// <returns>MLResult.Code.Ok if constant matrix was retrieved.</returns>
+            /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLWebViewGetFrameTransformMatrix(ulong handle, out MLMat4f outMtx);
 
@@ -578,6 +613,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <returns>MLResult.Code.Ok if all cookies removed successfully.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
             /// <returns>MLResult.Code.UnspecifiedFailure if removing all cookies failed due to an internal error.</returns>
+            /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLWebViewRemoveAllCookies(ulong handle);
 
@@ -588,6 +624,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <returns>MLResult.Code.Ok if cache cleared successfully</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
             /// <returns>MLResult.Code.UnspecifiedFailure if clearing cache failed due to an internal error.</returns>
+            /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLWebViewClearCache(ulong handle);
 
@@ -726,6 +763,19 @@ namespace UnityEngine.XR.MagicLeap
                 GCHandle gcHandle = GCHandle.FromIntPtr(userData);
                 MLWebView webView = gcHandle.Target as MLWebView;
                 MLThreadDispatch.Call(webView, webView.OnServiceDisconnected);
+            }
+
+            /// <summary>
+            /// Callback from the native code when Service failed to connect.
+            /// </summary>
+            /// <param name="result">The MLResult code associated with the failure.</param>
+            /// <param name="userData">User defined data, typically a pointer to the originating MLWebView object.</param>
+            [AOT.MonoPInvokeCallback(typeof(OnServiceFailedCallback))]
+            private static void HandleServiceFailed(MLResult result, IntPtr userData)
+            {
+                GCHandle gcHandle = GCHandle.FromIntPtr(userData);
+                MLWebView webView = gcHandle.Target as MLWebView;
+                MLThreadDispatch.Call(webView, result, webView.OnServiceFailed);
             }
         }
     }

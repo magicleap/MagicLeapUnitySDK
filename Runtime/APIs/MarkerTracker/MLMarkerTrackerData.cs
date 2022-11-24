@@ -57,6 +57,7 @@ namespace UnityEngine.XR.MagicLeap
         /// Marker Tracker supports pre-defined ArUco dictionary and AprilTags.
         /// ArUco dictionaries can be looked up and markers can be generated for them here:
         ///  http://chev.me/arucogen/
+        ///  Note: Due to 4X4 dictionaries suffering from frequent false detections, we discourage their use.
         /// </summary>
         public enum ArucoDictionaryName
         {
