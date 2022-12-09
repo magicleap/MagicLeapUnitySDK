@@ -12,7 +12,7 @@ namespace UnityEngine.XR.MagicLeap
 {
     using System;
     using System.Runtime.InteropServices;
-    
+
     [RequireComponent(typeof(AudioListener))]
     [DisallowMultipleComponent]
     public class MLAudioOutputPluginBehavior : MonoBehaviour
@@ -21,7 +21,7 @@ namespace UnityEngine.XR.MagicLeap
 
         void Start()
         {
-#if UNITY_EDITOR && UNITY_ANDROID
+#if UNITY_EDITOR
             string spatializerPluginName = AudioSettings.GetSpatializerPluginName();
             if (spatializerPluginName.ToLower().Contains(MSAPluginId.ToLower()))
             {
@@ -38,14 +38,14 @@ namespace UnityEngine.XR.MagicLeap
         // OnAudioFilterRead runs outside of the main thread and before Start().
         void OnAudioFilterRead(float[] data, int channels)
         {
-#if UNITY_EDITOR && UNITY_ANDROID
+#if UNITY_EDITOR
             MLAudioPlayback.SubmitBuffer(data, channels);
 #endif
         }
 
         private void OnDestroy()
         {
-#if UNITY_EDITOR && UNITY_ANDROID
+#if UNITY_EDITOR
             MLAudioPlayback.DestroyAudioBuffer();
 #endif
         }

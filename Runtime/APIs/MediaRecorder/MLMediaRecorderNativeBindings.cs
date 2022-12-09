@@ -8,7 +8,6 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
 using UnityEngine.XR.MagicLeap.Native;
 
 namespace UnityEngine.XR.MagicLeap
@@ -59,7 +58,7 @@ namespace UnityEngine.XR.MagicLeap
                 /// Holds 0 for the generic info (returned via on_info callback).
                 /// </summary>
                 public uint TrackId;
-                
+
                 /// <summary>
                 /// The error of MLMediaRecorderError
                 /// </summary>
@@ -99,7 +98,7 @@ namespace UnityEngine.XR.MagicLeap
                 /// Holds 0 for the generic info (returned via on_info callback).
                 /// </summary>
                 public uint TrackId;
-                
+
                 /// <summary>
                 /// The info of MLMediaRecorderInfo
                 /// </summary>
@@ -346,7 +345,7 @@ namespace UnityEngine.XR.MagicLeap
             {
                 GCHandle gcHandle = GCHandle.FromIntPtr(trackInfo.Data);
                 MLMediaRecorder mediaRecorder = gcHandle.Target as MLMediaRecorder;
-                
+
                 OnTrackInfoData mediaRecorderInfo = new OnTrackInfoData()
                 {
                     TrackId = trackInfo.TrackId,
@@ -365,7 +364,7 @@ namespace UnityEngine.XR.MagicLeap
             {
                 GCHandle gcHandle = GCHandle.FromIntPtr(error.Data);
                 MLMediaRecorder mediaRecorder = gcHandle.Target as MLMediaRecorder;
-                
+
                 OnErrorData mediaRecorderError = new OnErrorData()
                 {
                     Error = error.Error,
@@ -383,7 +382,7 @@ namespace UnityEngine.XR.MagicLeap
             {
                 GCHandle gcHandle = GCHandle.FromIntPtr(trackError.Data);
                 MLMediaRecorder mediaRecorder = gcHandle.Target as MLMediaRecorder;
-                
+
                 OnTrackErrorData mediaRecorderError = new OnTrackErrorData()
                 {
                     TrackId = trackError.TrackId,
@@ -396,5 +395,3 @@ namespace UnityEngine.XR.MagicLeap
         }
     }
 }
-
-#endif

@@ -8,8 +8,6 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-
 // Disable warnings about missing documentation for native interop.
 #pragma warning disable 1591
 namespace UnityEngine.XR.MagicLeap
@@ -212,5 +210,3 @@ namespace UnityEngine.XR.MagicLeap
         }
     }
 }
-
-#endif

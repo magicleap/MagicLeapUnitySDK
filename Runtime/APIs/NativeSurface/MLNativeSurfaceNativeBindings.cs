@@ -16,7 +16,6 @@ namespace UnityEngine.XR.MagicLeap
 {
     public partial class MLNativeSurface
     {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
         private sealed class NativeBindings : MagicLeapNativeBindings
         {
             [DllImport(MLNativeSurfaceDll, CallingConvention = CallingConvention.Cdecl)]
@@ -119,6 +118,5 @@ namespace UnityEngine.XR.MagicLeap
                 }
             }
         }
-#endif
     }
 }

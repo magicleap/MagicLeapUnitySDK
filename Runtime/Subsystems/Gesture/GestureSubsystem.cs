@@ -9,9 +9,9 @@
 // %BANNER_END%
 
 using System;
-using Unity.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using Unity.Collections;
 using UnityEngine.Scripting;
 using UnityEngine.XR.InteractionSubsystems;
 
@@ -45,12 +45,7 @@ namespace UnityEngine.XR.MagicLeap
         {
             get
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 return MagicLeapXrProviderNativeBindings.GetControllerTrackerHandle() != MagicLeap.Native.MagicLeapNativeBindings.InvalidHandle;
-#else
-                Debug.LogWarning("Attempting to get MagicLeapGestureSubsystem.ControllerGesturesEnabled while not on the Magic Leap platform.  This will be ignored.");
-                return false;
-#endif
             }
         }
 
@@ -82,7 +77,6 @@ namespace UnityEngine.XR.MagicLeap
 
             public override void Update()
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 int activationGestureEvents = 0;
                 m_TouchpadGestureEvents.Clear();
 
@@ -103,14 +97,13 @@ namespace UnityEngine.XR.MagicLeap
                 }
 
                 UpdateActivationGestures(activationGestureEvents);
-#endif
             }
 
             public override void Destroy()
             {
                 base.Destroy();
             }
-            
+
             private void UpdateActivationGestures(int numActivationGestureEvents)
             {
                 if (m_ActivateGestureEvents.IsCreated)
@@ -125,12 +118,9 @@ namespace UnityEngine.XR.MagicLeap
             }
         }
 
-#if UNITY_EDITOR || UNITY_MAGICLEAP || UNITY_ANDROID
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-#endif
         static void RegisterDescriptor()
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             XRGestureSubsystemDescriptor.RegisterDescriptor(
                 new XRGestureSubsystemDescriptor.Cinfo
                 {
@@ -138,7 +128,6 @@ namespace UnityEngine.XR.MagicLeap
                     subsystemImplementationType = typeof(GestureSubsystem),
                 }
             );
-#endif
         }
 
         // High GUID bits saved for common (Activate) gesture for this subsystem
@@ -167,9 +156,7 @@ namespace UnityEngine.XR.MagicLeap
 
             public Extensions.TouchpadGestureEvent currentGestureEvent;
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             private byte[] stateData = new byte[Marshal.SizeOf<InputSubsystem.Extensions.Controller.NativeBindings.MLInputControllerState>()];
-#endif
 
             public override void UpdateGesture(out bool isNewGesture)
             {
@@ -180,7 +167,6 @@ namespace UnityEngine.XR.MagicLeap
                     return;
                 }
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 // only continue if the keypose has changed
                 if (this.device.TryGetFeatureValue(InputSubsystem.Extensions.DeviceFeatureUsages.Controller.State, this.stateData))
                 {
@@ -205,7 +191,6 @@ namespace UnityEngine.XR.MagicLeap
                     isNewGesture = true;
                     return;
                 }
-#endif
             }
 
         }

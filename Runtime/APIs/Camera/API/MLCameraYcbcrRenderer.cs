@@ -11,10 +11,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-#if UNITY_MAGICLEAP || UNITY_ANDROID
 using UnityEngine.XR.MagicLeap.Native;
-#endif
 
 namespace UnityEngine.XR.MagicLeap
 {
@@ -25,12 +22,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <summary>
             /// Buffer received from Camera Preview.
             /// </summary>
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             public ulong PreviewBuffer = MagicLeapNativeBindings.InvalidHandle;
-#else
-            public ulong PreviewBuffer;
-
-#endif
             public Renderer()
             {
                 Initialize();
@@ -39,12 +31,7 @@ namespace UnityEngine.XR.MagicLeap
             bool INativeBufferProvider.AcquireNextAvailableBuffer(out ulong nativeBufferHandle)
             {
                 nativeBufferHandle = PreviewBuffer;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 return MagicLeapNativeBindings.MLHandleIsValid(PreviewBuffer);
-#else
-                return false;
-
-#endif
             }
 
             void INativeBufferProvider.ReleaseBuffer(ulong nativeBufferHandle)

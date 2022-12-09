@@ -7,7 +7,6 @@
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
-#if UNITY_MAGICLEAP || UNITY_ANDROID
 
 namespace UnityEngine.XR.MagicLeap
 {
@@ -402,5 +401,3 @@ namespace UnityEngine.XR.MagicLeap
         }
     }
 }
-
-#endif

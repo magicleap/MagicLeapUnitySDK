@@ -10,8 +10,6 @@
 
 using System.Runtime.InteropServices;
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-
 namespace UnityEngine.XR.MagicLeap
 {
     using System;
@@ -20,7 +18,7 @@ namespace UnityEngine.XR.MagicLeap
     /// <summary>
     /// MLMediaTTML Summary placeholder.
     /// </summary>
-    public partial class MLMediaTTML 
+    public partial class MLMediaTTML
     {
         private MLMediaTTML.MLTTMLData TTMLDataToPublic(NativeBindings.MLTTMLData internalData)
         {
@@ -44,24 +42,22 @@ namespace UnityEngine.XR.MagicLeap
                 TextSize = internalData.TextSize,
             };
         }
-        
+
         private MLMediaTTML.MLTTMLImage TTMLImageToPublic(NativeBindings.MLTTMLImage internalImage)
         {
             byte[] outBuffer = new byte[internalImage.Size];
             Marshal.Copy(internalImage.Data, outBuffer, 0, (int)internalImage.Size);
-            
+
             return MLMediaTTML.MLTTMLImage.Create(outBuffer, (uint)internalImage.Size);
         }
-        
+
         private NativeBindings.MLTTMLImage TTMLImageToNative(MLMediaTTML.MLTTMLImage internalImage)
         {
             var buffer = internalImage.Data;
             IntPtr unmanagedPointer = Marshal.AllocHGlobal(buffer.Length);
             Marshal.Copy(buffer, 0, unmanagedPointer, buffer.Length);
-            
+
             return NativeBindings.MLTTMLImage.Create(unmanagedPointer, (uint)buffer.Length);
         }
     }
 }
-
-#endif

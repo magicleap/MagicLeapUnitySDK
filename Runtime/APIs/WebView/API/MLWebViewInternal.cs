@@ -8,8 +8,6 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-
 namespace UnityEngine.XR.MagicLeap
 {
     using System;
@@ -31,9 +29,7 @@ namespace UnityEngine.XR.MagicLeap
         private MLWebView()
         {
             gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             Handle = Native.MagicLeapNativeBindings.InvalidHandle;
-#endif
         }
 
         ~MLWebView()
@@ -217,7 +213,7 @@ namespace UnityEngine.XR.MagicLeap
             }
 
             MLResult.Code result = NativeBindings.MLWebViewCanGoBack(Handle, out canGoBack);
-            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewCanGoBack));
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewCanGoBack), IllegalStatePredicate);
             return canGoBack;
         }
 
@@ -237,9 +233,14 @@ namespace UnityEngine.XR.MagicLeap
             }
 
             MLResult.Code result = NativeBindings.MLWebViewCanGoForward(Handle, out canGoForward);
-            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewCanGoForward));
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewCanGoForward), IllegalStatePredicate);
             return canGoForward;
         }
+
+        /// <summary>
+        /// Illegal state just means that webview is paused, use this to not log an error for appropriate functions.
+        /// </summary>
+        private bool IllegalStatePredicate(MLResult.Code code) => code == MLResult.Code.Ok || code == MLResult.Code.IllegalState;
 
         /// <summary>
         /// Moves the WebView mouse.
@@ -513,7 +514,7 @@ namespace UnityEngine.XR.MagicLeap
             }
 
             MLResult.Code result = NativeBindings.MLWebViewGetZoomFactor(Handle, out zoomFactor);
-            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewGetZoomFactor));
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewGetZoomFactor), IllegalStatePredicate);
             return zoomFactor;
         }
 
@@ -556,7 +557,38 @@ namespace UnityEngine.XR.MagicLeap
             MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewClearCache));
             return result;
         }
+
+
+        /// <summary>
+        /// Pause the webview. Call MLWebViewResume to resume.
+        /// This method provides a multiple pause types to the webview.
+        /// </summary>
+        /// <param name="pauseType">The type of pause to be used.</param>
+        /// <returns>MLResult.Code.Ok if paused successfully.</returns>
+        /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle or PauseType value.</returns>
+        /// <returns>MLResult.Code.UnspecifiedFailure if failed due to an internal error.</returns>
+        /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use. See an asynchronous mode of MLWebViewCreate.</returns>
+        private MLResult.Code PauseInternal(PauseType pauseType)
+        {
+            MLResult.Code result = NativeBindings.MLWebViewPause(Handle, pauseType);
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewPause));
+            return result;
+        }
+
+        /// <summary>
+        /// Resumes a webview after a previous call of the MLWebViewPause.
+        /// Resume webview to the normal operation for all webview pause types.
+        /// </summary>
+        /// <returns>MLResult.Code.Ok if resumed successfully.</returns>
+        /// <returns>MLResult.Code.IllegalState if WebView was paused. See MLWebViewPause.</returns>
+        /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
+        /// <returns>MLResult.Code.UnspecifiedFailure if failed due to an internal error.</returns>
+        /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use. See an asynchronous mode of MLWebViewCreate.</returns>
+        private MLResult.Code ResumeInternal()
+        {
+            MLResult.Code result = NativeBindings.MLWebViewResume(Handle);
+            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewResume));
+            return result;
+        }
     }
 }
-
-#endif

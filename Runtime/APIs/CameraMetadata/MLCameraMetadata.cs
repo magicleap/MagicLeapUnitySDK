@@ -11,9 +11,7 @@
 namespace UnityEngine.XR.MagicLeap
 {
     using System;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
     using UnityEngine.XR.MagicLeap.Native;
-#endif
 
     public partial class MLCamera
     {

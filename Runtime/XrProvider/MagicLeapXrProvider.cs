@@ -132,20 +132,13 @@ namespace UnityEngine.XR.MagicLeap
             {
                 Debug.LogError($"Adding library search paths failed with error {e.Message}");
             }
-#if !(UNITY_MAGICLEAP || UNITY_ANDROID)
-            if (isZIRunning)
-            {
-                Debug.LogError("When using ML App Sim you should be in Android build target instead of current build target.");
-                EditorApplication.isPlaying = false;
-            }
-#endif
 #endif
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void SetupLoaderLibPathInXRPackage()
         {
-#if UNITY_ANDROID && !UNITY_EDITOR
+#if !UNITY_EDITOR
             // AddLibrarySearchPaths() is only invoked by AppSimShimLibSupport.cs and contains more complex logic to setting the various
             // lib search paths which isnt really required when running on device. On device, we need to simply set a dummy path in the
             // xr package (because on android we don't need to dlopen() on full lib paths, all valid paths are already in LD_LIBRARY_PATH

@@ -65,7 +65,6 @@ namespace UnityEngine.XR.MagicLeap
         }
 
         #region MLAutoAPISingleton
-#if UNITY_ANDROID
         /// <summary>
         /// Start the API.
         /// </summary>
@@ -92,7 +91,6 @@ namespace UnityEngine.XR.MagicLeap
                 Instance.InternalMLHeadsetFitCreateClient();
             }
         }
-#endif
         #endregion
 
         /// <summary>

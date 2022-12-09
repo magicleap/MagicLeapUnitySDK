@@ -15,9 +15,7 @@ namespace UnityEngine.XR.MagicLeap
     using System.Runtime.InteropServices;
     using UnityEngine;
     using UnityEngine.Rendering;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
     using UnityEngine.XR.MagicLeap.Native;
-#endif
 
     /// <summary>
     /// MLMedia APIs.
@@ -32,7 +30,6 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public partial class ParserCEA608
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             public class NativeBindings : MagicLeapNativeBindings
             {
                 private const int MLCea608_TS = 0x00A0;
@@ -140,7 +137,6 @@ namespace UnityEngine.XR.MagicLeap
                     MLThreadDispatch.Call(parser.lines.ToArray(), parser.OnCaptionLines);
                 }
             }
-#endif
         }
     }
 }

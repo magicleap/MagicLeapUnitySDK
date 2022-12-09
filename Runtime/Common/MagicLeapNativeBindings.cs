@@ -148,7 +148,6 @@ namespace UnityEngine.XR.MagicLeap.Native
                     }
             }
         }
-#if UNITY_MAGICLEAP || UNITY_ANDROID
 
         /// <summary>
         /// Returns an ASCII string for MLSnapshotResult codes.
@@ -172,9 +171,6 @@ namespace UnityEngine.XR.MagicLeap.Native
 
             return string.Empty;
         }
-#endif
-
-#if UNITY_MAGICLEAP || UNITY_ANDROID
 
         /// <summary>
         /// Returns an ASCII string for MLSnapshotResult codes.
@@ -198,7 +194,6 @@ namespace UnityEngine.XR.MagicLeap.Native
 
             return string.Empty;
         }
-#endif
 
         /// <summary>
         /// Pull in the latest state of all persistent transforms and all

@@ -8,7 +8,6 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
 namespace UnityEngine.XR.MagicLeap
 {
     using System;
@@ -51,7 +50,7 @@ namespace UnityEngine.XR.MagicLeap
 
                     AppDefinedSource.NativeBindings.MLWebRTCAppDefinedSourceEventCallbacks callbacks = AppDefinedSource.NativeBindings.MLWebRTCAppDefinedSourceEventCallbacks.Create(gcHandlePtr, OnSetEnabled, OnDestroyed);
                     MLResult.Code resultCode = NativeBindings.MLWebRTCSourceCreateAppDefinedVideoSource(in callbacks, out appDefinedVideoSourceHandle);
-                    
+
                     appDefinedVideoSource.Handle = appDefinedVideoSourceHandle;
 
                     if (!MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCSourceCreateAppDefinedVideoSource)))
@@ -114,4 +113,3 @@ namespace UnityEngine.XR.MagicLeap
         }
     }
 }
-#endif

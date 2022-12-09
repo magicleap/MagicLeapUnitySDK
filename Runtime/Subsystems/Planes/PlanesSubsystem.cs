@@ -13,8 +13,8 @@ using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
-using UnityEngine.XR.ARSubsystems;
 using UnityEngine.Scripting;
+using UnityEngine.XR.ARSubsystems;
 using UnityEngine.XR.MagicLeap.Native;
 
 namespace UnityEngine.XR.MagicLeap
@@ -195,7 +195,6 @@ namespace UnityEngine.XR.MagicLeap
 
             public override void Stop()
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 if (_planesTracker != Native.MagicLeapNativeBindings.InvalidHandle)
                 {
                     if (_boundariesList.valid)
@@ -210,7 +209,6 @@ namespace UnityEngine.XR.MagicLeap
 
                 SubsystemFeatures.SetFeatureRequested(Feature.PlaneTracking, false);
                 _QueryHandle = Native.MagicLeapNativeBindings.InvalidHandle;
-#endif
             }
 
             public override void Destroy() { }
@@ -455,7 +453,6 @@ namespace UnityEngine.XR.MagicLeap
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void RegisterDescriptor()
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             XRPlaneSubsystemDescriptor.Create(new XRPlaneSubsystemDescriptor.Cinfo
             {
                 id = MagicLeapXrProvider.PlanesSubsystemId,
@@ -470,7 +467,6 @@ namespace UnityEngine.XR.MagicLeap
                 supportsBoundaryVertices = true,
                 supportsClassification = true
             });
-#endif
         }
 
         internal class NativeBindings : MagicLeapNativeBindings

@@ -8,8 +8,6 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-
 namespace UnityEngine.XR.MagicLeap
 {
     public partial class MLGazeRecognition
@@ -106,4 +104,3 @@ namespace UnityEngine.XR.MagicLeap
         }
     }
 }
-#endif

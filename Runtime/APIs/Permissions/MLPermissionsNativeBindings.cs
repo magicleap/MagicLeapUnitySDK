@@ -8,8 +8,6 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID && UNITY_EDITOR
-
 namespace UnityEngine.XR.MagicLeap
 {
     using System.Runtime.InteropServices;
@@ -79,4 +77,3 @@ namespace UnityEngine.XR.MagicLeap
     }
 }
 
-#endif

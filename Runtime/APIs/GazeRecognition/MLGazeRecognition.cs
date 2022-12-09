@@ -8,8 +8,6 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-
 namespace UnityEngine.XR.MagicLeap
 {
     /// <summary>
@@ -40,4 +38,3 @@ namespace UnityEngine.XR.MagicLeap
         public static MLResult GetStaticData(out StaticData data) => MLResult.Create(Instance.InternalMLGazeRecognitionGetStaticData(out data));
     }
 }
-#endif

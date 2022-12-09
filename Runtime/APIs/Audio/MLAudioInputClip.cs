@@ -121,7 +121,6 @@ namespace UnityEngine.XR.MagicLeap
                 mlAudioClips.Add(this);
                 gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
 
-#if UNITY_ANDROID
                 // get the best buffer format to use
                 MLResult.Code resultCode = NativeBindings.MLAudioGetBufferedInputDefaults(channels, (uint)GetSampleRate(captureType), out MLAudioOutput.NativeBindings.MLAudioBufferFormat bufferFormat, out uint recommendedSizeInBytes, out uint minimumSizeInBytes);
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLAudioGetBufferedInputDefaults));
@@ -133,7 +132,6 @@ namespace UnityEngine.XR.MagicLeap
                 // start the stream
                 resultCode = NativeBindings.MLAudioStartInput(captureHandle);
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLAudioStartInput));
-#endif
             }
 
             ~Clip() => Dispose();
@@ -149,10 +147,10 @@ namespace UnityEngine.XR.MagicLeap
                     return;
 
                 gcHandle.Free();
-#if UNITY_ANDROID
+
                 var resultCode = NativeBindings.MLAudioStopInput(captureHandle);
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLAudioStopInput));
-#endif
+
                 captureHandle = Native.MagicLeapNativeBindings.InvalidHandle;
             }
 
@@ -161,7 +159,6 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private void CopyMLAudioInputBuffer()
             {
-#if UNITY_ANDROID
                 var resultCode = NativeBindings.MLAudioGetInputBuffer(captureHandle, out MLAudioOutput.NativeBindings.MLAudioBuffer buffer);
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLAudioGetInputBuffer));
 
@@ -185,10 +182,8 @@ namespace UnityEngine.XR.MagicLeap
 
                 resultCode = NativeBindings.MLAudioReleaseInputBuffer(captureHandle);
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLAudioReleaseInputBuffer));
-#endif
             }
 
-#if UNITY_ANDROID
             /// <summary>
             /// Native callback for when an input buffer becomes available.
             /// Converts the input buffer's data and copies it into the AudioClip's data.
@@ -203,7 +198,6 @@ namespace UnityEngine.XR.MagicLeap
 
                 mlAudioInputClip.CopyMLAudioInputBuffer();
             }
-#endif
 
             /// <summary>
             /// Gets called from a thread when new samples are recorded.

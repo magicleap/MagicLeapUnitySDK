@@ -8,8 +8,6 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-
 namespace UnityEngine.XR.MagicLeap.Native
 {
     using System;
@@ -45,7 +43,7 @@ namespace UnityEngine.XR.MagicLeap.Native
             if (TextureFormat.DXT1 == texture.format)
             {
                 Color32[] colorArray = texture.GetPixels32();
-                numChannels  = Marshal.SizeOf(typeof(Color32));
+                numChannels = Marshal.SizeOf(typeof(Color32));
                 int totalBytes = numChannels * colorArray.Length;
                 encodedImage = new byte[totalBytes];
                 GCHandle handle = default(GCHandle);
@@ -94,5 +92,3 @@ namespace UnityEngine.XR.MagicLeap.Native
         }
     }
 }
-
-#endif

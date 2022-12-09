@@ -108,12 +108,10 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public void Hover()
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             //if (_controllerConnectionHandler != null && _controllerConnectionHandler.ConnectedController != null)
             //{
             //    _controllerConnectionHandler.ConnectedController.StartFeedbackPatternVibe(MLInput.Controller.FeedbackPatternVibe.Bump, MLInput.Controller.FeedbackIntensity.Low);
             //}
-#endif
         }
 
         /// <summary>

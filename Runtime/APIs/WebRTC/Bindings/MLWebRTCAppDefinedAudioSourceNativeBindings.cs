@@ -12,9 +12,7 @@ namespace UnityEngine.XR.MagicLeap
 {
     using System;
     using System.Runtime.InteropServices;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
     using UnityEngine.XR.MagicLeap.Native;
-#endif
 
     /// <summary>
     /// MLWebRTC class contains the API to interface with the
@@ -30,10 +28,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <summary>
             /// Native bindings for the MLWebRTC.AppDefinedAudioSource class. 
             /// </summary>
-            internal new class NativeBindings
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-                : MagicLeapNativeBindings
-#endif
+            internal new class NativeBindings : MagicLeapNativeBindings
             {
                 /// <summary>
                 /// Initialized a given AppDefinedAudioSource object and sets it's callbacks.
@@ -46,7 +41,6 @@ namespace UnityEngine.XR.MagicLeap
                 /// </returns>
                 public static MLResult.Code InitializeAppDefinedAudioSource(MLWebRTC.AppDefinedAudioSource appDefinedAudioSource)
                 {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                     appDefinedAudioSource.TrackType = Type.Audio;
                     appDefinedAudioSource.IsLocal = true;
                     appDefinedAudioSource.gcHandle = GCHandle.Alloc(appDefinedAudioSource);
@@ -57,7 +51,7 @@ namespace UnityEngine.XR.MagicLeap
                     ulong appDefinedAudioSourceHandle = MagicLeapNativeBindings.InvalidHandle;
                     var sourceParams = Source.NativeBindings.MLWebRTCAppDefinedSourceParams.Create(appDefinedAudioSource.Id, callbacks);
                     MLResult.Code resultCode = Source.NativeBindings.MLWebRTCSourceCreateAppDefinedAudioSourceEx(ref sourceParams, out appDefinedAudioSourceHandle);
-                   
+
                     appDefinedAudioSource.Handle = appDefinedAudioSourceHandle;
                     if (!MLResult.DidNativeCallSucceed(resultCode, nameof(Source.NativeBindings.MLWebRTCSourceCreateAppDefinedAudioSourceEx)))
                     {
@@ -66,15 +60,10 @@ namespace UnityEngine.XR.MagicLeap
                     }
 
                     return resultCode;
-#else
-                    appDefinedAudioSource = null;
-                    return MLResult.Code.Ok;
-#endif
                 }
 
                 public static MLResult.Code PushData(ulong sourceHandle, byte[] audioBuffer, in MLAudioOutput.BufferFormat audioBufferFormat)
                 {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                     MLAudioOutput.NativeBindings.MLAudioBuffer audioBufferNative = new MLAudioOutput.NativeBindings.MLAudioBuffer();
                     audioBufferNative.Size = (uint)audioBuffer.Length;
                     // TODO : pool this memory since audio buffers should be expected to be submitted every frame?
@@ -89,14 +78,10 @@ namespace UnityEngine.XR.MagicLeap
                     Marshal.FreeHGlobal(audioBufferNative.Ptr);
 
                     return resultCode;
-#else
-                    return MLResult.Code.Ok;
-#endif
                 }
 
                 public static MLResult.Code PushData(ulong sourceHandle, float[] audioBuffer, in MLAudioOutput.BufferFormat audioBufferFormat)
                 {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                     MLAudioOutput.NativeBindings.MLAudioBuffer audioBufferNative = new MLAudioOutput.NativeBindings.MLAudioBuffer();
                     int numBytes = (audioBuffer.Length * sizeof(float));
                     audioBufferNative.Size = (uint)numBytes;
@@ -112,12 +97,8 @@ namespace UnityEngine.XR.MagicLeap
                     Marshal.FreeHGlobal(audioBufferNative.Ptr);
 
                     return resultCode;
-#else
-                    return MLResult.Code.Ok;
-#endif
                 }
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 /// <summary>
                 /// Callback that is invoked when the source has been enabled or disabled. This callback will be called on the main thread.
                 /// </summary>
@@ -167,7 +148,6 @@ namespace UnityEngine.XR.MagicLeap
                 /// </returns>
                 [DllImport(MLWebRTCDLL, CallingConvention = CallingConvention.Cdecl)]
                 public static extern MLResult.Code MLWebRTCSourceAppDefinedAudioSourcePushData(ulong sourceHandle, in MLAudioOutput.NativeBindings.MLAudioBuffer audioBuffer, in MLAudioOutput.NativeBindings.MLAudioBufferFormat audioBufferFormat);
-#endif
             }
         }
     }

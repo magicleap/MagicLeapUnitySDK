@@ -11,8 +11,8 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using UnityEngine.InputSystem.Utilities;
 using UnityEngine.InputSystem.LowLevel;
+using UnityEngine.InputSystem.Utilities;
 
 namespace UnityEngine.XR.MagicLeap
 {
@@ -53,12 +53,8 @@ namespace UnityEngine.XR.MagicLeap
                 /// </summary>
                 public static MLResult Stop()
                 {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                     var resultCode = MagicLeapXrProviderNativeBindings.StopHaptics();
                     return MLResult.Create(resultCode);
-#else
-                    return MLResult.Create(MLResult.Code.Ok);
-#endif
                 }
 
                 /// <summary>
@@ -81,11 +77,9 @@ namespace UnityEngine.XR.MagicLeap
                         var nativeCommandStruct = new NativeBindings.MLInputBuzzCommand(this);
                         IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(nativeCommandStruct));
                         Marshal.StructureToPtr(nativeCommandStruct, ptr, false);
-#if UNITY_MAGICLEAP || UNITY_ANDROID
+
                         var resultCode = MagicLeapXrProviderNativeBindings.StartHapticsPattern((uint)(int)nativeCommandStruct.typeStatic, ptr);
-#else 
-                        var resultCode = MLResult.Code.APIDLLNotFound;
-#endif
+
                         Marshal.FreeHGlobal(ptr);
                         return MLResult.Create(resultCode);
                     }
@@ -152,11 +146,9 @@ namespace UnityEngine.XR.MagicLeap
                         var nativeCommandStruct = new NativeBindings.MLInputPreDefinedPattern(this);
                         IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(nativeCommandStruct));
                         Marshal.StructureToPtr(nativeCommandStruct, ptr, false);
-#if UNITY_MAGICLEAP || UNITY_ANDROID
+
                         var resultCode = MagicLeapXrProviderNativeBindings.StartHapticsPattern((uint)(int)nativeCommandStruct.typeStatic, ptr);
-#else 
-                        var resultCode = MLResult.Code.APIDLLNotFound;
-#endif
+
                         Marshal.FreeHGlobal(ptr);
                         return MLResult.Create(resultCode);
                     }
@@ -182,11 +174,9 @@ namespace UnityEngine.XR.MagicLeap
                         var nativeCommandStruct = new NativeBindings.MLInputCustomHapticsInfo(customHaptics);
                         IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(nativeCommandStruct));
                         Marshal.StructureToPtr(nativeCommandStruct, ptr, false);
-#if UNITY_MAGICLEAP || UNITY_ANDROID
+
                         var resultCode = MagicLeapXrProviderNativeBindings.StartHapticsPattern((uint)(int)nativeCommandStruct.typeStatic, ptr);
-#else 
-                        var resultCode = MLResult.Code.APIDLLNotFound;
-#endif
+
                         nativeCommandStruct.Dispose();
                         Marshal.FreeHGlobal(ptr);
                         return MLResult.Create(resultCode);

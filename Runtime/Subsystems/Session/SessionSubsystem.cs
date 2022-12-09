@@ -32,12 +32,8 @@ namespace UnityEngine.XR.MagicLeap
         {
             public override Promise<SessionAvailability> GetAvailabilityAsync()
             {
-                var availability =
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-                SessionAvailability.Installed | SessionAvailability.Supported;
-#else
-                SessionAvailability.None;
-#endif
+                var availability = SessionAvailability.Installed | SessionAvailability.Supported;
+
                 return Promise<SessionAvailability>.CreateResolvedPromise(availability);
             }
 
@@ -140,7 +136,6 @@ namespace UnityEngine.XR.MagicLeap
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void RegisterDescriptor()
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             XRSessionSubsystemDescriptor.RegisterDescriptor(new XRSessionSubsystemDescriptor.Cinfo
             {
                 id = MagicLeapXrProvider.SessionSubsystemId,
@@ -152,7 +147,6 @@ namespace UnityEngine.XR.MagicLeap
 #endif
                 supportsInstall = false
             });
-#endif
         }
     }
 }

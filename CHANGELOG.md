@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.2.0]
+
+### Features
+- Added `GetData` method to `AudioInputBufferClip` that does not automatically wrap the audio data and instead sends you exactly what is in the audio buffer.
+- Added `MLCamera.FlipCameraVertically` method to allow easily flipping camera frames instead of needing to invert Unity Renderer.
+- Added Pause and Resume capability to `MLWebView`
+- Added new result code `MLResult.Code.IllegalState`
+- Added new struct `MLMarkerTracker.TrackerSettings` that introduces tracker profiles to `MLMarkerTracker` as a more modular way to configure the marker tracker hints.
+- `MLMarkerTracker.MarkerData` objects now have their pose correctly rotated before being given to the developer.
+- Exposed a callback `MeshingSubsystem.Extensions.MLMeshing.Config.OnMeshBlockRequests` that provides the mesh block info to allow for setting LOD overrides on a per mesh block basis. The callback is set with `MeshingSubsystem.Extensions.MLMeshing.Config.SetCustomMeshBlockRequests(...)` or `MeshingSubsystemComponent.SetCustomMeshBlockRequests(...)`
+- Exposed system intents in `MLVoiceIntentsConfiguration`. This is curretly an experimental feature on the OS.
+- Exposed funcs in `MLAudioOutput` to allow bypassing device's master volume. These functions will only work on 60601 compliant devices.
+
+### Bugfixes
+- `MagicLeapHandDevice` is no longer derived from `XRController`
+- Fixed AccessRenderBufferTexture bug in `MLWebRTCVideoSinkBehavior` which occasionally prevented frame from rendering correctly.
+- Fixed UnspecifiedFailure in `MLMarkerTracker` API caused by change in `MLMarkerTrackerSettings` structure.
+- Fixed bug in `MLMediaPlayer` where `Reset()` was being incorrectly called in place of `Stop()`.
+- Fixed `MLMediaPlayer` blocking main thread with `Reset()` and `Destroy()` methods. These now execute on a separate detatched thread.
+- Fixed a crash in `MLMediaPlayer` when switching scenes.
+- Fixed bug in MRCamera RGBA image format rendering.
+
+### Deprecations & Removals
+- `MeshingSubsystemComponent.LevelOfDetail`, `MeshingSubsystemComponent.LevelOfDetailToDensity()`, and `MeshingSubsystemComponent.LevelOfDetailToDensity()` have been marked `Obsolete` and will be removed in a future release in favor of `MeshingSubsystem.Extensions.MLMeshing.LevelOfDetail`, `MeshingSubsystemComponent.FromDensityToLevelOfDetail()`, and `MeshingSubsystemComponent.FromLevelOfDetailToDensity()`
+
+### Known Issues / Limitations
+- Hand Center and Interaction Point are not valid in the Gesture Classification API.
+
 ## [1.1.0]
 
 ### Features
@@ -10,7 +38,6 @@
 - Unity XRI haptics now supported.
 - `SettingsIntentsLauncher` can be used to open certain Android Settings views directly from Unity.
 - Added new `MLMediaPlayer` `OnVideoRendererInitialized` callback for when video renderer is fully initialized
-- Added `GetData` function to `AudioInputBufferClip` that does not automatically wrap the audio data and instead sends you exactly what is in the audio buffer.
 
 ### Bugfixes
 - Fixed bug in WebRTC where toggling local video off and then back on during a connected session did not work.
@@ -21,10 +48,10 @@
 - Fixed Meshing Subsystem using invalid handles if device headpose gets reset
 - Corrected some `MLCamera` event delegates being incorrectly defined.
 - Fixed issue in WebView where adding too many tabs caused them to begin rendering outside of UI bounds.
-- `MagicLEapHandDevice` is no longer derived from `XRController`
 
 ### Deprecations & Removals
 - Numerous MLSegmentedDimmer API properties have been marked `Obsolete` as they are non-functional and will be removed in a future release.
+- `MLMarkerTracker.Settings`, `MLMarkerTracker.SetSettingsAsync(Settings settings)`, and  `MLMarkerTracker.StartScanningAsync(Settings settings)` have been marked `Obsolete` and will be removed in a future release.
 
 ## [1.0.0]
 

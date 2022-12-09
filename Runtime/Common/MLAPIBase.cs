@@ -17,11 +17,7 @@ namespace UnityEngine.XR.MagicLeap
         /// <summary>
         /// The native handle ID for this API instance. Will be invalid until the API is started.
         /// </summary>
-#if UNITY_MAGICLEAP || UNITY_ANDROID
         protected ulong Handle = Native.MagicLeapNativeBindings.InvalidHandle;
-#else
-        protected ulong Handle = 0;
-#endif
 
         /// <summary>
         /// Lock used to keep api calls synchronous.
@@ -59,12 +55,10 @@ namespace UnityEngine.XR.MagicLeap
 
         private void StartInternal()
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             MLDevice.RegisterUpdate(Update);
             MLDevice.RegisterApplicationPause(OnApplicationPause);
             MLDevice.RegisterApplicationFocus(OnApplicationFocus);
             MLDevice.RegisterDestroy(StopInternal);
-#endif
             isStarted = true;
         }
 
@@ -72,12 +66,10 @@ namespace UnityEngine.XR.MagicLeap
         {
             if (isStarted)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 MLDevice.UnregisterUpdate(Update);
                 MLDevice.UnregisterApplicationPause(OnApplicationPause);
                 MLDevice.UnregisterApplicationFocus(OnApplicationFocus);
                 MLDevice.UnregisterDestroy(StopInternal);
-#endif
                 isStarted = false;
             }
         }

@@ -11,12 +11,10 @@
 namespace UnityEngine.XR.MagicLeap
 {
     using System;
-    using System.Threading;
     using System.Runtime.InteropServices;
+    using System.Threading;
     using UnityEngine;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
     using UnityEngine.XR.MagicLeap.Native;
-#endif
 
     /// <summary>
     /// MLWebRTC class contains the API to interface with the
@@ -43,7 +41,6 @@ namespace UnityEngine.XR.MagicLeap
 
                 bool INativeBufferProvider.AcquireNextAvailableBuffer(out ulong nativeBufferHandle)
                 {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                     nativeBufferHandle = MagicLeapNativeBindings.InvalidHandle;
                     bool result = videoSink.AcquireNextAvailableFrame(out latestFrame);
                     if (result)
@@ -51,10 +48,6 @@ namespace UnityEngine.XR.MagicLeap
                         nativeBufferHandle = latestFrame.NativeFrame.NativeBufferHandle;
                     }
                     return result;
-#else
-                    nativeBufferHandle = 0;
-                    return false;
-#endif
                 }
 
                 void INativeBufferProvider.ReleaseBuffer(ulong nativeBufferHandle)

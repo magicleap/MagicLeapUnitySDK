@@ -53,7 +53,6 @@ namespace UnityEngine.XR.MagicLeap
 
         public MLNativeSurface(PixelFormat pixelFormat, ushort bufferCount, uint width, uint height)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
             isExternallyOwned = false;
             Handle = Native.MagicLeapNativeBindings.InvalidHandle;
@@ -67,7 +66,6 @@ namespace UnityEngine.XR.MagicLeap
                 resultCode = NativeBindings.MLNativeSurfaceSetOnFrameAvailableCallback(Handle, ref frameInfo, GCHandle.ToIntPtr(gcHandle));
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLNativeSurfaceSetOnFrameAvailableCallback));
             }
-#endif
         }
 
         /// <summary>
@@ -88,85 +86,56 @@ namespace UnityEngine.XR.MagicLeap
         public MLResult Destroy()
         {
             MLResult.Code resultCode = MLResult.Code.NotImplemented;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
+
             if (!isExternallyOwned && Native.MagicLeapNativeBindings.MLHandleIsValid(Handle))
             {
                 resultCode = NativeBindings.MLNativeSurfaceRelease(Handle);
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLNativeSurfaceRelease));
                 Handle = Native.MagicLeapNativeBindings.InvalidHandle;
             }
-#endif
             return MLResult.Create(resultCode);
         }
 
         public MLResult AcquireNextAvailableFrame(out ulong nativeBuffer)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             MLResult.Code resultCode = NativeBindings.MLNativeSurfaceAcquireNextAvailableFrame(Handle, out nativeBuffer);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLNativeSurfaceAcquireNextAvailableFrame));
             return MLResult.Create(resultCode);
-#else
-            nativeBuffer = 0;
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         public MLResult ReleaseFrame(ulong nativeBuffer)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             MLResult.Code resultCode = NativeBindings.MLNativeSurfaceReleaseFrame(Handle, nativeBuffer);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLNativeSurfaceReleaseFrame));
             return MLResult.Create(resultCode);
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         public MLResult GetFrameTransformMatrix(float[] frameTransformMatColMajor)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             MLResult.Code resultCode = NativeBindings.MLNativeSurfaceGetFrameTransformationMatrix(Handle, frameTransformMatColMajor);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLNativeSurfaceGetFrameTransformationMatrix));
             return MLResult.Create(resultCode);
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         public MLResult GetFrameTimestamp(out long timestampNs)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             MLResult.Code resultCode = NativeBindings.MLNativeSurfaceGetFrameTimestamp(Handle, out timestampNs);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLNativeSurfaceGetFrameTimestamp));
             return MLResult.Create(resultCode);
-#else
-            timestampNs = 0;
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         public MLResult GetFrameQueueBufferTimestamp(out long timestampNs)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             MLResult.Code resultCode = NativeBindings.MLNativeSurfaceGetFrameQueueBufferTimestamp(Handle, out timestampNs);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLNativeSurfaceGetFrameQueueBufferTimestamp));
             return MLResult.Create(resultCode);
-#else
-            timestampNs = 0;
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         public MLResult GetFrameNumber(out ulong number)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             MLResult.Code resultCode = NativeBindings.MLNativeSurfaceGetFrameNumber(Handle, out number);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLNativeSurfaceGetFrameNumber));
             return MLResult.Create(resultCode);
-#else
-            number = 0;
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         private void OnFrameAvailable_CallbackThread()

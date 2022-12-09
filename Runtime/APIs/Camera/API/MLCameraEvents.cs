@@ -15,10 +15,7 @@ namespace UnityEngine.XR.MagicLeap
     using System.Runtime.InteropServices;
     using System.Threading;
     using System.Threading.Tasks;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
     using UnityEngine.XR.MagicLeap.Native;
-
-#endif
 
     /// <summary>
     /// APIs for accessing Camera Device and to do Camera Capture.

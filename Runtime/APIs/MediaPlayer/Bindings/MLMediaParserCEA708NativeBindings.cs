@@ -13,9 +13,7 @@ namespace UnityEngine.XR.MagicLeap
     using System;
     using System.Runtime.InteropServices;
     using UnityEngine;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
     using UnityEngine.XR.MagicLeap.Native;
-#endif
     /// <summary>
     /// MLMedia APIs.
     /// </summary>
@@ -29,7 +27,6 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public partial class ParserCEA708
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             private class NativeBindings : MagicLeapNativeBindings
             {
                 public delegate void OnEmitEventDelegate(ulong parserHandle, ref Cea708CaptionEvent captionEvent, IntPtr data);
@@ -383,67 +380,67 @@ namespace UnityEngine.XR.MagicLeap
                     switch (captionEvent.Type)
                     {
                         case MLMedia.ParserCEA708.Cea708CaptionEmitCommand.Buffer:
-                            obj =  MLConvert.DecodeUTF8(captionEvent.Data, MLCea708CaptionEmitCommandBufferMaxSize);
+                            obj = MLConvert.DecodeUTF8(captionEvent.Data, MLCea708CaptionEmitCommandBufferMaxSize);
                             break;
 
                         case MLMedia.ParserCEA708.Cea708CaptionEmitCommand.Control:
-                            obj =  Marshal.ReadByte(captionEvent.Data);
+                            obj = Marshal.ReadByte(captionEvent.Data);
                             break;
 
                         case MLMedia.ParserCEA708.Cea708CaptionEmitCommand.CWX:
-                            obj =  Marshal.ReadInt32(captionEvent.Data);
+                            obj = Marshal.ReadInt32(captionEvent.Data);
                             break;
 
                         case MLMedia.ParserCEA708.Cea708CaptionEmitCommand.CLW:
-                            obj =  Marshal.ReadInt32(captionEvent.Data);
+                            obj = Marshal.ReadInt32(captionEvent.Data);
                             break;
 
                         case MLMedia.ParserCEA708.Cea708CaptionEmitCommand.DSW:
-                            obj =  Marshal.ReadInt32(captionEvent.Data);
+                            obj = Marshal.ReadInt32(captionEvent.Data);
                             break;
 
                         case MLMedia.ParserCEA708.Cea708CaptionEmitCommand.HDW:
-                            obj =  Marshal.ReadInt32(captionEvent.Data);
+                            obj = Marshal.ReadInt32(captionEvent.Data);
                             break;
 
                         case MLMedia.ParserCEA708.Cea708CaptionEmitCommand.TGW:
-                            obj =  Marshal.ReadInt32(captionEvent.Data);
+                            obj = Marshal.ReadInt32(captionEvent.Data);
                             break;
 
                         case MLMedia.ParserCEA708.Cea708CaptionEmitCommand.DLW:
-                            obj =  Marshal.ReadInt32(captionEvent.Data);
+                            obj = Marshal.ReadInt32(captionEvent.Data);
                             break;
 
                         case MLMedia.ParserCEA708.Cea708CaptionEmitCommand.DLY:
-                            obj =  Marshal.ReadInt32(captionEvent.Data);
+                            obj = Marshal.ReadInt32(captionEvent.Data);
                             break;
 
                         case MLMedia.ParserCEA708.Cea708CaptionEmitCommand.DLC:
-                            obj =  null;
+                            obj = null;
                             break;
 
                         case MLMedia.ParserCEA708.Cea708CaptionEmitCommand.RST:
-                            obj =  null;
+                            obj = null;
                             break;
 
                         case MLMedia.ParserCEA708.Cea708CaptionEmitCommand.SPA:
-                            obj =  Marshal.PtrToStructure(captionEvent.Data, typeof(Cea708CaptionPenAttr));
+                            obj = Marshal.PtrToStructure(captionEvent.Data, typeof(Cea708CaptionPenAttr));
                             break;
 
                         case MLMedia.ParserCEA708.Cea708CaptionEmitCommand.SPC:
-                            obj =  Marshal.PtrToStructure(captionEvent.Data, typeof(Cea708CaptionPenColor));
+                            obj = Marshal.PtrToStructure(captionEvent.Data, typeof(Cea708CaptionPenColor));
                             break;
 
                         case MLMedia.ParserCEA708.Cea708CaptionEmitCommand.SPL:
-                            obj =  Marshal.PtrToStructure(captionEvent.Data, typeof(Cea708CaptionPenLocation));
+                            obj = Marshal.PtrToStructure(captionEvent.Data, typeof(Cea708CaptionPenLocation));
                             break;
 
                         case MLMedia.ParserCEA708.Cea708CaptionEmitCommand.SWA:
-                            obj =  Marshal.PtrToStructure(captionEvent.Data, typeof(Cea708CaptionWindowAttr));
+                            obj = Marshal.PtrToStructure(captionEvent.Data, typeof(Cea708CaptionWindowAttr));
                             break;
 
                         case MLMedia.ParserCEA708.Cea708CaptionEmitCommand.DFX:
-                            obj =  Marshal.PtrToStructure(captionEvent.Data, typeof(Cea708CaptionWindow));
+                            obj = Marshal.PtrToStructure(captionEvent.Data, typeof(Cea708CaptionWindow));
                             break;
                     }
                     MLThreadDispatch.Call(captionEvent.Type, obj, parser708.OnEmitEvent);
@@ -565,7 +562,6 @@ namespace UnityEngine.XR.MagicLeap
                     }
                 }
             }
-#endif
         }
     }
 }

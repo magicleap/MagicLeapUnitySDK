@@ -13,7 +13,6 @@ namespace UnityEngine.XR.MagicLeap
     using System.Runtime.InteropServices;
     using Native;
 
-#if UNITY_ANDROID
     public partial class MLAudioPlayback
     {
         public class NativeBindings : MagicLeapNativeBindings
@@ -31,5 +30,4 @@ namespace UnityEngine.XR.MagicLeap
             public static extern bool CreateOutputBuffer(uint bufferSizeInBytes, uint channels, uint samplesPerSecond, uint bitsPerSample, uint validBitsPerSample, float maxPitch, uint cacheDuration);
         }
     }
-#endif
 }

@@ -56,7 +56,7 @@ namespace UnityEngine.XR.MagicLeap
 
         private static bool NativeCallSuccess(MLResult.Code resultCode)
         {
-            switch(resultCode)
+            switch (resultCode)
             {
                 case MLResult.Code.Ok:
                 case MLResult.Code.Pending:
@@ -67,7 +67,6 @@ namespace UnityEngine.XR.MagicLeap
             }
         }
 
-#if UNITY_ANDROID
         protected override MLResult.Code StartAPI() => MLResult.Code.Ok;
 
         protected override MLResult.Code StopAPI() => MLResult.Code.Ok;
@@ -82,7 +81,7 @@ namespace UnityEngine.XR.MagicLeap
         {
             if (permissionRequests.Count > 0)
             {
-#if UNITY_EDITOR && UNITY_ANDROID
+#if UNITY_EDITOR
                 var permissionName = permissionRequests.Peek();
                 MLResult.Code resultCode = CheckPermissionInternal(permissionName);
                 if (MLResult.IsOK(resultCode))
@@ -105,7 +104,7 @@ namespace UnityEngine.XR.MagicLeap
 
                     requestData[permissionName].Clear();
                 }
-#elif UNITY_ANDROID
+#else
                 // a request has been issued and is waiting for a callback. during this time,
                 // the application doesn't have focus due to the popup. we need to wait until a callback
                 // clears this flag after the user makes their choice and focus returns.
@@ -132,7 +131,6 @@ namespace UnityEngine.XR.MagicLeap
 #endif
             }
         }
-#endif
 
         private MLResult.Code CheckPermissionInternal(string permission)
         {
@@ -142,10 +140,10 @@ namespace UnityEngine.XR.MagicLeap
             }
             nativeMLPermissionsCheckPermissionPerfMarker.Begin();
             MLResult.Code result = MLResult.Code.Ok;
-#if UNITY_EDITOR && UNITY_ANDROID
+#if UNITY_EDITOR
             result = NativeBindings.MLZIPermissionsIsGranted(permission);
             MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLZIPermissionsIsGranted), NativeCallSuccess);
-#elif UNITY_ANDROID
+#else
             if (Android.Permission.HasUserAuthorizedPermission(permission))
             {
                 result = MLResult.Code.Ok;
@@ -212,7 +210,7 @@ namespace UnityEngine.XR.MagicLeap
                 result = MLResult.Code.Pending;
                 if (!permissionRequests.Contains(permission))
                 {
-#if UNITY_EDITOR && UNITY_ANDROID
+#if UNITY_EDITOR
                     Task.Run(() =>
                         {
                             result = NativeBindings.MLZIPermissionsRequest(permission);
@@ -233,7 +231,6 @@ namespace UnityEngine.XR.MagicLeap
             dontAskAgainPermissions.Add(permission);
             deniedPermissions.Add(permission);
 
-#if UNITY_ANDROID
             MLPluginLog.Debug($"MLPermissions: User denied {permission}, DON'T ASK AGAIN.");
             MLThreadDispatch.ScheduleMain(() =>
             {
@@ -243,7 +240,6 @@ namespace UnityEngine.XR.MagicLeap
                 }
                 requestData[permission].Clear();
             });
-#endif
 
             currentlyRequestingPermission = false;
         }
@@ -251,7 +247,7 @@ namespace UnityEngine.XR.MagicLeap
         private void OnPermissionDenied(string permission)
         {
             deniedPermissions.Add(permission);
-#if UNITY_ANDROID
+
             MLPluginLog.Debug($"MLPermissions: User denied {permission}");
             MLThreadDispatch.ScheduleMain(() =>
             {
@@ -261,14 +257,12 @@ namespace UnityEngine.XR.MagicLeap
                 }
                 requestData[permission].Clear();
             });
-#endif
 
             currentlyRequestingPermission = false;
         }
 
         private void OnPermissionGranted(string permission)
         {
-#if UNITY_ANDROID
             MLPluginLog.Debug($"MLPermissions: User granted {permission}");
             MLThreadDispatch.ScheduleMain(() =>
             {
@@ -279,7 +273,6 @@ namespace UnityEngine.XR.MagicLeap
                 requestData[permission].Clear();
             });
             currentlyRequestingPermission = false;
-#endif
         }
     }
 }

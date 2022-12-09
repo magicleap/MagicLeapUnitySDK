@@ -8,8 +8,6 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-
 namespace UnityEngine.XR.MagicLeap
 {
     using System;
@@ -368,6 +366,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="handle">The webview being accessed.</param>
             /// <param name="url">URL that will be loaded.</param>
             /// <returns>MLResult.Code.Ok if WebView is attempting to load the specified URL.</returns>
+            /// <returns>MLResult.Code.IllegalState if WebView was paused. MLWebViewResume should be called before this function.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
             /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
@@ -379,6 +378,7 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             /// <param name="handle">The webview being accessed.</param>
             /// <returns>MLResult.Code.Ok if WebView Back action was initiated or cannot go back any further.</returns>
+            /// <returns>MLResult.Code.IllegalState if WebView was paused. MLWebViewResume should be called before this function.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
             /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
@@ -390,6 +390,7 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             /// <param name="handle">The webview being accessed.</param>
             /// <returns>MLResult.Code.Ok if WebView Forward action was initiated or cannot go forward any further.</returns>
+            /// <returns>MLResult.Code.IllegalState if WebView was paused. MLWebViewResume should be called before this function.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
             /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
@@ -400,6 +401,7 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             /// <param name="handle">The webview being accessed.</param>
             /// <returns>MLResult.Code.Ok if WebView Reload action was initiated.</returns>
+            /// <returns>MLResult.Code.IllegalState if WebView was paused. MLWebViewResume should be called before this function.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
             /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
@@ -423,6 +425,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="handle">The webview being accessed.</param>
             /// <param name="outCanGoBack">True if "Back" has a valid page to go to.</param>
             /// <returns>MLResult.Code.Ok if status of going "Back" was acquired.</returns>
+            /// <returns>MLResult.Code.IllegalState if WebView was paused. See MLWebViewPause.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
             /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
@@ -445,6 +448,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="handle">The webview being accessed.</param>
             /// <param name="cursorState">Information about the mouse movement.</param>
             /// <returns>MLResult.Code.Ok if internal mouse was moved.</returns>
+            /// <returns>MLResult.Code.IllegalState if WebView was paused. See MLWebViewPause.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
             /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
@@ -457,6 +461,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="handle">The webview being accessed.</param>
             /// <param name="cursorState">Information about the mouse button event.</param>
             /// <returns>MLResult.Code.Ok if successful.</returns>
+            /// <returns>MLResult.Code.IllegalState if WebView was paused. See MLWebViewPause.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
             /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
@@ -468,6 +473,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="handle">The webview being accessed.</param>
             /// <param name="cursorState">Information about the mouse button event.</param>
             /// <returns>MLResult.Code.Ok if successful.</returns>
+            /// <returns>MLResult.Code.IllegalState if WebView was paused. See MLWebViewPause.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
             /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
@@ -479,6 +485,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="handle">The webview being accessed.</param>
             /// <param name="charUtf32">printable char utf code</param>
             /// <returns>MLResult.Code.Ok if key event was injected.</returns>
+            /// <returns>MLResult.Code.IllegalState if WebView was paused. See MLWebViewPause.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
             /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
@@ -491,6 +498,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="keyCode">MLWebView.KeyCode.</param>
             /// <param name="modifierMask">Should be one or combination of MLWebView.EventFlags.</param>
             /// <returns>MLResult.Code.Ok if key event was injected.</returns>
+            /// <returns>MLResult.Code.IllegalState if WebView was paused. See MLWebViewPause.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
             /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
@@ -503,6 +511,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="keyCode">MLWebView.KeyCode.</param>
             /// <param name="modifierMask">Should be one or combination of MLWebView.EventFlags.</param>
             /// <returns>MLResult.Code.Ok if key event was injected.</returns>
+            /// <returns>MLResult.Code.IllegalState if WebView was paused. See MLWebViewPause.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
             /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
@@ -513,6 +522,7 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             /// <param name="handle">The webview being accessed.</param>
             /// <returns>MLResult.Code.Ok if MLWebView zoom was reset.</returns>
+            /// <returns>MLResult.Code.IllegalState if WebView was paused. See MLWebViewPause.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
             /// <returns>MLResult.Code.UnspecifiedFailure if it failed to reset zoom due to an internal error.</returns>
             /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
@@ -524,6 +534,7 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             /// <param name="handle">The webview being accessed.</param>
             /// <returns>MLResult.Code.Ok if MLWebView zoomed in.</returns>
+            /// <returns>MLResult.Code.IllegalState if WebView was paused. See MLWebViewPause.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
             /// <returns>MLResult.Code.WebViewResultZoomLimitReached if cannot zoom in any further.</returns>
             /// <returns>MLResult.Code.UnspecifiedFailure if it failed to reset zoom due to an internal error.</returns>
@@ -536,6 +547,7 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             /// <param name="handle">The webview being accessed.</param>
             /// <returns>MLResult.Code.Ok if MLWebView zoomed out.</returns>
+            /// <returns>MLResult.Code.IllegalState if WebView was paused. See MLWebViewPause.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
             /// <returns>MLResult.Code.WebViewResultZoomLimitReached if cannot zoom out any further.</returns>
             /// <returns>MLResult.Code.UnspecifiedFailure if it failed to reset zoom due to an internal error.</returns>
@@ -549,6 +561,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="handle">The webview being accessed.</param>
             /// <param name="outZoomFactor">Current numeric value for zoom factor.</param>
             /// <returns>MLResult.Code.Ok if outZoomFactor parameter was updated with the current zoom value.</returns>
+            /// <returns>MLResult.Code.IllegalState if WebView was paused. See MLWebViewPause.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
             /// <returns>MLResult.Code.UnspecifiedFailure if failed to get the zoom factor due to an internal error.</returns>
             /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
@@ -562,6 +575,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="xPixels">The number of pixels to scroll on the x axis.</param>
             /// <param name="yPixels">The number of pixels to scroll on the y axis.</param>
             /// <returns>MLResult.Code.Ok if MLWebView was scrolled.</returns>
+            /// <returns>MLResult.Code.IllegalState if WebView was paused. See MLWebViewPause.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
             /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
@@ -577,6 +591,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="width">The number representing the entire width of the webview, in pixels.</param>
             /// <param name="height">The number representing the entire height of the webview, in pixels.</param>
             /// <returns>MLResult.Code.Ok if MLWebView scroll size values were retrieved.</returns>
+            /// <returns>MLResult.Code.IllegalState if WebView was paused. See MLWebViewPause.</returns>
             /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLWebViewGetScrollSize(ulong handle, out int width, out int height);
@@ -588,6 +603,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="x">The number representing the horizontal offset of the webview, in pixels.</param>
             /// <param name="y">The number representing the vertical offset of the webview, in pixels.</param>
             /// <returns>MLResult.Code.Ok if MLWebView scroll offset values were retrieved.</returns>
+            /// <returns>MLResult.Code.IllegalState if WebView was paused. See MLWebViewPause.</returns>
             /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLWebViewGetScrollOffset(ulong handle, out int x, out int y);
@@ -611,17 +627,46 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             /// <param name="handle">The webview being accessed.</param>
             /// <returns>MLResult.Code.Ok if all cookies removed successfully.</returns>
+            /// <returns>MLResult.Code.IllegalState if WebView was paused. See MLWebViewPause.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
             /// <returns>MLResult.Code.UnspecifiedFailure if removing all cookies failed due to an internal error.</returns>
             /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLWebViewRemoveAllCookies(ulong handle);
 
+
+            /// <summary>
+            /// Pause the webview. Call MLWebViewResume to resume.
+            /// This method provides a multiple pause types to the webview.
+            /// </summary>
+            /// <param name="handle">The webview being accessed.</param>
+            /// <param name="pauseType">The type of pause to be used.</param>
+            /// <returns>MLResult.Code.Ok if paused successfully.</returns>
+            /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle or PauseType value.</returns>
+            /// <returns>MLResult.Code.UnspecifiedFailure if failed due to an internal error.</returns>
+            /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use. See an asynchronous mode of MLWebViewCreate.</returns>
+            [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
+            public static extern MLResult.Code MLWebViewPause(ulong handle, MLWebView.PauseType pauseType);
+
+            /// <summary>
+            /// Resumes a webview after a previous call of the MLWebViewPause.
+            /// Resume webview to the normal operation for all webview pause types.
+            /// </summary>
+            /// <param name="handle">The webview being accessed.</param>
+            /// <returns>MLResult.Code.Ok if resumed successfully.</returns>
+            /// <returns>MLResult.Code.IllegalState if WebView was paused. See MLWebViewPause.</returns>
+            /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
+            /// <returns>MLResult.Code.UnspecifiedFailure if failed due to an internal error.</returns>
+            /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use. See an asynchronous mode of MLWebViewCreate.</returns>
+            [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
+            public static extern MLResult.Code MLWebViewResume(ulong handle);
+
             /// <summary>
             /// Clear the webview cache.
             /// </summary>
             /// <param name="handle">The webview being accessed.</param>
             /// <returns>MLResult.Code.Ok if cache cleared successfully</returns>
+            /// <returns>MLResult.Code.IllegalState if WebView was paused. See MLWebViewPause.</returns>
             /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
             /// <returns>MLResult.Code.UnspecifiedFailure if clearing cache failed due to an internal error.</returns>
             /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
@@ -781,4 +826,3 @@ namespace UnityEngine.XR.MagicLeap
     }
 }
 
-#endif

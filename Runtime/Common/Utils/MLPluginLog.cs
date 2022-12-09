@@ -42,11 +42,10 @@ namespace UnityEngine.XR.MagicLeap
             Verbose,
         }
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
         /// <summary>
         /// Gets or sets current level of logs to print.
         /// </summary>
-        public static VerbosityLevel Level { get; set; }  = VerbosityLevel.ErrorsOnly;
+        public static VerbosityLevel Level { get; set; } = VerbosityLevel.ErrorsOnly;
 
         /// <summary>
         /// Prints the given log message.
@@ -122,6 +121,5 @@ namespace UnityEngine.XR.MagicLeap
                 UnityEngine.Debug.LogErrorFormat("Error: " + logMsg, args);
             }
         }
-#endif
     }
 }

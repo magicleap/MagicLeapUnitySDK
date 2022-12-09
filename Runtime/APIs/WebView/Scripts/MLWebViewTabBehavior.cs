@@ -1,9 +1,9 @@
 using System;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.XR.MagicLeap;
 using UnityEngine.XR.MagicLeap.Native;
-using UnityEngine.UI;
 
 namespace MagicLeap.Core
 {
@@ -58,7 +58,7 @@ namespace MagicLeap.Core
             this.webViewScreen = webViewScreen;
             this.addressBar = addressBar;
             webViewScreen.GetWebViewSize(out uint width, out uint height);
-#if UNITY_MAGICLEAP || UNITY_ANDROID
+
             WebView = MLWebView.Create(width, height);
             if (WebView == null)
             {
@@ -70,9 +70,6 @@ namespace MagicLeap.Core
             WebView.OnLoadEnded += OnLoadEnded;
             WebView.OnServiceConnected += OnServiceConnected;
             return true;
-#else 
-            return false;
-#endif
         }
 
         public void SelectTab()
@@ -103,7 +100,6 @@ namespace MagicLeap.Core
 
         public void DestroyTab()
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             if (webViewScreen != null)
             {
                 if (webViewScreen.WebView == WebView)
@@ -131,12 +127,10 @@ namespace MagicLeap.Core
                     Destroy(gameObject);
                 }
             }
-#endif
         }
 
         public void GoToUrl(string url)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             if (WebView != null)
             {
                 if (webViewScreen.IsConnected)
@@ -157,24 +151,20 @@ namespace MagicLeap.Core
                 }
 
             }
-#endif
         }
 
         public void UpdateTabLabel()
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             if (text != null && WebView != null)
             {
                 tabUrl = WebView.GetURL();
                 System.Uri uri = new System.Uri(tabUrl);
                 text.text = uri.Host;
             }
-#endif
         }
 
         private void OnServiceConnected(MLWebView webView)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             if (webViewScreen != null)
             {
                 webViewScreen.ServiceConnected();
@@ -191,14 +181,12 @@ namespace MagicLeap.Core
                     }
                 }
             }
-#endif
         }
 
         private void OnLoadEnded(MLWebView webView, bool isMainFrame, int httpStatusCode)
         {
             UpdateTabLabel();
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             if (WebView != null && webViewScreen.WebView == WebView)
             {
                 if (addressBar != null)
@@ -206,7 +194,6 @@ namespace MagicLeap.Core
                     addressBar.text = WebView.GetURL();
                 }
             }
-#endif
         }
     }
 }

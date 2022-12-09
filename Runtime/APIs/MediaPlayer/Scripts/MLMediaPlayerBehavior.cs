@@ -45,7 +45,7 @@ namespace MagicLeap.Core
 
         [SerializeField, Tooltip("A reference of the media player texture.")]
         private RenderTexture mediaPlayerTexture = null;
-        
+
         public bool IsBuffering { get; private set; } = false;
         public bool IsSeeking { get; private set; } = false;
         public long DurationInMiliseconds { get; private set; } = 0;
@@ -70,7 +70,6 @@ namespace MagicLeap.Core
         private bool hasSetSourceURI = false;
         private int videoWidth, videoHeight;
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
         /// <summary>
         /// MediaPlayer reference
         /// </summary>
@@ -107,8 +106,8 @@ namespace MagicLeap.Core
             }
         }
 
-        public bool IsPlaying => _mediaPlayer is {IsPlaying: true};
-        public bool IsPrepared =>_mediaPlayer is { IsPrepared: true};
+        public bool IsPlaying => _mediaPlayer is { IsPlaying: true };
+        public bool IsPrepared => _mediaPlayer is { IsPrepared: true };
 
         private MLMedia.Player _mediaPlayer;
 
@@ -143,8 +142,8 @@ namespace MagicLeap.Core
                 _mediaPlayer.OnTrackSelected -= HandleOnTrackSelected;
                 _mediaPlayer.OnResetComplete -= HandleOnResetComplete;
 
-                StopMLMediaPlayer(onDestroy: true);
-
+                StopMLMediaPlayer();
+                _mediaPlayer.Reset();
                 _mediaPlayer.Destroy();
             }
         }
@@ -210,23 +209,17 @@ namespace MagicLeap.Core
         /// <summary>
         /// Stops Media Player and destroys it's instance.
         /// </summary>
-        public void StopMLMediaPlayer(bool onDestroy = false)
+        public void StopMLMediaPlayer()
         {
             if (_mediaPlayer == null)
                 return;
 
-            if (!onDestroy)
-            {
-                _mediaPlayer.Reset();
-            }
-
             if (_mediaPlayer.IsPrepared)
             {
                 _mediaPlayer.Stop();
-                _mediaPlayer.VideoRenderer?.Cleanup();
             }
         }
-        
+
         /// <summary>
         /// Uses the texture on the renderer to play the video on <c>Magic Leap</c>.
         /// </summary>
@@ -237,16 +230,16 @@ namespace MagicLeap.Core
                 Destroy(mediaPlayerTexture);
                 mediaPlayerTexture = null;
             }
-            
+
             if (mediaPlayerTexture == null)
             {
                 // Create texture with given dimensions
                 mediaPlayerTexture = texture;
             }
-            
+
             // Set texture on quad
             screen.material.SetTexture("_MainTex", this.mediaPlayerTexture);
-            
+
             MediaPlayer.CreateVideoRenderer((uint)texture.width, (uint)texture.height);
             MediaPlayer.VideoRenderer.SetRenderBuffer(this.mediaPlayerTexture);
         }
@@ -264,7 +257,7 @@ namespace MagicLeap.Core
 
             TryApplyVideoRenderMaterial(videoRenderMaterial);
             TryApplyStereoMode();
-            
+
             if (mediaPlayerTexture == null)
                 CreateTexture(width, height);
             else
@@ -549,6 +542,5 @@ namespace MagicLeap.Core
         {
             OnCaptionsText?.Invoke(text);
         }
-#endif
     }
 }

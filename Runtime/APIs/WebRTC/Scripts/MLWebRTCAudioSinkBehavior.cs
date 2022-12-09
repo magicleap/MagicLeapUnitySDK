@@ -30,9 +30,7 @@ namespace MagicLeap.Core
                 {
                     if (audioSource == null)
                     {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                         audioSink.ResetPosition();
-#endif
                     }
 
                     if (sinkBufferNotifyMode == MLWebRTC.AudioSink.BufferNotifyMode.NotifyOnly)
@@ -78,24 +76,20 @@ namespace MagicLeap.Core
 
         void Start()
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             if (audioSink != null)
                 return;
             audioSource = gameObject.GetComponent<AudioSource>();
             audioSink = MLWebRTC.AudioSink.Create(out MLResult result, sinkBufferNotifyMode);
             SetupAudioSink();
-#endif
         }
 
         public void Setup()
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             if (audioSink != null)
                 return;
             audioSource = gameObject.GetComponent<AudioSource>();
             audioSink = MLWebRTC.AudioSink.Create(out MLResult result, sinkBufferNotifyMode);
             SetupAudioSink();
-#endif
         }
 
         private void OnAudioDataAvailable_NativeCallbackThread(MLAudioOutput.Buffer buffer)
@@ -226,7 +220,7 @@ namespace MagicLeap.Core
         /// so the position has no meaning for us here.
         /// </summary>
         /// <param name="newPosition"></param>
-        private void OnAudioClipSetPosition(int newPosition) {}
+        private void OnAudioClipSetPosition(int newPosition) { }
 
         void Update()
         {

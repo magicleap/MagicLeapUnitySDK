@@ -10,12 +10,10 @@
 
 using System;
 using System.Runtime.InteropServices;
-using UnityEngine.InputSystem.Utilities;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-using UnityEngine.XR.MagicLeap.Native;
-#endif
 using UnityEngine.InputSystem.LowLevel;
+using UnityEngine.InputSystem.Utilities;
 using UnityEngine.InputSystem.XR;
+using UnityEngine.XR.MagicLeap.Native;
 
 
 namespace UnityEngine.XR.MagicLeap
@@ -31,7 +29,6 @@ namespace UnityEngine.XR.MagicLeap
                 /// </summary>
                 public static bool AttachTriggerListener(Action<ushort, MLInputControllerTriggerEvent, float> triggerCallback)
                 {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                     if (!_callbacksSet)
                     {
                         var result = SetCallbacks();
@@ -44,9 +41,6 @@ namespace UnityEngine.XR.MagicLeap
 
                     _onTriggerEvent += triggerCallback;
                     return _callbacksSet;
-#else
-                    return false;
-#endif
                 }
 
                 public static void RemoveTriggerListener(Action<ushort, MLInputControllerTriggerEvent, float> triggerCallback)
@@ -56,7 +50,6 @@ namespace UnityEngine.XR.MagicLeap
 
                 private static event Action<ushort, MLInputControllerTriggerEvent, float> _onTriggerEvent;
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 /// <summary>
                 /// Sets the callbacks for controller input events.
                 /// </summary>
@@ -69,7 +62,6 @@ namespace UnityEngine.XR.MagicLeap
 
                     return MLResult.Create(result);
                 }
-#endif
 
                 /// <summary>
                 /// The maximum number of controller touchpad touches that are supported.
@@ -149,7 +141,6 @@ namespace UnityEngine.XR.MagicLeap
                     Hold
                 }
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 internal class NativeBindings : MagicLeapNativeBindings
                 {
                     /// <summary>
@@ -363,7 +354,6 @@ namespace UnityEngine.XR.MagicLeap
                         _onTriggerEvent?.Invoke(controllerId, triggerEvent, depth);
                     }
                 }
-#endif
             }
         }
     }

@@ -13,10 +13,7 @@ namespace UnityEngine.XR.MagicLeap
     using System;
     using System.Runtime.InteropServices;
     using System.Threading;
-
-#if UNITY_MAGICLEAP || UNITY_ANDROID
     using UnityEngine.XR.MagicLeap.Native;
-#endif
 
     /// <summary>
     /// MLCamera class exposes static functions to query camera related
@@ -26,8 +23,6 @@ namespace UnityEngine.XR.MagicLeap
     [RequireXRLoader]
     public sealed partial class MLCVCamera : MLAutoAPISingleton<MLCVCamera>
     {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-
         /// <summary>
         /// Get transform between world origin and the camera. This method relies on a camera timestamp
         /// that is normally acquired from the MLCameraResultExtras structure, therefore this method is
@@ -104,6 +99,5 @@ namespace UnityEngine.XR.MagicLeap
 
             return poseResult;
         }
-#endif
     }
 }

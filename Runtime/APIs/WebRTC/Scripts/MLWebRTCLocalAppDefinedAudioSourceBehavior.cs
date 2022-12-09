@@ -59,9 +59,7 @@ namespace MagicLeap.Core
                 data[i] = 0;
             }
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             var r = this.definedAudioSource.PushData(this.audioBuffer, in this.audioBufferFormat);
-#endif
         }
     }
 }

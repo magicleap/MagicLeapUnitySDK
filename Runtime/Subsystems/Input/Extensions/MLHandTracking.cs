@@ -87,9 +87,7 @@ namespace UnityEngine.XR.MagicLeap
 
                 public static void StartTracking()
                 {
-#if UNITY_ANDROID
                     MagicLeapXrProviderNativeBindings.StartHandTracking();
-#endif
                 }
 
                 /// <summary>
@@ -100,9 +98,7 @@ namespace UnityEngine.XR.MagicLeap
                 /// </summary>
                 public static void SetPreRenderHandUpdate(bool enable = true)
                 {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                     NativeBindings.SetPreRenderPoseUpdate(enable);
-#endif
                 }
 
                 public static bool TryGetKeyPointsMask(InputDevice handDevice, out bool[] keyPointsMask) => NativeBindings.TryGetKeyPointsMask(handDevice, out keyPointsMask);
@@ -142,7 +138,7 @@ namespace UnityEngine.XR.MagicLeap
                             goto Failure;
                         }
 
-                        Failure:
+                    Failure:
                         keyPointsMask = new NativeBindings.KeyPointsMask().Mask;
                         return false;
                     }
@@ -171,7 +167,7 @@ namespace UnityEngine.XR.MagicLeap
                         {
                             int keypointEnum = (int)location + keyPointIndex;
 
-                            if((int)location > 0 && keyPointIndex == 4)
+                            if ((int)location > 0 && keyPointIndex == 4)
                             {
                                 keypointEnum = FifthBoneKeypointValue(location);
                                 location = KeyPointLocation.FifthBone;
@@ -218,7 +214,7 @@ namespace UnityEngine.XR.MagicLeap
                     // Should not be used for Thumb.
                     private static int FifthBoneKeypointValue(KeyPointLocation location)
                     {
-                        switch(location)
+                        switch (location)
                         {
                             case KeyPointLocation.Index:
                                 return (int)KeyPointLocation.FifthBone;
@@ -233,14 +229,13 @@ namespace UnityEngine.XR.MagicLeap
                         }
                     }
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                     /// <summary>
                     /// Native call for pre render Keypoints update.
                     /// </summary>
                     /// <param name="enable">bool to determine if pre render pose update should happen.</param>
                     [DllImport(MagicLeapXrProviderNativeBindings.MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
                     public static extern void SetPreRenderPoseUpdate(bool enable);
-#endif
+
                     [StructLayout(LayoutKind.Sequential)]
                     public readonly struct KeyPointsMask
                     {

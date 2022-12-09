@@ -59,7 +59,7 @@ namespace UnityEngine.XR.MagicLeap
         {
             if (!isStarted)
             {
-#if UNITY_EDITOR && UNITY_ANDROID
+#if UNITY_EDITOR
                 this.cacheDurationInSeconds = cacheDurationInSeconds;
                 this.outputSampleRate = (uint)AudioSettings.outputSampleRate;
                 NativeBindings.CreateAudioOutput();
@@ -71,7 +71,7 @@ namespace UnityEngine.XR.MagicLeap
 
         private void DestroyAudioBufferInternal()
         {
-#if UNITY_EDITOR && UNITY_ANDROID
+#if UNITY_EDITOR
             NativeBindings.DestroyAudioOutput();
             isStarted = false;
 #endif
@@ -79,7 +79,7 @@ namespace UnityEngine.XR.MagicLeap
 
         private void SubmitBufferInternal(float[] data, int channels)
         {
-#if UNITY_EDITOR && UNITY_ANDROID
+#if UNITY_EDITOR
             if (!this.isStarted)
             {
                 return;

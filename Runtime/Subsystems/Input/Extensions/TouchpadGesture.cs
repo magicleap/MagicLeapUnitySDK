@@ -9,9 +9,7 @@
 // %BANNER_END%
 
 using System.Runtime.InteropServices;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
 using UnityEngine.XR.MagicLeap.Native;
-#endif
 
 namespace UnityEngine.XR.MagicLeap
 {
@@ -128,8 +126,7 @@ namespace UnityEngine.XR.MagicLeap
                     /// </summary>
                     CounterClockwise
                 }
-                
-#if UNITY_MAGICLEAP || UNITY_ANDROID
+
                 /// <summary>
                 /// Links to MLInputConnectedDevicesList in ml_input.h.
                 /// </summary>
@@ -150,7 +147,6 @@ namespace UnityEngine.XR.MagicLeap
 
                     public float Angle;
                 }
-#endif
             }
         }
     }

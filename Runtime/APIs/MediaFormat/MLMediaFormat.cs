@@ -10,9 +10,7 @@
 
 using System;
 using System.Runtime.InteropServices;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
 using UnityEngine.XR.MagicLeap.Native;
-#endif
 
 namespace UnityEngine.XR.MagicLeap
 {
@@ -63,12 +61,10 @@ namespace UnityEngine.XR.MagicLeap
         /// <returns>An MLMediaFormat object if successful, null otherwise</returns>
         public static MLMediaFormat CreateVideo(string mimeType, int width, int height)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             if (MLResult.DidNativeCallSucceed(NativeBindings.MLMediaFormatCreateVideo(mimeType, width, height, out ulong handle), nameof(NativeBindings.MLMediaFormatCreateVideo)))
             {
                 return new MLMediaFormat(handle);
             }
-#endif
             return null;
         }
 
@@ -81,12 +77,10 @@ namespace UnityEngine.XR.MagicLeap
         /// <returns>An MLMediaFormat object if successful, null otherwise</returns>
         public static MLMediaFormat CreateAudio(string mimeType, int sampleRate, int channelCount)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             if (MLResult.DidNativeCallSucceed(NativeBindings.MLMediaFormatCreateAudio(mimeType, sampleRate, channelCount, out ulong handle), nameof(NativeBindings.MLMediaFormatCreateAudio)))
             {
                 return new MLMediaFormat(handle);
             }
-#endif
             return null;
         }
 
@@ -100,12 +94,10 @@ namespace UnityEngine.XR.MagicLeap
         /// <returns>An MLMediaFormat object if successful, null otherwise</returns>
         public static MLMediaFormat CreateSubtitle(string mimeType, string language)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             if (MLResult.DidNativeCallSucceed(NativeBindings.MLMediaFormatCreateSubtitle(mimeType, language, out ulong handle), nameof(NativeBindings.MLMediaFormatCreateSubtitle)))
             {
                 return new MLMediaFormat(handle);
             }
-#endif
             return null;
         }
 
@@ -123,12 +115,10 @@ namespace UnityEngine.XR.MagicLeap
         // TODO : can we replace with a "copy-constructor" or Clone() method?
         public static MLMediaFormat CreateCopy(MLMediaFormat format)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             if (MLResult.DidNativeCallSucceed(NativeBindings.MLMediaFormatCreateCopy(format.Handle, out ulong handle), nameof(NativeBindings.MLMediaFormatCreateCopy)))
             {
                 return new MLMediaFormat(handle);
             }
-#endif
             return null;
         }
 
@@ -139,12 +129,10 @@ namespace UnityEngine.XR.MagicLeap
         // TODO : replace this with a regular constructor, but then we cant return null value if MLMediaFormatCreate() fails.
         public static MLMediaFormat CreateEmpty()
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             if (MLResult.DidNativeCallSucceed(NativeBindings.MLMediaFormatCreate(out ulong handle), nameof(NativeBindings.MLMediaFormatCreate)))
             {
                 return new MLMediaFormat(handle);
             }
-#endif
             return null;
         }
 
@@ -162,10 +150,8 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         ~MLMediaFormat()
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             MLResult.Code resultCode = NativeBindings.MLMediaFormatDestroy(Handle);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaFormatDestroy));
-#endif
         }
 
         /// <summary>
@@ -176,15 +162,13 @@ namespace UnityEngine.XR.MagicLeap
         {
             string objToStr = string.Empty;
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             IntPtr stringPtr = Marshal.AllocHGlobal(NativeBindings.MAX_FORMAT_STRING_SIZE);
-            
+
             if (MLResult.DidNativeCallSucceed(NativeBindings.MLMediaFormatObjectToString(Handle, stringPtr), nameof(NativeBindings.MLMediaFormatObjectToString)))
             {
                 objToStr = Marshal.PtrToStringAnsi(stringPtr);
             }
             Marshal.FreeHGlobal(stringPtr);
-#endif
 
             return objToStr;
         }
@@ -197,14 +181,9 @@ namespace UnityEngine.XR.MagicLeap
         /// <returns>MLResult.Result.Ok if value was obtained successfully</returns>
         public MLResult GetValue(string keyName, out int value)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             MLResult result = MLResult.Create(NativeBindings.MLMediaFormatGetKeyValueInt32(Handle, keyName, out value));
             MLResult.DidNativeCallSucceed(result.Result, nameof(NativeBindings.MLMediaFormatGetKeyValueInt32));
             return result;
-#else
-            value = 0;
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         /// <summary>
@@ -215,14 +194,9 @@ namespace UnityEngine.XR.MagicLeap
         /// <returns>MLResult.Result.Ok if value was obtained successfully</returns>
         public MLResult GetValue(string keyName, out long value)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             MLResult result = MLResult.Create(NativeBindings.MLMediaFormatGetKeyValueInt64(Handle, keyName, out value));
             MLResult.DidNativeCallSucceed(result.Result, nameof(NativeBindings.MLMediaFormatGetKeyValueInt64));
             return result;
-#else
-            value = 0;
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         /// <summary>
@@ -233,14 +207,9 @@ namespace UnityEngine.XR.MagicLeap
         /// <returns>MLResult.Result.Ok if value was obtained successfully</returns>
         public MLResult GetValue(string keyName, out float value)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             MLResult result = MLResult.Create(NativeBindings.MLMediaFormatGetKeyValueFloat(Handle, keyName, out value));
             MLResult.DidNativeCallSucceed(result.Result, nameof(NativeBindings.MLMediaFormatGetKeyValueFloat));
             return result;
-#else
-            value = 0f;
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         /// <summary>
@@ -253,7 +222,6 @@ namespace UnityEngine.XR.MagicLeap
         {
             value = string.Empty;
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             IntPtr stringPtr = Marshal.AllocHGlobal(NativeBindings.MAX_KEY_STRING_SIZE);
             MLResult result = MLResult.Create(NativeBindings.MLMediaFormatGetKeyString(Handle, keyName, stringPtr));
             MLResult.DidNativeCallSucceed(result.Result, nameof(NativeBindings.MLMediaFormatGetKeyString));
@@ -263,9 +231,6 @@ namespace UnityEngine.XR.MagicLeap
             }
             Marshal.FreeHGlobal(stringPtr);
             return result;
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         /// <summary>
@@ -276,7 +241,6 @@ namespace UnityEngine.XR.MagicLeap
         /// <returns>MLResult.Result.Ok if value was obtained successfully</returns>
         public MLResult GetValue(string keyName, out byte[] value)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             MLResult result = MLResult.Create(NativeBindings.MLMediaFormatGetKeyByteBuffer(Handle, keyName, out NativeBindings.MLMediaFormatByteArray nativeByteBuffer));
             MLResult.DidNativeCallSucceed(result.Result, nameof(NativeBindings.MLMediaFormatGetKeyByteBuffer));
             if (result.IsOk)
@@ -293,10 +257,6 @@ namespace UnityEngine.XR.MagicLeap
             }
 
             return result;
-#else
-            value =  null;
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         /// <summary>
@@ -307,14 +267,9 @@ namespace UnityEngine.XR.MagicLeap
         /// <returns>MLResult.Result.Ok if value was obtained successfully</returns>
         public MLResult GetValue(string keyName, out ulong size)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             MLResult result = MLResult.Create(NativeBindings.MLMediaFormatGetKeySize(Handle, keyName, out size));
             MLResult.DidNativeCallSucceed(result.Result, nameof(NativeBindings.MLMediaFormatGetKeySize));
             return result;
-#else
-            size = 0;
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         /// <summary>
@@ -325,13 +280,9 @@ namespace UnityEngine.XR.MagicLeap
         /// <returns>MLResult.Result.Ok if value was set successfully</returns>
         public MLResult SetValue(string keyName, int value)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             MLResult result = MLResult.Create(NativeBindings.MLMediaFormatSetKeyInt32(Handle, keyName, value));
             MLResult.DidNativeCallSucceed(result.Result, nameof(NativeBindings.MLMediaFormatSetKeyInt32));
             return result;
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         /// <summary>
@@ -342,13 +293,9 @@ namespace UnityEngine.XR.MagicLeap
         /// <returns>MLResult.Result.Ok if value was set successfully</returns>
         public MLResult SetValue(string keyName, long value)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             MLResult result = MLResult.Create(NativeBindings.MLMediaFormatSetKeyInt64(Handle, keyName, value));
             MLResult.DidNativeCallSucceed(result.Result, nameof(NativeBindings.MLMediaFormatSetKeyInt64));
             return result;
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         /// <summary>
@@ -359,13 +306,9 @@ namespace UnityEngine.XR.MagicLeap
         /// <returns>MLResult.Result.Ok if value was set successfully</returns>
         public MLResult SetValue(string keyName, float value)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             MLResult result = MLResult.Create(NativeBindings.MLMediaFormatSetKeyFloat(Handle, keyName, value));
             MLResult.DidNativeCallSucceed(result.Result, nameof(NativeBindings.MLMediaFormatSetKeyFloat));
             return result;
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         /// <summary>
@@ -376,13 +319,9 @@ namespace UnityEngine.XR.MagicLeap
         /// <returns>MLResult.Result.Ok if value was set successfully</returns>
         public MLResult SetValue(string keyName, string value)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             MLResult result = MLResult.Create(NativeBindings.MLMediaFormatSetKeyString(Handle, keyName, value));
             MLResult.DidNativeCallSucceed(result.Result, nameof(NativeBindings.MLMediaFormatSetKeyString));
             return result;
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         /// <summary>
@@ -393,7 +332,6 @@ namespace UnityEngine.XR.MagicLeap
         /// <returns>MLResult.Result.Ok if value was set successfully</returns>
         public MLResult SetValue(string keyName, byte[] value)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             IntPtr bufferPtr = Marshal.AllocHGlobal(value.Length);
             Marshal.Copy(value, 0, bufferPtr, value.Length);
             NativeBindings.MLMediaFormatByteArray nativeBuffer = new NativeBindings.MLMediaFormatByteArray(bufferPtr, (uint)value.Length);
@@ -403,9 +341,6 @@ namespace UnityEngine.XR.MagicLeap
             Marshal.FreeHGlobal(bufferPtr);
 
             return result;
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         /// <summary>
@@ -416,13 +351,9 @@ namespace UnityEngine.XR.MagicLeap
         /// <returns>MLResult.Result.Ok if value was set successfully</returns>
         public MLResult SetValue(string keyName, ulong size)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             MLResult result = MLResult.Create(NativeBindings.MLMediaFormatSetKeySize(Handle, keyName, size));
             MLResult.DidNativeCallSucceed(result.Result, nameof(NativeBindings.MLMediaFormatSetKeySize));
             return result;
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
     }

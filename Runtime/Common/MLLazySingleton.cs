@@ -19,10 +19,8 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         protected MLLazySingleton()
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             if (instance.IsValueCreated)
                 throw new InvalidInstanceException($"Manually creating an instance of {typeof(T).Name} is not supported. You should use {typeof(T).Name}.Instance instead.");
-#endif
         }
 
         protected static T Instance

@@ -11,12 +11,10 @@
 namespace UnityEngine.XR.MagicLeap
 {
     using System;
-    using System.Text;
     using System.Collections.Generic;
     using System.Runtime.InteropServices;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
+    using System.Text;
     using UnityEngine.XR.MagicLeap.Native;
-#endif
 
     /// <summary>
     /// MLWebRTC class contains the API to interface with the
@@ -178,7 +176,6 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             public event OnIceGatheringCompletedDelegate OnIceGatheringCompleted = delegate { };
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             /// <summary>
             /// Gets the ice servers used for the connection.
             /// </summary>
@@ -213,7 +210,7 @@ namespace UnityEngine.XR.MagicLeap
             /// Gets the local data channels map of the connection.
             /// </summary>
             internal List<MLWebRTC.DataChannel> LocalDataChannels { get => this.localDataChannels; }
-#endif
+
             /// <summary>
             /// Creates an initialized PeerConnection object.
             /// </summary>
@@ -222,7 +219,6 @@ namespace UnityEngine.XR.MagicLeap
             /// <returns> An initialized PeerConnection object.</returns>
             public static PeerConnection CreateRemote(MLWebRTC.IceServer[] iceServers, out MLResult result)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var permResult = MLPermissions.CheckPermission(MLPermission.Internet);
                 if (!MLResult.DidNativeCallSucceed(permResult.Result, nameof(CreateRemote)))
                 {
@@ -236,15 +232,11 @@ namespace UnityEngine.XR.MagicLeap
                 MLResult.Code resultCode = NativeBindings.CreateRemoteConnection(iceServers, out PeerConnection connection);
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.CreateRemoteConnection));
                 result = MLResult.Create(resultCode);
-                if(result.IsOk)
+                if (result.IsOk)
                 {
-                   connections.Add(connection);
+                    connections.Add(connection);
                 }
                 return connection;
-#else
-                result = new MLResult();
-                return null;
-#endif
             }
 
             /// <summary>
@@ -256,7 +248,6 @@ namespace UnityEngine.XR.MagicLeap
             /// <returns> An initialized PeerConnection object.</returns>
             public static PeerConnection CreateRemote(MLWebRTC.IceServer[] iceServers, MLWebRTC.ProxyConfig proxyConfig, out MLResult result)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var permResult = MLPermissions.CheckPermission(MLPermission.Internet);
                 if (!MLResult.DidNativeCallSucceed(permResult.Result, nameof(CreateRemote)))
                 {
@@ -275,10 +266,6 @@ namespace UnityEngine.XR.MagicLeap
                     connections.Add(connection);
                 }
                 return connection;
-#else
-                result = new MLResult();
-                return null;
-#endif
             }
 
             /// <summary>
@@ -293,7 +280,6 @@ namespace UnityEngine.XR.MagicLeap
             /// </returns>
             public MLResult IsConnected(out bool connected)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 if (!MagicLeapNativeBindings.MLHandleIsValid(this.Handle))
                 {
                     connected = false;
@@ -304,10 +290,6 @@ namespace UnityEngine.XR.MagicLeap
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCConnectionIsConnected));
                 connected = isConnected;
                 return MLResult.Create(resultCode);
-#else
-                connected = false;
-                return new MLResult();
-#endif
             }
 
             /// <summary>
@@ -322,7 +304,6 @@ namespace UnityEngine.XR.MagicLeap
             /// </returns>
             public MLResult HasFailed(out bool failed)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 if (!MagicLeapNativeBindings.MLHandleIsValid(this.Handle))
                 {
                     failed = false;
@@ -334,13 +315,8 @@ namespace UnityEngine.XR.MagicLeap
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCConnectionHasFailed));
                 failed = isFailed;
                 return MLResult.Create(resultCode);
-#else
-                failed = false;
-                return new MLResult();
-#endif
             }
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             /// <summary>
             /// Creates the offer for the connection.
             /// </summary>
@@ -351,7 +327,6 @@ namespace UnityEngine.XR.MagicLeap
             /// </returns>
             public MLResult CreateOffer()
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 if (!MagicLeapNativeBindings.MLHandleIsValid(this.Handle))
                 {
                     return MLResult.Create(MLResult.Code.InvalidParam, "Handle is invalid.");
@@ -359,9 +334,6 @@ namespace UnityEngine.XR.MagicLeap
                 MLResult.Code resultCode = NativeBindings.MLWebRTCConnectionCreateOffer(this.Handle);
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCConnectionCreateOffer));
                 return MLResult.Create(resultCode);
-#else
-                return new MLResult();
-#endif
             }
 
             /// <summary>
@@ -376,12 +348,11 @@ namespace UnityEngine.XR.MagicLeap
             /// </returns>
             public MLResult SetRemoteOffer(string remoteOffer)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 if (!MagicLeapNativeBindings.MLHandleIsValid(this.Handle))
                 {
                     return MLResult.Create(MLResult.Code.InvalidParam, "Handle is invalid.");
                 }
-#endif
+
                 MLResult.Code resultCode = NativeBindings.MLWebRTCConnectionSetRemoteOffer(this.Handle, remoteOffer);
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCConnectionSetRemoteOffer));
                 return MLResult.Create(resultCode);
@@ -399,12 +370,10 @@ namespace UnityEngine.XR.MagicLeap
             /// </returns>
             public MLResult SetRemoteAnswer(string remoteAnswer)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 if (!MagicLeapNativeBindings.MLHandleIsValid(this.Handle))
                 {
                     return MLResult.Create(MLResult.Code.InvalidParam, "Handle is invalid.");
                 }
-#endif
 
                 MLResult.Code resultCode = NativeBindings.MLWebRTCConnectionSetRemoteAnswer(this.Handle, remoteAnswer);
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCConnectionSetRemoteAnswer));
@@ -423,12 +392,11 @@ namespace UnityEngine.XR.MagicLeap
             /// </returns>
             public MLResult AddRemoteIceCandidate(MLWebRTC.IceCandidate iceCandidate)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 if (!MagicLeapNativeBindings.MLHandleIsValid(this.Handle))
                 {
                     return MLResult.Create(MLResult.Code.InvalidParam, "Handle is invalid.");
                 }
-#endif
+
                 NativeBindings.MLWebRTCConnectionIceCandidate nativeIceCandidate = new NativeBindings.MLWebRTCConnectionIceCandidate();
                 nativeIceCandidate.Data = iceCandidate;
 
@@ -452,12 +420,11 @@ namespace UnityEngine.XR.MagicLeap
             /// </returns>
             public MLResult Destroy()
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 if (!MagicLeapNativeBindings.MLHandleIsValid(this.Handle))
                 {
                     return MLResult.Create(MLResult.Code.InvalidParam, "Handle is invalid.");
                 }
-#endif
+
                 MLResult.Code resultCode = MLResult.Code.Ok;
 
                 // Remove local tracks from this connection.
@@ -471,7 +438,7 @@ namespace UnityEngine.XR.MagicLeap
                 // Invalidate the handles of any remote sources and remove the media stream id from the set of unique ids.
                 foreach (MLWebRTC.MediaStream mediaStream in this.remoteMediaStreams.Values)
                 {
-                    foreach(MediaStream.Track remoteTrack in mediaStream.Tracks)
+                    foreach (MediaStream.Track remoteTrack in mediaStream.Tracks)
                     {
                         remoteTrack.Cleanup();
                     }
@@ -494,7 +461,7 @@ namespace UnityEngine.XR.MagicLeap
                 resultCode = NativeBindings.MLWebRTCConnectionDestroy(this.Handle);
 
                 this.Handle = MagicLeapNativeBindings.InvalidHandle;
-                this.localMediaStreamTracks.Clear(); 
+                this.localMediaStreamTracks.Clear();
                 this.remoteMediaStreams.Clear();
                 this.remoteDataChannels.Clear();
                 this.localDataChannels.Clear();
@@ -516,7 +483,6 @@ namespace UnityEngine.XR.MagicLeap
             /// </returns>
             public MLResult AddLocalTrack(MLWebRTC.MediaStream.Track trackToAdd)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 if (!MagicLeapNativeBindings.MLHandleIsValid(this.Handle))
                 {
                     return MLResult.Create(MLResult.Code.InvalidParam, "Handle is invalid.");
@@ -533,7 +499,7 @@ namespace UnityEngine.XR.MagicLeap
                 }
 
                 string[] streamIds = new string[trackToAdd.Streams.Count];
-                for(int i = 0; i < streamIds.Length; ++i)
+                for (int i = 0; i < streamIds.Length; ++i)
                 {
                     streamIds[i] = trackToAdd.Streams[i].Id;
                     trackToAdd.Streams[i].ParentConnections.Add(this);
@@ -547,9 +513,6 @@ namespace UnityEngine.XR.MagicLeap
                     localMediaStreamTracks.Add(trackToAdd);
                 }
                 return MLResult.Create(resultCode);
-#else
-                return new MLResult();
-#endif
             }
 
             /// <summary>
@@ -563,8 +526,6 @@ namespace UnityEngine.XR.MagicLeap
             /// </returns>
             public MLResult RemoveLocalTrack(MLWebRTC.MediaStream.Track trackToRemove)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-
                 if (!MagicLeapNativeBindings.MLHandleIsValid(this.Handle))
                 {
                     return MLResult.Create(MLResult.Code.InvalidParam, "Handle is invalid.");
@@ -589,11 +550,7 @@ namespace UnityEngine.XR.MagicLeap
                 }
 
                 return MLResult.Create(resultCode);
-#else
-                return new MLResult();
-#endif
             }
-#endif
         }
     }
 }

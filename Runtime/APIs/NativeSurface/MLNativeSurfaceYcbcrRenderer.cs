@@ -42,7 +42,6 @@ namespace UnityEngine.XR.MagicLeap
 
         bool INativeBufferProvider.AcquireNextAvailableBuffer(out ulong nativeBufferHandle)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             // This needs to be an atomic operation because OnFrameAvailable is called on a different thread than this func.
             bool acquireNewFrame = (System.Threading.Interlocked.Exchange(ref isNewFrameAvailable, 0) == 1);
             if (acquireNewFrame)
@@ -52,29 +51,21 @@ namespace UnityEngine.XR.MagicLeap
             }
             nativeBufferHandle = 0;
             return false;
-#else
-            nativeBufferHandle = 0;
-            return false;
-#endif
         }
 
         void INativeBufferProvider.ReleaseBuffer(ulong nativeBufferHandle)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             Surface.ReleaseFrame(nativeBufferHandle);
-#endif
         }
 
         bool IFrameTransformMatrixProvider.GetFrameTransformMatrix(float[] frameTransformMatColMajor)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             if (Surface.GetFrameTransformMatrix(frameTransformMatColMajor).IsOk)
             {
                 Native.MLConvert.FlipTransformMatrixVertically(frameTransformMatColMajor);
 
                 return true;
             }
-#endif
             return false;
         }
     }

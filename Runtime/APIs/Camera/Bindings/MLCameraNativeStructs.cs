@@ -8,7 +8,6 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
 using System;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -648,4 +647,3 @@ namespace UnityEngine.XR.MagicLeap
         }
     }
 }
-#endif

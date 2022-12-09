@@ -46,12 +46,10 @@ namespace UnityEngine.XR.MagicLeap
                 newEvent.EventID = intentEvent.IntentID;
 
                 bool eventSuccessful = intentEvent.IsSuccess;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 MLThreadDispatch.ScheduleMain(() =>
                 {
                     OnVoiceEventInternal?.Invoke(eventSuccessful, newEvent);
                 });
-#endif
             }
 
             /// <summary>
@@ -121,9 +119,7 @@ namespace UnityEngine.XR.MagicLeap
                 {
                     IntentCallbacks callbacks = new IntentCallbacks();
                     callbacks.Version = 1;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                     callbacks.OnEvent = MLVoice.NativeBindings.OnEvent;
-#endif
                     return callbacks;
                 }
             }

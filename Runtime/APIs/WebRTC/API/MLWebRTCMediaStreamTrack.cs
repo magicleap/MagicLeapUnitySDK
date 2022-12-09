@@ -11,9 +11,7 @@
 namespace UnityEngine.XR.MagicLeap
 {
     using System.Collections.Generic;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
     using UnityEngine.XR.MagicLeap.Native;
-#endif
 
     /// <summary>
     /// MLWebRTC class contains the API to interface with the
@@ -46,11 +44,9 @@ namespace UnityEngine.XR.MagicLeap
                 /// </summary>
                 internal Track(string trackId)
                 {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                     MLDevice.RegisterApplicationPause(this.OnApplicationPause);
 
                     Id = trackId;
-#endif
                 }
 
                 /// <summary>
@@ -149,7 +145,6 @@ namespace UnityEngine.XR.MagicLeap
                 /// </summary>
                 internal ulong Handle { get; set; }
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 /// <summary>
                 /// Creates an initialized Track object.
                 /// </summary>
@@ -269,7 +264,7 @@ namespace UnityEngine.XR.MagicLeap
                     result = MLResult.Create(resultCode);
                     return track;
                 }
-#endif
+
                 /// <summary>
                 /// Gets if a track is currently enabled or not.
                 /// </summary>
@@ -282,7 +277,6 @@ namespace UnityEngine.XR.MagicLeap
                 /// </returns>
                 public MLResult GetEnabled(out bool isEnabled)
                 {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                     if (!MagicLeapNativeBindings.MLHandleIsValid(this.Handle))
                     {
                         isEnabled = false;
@@ -292,10 +286,6 @@ namespace UnityEngine.XR.MagicLeap
                     MLResult.Code resultCode = Source.NativeBindings.MLWebRTCSourceIsEnabled(this.Handle, out isEnabled);
                     MLResult.DidNativeCallSucceed(resultCode, nameof(Source.NativeBindings.MLWebRTCSourceIsEnabled));
                     return MLResult.Create(resultCode);
-#else
-                    isEnabled = false;
-                    return new MLResult();
-#endif
                 }
 
                 /// <summary>
@@ -309,7 +299,6 @@ namespace UnityEngine.XR.MagicLeap
                 /// </returns>
                 public MLResult SetEnabled(bool isEnabled)
                 {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                     if (!MagicLeapNativeBindings.MLHandleIsValid(this.Handle))
                     {
                         return MLResult.Create(MLResult.Code.InvalidParam, "Source handle is invalid.");
@@ -329,9 +318,6 @@ namespace UnityEngine.XR.MagicLeap
                     }
 
                     return result;
-#else
-                    return new MLResult();
-#endif
                 }
 
                 /// <summary>
@@ -344,7 +330,6 @@ namespace UnityEngine.XR.MagicLeap
                 /// </returns>                
                 public virtual MLResult DestroyLocal()
                 {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                     if (!this.IsLocal)
                     {
                         return MLResult.Create(MLResult.Code.InvalidParam, "Souce is not local.");
@@ -377,9 +362,6 @@ namespace UnityEngine.XR.MagicLeap
                     this.ParentConnection = null;
 
                     return MLResult.Create(resultCode);
-#else
-                    return new MLResult();
-#endif
                 }
 
                 /// <summary>
@@ -388,9 +370,7 @@ namespace UnityEngine.XR.MagicLeap
                 internal void Cleanup()
                 {
                     // While local tracks can be unsubscribed in the DestroyLocal(), the only place to do that for remote tracks is in the finalizer.
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                     MLDevice.UnregisterApplicationPause(this.OnApplicationPause);
-#endif
                 }
 
                 /// <summary>

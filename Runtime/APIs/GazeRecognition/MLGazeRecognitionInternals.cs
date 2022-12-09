@@ -8,8 +8,6 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-
 namespace UnityEngine.XR.MagicLeap
 {
     /// <summary>
@@ -21,7 +19,7 @@ namespace UnityEngine.XR.MagicLeap
         /// Start the API.
         /// </summary>
         protected override MLResult.Code StartAPI()
-        {            
+        {
             var resultCode = NativeBindings.MLGazeRecognitionCreate(out Handle);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLGazeRecognitionCreate));
             return resultCode;
@@ -36,7 +34,7 @@ namespace UnityEngine.XR.MagicLeap
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLGazeRecognitionDestroy));
             return resultCode;
         }
-        
+
         /// <summary>
         /// Get information about the user's gaze.
         /// </summary>
@@ -60,4 +58,3 @@ namespace UnityEngine.XR.MagicLeap
         }
     }
 }
-#endif

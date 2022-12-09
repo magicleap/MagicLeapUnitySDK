@@ -10,9 +10,7 @@
 
 namespace UnityEngine.XR.MagicLeap
 {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
     using UnityEngine.XR.MagicLeap.Native;
-#endif
 
     /// <summary>
     /// MLWebRTC class contains the API to interface with the
@@ -82,9 +80,7 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             protected void InvalidateHandle()
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 this.Handle = MagicLeapNativeBindings.InvalidHandle;
-#endif
             }
         }
     }

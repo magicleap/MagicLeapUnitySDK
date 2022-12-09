@@ -72,7 +72,6 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             public ChannelFormatType ChannelFormat { get; set; }
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             internal BufferFormat(MLAudioOutput.NativeBindings.MLAudioBufferFormat bufferFormatNative)
             {
                 this.ChannelCount = bufferFormatNative.ChannelCount;
@@ -82,7 +81,6 @@ namespace UnityEngine.XR.MagicLeap
                 this.SampleFormat = bufferFormatNative.SampleFormat;
                 this.ChannelFormat = bufferFormatNative.ChannelFormat;
             }
-#endif
 
             public BufferFormat(uint channelCount, uint samplesPerSecond, uint bitsPerSample, SampleFormatType sampleFormat = SampleFormatType.Float, ChannelFormatType channelFormat = ChannelFormatType.Default)
             {
@@ -125,7 +123,6 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             public BufferFormat Format;
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             internal Buffer(MLAudioOutput.NativeBindings.MLAudioBuffer buffer, MLAudioOutput.NativeBindings.MLAudioBufferFormat bufferFormat, bool copyToManagedMemory = false)
             {
                 this.NativeDataPtr = buffer.Ptr;
@@ -175,8 +172,6 @@ namespace UnityEngine.XR.MagicLeap
 
                 return samples;
             }
-
-#endif
 
             public Buffer(BufferFormat format, float[] samples)
             {

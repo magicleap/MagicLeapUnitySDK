@@ -13,9 +13,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine.XR.MagicLeap.Native;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
 using static UnityEngine.XR.MagicLeap.MLWebRTC.VideoSink.Frame;
-#endif
 
 namespace UnityEngine.XR.MagicLeap
 {
@@ -26,7 +24,6 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public class MLCameraVideoSource : AppDefinedVideoSource
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             private MLCameraVideoSource(MLCamera mlCamera, MLCamera.CaptureConfig camCaptureConfig, string trackId, Renderer localRenderer, bool nativeBuffers)
                 : base(trackId)
             {
@@ -217,7 +214,7 @@ namespace UnityEngine.XR.MagicLeap
                     }
 
                     isCapturing = result.IsOk;
-                    if(IsCapturing)
+                    if (IsCapturing)
                     {
                         SetupCameraCallbacks();
                         OnCaptureStatusChanged?.Invoke(false);
@@ -357,7 +354,7 @@ namespace UnityEngine.XR.MagicLeap
 
                 OutputFormat outFmt = OutputFormat.YUV_420_888;
                 if (cameraOutput.Format == MLCamera.OutputFormat.RGBA_8888)
-                { 
+                {
                     outFmt = OutputFormat.RGBA_8888;
                 }
 
@@ -397,21 +394,6 @@ namespace UnityEngine.XR.MagicLeap
             {
                 MLPluginLog.Debug("MLWebRTC.CameraVideoSource camera is streaming.");
             }
-#else
-            public MLCameraVideoSource(string trackId) : base(trackId)
-            {
-            }
-
-            protected override void OnSourceDestroy()
-            {
-                throw new NotImplementedException();
-            }
-
-            protected override void OnSourceSetEnabled(bool enabled)
-            {
-                throw new NotImplementedException();
-            }
-#endif
         }
     }
 }

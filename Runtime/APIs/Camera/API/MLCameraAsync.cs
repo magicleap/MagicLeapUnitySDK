@@ -70,16 +70,12 @@ namespace UnityEngine.XR.MagicLeap
         {
             return Task.Run(() =>
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 lock (apiLock)
                 {
                     MLResult.Code resultCode = NativeBindings.MLCameraPreCaptureAEAWB(Handle);
                     MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraPreCaptureAEAWB));
                     return MLResult.Create(resultCode);
                 }
-#else
-                return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
             });
         }
 
@@ -95,7 +91,6 @@ namespace UnityEngine.XR.MagicLeap
         {
             return Task.Run(() =>
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 MLResult.Code resultCode = MLResult.Code.Ok;
                 lock (apiLock)
                 {
@@ -106,9 +101,6 @@ namespace UnityEngine.XR.MagicLeap
                     }
                 }
                 return MLResult.Create(resultCode);
-#else
-                return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
             });
         }
 
@@ -120,7 +112,6 @@ namespace UnityEngine.XR.MagicLeap
         {
             return Task.Run(() =>
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 MLResult.Code resultCode = MLResult.Code.Ok;
                 lock (apiLock)
                 {
@@ -132,9 +123,6 @@ namespace UnityEngine.XR.MagicLeap
                     }
                 }
                 return MLResult.Create(resultCode);
-#else
-                return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
             });
         }
 
@@ -145,13 +133,10 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public Task<MLResult> CapturePreviewStartAsync()
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             // this has to be called on main thread
             CreatePreviewTexture();
-#endif
             return Task.Run(() =>
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 MLResult.Code resultCode = MLResult.Code.Ok;
                 lock (apiLock)
                 {
@@ -162,9 +147,6 @@ namespace UnityEngine.XR.MagicLeap
                     }
                 }
                 return MLResult.Create(resultCode);
-#else
-                return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
             });
         }
 
@@ -175,7 +157,6 @@ namespace UnityEngine.XR.MagicLeap
         {
             return Task.Run(() =>
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 MLResult.Code resultCode = MLResult.Code.Ok;
                 lock (apiLock)
                 {
@@ -188,9 +169,6 @@ namespace UnityEngine.XR.MagicLeap
                     MLThreadDispatch.ScheduleMain(ClearPreviewTexture);
                 }
                 return MLResult.Create(resultCode);
-#else
-                return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
             });
         }
 
@@ -203,7 +181,6 @@ namespace UnityEngine.XR.MagicLeap
         {
             return Task.Run(() =>
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 MLResult.Code resultCode = MLResult.Code.Ok;
                 lock (apiLock)
                 {
@@ -211,9 +188,6 @@ namespace UnityEngine.XR.MagicLeap
                     MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraCaptureImage));
                 }
                 return MLResult.Create(resultCode);
-#else
-                return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
             });
         }
     }

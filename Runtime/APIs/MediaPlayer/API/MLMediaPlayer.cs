@@ -14,13 +14,10 @@ using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Networking;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
 using UnityEngine.XR.MagicLeap.Native;
-#endif
 
 namespace UnityEngine.XR.MagicLeap
 {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
     using System;
     using System.Collections.Generic;
     using System.Runtime.InteropServices;
@@ -137,14 +134,14 @@ namespace UnityEngine.XR.MagicLeap
 #else 
                 MLResult.Code resultCode = NativeBindings.MLMediaPlayerCreate(out this.handle);
 #endif
-                if (!MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerCreate) ))
+                if (!MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerCreate)))
                 {
                     result = MLResult.Create(resultCode);
                     return;
                 }
-                
+
                 MLDevice.RegisterApplicationPause(this.OnApplicationPause);
-                
+
                 NativeBindings.MLMediaPlayerEventCallbacksEx callbacks = NativeBindings.MLMediaPlayerEventCallbacksEx.Create();
                 this.gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
                 IntPtr gcHandlePtr = GCHandle.ToIntPtr(this.gcHandle);
@@ -164,7 +161,7 @@ namespace UnityEngine.XR.MagicLeap
                 // register to the captionings callbacks
                 resultCode = NativeBindings.MLMediaPlayerSetOnMediaTimedTextUpdateCallback(this.handle, NativeBindings.OnTimedTextUpdate, gcHandlePtr);
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerSetOnMediaTimedTextUpdateCallback));
-                
+
                 NativeBindings.MLMediaPlayerSetOnMediaSubtitleUpdateCallback(this.handle, NativeBindings.OnMediaSubtitleUpdate, gcHandlePtr);
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerSetOnMediaSubtitleUpdateCallback));
 
@@ -196,16 +193,16 @@ namespace UnityEngine.XR.MagicLeap
                     return;
 
                 MLDevice.UnregisterApplicationPause(this.OnApplicationPause);
-                
+
                 this.parser608.OnText -= On608Text;
                 this.parser708.OnText -= On708Text;
-                
+
                 var resultCode = NativeBindings.MLMediaPlayerSetOnMediaSubtitleUpdateCallback(this.handle, null, IntPtr.Zero);
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerSetOnMediaSubtitleUpdateCallback));
-                
+
                 resultCode = NativeBindings.MLMediaPlayerSetOnMediaTimedTextUpdateCallback(this.handle, null, IntPtr.Zero);
-                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerSetOnMediaTimedTextUpdateCallback));                
-                
+                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerSetOnMediaTimedTextUpdateCallback));
+
                 if (VideoRenderer != null)
                 {
                     this.VideoRenderer.Cleanup();
@@ -213,11 +210,10 @@ namespace UnityEngine.XR.MagicLeap
 
                 AudioDRM = null;
                 VideoDRM = null;
-                
-                resultCode = NativeBindings.MLMediaPlayerDestroy(this.handle);
-                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerDestroy));
-                
+
+                NativeBindings.MLUnityQueueMediaPlayerResetAndDestroy(this.handle);
                 handle = MagicLeapNativeBindings.InvalidHandle;
+
                 this.gcHandle.Free();
             }
 
@@ -431,7 +427,7 @@ namespace UnityEngine.XR.MagicLeap
                     Debug.LogError(e);
                     return MLResult.Create(MLResult.Code.AllocFailed);
                 }
-                
+
                 return MLResult.Create(MLResult.Code.Pending);
             }
 
@@ -455,7 +451,7 @@ namespace UnityEngine.XR.MagicLeap
             public MLResult Reset()
             {
                 var resultCode = NativeBindings.MLMediaPlayerReset(handle);
-                if(MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerReset)))
+                if (MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerReset)))
                 {
                     IsPrepared = false;
                     VideoRenderer?.Cleanup();
@@ -466,7 +462,7 @@ namespace UnityEngine.XR.MagicLeap
             public MLResult ResetAsync()
             {
                 var resultCode = NativeBindings.MLMediaPlayerResetAsync(this.handle);
-                if(MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerResetAsync)))
+                if (MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerResetAsync)))
                 {
                     IsPrepared = false;
                     VideoRenderer?.Cleanup();
@@ -646,7 +642,6 @@ namespace UnityEngine.XR.MagicLeap
             }
         }
     }
-#endif
 }
 
 namespace UnityEngine.XR.MagicLeap
@@ -667,7 +662,6 @@ namespace UnityEngine.XR.MagicLeap
                 this.fileBuffer = fileBuffer;
                 this.byteBuffer = null;
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 // media player not supported in Magic Leap App Simulator
 #if !UNITY_EDITOR
                 MLResult.Code result = NativeBindings.Create(this, out ulong handle);
@@ -675,7 +669,6 @@ namespace UnityEngine.XR.MagicLeap
                 {
                     Handle = handle;
                 }
-#endif
 #endif
             }
 
@@ -684,7 +677,6 @@ namespace UnityEngine.XR.MagicLeap
                 this.gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
                 this.byteBuffer = byteBuffer;
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 // media player not supported in Magic Leap App Simulator
 #if !UNITY_EDITOR
                 MLResult.Code result = NativeBindings.Create(this, out ulong handle);
@@ -693,31 +685,26 @@ namespace UnityEngine.XR.MagicLeap
                     Handle = handle;
                 }
 #endif
-#endif
             }
 
             public void Destroy()
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 if (MagicLeapNativeBindings.MLHandleIsValid(Handle))
                 {
                     var resultCode = NativeBindings.MLMediaDataSourceDestroy(Handle);
                     MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaDataSourceDestroy));
                     Handle = MagicLeapNativeBindings.InvalidHandle;
                 }
-#endif
             }
 
             ~DataSource()
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 if (MagicLeapNativeBindings.MLHandleIsValid(Handle))
                 {
                     var resultCode = NativeBindings.MLMediaDataSourceDestroy(Handle);
                     MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaDataSourceDestroy));
                     Handle = MagicLeapNativeBindings.InvalidHandle;
                 }
-#endif
             }
         }
     }
@@ -729,7 +716,6 @@ namespace UnityEngine.XR.MagicLeap
     {
         public partial class DataSource
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             public class NativeBindings : MagicLeapNativeBindings
             {
                 public delegate long ReadAtDelegate(ulong dataSourceHandle, ulong position, ulong size, IntPtr buffer, IntPtr context);
@@ -797,7 +783,6 @@ namespace UnityEngine.XR.MagicLeap
                     return MLMediaDataSourceCreate(OnReadAt, OnGetSize, OnClose, GCHandle.ToIntPtr(dataSource.gcHandle), out handle);
                 }
             }
-#endif
         }
     }
 }

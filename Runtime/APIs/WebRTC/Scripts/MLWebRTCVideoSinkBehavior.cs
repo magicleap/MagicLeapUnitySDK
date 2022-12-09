@@ -54,7 +54,6 @@ namespace MagicLeap.Core
 
         void Awake()
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             VideoSink = MLWebRTC.VideoSink.Create(out MLResult result);
             if (autoResizeNativeRenderer)
             {
@@ -63,7 +62,6 @@ namespace MagicLeap.Core
             VideoSink.OnStreamChanged += OnVideoSinkStreamChanged;
             fpsTimer = new Timer(1000);
             hasDeterminedFrameFormat = false;
-#endif
         }
 
         private void OnFrameResolutionChanged(uint newWidth, uint newHeight)
@@ -130,7 +128,7 @@ namespace MagicLeap.Core
                 }
             }
 
-            if (hasDeterminedFrameFormat)
+            else if (hasDeterminedFrameFormat)
             {
                 RenderWebRTCFrame(currentFrame);
             }
@@ -147,7 +145,6 @@ namespace MagicLeap.Core
 
         private void RenderWebRTCFrame(MLWebRTC.VideoSink.Frame frame)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             if (frame.Format != MLWebRTC.VideoSink.Frame.OutputFormat.NativeBuffer)
             {
                 if (frame.ImagePlanes == null)
@@ -199,7 +196,6 @@ namespace MagicLeap.Core
                     }
                     break;
             }
-#endif
         }
 
         private void RenderWebRTCFrameYUV(MLWebRTC.VideoSink.Frame frame)

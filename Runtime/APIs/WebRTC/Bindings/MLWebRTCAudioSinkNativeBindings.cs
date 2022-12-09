@@ -12,9 +12,7 @@ namespace UnityEngine.XR.MagicLeap
 {
     using System;
     using System.Runtime.InteropServices;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
     using UnityEngine.XR.MagicLeap.Native;
-#endif
 
     /// <summary>
     /// MLWebRTC class contains the API to interface with the
@@ -27,7 +25,6 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public partial class AudioSink
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             /// <summary>
             /// Native bindings for the MLWebRTC.AudioSink class. 
             /// </summary>
@@ -464,7 +461,6 @@ namespace UnityEngine.XR.MagicLeap
                     }
                 }
             }
-#endif
         }
     }
 }

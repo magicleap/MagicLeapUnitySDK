@@ -146,7 +146,6 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public static bool VoiceEnabled => Instance.isEnabled();
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
         protected override MLResult.Code StartAPI()
         {
             if (!MLResult.DidNativeCallSucceed(MLPermissions.CheckPermission(MLPermission.VoiceInput).Result, nameof(StartAPI)))
@@ -169,7 +168,7 @@ namespace UnityEngine.XR.MagicLeap
             }
             return result;
         }
-#endif
+
         /// <summary>
         /// Configures Settings sent, Sets the callbacks for voice intent events, and starts processing.
         /// </summary>
@@ -184,7 +183,6 @@ namespace UnityEngine.XR.MagicLeap
         /// </returns>
         public static MLResult SetupVoiceIntents(MLVoiceIntentsConfiguration voiceConfiguration)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             string JSONString = voiceConfiguration.GetJSONString();
 
             MLResult result = MLResult.Create(Instance.ConfigureSettings(JSONString));
@@ -212,9 +210,6 @@ namespace UnityEngine.XR.MagicLeap
                 Instance.isProcessing = true;
             }
             return result;
-#else
-            return MLResult.Create(MLResult.Code.APIDLLNotFound);
-#endif
         }
 
         /// <summary>
@@ -233,7 +228,6 @@ namespace UnityEngine.XR.MagicLeap
         /// </returns>
         public static MLResult SetupVoiceIntents(string JSONString)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             MLResult result = MLResult.Create(Instance.ConfigureSettings(JSONString));
             if (!result.IsOk)
             {
@@ -259,9 +253,6 @@ namespace UnityEngine.XR.MagicLeap
                 Instance.isProcessing = true;
             }
             return result;
-#else
-            return MLResult.Create(MLResult.Code.APIDLLNotFound);
-#endif
         }
 
         /// <summary>
@@ -277,7 +268,6 @@ namespace UnityEngine.XR.MagicLeap
         /// </returns>
         public static MLResult Stop()
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             MLResult result = MLResult.Create(Instance.SetCallbacks(true));
 
             if (!MLResult.IsOK(result.Result))
@@ -297,9 +287,6 @@ namespace UnityEngine.XR.MagicLeap
             }
 
             return MLResult.Create(resultCode);
-#else
-            return MLResult.Create(MLResult.Code.APIDLLNotFound);
-#endif
         }
     }
 }

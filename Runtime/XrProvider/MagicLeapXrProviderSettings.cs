@@ -16,13 +16,12 @@ namespace UnityEngine.XR.MagicLeap
     [System.Serializable]
     public class MagicLeapXrProviderSettings : ScriptableObject
     {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
 #if !UNITY_EDITOR
         /// <summary>Static instance that will hold the runtime asset instance we created in our build process.</summary>
         public static MagicLeapXrProviderSettings s_RuntimeInstance = null;
 #endif
 
-        
+
         [SerializeField]
         private MagicLeapXrProviderNativeBindings.LogLevel m_logLevel = MagicLeapXrProviderNativeBindings.LogLevel.Error;
 
@@ -38,6 +37,5 @@ namespace UnityEngine.XR.MagicLeap
             s_RuntimeInstance = this;
 #endif
         }
-#endif
     }
 }

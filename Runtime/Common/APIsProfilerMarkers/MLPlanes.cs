@@ -14,7 +14,6 @@ namespace UnityEngine.XR.MagicLeap
 {
     public partial class MLPlanes
     {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
         //Profiler markers for MLPlanes Native Bindings calls
         private readonly static ProfilerMarker nativeCreatePerfMarker = new ProfilerMarker("MLPlanesNativeBindings.MLPlanesCreate");
         private readonly static ProfilerMarker nativeQueryBeginPerfMarker = new ProfilerMarker("MLPlanesNativeBindings.MLPlanesQueryBegin");
@@ -27,6 +26,5 @@ namespace UnityEngine.XR.MagicLeap
         private readonly static ProfilerMarker startAPIPerfMarker = new ProfilerMarker("MLPlanes.StartAPI");
         private readonly static ProfilerMarker stopAPIPerfMarker = new ProfilerMarker("MLPlanes.StopAPI");
         private readonly static ProfilerMarker updatePerfMarker = new ProfilerMarker("MLPlanes.Update");
-#endif
     }
 }

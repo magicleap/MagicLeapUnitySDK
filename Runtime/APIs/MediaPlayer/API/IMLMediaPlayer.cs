@@ -8,7 +8,6 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
 using System;
 
 namespace UnityEngine.XR.MagicLeap
@@ -142,4 +141,3 @@ namespace UnityEngine.XR.MagicLeap
         int GetHeight();
     }
 }
-#endif

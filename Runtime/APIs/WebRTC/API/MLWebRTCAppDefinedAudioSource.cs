@@ -12,9 +12,7 @@ namespace UnityEngine.XR.MagicLeap
 {
     using System;
     using System.Runtime.InteropServices;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
     using UnityEngine.XR.MagicLeap.Native;
-#endif
 
     /// <summary>
     /// MLWebRTC class contains the API to interface with the
@@ -28,10 +26,7 @@ namespace UnityEngine.XR.MagicLeap
         public abstract partial class AppDefinedAudioSource : AppDefinedSource
         {
             private bool isEnabled = false;
-
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             private MLAudioOutput.NativeBindings.MLAudioBuffer audioBufferNative;
-#endif
             private int audioBufferCapacity;
             private short[] intSamples;
 
@@ -41,7 +36,6 @@ namespace UnityEngine.XR.MagicLeap
                 this.TrackType = Type.Audio;
             }
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             /// <summary>
             /// Initializes the given AppDefinedVideoSource object.
             /// </summary>
@@ -110,7 +104,6 @@ namespace UnityEngine.XR.MagicLeap
                 }
                 return result;
             }
-#endif
         }
     }
 }

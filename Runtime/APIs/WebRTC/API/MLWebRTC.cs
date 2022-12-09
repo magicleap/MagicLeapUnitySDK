@@ -10,11 +10,9 @@
 
 namespace UnityEngine.XR.MagicLeap
 {
-    using System.Threading.Tasks;
     using System.Collections.Generic;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
+    using System.Threading.Tasks;
     using UnityEngine.XR.MagicLeap.Native;
-#endif
 
     /// <summary>
     /// MLWebRTC class contains the API to interface with the
@@ -22,7 +20,6 @@ namespace UnityEngine.XR.MagicLeap
     /// </summary>
     public partial class MLWebRTC : MLAutoAPISingleton<MLWebRTC>
     {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
         /// <summary>
         /// Contains all the unique Id's of the media streams for this connection.
         /// </summary>
@@ -86,7 +83,7 @@ namespace UnityEngine.XR.MagicLeap
 
             MLResult.Code resultCode = NativeBindings.MLWebRTCInstanceDestroy();
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCInstanceDestroy));
-            return resultCode; 
+            return resultCode;
         }
 
         /// <summary>
@@ -118,6 +115,5 @@ namespace UnityEngine.XR.MagicLeap
                 }
             }
         }
-#endif
     }
 }

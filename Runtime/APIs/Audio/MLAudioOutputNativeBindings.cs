@@ -14,16 +14,13 @@ namespace UnityEngine.XR.MagicLeap
 {
     using System;
     using System.Runtime.InteropServices;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
     using MagicLeap.Native;
-#endif
 
     /// <summary>
     /// Manages Audio.
     /// </summary>
     public sealed partial class MLAudioOutput
     {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
         /// <summary>
         /// See ml_audio.h for additional comments.
         /// </summary>
@@ -42,7 +39,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="volume">The new media event.</param>
             /// <param name="callback">A pointer to the callback.</param>
             public delegate void MLAudioMediaEventCallback(MediaEvent mediaEvent, IntPtr callback);
-            
+
             /// <summary>
             /// Gets the current audio output device.
             /// </summary>
@@ -160,7 +157,33 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             [DllImport(AudioPlayerDLL, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLAudioSetMediaEventCallback(MLAudioMediaEventCallback callback, IntPtr context);
-            
+
+            /// <summary>
+            /// Setting this option on a sound output causes its output to bypass master volume, making
+            /// it effectively "always audible" (assuming it is neither muted nor set to zero volume
+            /// on a per-sound basis). This option can only be set on medical-enabled devices (60601
+            /// compliant), and will only work for non-spatial sounds.Non-spatial sound parameters
+            /// such as volume, mute, pitch and looping are still in effect for sounds that are
+            /// bypassing master volume.
+            /// </summary>
+            [DllImport(AudioPlayerDLL, CallingConvention = CallingConvention.Cdecl)]
+            public static extern MLResult.Code MLAudioSetSoundBypassesMasterVolume(ulong audioHandle, [MarshalAs(UnmanagedType.I1)] bool isBypassing);
+
+            /// <summary>
+            /// Queries whether a sound output is exempt from attenuation due to master volume.
+            /// This call reports whether the output from a sound output is bypassing master volume,
+            /// making it effectively "always audible" (assuming it is neither muted nor set to zero volume
+            /// on a per-sound basis). This option can only be set on medical-enabled devices(60601
+            /// compliant), and will only work for non-spatial sounds.Non-spatial sound parameters
+            /// such as volume, mute, pitch and looping are still in effect for sounds that are
+            /// bypassing master volume.
+            /// </summary>
+            [DllImport(AudioPlayerDLL, CallingConvention = CallingConvention.Cdecl)]
+            public static extern MLResult.Code MLAudioGetSoundBypassesMasterVolume(ulong audioHandle, [MarshalAs(UnmanagedType.I1)] out bool isBypassing);
+
+            [DllImport(MLSdkLoaderDll, CallingConvention = CallingConvention.Cdecl)]
+            internal static extern ulong MLUnityAudioGetHandle();
+
             [StructLayout(LayoutKind.Sequential)]
             public readonly struct MLAudioBufferFormat
             {
@@ -306,6 +329,5 @@ namespace UnityEngine.XR.MagicLeap
                 }
             }
         }
-#endif
     }
 }

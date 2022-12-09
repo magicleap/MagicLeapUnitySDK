@@ -8,11 +8,11 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-using UnityEngine.Scripting;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
 using UnityEngine.InputSystem.Layouts;
 using UnityEngine.InputSystem.XR;
+using UnityEngine.Scripting;
 
 namespace UnityEngine.XR.MagicLeap
 {
@@ -108,7 +108,7 @@ namespace UnityEngine.XR.MagicLeap
                     High,
                 }
 
-#if UNITY_INPUT_SYSTEM && (UNITY_MAGICLEAP || UNITY_ANDROID)
+#if UNITY_INPUT_SYSTEM
 
                 [StructLayout(LayoutKind.Explicit, Size = Constants.kBaseCommandSize + (sizeof(uint) * 2))]
                 public struct SendControllerVibe : IInputDeviceCommandInfo
