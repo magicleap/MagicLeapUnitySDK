@@ -8,8 +8,6 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-
 namespace UnityEngine.XR.MagicLeap
 {
     using System;
@@ -24,7 +22,7 @@ namespace UnityEngine.XR.MagicLeap
         ///  An unset position, width, or size.
         /// </summary>
         public const float MLTTMLDimen_Unset = -3.402823466e+38F;
-        
+
         /// <summary>
         /// The cue default text size type;
         public enum MLTTMLTextSizeType
@@ -131,27 +129,27 @@ namespace UnityEngine.XR.MagicLeap
             /// <summary>
             /// Track cue start time in milliseconds.
             /// </summary>
-            public long StartTimeMs  {get; internal set; }
+            public long StartTimeMs { get; internal set; }
 
             /// <summary>
             /// Track cue end time in milliseconds.
             /// </summary>
-            public long EndTimeMs {get; internal set; }
+            public long EndTimeMs { get; internal set; }
 
             /// <summary>
             /// The cue text encoded as UTF-8.  Or null if this is an image cue.
             /// </summary>
-            public string Text {get; internal set; }
+            public string Text { get; internal set; }
 
             /// <summary>
             /// The alignment of the cue text within the cue box.
             /// </summary>
-            public MLTTMLLayoutAlignment TextAlignment {get; internal set; }
+            public MLTTMLLayoutAlignment TextAlignment { get; internal set; }
 
             /// <summary>
             /// The cue image if this is an image cue, an empty image otherwise.
             /// </summary>
-            public MLTTMLImage Bitmap {get; internal set; }
+            public MLTTMLImage Bitmap { get; internal set; }
 
             /// <summary>
             /// The position of the #line_anchor of the cue box within the viewport in the direction orthogonal to the writing direction,
@@ -159,7 +157,7 @@ namespace UnityEngine.XR.MagicLeap
             /// For horizontal text and <seealso cref="LineType"/> equal to <seealso cref="MLTTMLLineType.Fraction"/>,
             /// this is the fractional vertical position relative to the top of the viewport.
             /// </summary>
-            public float Line {get; internal set; }
+            public float Line { get; internal set; }
 
             /// <summary>
             /// The cue line type. <seealso cref="MLTTMLLineType.Fraction"/> indicates that #line is a fractional position within the viewport.
@@ -170,12 +168,12 @@ namespace UnityEngine.XR.MagicLeap
             /// start and end of the viewport are the top and bottom respectively.  Note that it's particularly important to consider
             /// the effect of <seealso cref="LineAnchor"/> when using <seealso cref="MLTTMLLineType.Number"/>.
             /// </summary>
-            public MLTTMLLineType LineType {get; internal set; }
+            public MLTTMLLineType LineType { get; internal set; }
 
             /// <summary>
             /// The cue box anchor in the direction of line.
             /// </summary>
-            public MLTTMLAnchorType LineAnchor {get; internal set; }
+            public MLTTMLAnchorType LineAnchor { get; internal set; }
 
             /// <summary>
             /// The fractional position of the #position_anchor of the cue box within the viewport in the direction orthogonal to #line,
@@ -183,43 +181,43 @@ namespace UnityEngine.XR.MagicLeap
             /// For horizontal text, this is the horizontal position relative to the left of the viewport.
             /// Note that positioning is relative to the left of the viewport even in the case of right-to-left text.
             /// </summary>
-            public float Position {get; internal set; }
+            public float Position { get; internal set; }
 
             /// <summary>
             /// The cue box anchor in the direction of position.
             /// </summary>
-            public MLTTMLAnchorType PositionAnchor {get; internal set; }
+            public MLTTMLAnchorType PositionAnchor { get; internal set; }
 
             /// <summary>
             /// The cue box size in the writing direction, as a fraction of the viewport size or <seealso cref="MLMediaTTML.MLTTMLDimen_Unset"/>.
             /// </summary>
-            public float Size {get; internal set; }
+            public float Size { get; internal set; }
 
             /// <summary>
             /// The cue bitmap height as a fraction of the viewport size or <seealso cref="MLMediaTTML.MLTTMLDimen_Unset"/>
             /// if the bitmap should be displayed at its natural height given the bitmap dimensions and the specified #size.
             /// </summary>
-            public float BitmapHeight {get; internal set; }
+            public float BitmapHeight { get; internal set; }
 
             /// <summary>
             /// Specifies whether or not the <seealso cref="WindowColor"/> property is set.
             /// </summary>
-            public bool WindowColorSet {get; internal set; }
+            public bool WindowColorSet { get; internal set; }
 
             /// <summary>
             /// The cue window fill color in ARGB format.
             /// </summary>
-            public uint WindowColor {get; internal set; }
+            public uint WindowColor { get; internal set; }
 
             /// <summary>
             /// The cue default text size type, or or <seealso cref="Unset"/> if this cue has no default text size.
             /// </summary>
-            public MLTTMLTextSizeType TextSizeType {get; internal set; }
+            public MLTTMLTextSizeType TextSizeType { get; internal set; }
 
             /// <summary>
             /// The cue default text size, or <seealso cref="MLMediaTTML.MLTTMLDimen_Unset"/> if this cue has no default.
             /// </summary>
-            public float TextSize {get; internal set; }
+            public float TextSize { get; internal set; }
 
             /// <summary>
             /// Create and return an initialized version of this struct.
@@ -271,5 +269,3 @@ namespace UnityEngine.XR.MagicLeap
         };
     }
 }
-
-#endif

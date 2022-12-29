@@ -12,9 +12,7 @@ namespace UnityEngine.XR.MagicLeap
 {
     using System;
     using System.Runtime.InteropServices;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
     using MagicLeap.Native;
-#endif
     /// <summary>
     /// MLMedia APIs.
     /// </summary>
@@ -37,7 +35,6 @@ namespace UnityEngine.XR.MagicLeap
 
                 internal Track(ulong mediaPlayerHandle, uint trackIndex)
                 {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                     this.Index = trackIndex;
                     this.Language = NativeBindings.GetTrackLanguage(mediaPlayerHandle, trackIndex);
 
@@ -63,7 +60,6 @@ namespace UnityEngine.XR.MagicLeap
                     resultCode = NativeBindings.MLMediaPlayerGetTrackType(mediaPlayerHandle, trackIndex, out Type type);
                     MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerGetTrackType));
                     this.TrackType = type;
-#endif
                 }
 
                 public MLAudioOutput.ChannelLayouts AudioChannelLayout

@@ -12,17 +12,13 @@ namespace UnityEngine.XR.MagicLeap
 {
     using System;
     using System.Runtime.InteropServices;
-
-#if UNITY_MAGICLEAP || UNITY_ANDROID
     using UnityEngine.XR.MagicLeap.Native;
-#endif
 
     /// <summary>
     /// Manages Audio.
     /// </summary>
     public sealed partial class MLAudioOutput : MLAutoAPISingleton<MLAudioOutput>
     {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
         /// <summary>
         /// The current audio device.
         /// </summary>
@@ -70,8 +66,6 @@ namespace UnityEngine.XR.MagicLeap
         /// Raised whenever the media event happens.
         /// </summary>
         public static event MLAudioMediaEventDelegate OnMediaEvent = delegate { };
-
-#endif
 
         /// <summary>
         /// The currently active output device.
@@ -122,7 +116,6 @@ namespace UnityEngine.XR.MagicLeap
 
         };
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
         /// <summary>
         /// Gets the audio output device.
         /// </summary>
@@ -143,6 +136,43 @@ namespace UnityEngine.XR.MagicLeap
         public static float MasterVolume
         {
             get { return Instance.masterVolume; }
+        }
+
+        public static MLResult SetSoundBypassesMasterVolume(bool isBypassing) => MLResult.Create(Instance.SetSoundBypassesMasterVolumeInternal(isBypassing));
+
+        public static MLResult GetSoundBypassesMasterVolume(out bool isBypassing) => MLResult.Create(Instance.GetSoundBypassesMasterVolumeInternal(out isBypassing));
+
+        /// <summary>
+        /// Setting this option on a sound output causes its output to bypass master volume, making
+        /// it effectively "always audible" (assuming it is neither muted nor set to zero volume
+        /// on a per-sound basis). This option can only be set on medical-enabled devices (60601
+        /// compliant), and will only work for non-spatial sounds.Non-spatial sound parameters
+        /// such as volume, mute, pitch and looping are still in effect for sounds that are
+        /// bypassing master volume.
+        /// </summary>
+        private MLResult.Code SetSoundBypassesMasterVolumeInternal(bool isBypassing)
+        {
+            ulong audioHandle = NativeBindings.MLUnityAudioGetHandle();
+            var resultCode = NativeBindings.MLAudioSetSoundBypassesMasterVolume(audioHandle, isBypassing);
+            MLResult.DidNativeCallSucceed(resultCode, nameof(MLAudioOutput.NativeBindings.MLAudioSetSoundBypassesMasterVolume));
+            return resultCode;
+        }
+
+        /// <summary>
+        /// Queries whether a sound output is exempt from attenuation due to master volume.
+        /// This call reports whether the output from a sound output is bypassing master volume,
+        /// making it effectively "always audible" (assuming it is neither muted nor set to zero volume
+        /// on a per-sound basis). This option can only be set on medical-enabled devices(60601
+        /// compliant), and will only work for non-spatial sounds.Non-spatial sound parameters
+        /// such as volume, mute, pitch and looping are still in effect for sounds that are
+        /// bypassing master volume.
+        /// </summary>
+        private MLResult.Code GetSoundBypassesMasterVolumeInternal(out bool isBypassing)
+        {
+            ulong audioHandle = NativeBindings.MLUnityAudioGetHandle();
+            var resultCode = NativeBindings.MLAudioGetSoundBypassesMasterVolume(audioHandle, out isBypassing);
+            MLResult.DidNativeCallSucceed(resultCode, nameof(MLAudioOutput.NativeBindings.MLAudioGetSoundBypassesMasterVolume));
+            return resultCode;
         }
 
         /// <summary>
@@ -407,6 +437,5 @@ namespace UnityEngine.XR.MagicLeap
 
             return Instance.audioDevice;
         }
-#endif
     }
 }

@@ -95,7 +95,6 @@ namespace UnityEngine.XR.MagicLeap
             /// <returns> An initialized MediaStream object.</returns>
             public static MediaStream CreateWithBuiltInTracks(string id, Track.VideoType videoType, Track.AudioType audioType, string videoTrackId = "", string audioTrackId = "")
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 MediaStream mediaStream = Create(id);
                 if (mediaStream == null)
                 {
@@ -117,9 +116,6 @@ namespace UnityEngine.XR.MagicLeap
                 }
 
                 return mediaStream;
-#else
-                return null;
-#endif
             }
 
             /// <summary>
@@ -131,7 +127,6 @@ namespace UnityEngine.XR.MagicLeap
             /// <returns> An initialized MediaStream object.</returns>
             public static MediaStream CreateWithAppDefinedVideoTrack(string id, MLWebRTC.AppDefinedVideoSource appDefinedVideoSource, Track.AudioType audioType, string audioTrackId = "", MLWebRTC.AppDefinedAudioSource localDefinedAudioSource = null)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 MediaStream mediaStream = Create(id);
                 if (mediaStream == null)
                 {
@@ -161,9 +156,6 @@ namespace UnityEngine.XR.MagicLeap
                 }
 
                 return mediaStream;
-#else
-                return null;
-#endif
             }
 
             /// <summary>
@@ -173,7 +165,6 @@ namespace UnityEngine.XR.MagicLeap
             /// <returns> An initialized MediaStream object.</returns>
             public static MediaStream Create(string id)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 if (MLWebRTC.Instance.uniqueMediaStreamIds.Contains(id))
                 {
                     MLPluginLog.ErrorFormat("Media stream id '{0}' already exists.", id);
@@ -184,9 +175,6 @@ namespace UnityEngine.XR.MagicLeap
                 mediaStream.IsLocal = true;
                 MLWebRTC.Instance.uniqueMediaStreamIds.Add(id);
                 return mediaStream;
-#else
-                return null;
-#endif
             }
 
             /// <summary>
@@ -212,7 +200,6 @@ namespace UnityEngine.XR.MagicLeap
             /// <returns>
             public MLResult AddLocalTrack(MLWebRTC.MediaStream.Track track)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 MLResult result = MLResult.Create(MLResult.Code.Ok);
                 if (this.Tracks.Contains(track))
                 {
@@ -226,9 +213,6 @@ namespace UnityEngine.XR.MagicLeap
                 }
 
                 return result;
-#else
-                return new MLResult();
-#endif
             }
 
             /// <summary>
@@ -239,7 +223,6 @@ namespace UnityEngine.XR.MagicLeap
             /// <returns>
             public MLResult RemoveLocalTrack(MLWebRTC.MediaStream.Track track)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 MLResult result = MLResult.Create(MLResult.Code.Ok);
                 if (!this.Tracks.Contains(track))
                 {
@@ -253,9 +236,6 @@ namespace UnityEngine.XR.MagicLeap
                 }
 
                 return result;
-#else
-                return new MLResult();
-#endif
             }
 
             /// <summary>
@@ -264,26 +244,22 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="track">The track to make active.</param>
             public MLResult SelectTrack(MediaStream.Track track)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 if (track == null)
                 {
                     return MLResult.Create(MLResult.Code.InvalidParam, "Track is null.");
                 }
 
                 MediaStream.Track currentActiveTrack = activeTracks[track.TrackType];
-                
-                if(currentActiveTrack != null)
+
+                if (currentActiveTrack != null)
                 {
                     UnSelectTrack(currentActiveTrack);
                 }
-                
+
                 activeTracks[track.TrackType] = track;
                 MLResult result = track.SetEnabled(true);
 
                 return result;
-#else
-                return new MLResult();
-#endif
             }
 
             /// <summary>
@@ -292,7 +268,6 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="track">The track to make inactive.</param>
             public MLResult UnSelectTrack(MediaStream.Track track)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 if (track == null)
                 {
                     return MLResult.Create(MLResult.Code.InvalidParam, "Track is null.");
@@ -304,14 +279,12 @@ namespace UnityEngine.XR.MagicLeap
 
                 if (currentActiveTrack == track)
                 {
-                    result = currentActiveTrack.SetEnabled(false);
+                    if (IsLocal)
+                        result = currentActiveTrack.SetEnabled(false);
                     activeTracks[track.TrackType] = null;
                 }
 
                 return result;
-#else
-                return new MLResult();
-#endif
             }
 
             /// <summary>
@@ -324,13 +297,12 @@ namespace UnityEngine.XR.MagicLeap
                     return;
                 }
 
-                foreach(Track track in this.Tracks)
+                foreach (Track track in this.Tracks)
                 {
                     track.DestroyLocal();
                 }
-#if UNITY_MAGICLEAP || UNITY_ANDROID
+
                 MLWebRTC.Instance.uniqueMediaStreamIds.Remove(this.Id);
-#endif
             }
         }
     }

@@ -111,13 +111,9 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public MLResult UpdateCaptureSettings()
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             MLResult.Code resultCode = NativeBindings.MLCameraUpdateCaptureSettings(Handle);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraUpdateCaptureSettings));
             return MLResult.Create(resultCode);
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif        
         }
 
         /// <summary>
@@ -180,16 +176,13 @@ namespace UnityEngine.XR.MagicLeap
         public MLResult GetDeviceStatus(out DeviceStatusFlag status)
         {
             status = DeviceStatusFlag.Error;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
+
             MLResult.Code resultCode = NativeBindings.MLCameraGetDeviceStatus(Handle, out uint statusFlags);
             if (MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraGetDeviceStatus)))
             {
                 status = (DeviceStatusFlag)statusFlags;
             }
             return MLResult.Create(resultCode);
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         /// <summary>
@@ -199,14 +192,9 @@ namespace UnityEngine.XR.MagicLeap
         /// <returns></returns>
         public MLResult GetErrorCode(out ErrorType error)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             MLResult.Code resultCode = NativeBindings.MLCameraGetErrorCode(Handle, out error);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraGetErrorCode));
             return MLResult.Create(resultCode);
-#else
-            error = ErrorType.None;
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         /// <summary>
@@ -215,16 +203,13 @@ namespace UnityEngine.XR.MagicLeap
         public MLResult GetCameraCharacteristics(out Metadata cameraMetadata)
         {
             cameraMetadata = null;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
+
             MLResult.Code resultCode = NativeBindings.MLCameraGetCameraCharacteristics(Handle, out ulong metadataHandle);
             if (MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraGetErrorCode)))
             {
                 cameraMetadata = new Metadata(metadataHandle);
             }
             return MLResult.Create(resultCode);
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         /// <summary>
@@ -241,14 +226,9 @@ namespace UnityEngine.XR.MagicLeap
                 InternalInitialize();
             }
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             var resultCode = NativeBindings.MLCameraGetDeviceAvailabilityStatus(camId, out deviceAvailable);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraGetDeviceAvailabilityStatus));
             return MLResult.Create(resultCode);
-#else
-            deviceAvailable = false;
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
     }
 }

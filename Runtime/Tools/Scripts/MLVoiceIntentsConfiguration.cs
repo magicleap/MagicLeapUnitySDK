@@ -9,11 +9,30 @@ using UnityEngine;
 /// </summary>
 public class MLVoiceIntentsConfiguration : ScriptableObject
 {
+    [System.Flags]
+    /// <summary>
+    /// The verbal System Intents currently supported.
+    /// </summary>
+    public enum SystemIntentFlags
+    {
+        TakeAPhoto = 1 << 0,
+        TakeAVideo = 1 << 1,
+        StopRecording = 1 << 2,
+        CloseAPPNAME = 1 << 3,
+        OpenHome = 1 << 4,
+        OpenAPPNAME = 1 << 5,
+        Mute = 1 << 6,
+        Unmute = 1 << 7,
+        TurnTheVolumeDown = 1 << 8,
+        SetTheVolumeToNUMBERPercent = 1 << 9,
+        TurnTheVolumeUp = 1 << 10,
+        Help = 1 << 11,
+    }
+
     [System.Serializable]
     /// <summary>
     /// The current structure of the JSON data that will be sent to the MLVoice API. Subject to change.
     /// </summary>
-    /// 
     public struct JSONData
     {
         [SerializeField]
@@ -86,6 +105,17 @@ public class MLVoiceIntentsConfiguration : ScriptableObject
     /// </summary>
     public List<CustomVoiceIntents> VoiceCommandsToAdd;
 
+    [Header("Experimental")]
+    /// <summary>
+    /// Flag to indicate which System Intents should be enabled from within the application. In an experimental state as there may be issues using voice commands on any pop-up windows that appear because of the enabled system commands.
+    /// </summary>
+    public SystemIntentFlags SystemCommands;
+
+    /// <summary>
+    /// List of the system intent names to be added to the JSON file.
+    /// </summary>
+    private List<String> supportedSystemIntents = new List<string> { "ML_CAPTURE_STILL", "ML_CAPTURE_VIDEO_START", "ML_CAPTURE_VIDEO_STOP", "ML_CLOSE" , "ML_GLOBAL_HOME", "ML_LAUNCH" , "ML_SYSAUDIO_MUTE" , "ML_SYSAUDIO_UNMUTE" , "ML_SYSAUDIO_VOLUME_DOWN" , "ML_SYSAUDIO_VOLUME_SET" , "ML_SYSAUDIO_VOLUME_UP" , "ML_GLOBAL_HELP" };
+
 
     public string GetJSONString()
     {
@@ -127,6 +157,17 @@ public class MLVoiceIntentsConfiguration : ScriptableObject
         container.app_intents.AddRange(AllVoiceIntents);
         container.sys_intent_list = new SystemJSONData();
         container.sys_intent_list.name = new List<string>();
+
+        int index = 0;
+        foreach(SystemIntentFlags flag in Enum.GetValues(typeof(SystemIntentFlags)))
+        {
+            if(SystemCommands.HasFlag(flag))
+            {
+                container.sys_intent_list.name.Add(supportedSystemIntents[index]);
+            }
+            index++;
+        }
+
     }
 
     private void addCustomVoiceCommands()

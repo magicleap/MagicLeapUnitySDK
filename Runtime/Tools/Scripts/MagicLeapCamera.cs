@@ -43,12 +43,7 @@ namespace UnityEngine.XR.MagicLeap
         /// <summary>
         /// The minimum recommended near clip value
         /// </summary>
-        private static readonly float MINIMUM_NEAR_CLIP_METERS =
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-            MLDevice.MinimumNearClipDistance;
-#else
-            0.0f;
-#endif
+        private static readonly float MINIMUM_NEAR_CLIP_METERS = MLDevice.MinimumNearClipDistance;
 
         /// <summary>
         /// The recommended clear mode for the camera
@@ -106,12 +101,10 @@ namespace UnityEngine.XR.MagicLeap
 
         private void LateUpdate()
         {
-#if UNITY_ANDROID
             if (!(Application.isPlaying && MLDevice.IsMagicLeapLoaderActive()))
             {
                 return;
             }
-#endif
 
             RenderingSettings.cameraScale = RenderingUtility.GetParentScale(transform);
             ValidateFarClip();

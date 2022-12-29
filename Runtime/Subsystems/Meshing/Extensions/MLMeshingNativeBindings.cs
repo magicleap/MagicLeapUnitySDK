@@ -26,7 +26,6 @@ namespace UnityEngine.XR.MagicLeap
                     {
                         private const string MagicLeapXrProviderDll = "MagicLeapXrProvider";
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                         [DllImport(MagicLeapXrProviderDll)]
                         internal static extern void MeshingUpdateSettings(ref Config.Settings newSettings);
 
@@ -44,19 +43,6 @@ namespace UnityEngine.XR.MagicLeap
 
                         [DllImport(MagicLeapXrProviderDll)]
                         internal static extern void MeshingReleaseConfidence(MeshId meshId);
-#else
-                        internal static void MeshingUpdateSettings(ref Config.Settings newSettings) { }
-
-                        internal static void MeshingSetDensity(float density) { }
-
-                        internal static void MeshingSetBounds(Vector3 center, Quaternion rotation, Vector3 extents) { }
-
-                        internal static void MeshingSetBatchSize(int batchSize) { }
-
-                        internal static IntPtr MeshingAcquireConfidence(MeshId meshId, out int count) { count = 0; return IntPtr.Zero; }
-
-                        internal static void MeshingReleaseConfidence(MeshId meshId) { }
-#endif
                     }
                 }
             }

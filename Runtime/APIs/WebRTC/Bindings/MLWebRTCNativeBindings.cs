@@ -12,9 +12,7 @@ namespace UnityEngine.XR.MagicLeap
 {
     using System;
     using System.Runtime.InteropServices;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
     using UnityEngine.XR.MagicLeap.Native;
-#endif
 
     /// <summary>
     /// MLWebRTC class contains the API to interface with the
@@ -37,7 +35,7 @@ namespace UnityEngine.XR.MagicLeap
             Fatal,
             Silent,
         }
-#if UNITY_MAGICLEAP || UNITY_ANDROID
+
         /// <summary>
         /// Native bindings for the MLWebRTC class. 
         /// </summary>
@@ -152,6 +150,5 @@ namespace UnityEngine.XR.MagicLeap
                 }
             }
         }
-#endif
     }
 }

@@ -13,7 +13,6 @@ using UnityEditor;
 
 namespace UnityEngine.XR.MagicLeap
 {
-    #if UNITY_MAGICLEAP || UNITY_ANDROID
     [CustomPropertyDrawer(typeof(MLBitMask))]
     public class MLBitMaskEditor : PropertyDrawer
     {
@@ -22,7 +21,7 @@ namespace UnityEngine.XR.MagicLeap
             Type propertyType = (attribute as MLBitMask).PropertyType;
 
             string[] enumNames = Enum.GetNames(propertyType);
-            int[] enumValues = (int[]) Enum.GetValues(propertyType);
+            int[] enumValues = (int[])Enum.GetValues(propertyType);
 
             int curIntValue = property.intValue;
             int curMaskValue = 0;
@@ -56,5 +55,4 @@ namespace UnityEngine.XR.MagicLeap
             property.intValue = curIntValue;
         }
     }
-    #endif
 }

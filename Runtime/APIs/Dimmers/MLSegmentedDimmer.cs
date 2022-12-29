@@ -64,14 +64,25 @@ namespace UnityEngine.XR.MagicLeap
         /// <param name="enabled"></param>
         public static void SetEnabled(bool enabled)
         {
-            var renderers = GameObject.FindObjectsOfType<MeshRenderer>();
-            foreach(var r in renderers)
+#if URP_14_0_0_OR_NEWER
+            if (Exists)
             {
-                if((Feature.settings.layerMask & (1 << r.gameObject.layer)) != 0)
+                var renderers = GameObject.FindObjectsOfType<MeshRenderer>();
+                foreach (var r in renderers)
                 {
-                    r.enabled = enabled;
+                    if ((Feature.settings.layerMask & (1 << r.gameObject.layer)) != 0)
+                    {
+                        r.enabled = enabled;
+                    }
                 }
             }
+            else
+            {
+                Debug.LogError("Segmented Dimmer requirement not met: URP SegmentedDimmer RenderFeature was not configured.");
+            }
+#else
+            Debug.LogError("Segmented Dimmer requirement not met: Package com.unity.render-pipelines.universal >= 14.0.0 was not installed.");
+#endif
         }        
 
         /// <summary>

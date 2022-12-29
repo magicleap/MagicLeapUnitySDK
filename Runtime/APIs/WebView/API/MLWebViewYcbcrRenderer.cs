@@ -27,9 +27,7 @@ namespace UnityEngine.XR.MagicLeap
 
             public Renderer()
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 Initialize();
-#endif
             }
 
             bool IHardwareBufferProvider.AcquireNextAvailableHwBuffer(out IntPtr hwBuffer)
@@ -41,7 +39,6 @@ namespace UnityEngine.XR.MagicLeap
                     return false;
                 }
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 MLResult.Code result = NativeBindings.MLWebViewAcquireNextAvailableFrame(WebViewHandle, out hwBuffer);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewAcquireNextAvailableFrame));
                 bool acquired = MLResult.IsOK(result) && hwBuffer != IntPtr.Zero;
@@ -51,10 +48,6 @@ namespace UnityEngine.XR.MagicLeap
                 }
 
                 return acquired;
-#else
-                hwBuffer = IntPtr.Zero;
-                return false;
-#endif
             }
 
             void IHardwareBufferProvider.ReleaseHwBuffer(IntPtr hwBuffer)
@@ -71,21 +64,18 @@ namespace UnityEngine.XR.MagicLeap
                     return;
                 }
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 NativeBindings.MLWebViewReleaseFrame(currentWebViewHandle, hwBuffer);
-#endif
             }
 
             bool IFrameTransformMatrixProvider.GetFrameTransformMatrix(float[] frameTransformMatColMajor)
             {
-#if UNITY_ANDROID
                 if (MLResult.DidNativeCallSucceed(
                     NativeBindings.MLWebViewGetFrameTransformMatrix(WebViewHandle, out MagicLeapNativeBindings.MLMat4f matrix),
                     nameof(NativeBindings.MLWebViewGetFrameTransformMatrix)))
                 {
                     Array.Copy(matrix.MatrixColmajor, frameTransformMatColMajor, frameTransformMatColMajor.Length);
                 }
-#endif
+
                 return true;
             }
         }

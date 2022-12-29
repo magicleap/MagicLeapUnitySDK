@@ -14,10 +14,7 @@ namespace UnityEngine.XR.MagicLeap
     using System.Collections.Generic;
     using System.Runtime.InteropServices;
     using System.Threading.Tasks;
-
-#if UNITY_MAGICLEAP || UNITY_ANDROID
     using UnityEngine.XR.MagicLeap.Native;
-#endif
 
     /// <summary>
     /// ALWAYS INHERIT FROM THIS
@@ -39,11 +36,7 @@ namespace UnityEngine.XR.MagicLeap
 
         protected Params parameters;
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
         protected ulong handle = MagicLeapNativeBindings.InvalidHandle;
-#else
-        protected ulong handle = 0;
-#endif
 
         public abstract MLResult Start(Params parameters);
 
@@ -163,6 +156,11 @@ namespace UnityEngine.XR.MagicLeap
             /// Operation failed because the Perception System was not started.
             /// </summary>
             PerceptionSystemNotStarted,
+
+            /// <summary>
+            /// Operation failed because it has been invoked at the wrong time.
+            /// </summary>
+            IllegalState,
 
             // MLAudioResult
 
@@ -806,7 +804,6 @@ namespace UnityEngine.XR.MagicLeap
         {
             string codeString = string.Empty;
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             switch ((CodePrefix)((int)resultCode >> 16))
             {
                 case CodePrefix.MLResultGlobal:
@@ -839,7 +836,6 @@ namespace UnityEngine.XR.MagicLeap
                     codeString = MagicLeapNativeBindings.MLGetResultString(resultCode);
                     break;
             }
-#endif
 
             return codeString;
         }
@@ -869,10 +865,9 @@ namespace UnityEngine.XR.MagicLeap
         public static bool DidNativeCallSucceed(Code resultCode, string functionName = "A native function", Predicate<Code> successCase = null, bool showError = true)
         {
             bool success = successCase != null ? successCase(resultCode) : IsOK(resultCode);
-#if UNITY_MAGICLEAP || UNITY_ANDROID
+
             if (!success && showError)
                 MLPluginLog.ErrorFormat($"{functionName} in the Magic Leap API failed. Reason: {CodeToString(resultCode)} ");
-#endif
             return success;
         }
 

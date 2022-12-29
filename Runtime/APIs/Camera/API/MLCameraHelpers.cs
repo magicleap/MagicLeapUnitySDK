@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -72,6 +73,27 @@ namespace UnityEngine.XR.MagicLeap
                 }
             }
             return false;
+        }
+
+        public static void FlipFrameVertically(ref CameraOutput frame)
+        {
+            for(int i = 0; i < frame.Planes.Length; i++)
+            {
+                var flippedArray = new byte[frame.Planes[i].Data.Length];
+                
+                int width = (frame.Format == OutputFormat.YUV_420_888) ? (int)frame.Planes[i].Stride : (int)frame.Planes[i].Width;
+                int height = (int)frame.Planes[i].Height;
+                int bytesPerPixel = (int)frame.Planes[i].BytesPerPixel;
+                int stride = (int)frame.Planes[i].Stride;
+
+                for (int y = 0; y < height; y++)
+                {
+                    int x = height - y - 1;
+                    Buffer.BlockCopy(frame.Planes[i].Data, y * stride, flippedArray, x * stride, stride);
+                }
+
+                frame.Planes[i].Data = flippedArray;
+            }
         }
     }
 }

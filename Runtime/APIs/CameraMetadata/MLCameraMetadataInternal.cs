@@ -12,9 +12,7 @@ namespace UnityEngine.XR.MagicLeap
 {
     using System;
     using System.Runtime.InteropServices;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
     using UnityEngine.XR.MagicLeap.Native;
-#endif
 
     public partial class MLCamera
     {
@@ -29,14 +27,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetSensorSensitivityRequestMetadata(out int OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetSensorSensitivityRequestMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetSensorSensitivityRequestMetadata));
                 return result;
-#else
-				OutData = 0;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -44,13 +37,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalSetControlAELock(ControlAELock Data)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataSetControlAELock(Handle, ref Data);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataSetControlAELock));
                 return result;
-#else
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -58,14 +47,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlAEMaxRegions(out int OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlAEMaxRegions(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlAEMaxRegions));
                 return result;
-#else
-				OutData = 0;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -73,14 +57,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlAEModeResultMetadata(out ControlAEMode OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlAEModeResultMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlAEModeResultMetadata));
                 return result;
-#else
-				OutData = ControlAEMode.Off;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -88,14 +67,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlAEAntibandingModeResultMetadata(out ControlAEAntibandingMode OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlAEAntibandingModeResultMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlAEAntibandingModeResultMetadata));
                 return result;
-#else
-				OutData = ControlAEAntibandingMode.Off;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -103,7 +77,6 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlAECompensationStep(out Rational OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 int sizeOfMLCameraMetadataRational = Marshal.SizeOf(typeof(Rational));
                 IntPtr outDataPointer = Marshal.AllocHGlobal(sizeOfMLCameraMetadataRational);
                 var result = NativeBindings.MLCameraMetadataGetControlAECompensationStep(Handle, outDataPointer);
@@ -112,10 +85,6 @@ namespace UnityEngine.XR.MagicLeap
                 Marshal.FreeHGlobal(outDataPointer);
 
                 return result;
-#else
-				OutData = new Rational();
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -123,7 +92,6 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetColorCorrectionTransformRequestMetadata(out Rational[][] OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 const int outDataRowSize = 3;
                 const int outDataColSize = 3;
                 int sizeOfMLCameraMetadataRational = Marshal.SizeOf(typeof(NativeBindings.MLCameraMetadataRational));
@@ -148,10 +116,6 @@ namespace UnityEngine.XR.MagicLeap
 
                 Marshal.FreeHGlobal(ptr);
                 return result;
-#else
-				OutData = null;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -159,15 +123,10 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetSensorInfoSensitivityRange(out int[] OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 OutData = new int[2];
                 var result = NativeBindings.MLCameraMetadataGetSensorInfoSensitivityRange(Handle, OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetSensorInfoSensitivityRange));
                 return result;
-#else
-				OutData = null;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -175,13 +134,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalSetControlEffectMode(ControlEffectMode Data)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataSetControlEffectMode(Handle, ref Data);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataSetControlEffectMode));
                 return result;
-#else
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -189,13 +144,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalSetColorCorrectionAberrationMode(ColorCorrectionAberrationMode Data)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataSetColorCorrectionAberrationMode(Handle, ref Data);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataSetColorCorrectionAberrationMode));
                 return result;
-#else
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -204,7 +155,6 @@ namespace UnityEngine.XR.MagicLeap
             private MLResult.Code InternalGetColorCorrectionAvailableAberrationModes(
                 out ColorCorrectionAberrationMode[] OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 const int sizeOfMLCameraMetadataColorCorrectionAberrationMode = sizeof(ColorCorrectionAberrationMode);
                 var result = NativeBindings.MLCameraMetadataGetColorCorrectionAvailableAberrationModes(Handle,
                     out IntPtr outDataPointer,
@@ -222,10 +172,6 @@ namespace UnityEngine.XR.MagicLeap
 
                 Marshal.FreeHGlobal(outDataPointer);
                 return result;
-#else
-				OutData = null;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -234,14 +180,9 @@ namespace UnityEngine.XR.MagicLeap
             private MLResult.Code InternalGetColorCorrectionAberrationModeRequestMetadata(
                 out ColorCorrectionAberrationMode OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetColorCorrectionAberrationModeRequestMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetColorCorrectionAberrationModeRequestMetadata));
                 return result;
-#else
-				OutData = ColorCorrectionAberrationMode.Off;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -249,14 +190,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlAELockAvailable(out ControlAELock OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlAELockAvailable(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlAELockAvailable));
                 return result;
-#else
-				OutData = ControlAELock.Off;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -264,15 +200,10 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetJpegGPSCoordinatesRequestMetadata(out double[] OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 OutData = new double[3];
                 var result = NativeBindings.MLCameraMetadataGetJpegGPSCoordinatesRequestMetadata(Handle, OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetJpegGPSCoordinatesRequestMetadata));
                 return result;
-#else
-				OutData = null;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -280,14 +211,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlAvailableEffectModes(out ControlEffectMode[] OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlAvailableEffectModes(Handle, out OutData, out int OutCount);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlAvailableEffectModes));
                 return result;
-#else
-				OutData = null;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -295,14 +221,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlAvailableSceneModes(out ControlSceneMode[] OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlAvailableSceneModes(Handle, out OutData, out int OutCount);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlAvailableSceneModes));
                 return result;
-#else
-				OutData = null;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -310,14 +231,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlAEAvailableModes(out ControlAEMode[] OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlAEAvailableModes(Handle, out OutData, out int OutCount);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlAEAvailableModes));
                 return result;
-#else
-				OutData = null;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -325,14 +241,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlAECompensationRange(out int[] OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlAECompensationRange(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlAECompensationRange));
                 return result;
-#else
-				OutData = null;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -340,14 +251,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlAWBAvailableModes(out ControlAWBMode[] OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlAWBAvailableModes(Handle, out OutData, out int OutCount);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlAWBAvailableModes));
                 return result;
-#else
-				OutData = null;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -355,7 +261,6 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlAERegionsRequestMetadata(out int[][] OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 const int maxColSize = 3;
                 const int rowSize = 5;
                 const int arraySize = sizeof(int) * maxColSize * rowSize;
@@ -379,10 +284,6 @@ namespace UnityEngine.XR.MagicLeap
 
                 Marshal.FreeHGlobal(ptr);
                 return result;
-#else
-				OutData = null;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -390,14 +291,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlAvailableModes(out ControlMode[] OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlAvailableModes(Handle, out OutData, out int OutCount);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlAvailableModes));
                 return result;
-#else
-				OutData = null;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -405,7 +301,6 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalSetColorCorrectionTransform(Rational[][] Data)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 int elementSize = Marshal.SizeOf<NativeBindings.MLCameraMetadataRational>();
                 const int rowSize = 3;
                 const int colSize = 3;
@@ -423,9 +318,6 @@ namespace UnityEngine.XR.MagicLeap
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataSetColorCorrectionTransform));
                 Marshal.FreeHGlobal(ptr);
                 return result;
-#else
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -433,14 +325,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlAWBLockAvailable(out ControlAWBLock OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlAWBLockAvailable(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlAWBLockAvailable));
                 return result;
-#else
-				OutData = ControlAWBLock.Off;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -448,15 +335,10 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetSensorInfoActiveArraySize(out int[] OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 OutData = new int[4];
                 var result = NativeBindings.MLCameraMetadataGetSensorInfoActiveArraySize(Handle, OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetSensorInfoActiveArraySize));
                 return result;
-#else
-				OutData = null;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -464,14 +346,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetColorCorrectionModeRequestMetadata(out ColorCorrectionMode OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetColorCorrectionModeRequestMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetColorCorrectionModeRequestMetadata));
                 return result;
-#else
-				OutData = ColorCorrectionMode.Fast;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -479,14 +356,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetSensorOrientation(out int OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetSensorOrientation(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetSensorOrientation));
                 return result;
-#else
-				OutData = 0;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -494,16 +366,11 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetColorCorrectionGainsRequestMetadata(out float[] OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 float[] outData = new float[4];
                 var result = NativeBindings.MLCameraMetadataGetColorCorrectionGainsRequestMetadata(Handle, outData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetColorCorrectionGainsRequestMetadata));
                 OutData = outData;
                 return result;
-#else
-				OutData = null;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -511,7 +378,6 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetColorCorrectionTransformResultMetadata(out Rational[][] OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 const int colSize = 3;
                 const int rowSize = 3;
                 int elementSize = Marshal.SizeOf(typeof(NativeBindings.MLCameraMetadataRational));
@@ -536,10 +402,6 @@ namespace UnityEngine.XR.MagicLeap
 
                 Marshal.FreeHGlobal(ptr);
                 return result;
-#else
-				OutData = null;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -547,14 +409,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlAEAntibandingModeRequestMetadata(out ControlAEAntibandingMode OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlAEAntibandingModeRequestMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlAEAntibandingModeRequestMetadata));
                 return result;
-#else
-				OutData = ControlAEAntibandingMode.Off;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -562,14 +419,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlAEExposureCompensationRequestMetadata(out int OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlAEExposureCompensationRequestMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlAEExposureCompensationRequestMetadata));
                 return result;
-#else
-				OutData = 0;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -577,14 +429,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlAELockRequestMetadata(out ControlAELock OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlAELockRequestMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlAELockRequestMetadata));
                 return result;
-#else
-				OutData = ControlAELock.Off;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -592,14 +439,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlAEModeRequestMetadata(out ControlAEMode OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlAEModeRequestMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlAEModeRequestMetadata));
                 return result;
-#else
-				OutData = ControlAEMode.Off;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -607,14 +449,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlAWBLockRequestMetadata(out ControlAWBLock OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlAWBLockRequestMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlAWBLockRequestMetadata));
                 return result;
-#else
-				OutData = ControlAWBLock.Off;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -622,14 +459,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlAWBModeRequestMetadata(out ControlAWBMode OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlAWBModeRequestMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlAWBModeRequestMetadata));
                 return result;
-#else
-				OutData = ControlAWBMode.Off;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -637,14 +469,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlModeRequestMetadata(out ControlMode OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlModeRequestMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlModeRequestMetadata));
                 return result;
-#else
-				OutData = ControlMode.Off;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -652,14 +479,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlSceneModeRequestMetadata(out ControlSceneMode OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlSceneModeRequestMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlSceneModeRequestMetadata));
                 return result;
-#else
-				OutData = ControlSceneMode.Action;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -667,14 +489,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetSensorExposureTimeRequestMetadata(out long OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetSensorExposureTimeRequestMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetSensorExposureTimeRequestMetadata));
                 return result;
-#else
-				OutData = 0;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -682,14 +499,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlEffectModeRequestMetadata(out ControlEffectMode OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlEffectModeRequestMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlEffectModeRequestMetadata));
                 return result;
-#else
-				OutData = ControlEffectMode.Off;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -697,14 +509,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlAELockResultMetadata(out ControlAELock OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlAELockResultMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlAELockResultMetadata));
                 return result;
-#else
-				OutData = ControlAELock.Off;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -712,14 +519,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlExposureUpperTimeLimitRequestMetadata(out long OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlExposureUpperTimeLimitRequestMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlExposureUpperTimeLimitRequestMetadata));
                 return result;
-#else
-				OutData = 0;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -727,14 +529,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetJpegGPSTimestampRequestMetadata(out long OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetJpegGPSTimestampRequestMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetJpegGPSTimestampRequestMetadata));
                 return result;
-#else
-				OutData = 0;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -742,14 +539,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetJpegThumbnailSizeRequestMetadata(out JpegThumbnailSize OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetJpegThumbnailSizeRequestMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetJpegThumbnailSizeRequestMetadata));
                 return result;
-#else
-				OutData = JpegThumbnailSize.Size_160x120;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -757,14 +549,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetJpegQualityRequestMetadata(out byte OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetJpegQualityRequestMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetJpegQualityRequestMetadata));
                 return result;
-#else
-				OutData = 0;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -776,13 +563,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalSetControlForceApplyMode(ControlForceApplyMode Data)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataSetControlForceApplyMode(Handle, Data);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataSetControlForceApplyMode));
                 return result;
-#else
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -794,14 +577,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlForceApplyModeRequestMetadata(out ControlForceApplyMode OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlForceApplyModeRequestMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlForceApplyModeRequestMetadata));
                 return result;
-#else
-				OutData = ControlForceApplyMode.Off;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -809,13 +587,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalSetColorCorrectionMode(ColorCorrectionMode Data)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataSetColorCorrectionMode(Handle, ref Data);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataSetColorCorrectionMode));
                 return result;
-#else
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -823,16 +597,11 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetColorCorrectionGainsResultMetadata(out float[] OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 float[] outData = new float[4];
                 var result = NativeBindings.MLCameraMetadataGetColorCorrectionGainsResultMetadata(Handle, outData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetColorCorrectionGainsResultMetadata));
                 OutData = outData;
                 return result;
-#else
-				OutData = null;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -840,13 +609,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalSetColorCorrectionGains(float[] Data)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataSetColorCorrectionGains(Handle, Data);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataSetColorCorrectionGains));
                 return result;
-#else
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -854,13 +619,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalSetControlAEAntibandingMode(ControlAEAntibandingMode Data)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataSetControlAEAntibandingMode(Handle, ref Data);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataSetControlAEAntibandingMode));
                 return result;
-#else
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -868,13 +629,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalSetControlAEExposureCompensation(int Data)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataSetControlAEExposureCompensation(Handle, ref Data);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataSetControlAEExposureCompensation));
                 return result;
-#else
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -882,13 +639,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalSetControlAEMode(ControlAEMode Data)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataSetControlAEMode(Handle, ref Data);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataSetControlAEMode));
                 return result;
-#else
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -896,7 +649,6 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalSetControlAERegions(int[][] Data)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 const int colSize = 3;
                 const int rowSize = 5;
                 const int elementSize = sizeof(int);
@@ -914,9 +666,6 @@ namespace UnityEngine.XR.MagicLeap
 
                 Marshal.FreeHGlobal(ptr);
                 return result;
-#else
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -924,13 +673,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalSetControlAWBLock(ControlAWBLock Data)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataSetControlAWBLock(Handle, ref Data);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataSetControlAWBLock));
                 return result;
-#else
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -938,13 +683,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalSetControlAWBMode(ControlAWBMode Data)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataSetControlAWBMode(Handle, ref Data);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataSetControlAWBMode));
                 return result;
-#else
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -952,13 +693,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalSetControlMode(ControlMode Data)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataSetControlMode(Handle, ref Data);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataSetControlMode));
                 return result;
-#else
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -966,13 +703,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalSetControlSceneMode(ControlSceneMode Data)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataSetControlSceneMode(Handle, ref Data);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataSetControlSceneMode));
                 return result;
-#else
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -980,14 +713,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlAWBLockResultMetadata(out ControlAWBLock OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlAWBLockResultMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlAWBLockResultMetadata));
                 return result;
-#else
-				OutData = ControlAWBLock.Off;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -995,13 +723,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalSetSensorExposureTime(long Data)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataSetSensorExposureTime(Handle, ref Data);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataSetSensorExposureTime));
                 return result;
-#else
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -1009,13 +733,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalSetSensorSensitivity(int Data)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataSetSensorSensitivity(Handle, ref Data);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataSetSensorSensitivity));
                 return result;
-#else
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -1023,13 +743,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalSetControlExposureUpperTimeLimit(long Data)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataSetControlExposureUpperTimeLimit(Handle, Data);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataSetControlExposureUpperTimeLimit));
                 return result;
-#else
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -1037,13 +753,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalSetJpegGPSCoordinates(double[] Data)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataSetJpegGPSCoordinates(Handle, Data);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataSetJpegGPSCoordinates));
                 return result;
-#else
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -1051,13 +763,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalSetJpegGPSTimestamp(long Data)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataSetJpegGPSTimestamp(Handle, Data);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataSetJpegGPSTimestamp));
                 return result;
-#else
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -1065,13 +773,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalSetJpegThumbnailSize(JpegThumbnailSize Data)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataSetJpegThumbnailSize(Handle, ref Data);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataSetJpegThumbnailSize));
                 return result;
-#else
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -1079,13 +783,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalSetJpegQuality(byte Data)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataSetJpegQuality(Handle, ref Data);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataSetJpegQuality));
                 return result;
-#else
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -1093,14 +793,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetColorCorrectionModeResultMetadata(out ColorCorrectionMode OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetColorCorrectionModeResultMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetColorCorrectionModeResultMetadata));
                 return result;
-#else
-				OutData = ColorCorrectionMode.Fast;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -1108,14 +803,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetColorCorrectionAberrationModeResultMetadata(out ColorCorrectionAberrationMode OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetColorCorrectionAberrationModeResultMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetColorCorrectionAberrationModeResultMetadata));
                 return result;
-#else
-				OutData = ColorCorrectionAberrationMode.Off;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -1123,14 +813,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlAEExposureCompensationResultMetadata(out int OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlAEExposureCompensationResultMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlAEExposureCompensationResultMetadata));
                 return result;
-#else
-				OutData = 0;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -1138,7 +823,6 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlAERegionsResultMetadata(out int[][] OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 const int colSize = 3;
                 const int rowSize = 5;
                 const int elementSize = sizeof(int);
@@ -1162,10 +846,6 @@ namespace UnityEngine.XR.MagicLeap
 
                 Marshal.FreeHGlobal(ptr);
                 return result;
-#else
-				OutData = null;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -1173,16 +853,11 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlAETargetFPSRangeResultMetadata(out int[] OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 int[] outData = new int[2];
                 var result = NativeBindings.MLCameraMetadataGetControlAETargetFPSRangeResultMetadata(Handle, outData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlAETargetFPSRangeResultMetadata));
                 OutData = outData;
                 return result;
-#else
-				OutData = null;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -1190,14 +865,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlAEStateResultMetadata(out ControlAEState OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlAEStateResultMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlAEStateResultMetadata));
                 return result;
-#else
-				OutData = ControlAEState.Converged;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -1205,14 +875,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlAWBStateResultMetadata(out ControlAWBState OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlAWBStateResultMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlAWBStateResultMetadata));
                 return result;
-#else
-				OutData = ControlAWBState.Converged;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -1220,14 +885,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlAWBModeResultMetadata(out ControlAWBMode OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlAWBModeResultMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlAWBModeResultMetadata));
                 return result;
-#else
-				OutData = ControlAWBMode.Off;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -1235,14 +895,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlModeResultMetadata(out ControlMode OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlModeResultMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlModeResultMetadata));
                 return result;
-#else
-				OutData = ControlMode.Off;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -1250,14 +905,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlSceneModeResultMetadata(out ControlSceneMode OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlSceneModeResultMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlSceneModeResultMetadata));
                 return result;
-#else
-				OutData = ControlSceneMode.Action;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -1265,14 +915,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetSensorExposureTimeResultMetadata(out long OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetSensorExposureTimeResultMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetSensorExposureTimeResultMetadata));
                 return result;
-#else
-				OutData = 0;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -1280,14 +925,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetSensorSensitivityResultMetadata(out int OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetSensorSensitivityResultMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetSensorSensitivityResultMetadata));
                 return result;
-#else
-				OutData = 0;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -1295,14 +935,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetSensorTimestampResultMetadata(out long OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetSensorTimestampResultMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetSensorTimestampResultMetadata));
                 return result;
-#else
-				OutData = 0;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -1310,14 +945,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetSensorFrameDurationResultMetadata(out long OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetSensorFrameDurationResultMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetSensorFrameDurationResultMetadata));
                 return result;
-#else
-				OutData = 0;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -1325,14 +955,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlEffectModeResultMetadata(out ControlEffectMode OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlEffectModeResultMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlEffectModeResultMetadata));
                 return result;
-#else
-				OutData = ControlEffectMode.Off;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -1340,14 +965,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlExposureUpperTimeLimitResultMetadata(out long OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlExposureUpperTimeLimitResultMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlExposureUpperTimeLimitResultMetadata));
                 return result;
-#else
-				OutData = 0;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -1355,14 +975,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetJpegGPSCoordinatesResultMetadata(out double[] OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetJpegGPSCoordinatesResultMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetJpegGPSCoordinatesResultMetadata));
                 return result;
-#else
-				OutData = null;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -1370,14 +985,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetJpegGPSTimestampResultMetadata(out long OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetJpegGPSTimestampResultMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetJpegGPSTimestampResultMetadata));
                 return result;
-#else
-				OutData = 0;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -1385,14 +995,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetJpegThumbnailSizeResultMetadata(out JpegThumbnailSize OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetJpegThumbnailSizeResultMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetJpegThumbnailSizeResultMetadata));
                 return result;
-#else
-				OutData = JpegThumbnailSize.Size_160x120;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -1404,14 +1009,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetControlForceApplyModeResultMetadata(out ControlForceApplyMode OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlForceApplyModeResultMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlForceApplyModeResultMetadata));
                 return result;
-#else
-				OutData = ControlForceApplyMode.Off;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
             /// <summary>
@@ -1419,17 +1019,11 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private MLResult.Code InternalGetJpegQualityResultMetadata(out byte OutData)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetJpegQualityResultMetadata(Handle, out OutData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetJpegQualityResultMetadata));
                 return result;
-#else
-				OutData = 0;
-				return MLResult.Code.NotImplemented;
-#endif
             }
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             private static Rational ConvertRational(NativeBindings.MLCameraMetadataRational rational)
             {
                 Rational result = new Rational();
@@ -1465,85 +1059,59 @@ namespace UnityEngine.XR.MagicLeap
                 }
                 return result;
             }
-#endif
 
             private MLResult.Code InternalGetControlAFAvailableModes(out ControlAFMode[] outData)
             {
                 outData = new ControlAFMode[0];
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlAFAvailableModes(Handle, out outData, out uint resultCount);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlAFAvailableModes));
                 return result;
-#else
-                return MLResult.Code.Ok;
-#endif
             }
 
             private MLResult.Code InternalGetLensInfoHyperfocalDistance(out float outData)
             {
                 outData = 0f;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetLensInfoHyperfocalDistance(Handle, out outData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetLensInfoHyperfocalDistance));
                 return result;
-#else
-                return MLResult.Code.Ok;
-#endif
             }
 
             private MLResult.Code InternalGetLensInfoMinimumFocusDistance(out float outData)
             {
                 outData = 0f;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetLensInfoMinimumFocusDistance(Handle, out outData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetLensInfoMinimumFocusDistance));
                 return result;
-#else
-                return MLResult.Code.Ok;
-#endif
             }
 
             private MLResult.Code InternalGetLensInfoMinimumFocusDistanceIncrement(out float outData)
             {
                 outData = 0f;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetLensInfoMinimumFocusDistanceIncrement(Handle, out outData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetLensInfoMinimumFocusDistanceIncrement));
                 return result;
-#else
-                return MLResult.Code.Ok;
-#endif
             }
 
             private MLResult.Code InternalGetControlAFModeRequestMetadata(out ControlAFMode outData)
             {
                 outData = ControlAFMode.Off;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlAFModeRequestMetadata(Handle, out outData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlAFModeRequestMetadata));
                 return result;
-#else
-                return MLResult.Code.Ok;
-#endif
             }
 
             private MLResult.Code InternalGetControlAFTriggerRequestMetadata(out ControlAFTrigger outData)
             {
                 outData = ControlAFTrigger.Cancel;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlAFTriggerRequestMetadata(Handle, out outData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlAFTriggerRequestMetadata));
                 return result;
-#else
-                return MLResult.Code.Ok;
-#endif
             }
 
             private MLResult.Code InternalGetControlAFDistanceRangeRequestMetadata(out float min, out float max)
             {
                 min = 0f;
                 max = 0f;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetAFDistanceRangeRequestMetadata(Handle, out float[] outData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetAFDistanceRangeRequestMetadata));
                 if (outData.Length == 2 && result == MLResult.Code.Ok)
@@ -1552,97 +1120,65 @@ namespace UnityEngine.XR.MagicLeap
                     max = outData[1];
                 }
                 return result;
-#else
-                return MLResult.Code.Ok;
-#endif
             }
 
             private MLResult.Code InternalGetLensFocusDistanceRequestMetadata(out float outData)
             {
                 outData = 0f;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetLensFocusDistanceRequestMetadata(Handle, out outData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetLensFocusDistanceRequestMetadata));
                 return result;
-#else
-                return MLResult.Code.Ok;
-#endif
             }
 
             private MLResult.Code InternalSetControlAFMode(ControlAFMode mode)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataSetControlAFMode(Handle, in mode);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataSetControlAFMode));
                 return result;
-#else
-                return MLResult.Code.Ok;
-#endif
             }
 
             private MLResult.Code InternalSetControlAFTrigger(ControlAFTrigger trigger)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataSetControlAFTrigger(Handle, in trigger);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataSetControlAFTrigger));
                 return result;
-#else
-                return MLResult.Code.Ok;
-#endif
             }
 
             private MLResult.Code InternalSetAFDistanceRange(float min, float max)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 float[] values = new float[] { min, max };
                 var result = NativeBindings.MLCameraMetadataSetAFDistanceRange(Handle, in values);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataSetAFDistanceRange));
                 return result;
-#else
-                return MLResult.Code.Ok;
-#endif
             }
 
             private MLResult.Code InternalSetLensFocusDistance(float distance)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataSetLensFocusDistance(Handle, in distance);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataSetLensFocusDistance));
                 return result;
-#else
-                return MLResult.Code.Ok;
-#endif
             }
 
             private MLResult.Code InternalGetControlAFModeResultMetadata(out ControlAFMode data)
             {
                 data = ControlAFMode.Off;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlAFModeResultMetadata(Handle, out data);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlAFModeResultMetadata));
                 return result;
-#else
-                return MLResult.Code.Ok;
-#endif
             }
 
             private MLResult.Code InternalGetControlAFTriggerResultMetadata(out ControlAFTrigger data)
             {
                 data = ControlAFTrigger.Idle;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlAFTriggerResultMetadata(Handle, out data);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlAFTriggerResultMetadata));
                 return result;
-#else
-                return MLResult.Code.Ok;
-#endif
             }
 
             private MLResult.Code InternalGetControlAFDistanceRangeResultMetadata(out float min, out float max)
             {
                 min = 0f;
                 max = 0f;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetAFDistanceRangeResultMetadata(Handle, out float[] outData);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetAFDistanceRangeResultMetadata));
                 if (outData.Length == 2 && result == MLResult.Code.Ok)
@@ -1651,57 +1187,38 @@ namespace UnityEngine.XR.MagicLeap
                     max = outData[1];
                 }
                 return result;
-#else
-                return MLResult.Code.Ok;
-#endif
             }
 
             private MLResult.Code InternalGetControlAFStateResultMetadata(out ControlAFState data)
             {
                 data = ControlAFState.Inactive;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlAFStateResultMetadata(Handle, out data);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlAFStateResultMetadata));
                 return result;
-#else
-                return MLResult.Code.Ok;
-#endif
             }
 
             private MLResult.Code InternalGetControlAFSceneChangeResultMetadata(out ControlAFSceneChange data)
             {
                 data = ControlAFSceneChange.NotDetected;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetControlAFSceneChangeResultMetadata(Handle, out data);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetControlAFSceneChangeResultMetadata));
                 return result;
-#else
-                return MLResult.Code.Ok;
-#endif
             }
 
             private MLResult.Code InternalGetLensFocusDistanceResultMetadata(out float data)
             {
                 data = 0f;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetLensFocusDistanceResultMetadata(Handle, out data);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetLensFocusDistanceResultMetadata));
                 return result;
-#else
-                return MLResult.Code.Ok;
-#endif
             }
 
             private MLResult.Code InternalGetLensStateResultMetadata(out LensState data)
             {
                 data = LensState.Stationary;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 var result = NativeBindings.MLCameraMetadataGetLensStateResultMetadata(Handle, out data);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLCameraMetadataGetLensStateResultMetadata));
                 return result;
-#else
-                return MLResult.Code.Ok;
-#endif
             }
         }
     }

@@ -43,9 +43,7 @@ public class ExampleRuntimeTests
         // You'll this on the LuminUnity-Tests.asmdef asset. 
         // It might be useful in the future to further subdivide our tests into smaller ASMDEFs according
         // to which extra Unity or 3rd party assemblies are required.
-#if UNITY_MAGICLEAP || UNITY_ANDROID
         MLDevice.RegisterGestureSubsystem();
-#endif
     }
 
     /// <summary>
@@ -57,19 +55,14 @@ public class ExampleRuntimeTests
     public void MLDeviceTearDown()
     {
         Debug.Log("teardown: MLDevice.UnregisterGestureSubsystem");
-#if UNITY_MAGICLEAP || UNITY_ANDROID
+
         MLDevice.UnregisterGestureSubsystem();
-#endif
     }
 
     [Test]
     public void MLDevice_has_Gesture_Subsystem_Component()
     {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
         Assert.IsNotNull(MLDevice.GestureSubsystemComponent);
-#else
-        Assert.IsTrue(false);
-#endif
     }
 
     // A [UnityTest] behaves like a coroutine (Notice the IEnumerator return type). Use yield statements
@@ -78,7 +71,7 @@ public class ExampleRuntimeTests
     [UnityTest]
     public IEnumerator InputSubsystem_Can_Acquire_Head_Device()
     {
-        if(!headDevice.isValid)
+        if (!headDevice.isValid)
         {
             yield return new WaitForSeconds(1.0f);
             headDevice = InputSubsystem.Utils.FindMagicLeapDevice(InputDeviceCharacteristics.HeadMounted | InputDeviceCharacteristics.TrackedDevice);

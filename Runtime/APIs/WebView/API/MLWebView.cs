@@ -8,8 +8,6 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-
 namespace UnityEngine.XR.MagicLeap
 {
     using System;
@@ -20,6 +18,27 @@ namespace UnityEngine.XR.MagicLeap
     /// </summary>
     public partial class MLWebView : MLAPIBase
     {
+        /// <summary>
+        /// The type of the webview pause.
+        /// </summary>
+        public enum PauseType
+        {
+            /// <summary>
+            /// Pause all multimedia activities of the webview.
+            /// </summary>
+            MultiMedia,
+
+            /// <summary>
+            /// Pause javascript timers of the webview.
+            /// </summary>
+            Timers,
+
+            /// <summary>
+            /// Pause and discard the webview rendering process. But keep alive the MLWebView handle.
+            /// </summary>
+            Discard
+        }
+
         /// <summary>
         /// Create a MLWebView. 
         /// The MLWebView will be ready to use once this function returns with MLResult_OK.
@@ -238,6 +257,29 @@ namespace UnityEngine.XR.MagicLeap
         public MLResult RemoveAllCookies() => MLResult.Create(RemoveAllCookiesInternal());
 
         /// <summary>
+        /// Pause the webview. Call MLWebViewResume to resume.
+        /// This method provides a multiple pause types to the webview.
+        /// </summary>
+        /// <param name="pauseType">The type of pause to be used.</param>
+        /// <returns>MLResult.Code.Ok if paused successfully.</returns>
+        /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle or PauseType value.</returns>
+        /// <returns>MLResult.Code.UnspecifiedFailure if failed due to an internal error.</returns>
+        /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use. See an asynchronous mode of MLWebViewCreate.</returns>
+        public MLResult Pause(PauseType pauseType) => MLResult.Create(PauseInternal(pauseType));
+
+        /// <summary>
+        /// Resumes a webview after a previous call of Pause.
+        /// Resume webview to the normal operation for all webview pause types.
+        /// </summary>
+        /// <param name="handle">The webview being accessed.</param>
+        /// <returns>MLResult.Code.Ok if resumed successfully.</returns>
+        /// <returns>MLResult.Code.IllegalState if WebView was paused. See MLWebViewPause.</returns>
+        /// <returns>MLResult.Code.InvalidParam if its unable to find the specified MLWebView handle.</returns>
+        /// <returns>MLResult.Code.UnspecifiedFailure if failed due to an internal error.</returns>
+        /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use. See an asynchronous mode of MLWebViewCreate.</returns>
+        public MLResult Resume() => MLResult.Create(ResumeInternal());
+
+        /// <summary>
         /// Struct containing data about clicked input field in WebView.
         /// </summary>
         public struct InputFieldData
@@ -274,5 +316,3 @@ namespace UnityEngine.XR.MagicLeap
         }
     }
 }
-
-#endif

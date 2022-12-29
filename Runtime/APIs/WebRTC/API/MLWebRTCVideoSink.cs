@@ -11,12 +11,9 @@
 namespace UnityEngine.XR.MagicLeap
 {
     using System;
-    using System.Threading;
     using System.Collections.Generic;
-
-#if UNITY_MAGICLEAP || UNITY_ANDROID
+    using System.Threading;
     using UnityEngine.XR.MagicLeap.Native;
-#endif
 
     /// <summary>
     /// MLWebRTC class contains the API to interface with the
@@ -78,7 +75,7 @@ namespace UnityEngine.XR.MagicLeap
             public static VideoSink Create(out MLResult result)
             {
                 VideoSink videoSink = null;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
+
                 List<MLWebRTC.Sink> sinks = MLWebRTC.Instance.sinks;
                 ulong Handle = MagicLeapNativeBindings.InvalidHandle;
                 MLResult.Code resultCode = NativeBindings.MLWebRTCVideoSinkCreate(out Handle);
@@ -95,27 +92,20 @@ namespace UnityEngine.XR.MagicLeap
                 }
 
                 result = MLResult.Create(resultCode);
-#else
-                result = new MLResult();
-#endif
                 return videoSink;
             }
 
             public bool IsNewFrameAvailable()
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 MLResult.Code resultCode = NativeBindings.MLWebRTCVideoSinkIsNewFrameAvailable(this.Handle, out bool newFrameAvailable);
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCVideoSinkIsNewFrameAvailable));
                 return newFrameAvailable;
-#else
-                return false;
-#endif
             }
 
             public bool AcquireNextAvailableFrame(out Frame newFrame)
             {
                 newFrame = new Frame();
-#if UNITY_MAGICLEAP || UNITY_ANDROID
+
                 ulong frameHandle = MagicLeapNativeBindings.InvalidHandle;
                 MLResult.Code resultCode = NativeBindings.MLWebRTCVideoSinkAcquireNextAvailableFrame(this.Handle, out frameHandle);
                 if (!MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCVideoSinkAcquireNextAvailableFrame)))
@@ -141,21 +131,16 @@ namespace UnityEngine.XR.MagicLeap
                 }
 
                 return false;
-#else
-                return false;
-#endif
             }
 
             public void ReleaseFrame()
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 if (MagicLeapNativeBindings.MLHandleIsValid(newFrameHandle))
                 {
                     var resultCode = NativeBindings.MLWebRTCVideoSinkReleaseFrame(Handle, newFrameHandle);
                     MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCVideoSinkReleaseFrame));
                     newFrameHandle = MagicLeapNativeBindings.InvalidHandle;
                 }
-#endif
             }
 
             /// <summary>
@@ -169,14 +154,10 @@ namespace UnityEngine.XR.MagicLeap
             /// </returns>
             protected override MLResult SetTrack(MediaStream.Track track)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 ulong sourceHandle = track != null ? track.Handle : MagicLeapNativeBindings.InvalidHandle;
                 MLResult.Code resultCode = NativeBindings.MLWebRTCVideoSinkSetSource(this.Handle, sourceHandle);
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCVideoSinkSetSource));
                 return MLResult.Create(resultCode);
-#else
-                return new MLResult();
-#endif
             }
 
             /// <summary>
@@ -219,7 +200,6 @@ namespace UnityEngine.XR.MagicLeap
             /// </returns>
             public override MLResult Destroy()
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 if (!MagicLeapNativeBindings.MLHandleIsValid(this.Handle))
                 {
                     return MLResult.Create(MLResult.Code.InvalidParam, "Handle is invalid.");
@@ -237,9 +217,6 @@ namespace UnityEngine.XR.MagicLeap
                 MLWebRTC.Instance.sinks.Remove(this);
 
                 return MLResult.Create(resultCode);
-#else
-                return new MLResult();
-#endif
             }
         }
     }

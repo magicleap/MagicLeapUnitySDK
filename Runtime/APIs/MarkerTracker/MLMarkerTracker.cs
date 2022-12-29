@@ -8,8 +8,6 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-
 namespace UnityEngine.XR.MagicLeap
 {
     using System;
@@ -42,14 +40,14 @@ namespace UnityEngine.XR.MagicLeap
         ///     A cache of the last requested settings value. Any new requested value will be
         ///     checked against this to verify that an update is needed.
         /// </summary>
-        private static Settings futureSettingsValue;
+        private static TrackerSettings futureSettingsValue;
 
         /// <summary>
         ///     Instance.settings setter.
         ///     If called with the same value while a settings update operation is in progress,
         ///     nothing will happen.
         /// </summary>
-        public static async Task SetSettingsAsync(Settings value)
+        public static async Task SetSettingsAsync(TrackerSettings value)
         {
             if (futureSettingsValue.Equals(value))
                 return;
@@ -62,22 +60,22 @@ namespace UnityEngine.XR.MagicLeap
 
         private static bool IsScanning => Instance.settings.EnableMarkerScanning;
 
-        private MLMarkerTracker.Settings settings = Settings.Create(true, MarkerType.All);
-        
+        private MLMarkerTracker.TrackerSettings settings = TrackerSettings.Create(true, MarkerType.All);
+
         /// <summary>
         ///     Asynchronous utility method to enable marker scanning using the current <c> ScannerSettings </c>. 
-        ///     Does nothing if scanning is already enabled.
+        ///     Does nothing if scanning is already enabled.    
         ///     Note that enabling scanning has a performance cost until scanning is disabled using 
         ///     <c> StopScanning </c> or by setting <c> ScannerSettings.enabled </c> to <c>false</c>.
         /// </summary>
-        public static async Task StartScanningAsync(Settings? settings = null)
+        public static async Task StartScanningAsync(TrackerSettings? settings = null)
         {
             if (IsStarted && Instance.settings.EnableMarkerScanning == true)
                 return;
 
             settings ??= Instance.settings;
 
-            await SetSettingsAsync(Settings.Create(true, settings.Value.MarkerTypes, settings.Value.QRCodeSize, settings.Value.ArucoDicitonary, settings.Value.ArucoMarkerSize));
+            await SetSettingsAsync(TrackerSettings.Create(true, settings.Value.MarkerTypes, settings.Value.QRCodeSize, settings.Value.ArucoDicitonary, settings.Value.ArucoMarkerSize));
         }
 
         /// <summary>
@@ -90,7 +88,7 @@ namespace UnityEngine.XR.MagicLeap
             if (!IsStarted || futureSettingsValue.EnableMarkerScanning == false)
                 return;
 
-            await SetSettingsAsync(Settings.Create(false, Instance.settings.MarkerTypes, Instance.settings.QRCodeSize, Instance.settings.ArucoDicitonary, Instance.settings.ArucoMarkerSize));
+            await SetSettingsAsync(TrackerSettings.Create(false, Instance.settings.MarkerTypes, Instance.settings.QRCodeSize, Instance.settings.ArucoDicitonary, Instance.settings.ArucoMarkerSize));
         }
 
         protected override MLResult.Code StopAPI()
@@ -111,13 +109,11 @@ namespace UnityEngine.XR.MagicLeap
             if (IsScanning)
             {
                 var results = MLMarkerTrackerGetResults();
-                foreach(var result in results)
+                foreach (var result in results)
                     OnMLMarkerTrackerResultsFound?.Invoke(result);
 
                 OnMLMarkerTrackerResultsFoundArray?.Invoke(results);
             }
-        }    
+        }
     }
 }
-
-#endif

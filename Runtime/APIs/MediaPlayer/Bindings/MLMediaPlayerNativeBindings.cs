@@ -8,8 +8,6 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-
 namespace UnityEngine.XR.MagicLeap
 {
     using System;
@@ -52,7 +50,7 @@ namespace UnityEngine.XR.MagicLeap
                 /// <summary>
                 /// Delegate for the OnVideoSizeChanged event
                 /// </summary>
-                public delegate void OnVideoSizeChangedDelegate(ulong mediaPlayerHandle,  ref MLMediaPlayerOnVideoSizeChangedInfo videoSizeInfo);
+                public delegate void OnVideoSizeChangedDelegate(ulong mediaPlayerHandle, ref MLMediaPlayerOnVideoSizeChangedInfo videoSizeInfo);
 
                 /// <summary>
                 /// Delegate for the OnFramePacking event
@@ -62,42 +60,42 @@ namespace UnityEngine.XR.MagicLeap
                 /// <summary>
                 /// Delegate for the OnInfo event
                 /// </summary>
-                public delegate void OnInfoDelegate(ulong mediaPlayerHandle,  ref MLMediaPlayerOnInfoInfo info);
+                public delegate void OnInfoDelegate(ulong mediaPlayerHandle, ref MLMediaPlayerOnInfoInfo info);
 
                 /// <summary>
                 /// Delegate for the OnPrepared event
                 /// </summary>
-                public delegate void OnPreparedDelegate(ulong mediaPlayerHandle,  ref MLMediaPlayerOnPreparedInfo preparedInfo);
+                public delegate void OnPreparedDelegate(ulong mediaPlayerHandle, ref MLMediaPlayerOnPreparedInfo preparedInfo);
 
                 /// <summary>
                 /// Delegate for the OnBufferingUpdate event
                 /// </summary>
-                public delegate void OnBufferingUpdateDelegate(ulong mediaPlayerHandle,  ref MLMediaPlayerOnBufferingUpdateInfo updateInfo);
+                public delegate void OnBufferingUpdateDelegate(ulong mediaPlayerHandle, ref MLMediaPlayerOnBufferingUpdateInfo updateInfo);
 
                 /// <summary>
                 /// Delegate for the OnCompletion event
                 /// </summary>
-                public delegate void OnCompletionDelegate(ulong mediaPlayerHandle,  ref MLMediaPlayerOnCompletionInfo completionInfo);
+                public delegate void OnCompletionDelegate(ulong mediaPlayerHandle, ref MLMediaPlayerOnCompletionInfo completionInfo);
 
                 /// <summary>
                 /// Delegate for the OnError event
                 /// </summary>
-                public delegate void OnErrorDelegate(ulong mediaPlayerHandle,  ref MLMediaPlayerOnErrorInfo errorInfo);
+                public delegate void OnErrorDelegate(ulong mediaPlayerHandle, ref MLMediaPlayerOnErrorInfo errorInfo);
 
                 /// <summary>
                 /// Delegate for the OnSeekComplete event
                 /// </summary>
-                public delegate void OnSeekCompleteDelegate(ulong mediaPlayerHandle,  ref MLMediaPlayerOnSeekCompleteInfo seekCompleteInfo);
+                public delegate void OnSeekCompleteDelegate(ulong mediaPlayerHandle, ref MLMediaPlayerOnSeekCompleteInfo seekCompleteInfo);
 
                 /// <summary>
                 /// Delegate for the OnTrackDRMInfo event
                 /// </summary>
-                public delegate void OnTrackDRMInfoDelegate(ulong mediaPlayerHandle,  ref MLMediaPlayerOnTrackDRMInfo trackDrmInfo);
+                public delegate void OnTrackDRMInfoDelegate(ulong mediaPlayerHandle, ref MLMediaPlayerOnTrackDRMInfo trackDrmInfo);
 
                 /// <summary>
                 /// Delegate for the OnResetComplete event
                 /// </summary>
-                public delegate void OnResetCompleteDelegate(ulong mediaPlayerHandle,  ref MLMediaPlayerOnResetCompleteInfo resetCompleteInfo);
+                public delegate void OnResetCompleteDelegate(ulong mediaPlayerHandle, ref MLMediaPlayerOnResetCompleteInfo resetCompleteInfo);
 
 
                 /// <summary>
@@ -531,7 +529,7 @@ namespace UnityEngine.XR.MagicLeap
                 public struct MLMediaPlayerTrackDRMSessionInfo
                 {
 
-                    internal MLMediaPlayerTrackDRMSessionInfo (Track.Type type)
+                    internal MLMediaPlayerTrackDRMSessionInfo(Track.Type type)
                     {
                         this.Version = 1;
                         this.TrackType = type;
@@ -920,6 +918,9 @@ namespace UnityEngine.XR.MagicLeap
                 [DllImport(MLMediaPlayerDll, CallingConvention = CallingConvention.Cdecl)]
                 public static extern MLResult.Code MLMediaPlayerDestroy(ulong mediaPlayerHandle);
 
+                [DllImport(CUtilsDLL, CallingConvention = CallingConvention.Cdecl)]
+                public static extern void MLUnityQueueMediaPlayerResetAndDestroy(ulong mediaPlayerHandle);
+
                 /// <summary>
                 /// Set a file descriptor as the data source.  The file descriptor must be seekable.  It is the caller's responsibility to
                 /// close the file descriptor.  It is safe to do so as soon as this call returns.
@@ -1244,7 +1245,7 @@ namespace UnityEngine.XR.MagicLeap
                 /// Callback for the OnVideoSizeChanged event.
                 /// </summary>
                 [AOT.MonoPInvokeCallback(typeof(NativeBindings.OnVideoSizeChangedDelegate))]
-                private static void OnVideoSizeChanged(ulong mediaPlayerHandle,  ref NativeBindings.MLMediaPlayerOnVideoSizeChangedInfo videoSizeInfo)
+                private static void OnVideoSizeChanged(ulong mediaPlayerHandle, ref NativeBindings.MLMediaPlayerOnVideoSizeChangedInfo videoSizeInfo)
                 {
                     GCHandle gcHandle = GCHandle.FromIntPtr(videoSizeInfo.Data);
                     Player mediaPlayer = gcHandle.Target as Player;
@@ -1310,7 +1311,7 @@ namespace UnityEngine.XR.MagicLeap
                 /// Callback for the OnCompletion event.
                 /// </summary>
                 [AOT.MonoPInvokeCallback(typeof(NativeBindings.OnCompletionDelegate))]
-                private static void OnCompletion(ulong mediaPlayerHandle,  ref NativeBindings.MLMediaPlayerOnCompletionInfo completionInfo)
+                private static void OnCompletion(ulong mediaPlayerHandle, ref NativeBindings.MLMediaPlayerOnCompletionInfo completionInfo)
                 {
                     GCHandle gcHandle = GCHandle.FromIntPtr(completionInfo.Data);
                     Player mediaPlayer = gcHandle.Target as Player;
@@ -1321,7 +1322,7 @@ namespace UnityEngine.XR.MagicLeap
                 /// Callback for the OnError event.
                 /// </summary>
                 [AOT.MonoPInvokeCallback(typeof(NativeBindings.OnErrorDelegate))]
-                private static void OnError(ulong mediaPlayerHandle,  ref NativeBindings.MLMediaPlayerOnErrorInfo errorInfo)
+                private static void OnError(ulong mediaPlayerHandle, ref NativeBindings.MLMediaPlayerOnErrorInfo errorInfo)
                 {
                     GCHandle gcHandle = GCHandle.FromIntPtr(errorInfo.Data);
                     Player mediaPlayer = gcHandle.Target as Player;
@@ -1332,7 +1333,7 @@ namespace UnityEngine.XR.MagicLeap
                 /// Callback for the OnSeekComplete event.
                 /// </summary>
                 [AOT.MonoPInvokeCallback(typeof(NativeBindings.OnSeekCompleteDelegate))]
-                private static void OnSeekComplete(ulong mediaPlayerHandle,  ref NativeBindings.MLMediaPlayerOnSeekCompleteInfo seekCompleteInfo)
+                private static void OnSeekComplete(ulong mediaPlayerHandle, ref NativeBindings.MLMediaPlayerOnSeekCompleteInfo seekCompleteInfo)
                 {
                     GCHandle gcHandle = GCHandle.FromIntPtr(seekCompleteInfo.Data);
                     Player mediaPlayer = gcHandle.Target as Player;
@@ -1355,13 +1356,13 @@ namespace UnityEngine.XR.MagicLeap
                 /// Callback for the OnResetComplete event.
                 /// </summary>
                 [AOT.MonoPInvokeCallback(typeof(NativeBindings.OnResetCompleteDelegate))]
-                private static void OnResetComplete(ulong mediaPlayerHandle,  ref NativeBindings.MLMediaPlayerOnResetCompleteInfo resetCompleteInfo)
+                private static void OnResetComplete(ulong mediaPlayerHandle, ref NativeBindings.MLMediaPlayerOnResetCompleteInfo resetCompleteInfo)
                 {
                     GCHandle gcHandle = GCHandle.FromIntPtr(resetCompleteInfo.Data);
                     Player mediaPlayer = gcHandle.Target as Player;
                     MLThreadDispatch.Call(mediaPlayer, mediaPlayer.OnResetComplete);
                 }
-                
+
                 /// <summary>
                 /// Callback for the OnTimedTextUpdate event.
                 /// </summary>
@@ -1375,26 +1376,26 @@ namespace UnityEngine.XR.MagicLeap
                     switch (selectedTrack.MimeType)
                     {
                         case VTTMime:
-                        {
-                            IntPtr webVTTDataPtr = Marshal.AllocHGlobal(Marshal.SizeOf<WebVTTData>());
-                            var resultCode = NativeBindings.MLMediaPlayerGetWebVTTData(mediaPlayerHandle, timedTextHandle, ref webVTTDataPtr);
-                            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerGetWebVTTData));
-                            WebVTTData webVTTData = Marshal.PtrToStructure<WebVTTData>(webVTTDataPtr);
-                            Marshal.FreeHGlobal(webVTTDataPtr);
-                            MLThreadDispatch.Call(mediaPlayer, webVTTData.Body, mediaPlayer.OnTimedText);
-                            break;
-                        }
+                            {
+                                IntPtr webVTTDataPtr = Marshal.AllocHGlobal(Marshal.SizeOf<WebVTTData>());
+                                var resultCode = NativeBindings.MLMediaPlayerGetWebVTTData(mediaPlayerHandle, timedTextHandle, ref webVTTDataPtr);
+                                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerGetWebVTTData));
+                                WebVTTData webVTTData = Marshal.PtrToStructure<WebVTTData>(webVTTDataPtr);
+                                Marshal.FreeHGlobal(webVTTDataPtr);
+                                MLThreadDispatch.Call(mediaPlayer, webVTTData.Body, mediaPlayer.OnTimedText);
+                                break;
+                            }
 
                         case TTMLMime:
-                        {
-                            IntPtr ttmlDataPtr = Marshal.AllocHGlobal(Marshal.SizeOf<TTMLData>());
-                            var resultCode = NativeBindings.MLMediaPlayerGetTTMLData(mediaPlayerHandle, timedTextHandle, ref ttmlDataPtr);
-                            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerGetTTMLData));
-                            TTMLData ttmlData = Marshal.PtrToStructure<TTMLData>(ttmlDataPtr);
-                            Marshal.FreeHGlobal(ttmlDataPtr);
-                            MLThreadDispatch.Call(mediaPlayer, ttmlData.text, mediaPlayer.OnTimedText);
-                            break;
-                        }
+                            {
+                                IntPtr ttmlDataPtr = Marshal.AllocHGlobal(Marshal.SizeOf<TTMLData>());
+                                var resultCode = NativeBindings.MLMediaPlayerGetTTMLData(mediaPlayerHandle, timedTextHandle, ref ttmlDataPtr);
+                                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerGetTTMLData));
+                                TTMLData ttmlData = Marshal.PtrToStructure<TTMLData>(ttmlDataPtr);
+                                Marshal.FreeHGlobal(ttmlDataPtr);
+                                MLThreadDispatch.Call(mediaPlayer, ttmlData.text, mediaPlayer.OnTimedText);
+                                break;
+                            }
                     }
                 }
 
@@ -1413,15 +1414,15 @@ namespace UnityEngine.XR.MagicLeap
                     switch (selectedTrack.MimeType)
                     {
                         case ParserCEA608.Mime:
-                        {
-                            mediaPlayer.parser608.ParseAsync(subtitleData.Data, subtitleData.DataSize);
-                            break;
-                        }
+                            {
+                                mediaPlayer.parser608.ParseAsync(subtitleData.Data, subtitleData.DataSize);
+                                break;
+                            }
                         case ParserCEA708.Mime:
-                        {
-                            mediaPlayer.parser708.ParseAsync(subtitleData.Data, subtitleData.DataSize);
-                            break;
-                        }
+                            {
+                                mediaPlayer.parser708.ParseAsync(subtitleData.Data, subtitleData.DataSize);
+                                break;
+                            }
                     }
                 }
             }
@@ -1429,5 +1430,3 @@ namespace UnityEngine.XR.MagicLeap
 
     }
 }
-
-#endif

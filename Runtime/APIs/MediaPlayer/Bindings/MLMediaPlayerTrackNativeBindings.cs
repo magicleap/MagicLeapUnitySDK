@@ -13,9 +13,7 @@ namespace UnityEngine.XR.MagicLeap
     using System;
     using System.Collections.Generic;
     using System.Runtime.InteropServices;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
     using UnityEngine.XR.MagicLeap.Native;
-#endif
 
     /// <summary>
     /// MLMedia APIs.
@@ -35,11 +33,10 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             public partial class Track
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 internal class NativeBindings : MagicLeapNativeBindings
                 {
                     public const uint MAX_KEY_STRING_SIZE = 64;
-                    
+
                     public static string GetTrackLanguage(ulong mediaPlayerHandle, uint trackIndex)
                     {
                         string language = string.Empty;
@@ -55,7 +52,7 @@ namespace UnityEngine.XR.MagicLeap
 
                         return language;
                     }
-                    
+
                     /// <summary>
                     /// Get the language of a track.
                     /// </summary>
@@ -72,7 +69,7 @@ namespace UnityEngine.XR.MagicLeap
                     /// Get the Media Format of a track.
                     /// </summary>
                     [DllImport(MLMediaPlayerDll, CallingConvention = CallingConvention.Cdecl)]
-                    public static extern MLResult.Code MLMediaPlayerGetTrackMediaFormat(ulong mediaPlayerHandle, uint trackIndex,  out ulong formatHandle);
+                    public static extern MLResult.Code MLMediaPlayerGetTrackMediaFormat(ulong mediaPlayerHandle, uint trackIndex, out ulong formatHandle);
 
                     /// <summary>
                     /// Get the Media Format of a track.
@@ -87,7 +84,6 @@ namespace UnityEngine.XR.MagicLeap
                     public static extern MLResult.Code FreeUnmanagedMemory(IntPtr mediaStringPtr);
 
                 }
-#endif
             }
         }
     }

@@ -8,8 +8,6 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-
 namespace UnityEngine.XR.MagicLeap
 {
     using System;
@@ -29,7 +27,7 @@ namespace UnityEngine.XR.MagicLeap
         /// <returns> MLResult indicating the success or failure of the operation. </returns>
         /// <exception cref="System.DllNotFoundException" />
         /// <exception cref="System.EntryPointNotFoundException" />
-        private static MLResult.Code MLMarkerTrackerCreate(Settings settings)
+        private static MLResult.Code MLMarkerTrackerCreate(TrackerSettings settings)
         {
             var nativeSettings = new NativeBindings.MLMarkerTrackerSettings(settings);
             if (!MLPermissions.CheckPermission(MLPermission.MarkerTracking).IsOk)
@@ -74,7 +72,7 @@ namespace UnityEngine.XR.MagicLeap
             {
                 var scannerResults = new NativeBindings.MLMarkerTrackerResultArray(1);
                 var resultCode = NativeBindings.MLMarkerTrackerGetResult(Instance.Handle, ref scannerResults);
-                
+
                 // get results from native api
                 if (MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMarkerTrackerGetResult)))
                 {
@@ -88,7 +86,13 @@ namespace UnityEngine.XR.MagicLeap
                         if (detectedResult.IsValidPose)
                         {
                             resultCode = MagicLeapXrProviderNativeBindings.GetUnityPose(detectedResult.CoordinateFrameUID, out pose);
-                            if (!MLResult.IsOK(resultCode))
+                            if (MLResult.IsOK(resultCode))
+                            {
+                                // Update marker pose to be rotated 180 degrees on it's z axis to accommodate  for how the marker face is interpreted by the capi.
+                                // Without this update the marker positions will be upside down.
+                                pose = new Pose(pose.position, pose.rotation * Quaternion.AngleAxis(180, Vector3.forward));                              
+                            }
+                            else
                                 Debug.LogError($"Marker Scanner could not get pose data for coordinate frame id '{detectedResult.CoordinateFrameUID}'");
                         }
 
@@ -159,22 +163,15 @@ namespace UnityEngine.XR.MagicLeap
             return new MarkerData[0];
         }
 
-        /// <summary>
-        ///     Updates the current settings used by the native marker scanner API.
-        /// </summary>
-        /// <returns> MLResult indicating the success or failure of the operation. </returns>
-        private static Task<MLResult> MLMarkerTrackerSettingsUpdate(Settings settings)
+        private static Task<MLResult> MLMarkerTrackerSettingsUpdate(TrackerSettings settings)
         {
             try
             {
+                var handle = Instance.Handle;
                 var nativeSettings = new NativeBindings.MLMarkerTrackerSettings(settings);
-                var resultCode = NativeBindings.MLMarkerTrackerUpdateSettings(Instance.Handle, in nativeSettings);
+                var resultCode = NativeBindings.MLMarkerTrackerUpdateSettings(handle, in nativeSettings);
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMarkerTrackerUpdateSettings));
-                MLResult createSettingsResult = MLResult.Create(resultCode);
-                if (!createSettingsResult.IsOk)
-                    MLPluginLog.ErrorFormat("MLMarkerTracker.MLMarkerTrackerUpdateSettings failed to update scanner settings. Reason: {0}", createSettingsResult);
-
-                return createSettingsResult;
+                return MLResult.Create(resultCode);
             }
             catch (EntryPointNotFoundException)
             {
@@ -447,7 +444,7 @@ namespace UnityEngine.XR.MagicLeap
             ///     marker length has been set correctly.
             /// </summary>
             [StructLayout(LayoutKind.Sequential)]
-            public readonly struct MLMarkerTrackerSettings
+            public readonly partial struct MLMarkerTrackerSettings
             {
                 /// <summary>
                 ///     Version of the struct.
@@ -463,11 +460,6 @@ namespace UnityEngine.XR.MagicLeap
                 /// </summary>
                 [MarshalAs(UnmanagedType.I1)]
                 public readonly bool EnableMarkerScanning;
-
-                /// <summary>
-                ///     Hint used for all detectors.
-                /// </summary>
-                public readonly FPSHint FPSHint;
 
                 /// <summary>
                 ///     The marker types that are enabled for this scanner. Enable markers by
@@ -517,9 +509,68 @@ namespace UnityEngine.XR.MagicLeap
                 public readonly float QRCodeSize;
 
                 /// <summary>
+                ///     Tracker profile to be used.
+                /// </summary>
+                public readonly Profile TrackerProfile;
+
+                /// <summary>
+                ///     Custom tracker profile to be used if the TrackerProfile member is the Custom value (see MLMarkerTracker.Profile enum).
+                /// </summary>
+                public readonly MLMarkerTrackerCustomProfile CustomTrackerProfile;
+
+
+                /// <summary>
+                ///     Sets the native structures from the user facing properties.
+                /// </summary>
+                public MLMarkerTrackerSettings(TrackerSettings settings)
+                {
+                    this.Version = 5;
+                    this.EnableMarkerScanning = settings.EnableMarkerScanning;
+                    this.EnabledDetectorTypes = (uint)settings.MarkerTypes;
+                    this.ArucoDicitonary = settings.ArucoDicitonary;
+                    this.ArucoMarkerSize = settings.ArucoMarkerSize;
+                    this.QRCodeSize = settings.QRCodeSize;
+                    this.TrackerProfile = settings.TrackerProfile;
+                    this.CustomTrackerProfile = new MLMarkerTrackerCustomProfile(settings.CustomTrackerProfile);
+                }
+
+                /// <summary>
+                ///     Sets the native structures from the user facing properties.
+                /// </summary>
+                public MLMarkerTrackerSettings(Settings settings)
+                {
+                    this.Version = 5;
+                    this.EnableMarkerScanning = settings.EnableMarkerScanning;
+                    this.EnabledDetectorTypes = (uint)settings.MarkerTypes;
+                    this.ArucoDicitonary = settings.ArucoDicitonary;
+                    this.ArucoMarkerSize = settings.ArucoMarkerSize;
+                    this.QRCodeSize = settings.QRCodeSize;
+                    this.TrackerProfile = Profile.Default;
+                    this.CustomTrackerProfile = default;
+                }
+            }
+
+            /// <summary>
+            ///     Marker Tracker system provides a set of standard tracking profiles (see MLMarkerTracker.Profile enum)
+            ///     to configure the tracker settings. This is the structure that defines a custom tracker profile.
+            /// </summary>
+            [StructLayout(LayoutKind.Sequential)]
+            public readonly struct MLMarkerTrackerCustomProfile
+            {
+                /// <summary>
+                ///     Hint used for all detectors.
+                /// </summary>
+                public readonly FPSHint FPSHint;
+
+                /// <summary>
                 ///     The resolution hint for all detectors.
                 /// </summary>
                 public readonly ResolutionHint ResolutionHint;
+
+                /// <summary>
+                ///     The camera hint for all detectors.
+                /// </summary>
+                public readonly CameraHint CameraHint;
 
                 /// <summary>
                 ///     This option provides control over corner refinement methods and a way to
@@ -545,32 +596,18 @@ namespace UnityEngine.XR.MagicLeap
                 public readonly FullAnalysisIntervalHint FullAnalysisIntervalHint;
 
                 /// <summary>
-                ///     Determines which camera to use for aruco marker tracking.
-                ///     0 uses the world cameras and 1 uses the RGB camera.
-                /// </summary>
-                public readonly int ArucoTrackingCamera;
-
-                /// <summary>
                 ///     Sets the native structures from the user facing properties.
                 /// </summary>
-                public MLMarkerTrackerSettings(Settings settings)
+                public MLMarkerTrackerCustomProfile(TrackerSettings.CustomProfile customProfile)
                 {
-                    this.Version = 4;
-                    this.EnableMarkerScanning = settings.EnableMarkerScanning;
-                    this.FPSHint = settings.FPSHint;
-                    this.ResolutionHint = settings.ResolutionHint;
-                    this.EnabledDetectorTypes = (uint)settings.MarkerTypes;
-                    this.ArucoDicitonary = settings.ArucoDicitonary;
-                    this.CornerRefineMethod = settings.CornerRefineMethod;
-                    this.UseEdgeRefinement = settings.UseEdgeRefinement;
-                    this.ArucoMarkerSize = settings.ArucoMarkerSize;
-                    this.FullAnalysisIntervalHint = settings.FullAnalysisIntervalHint;
-                    this.QRCodeSize = settings.QRCodeSize;
-                    this.ArucoTrackingCamera = 0;
+                    this.FPSHint = customProfile.FPSHint;
+                    this.ResolutionHint = customProfile.ResolutionHint;
+                    this.CameraHint = customProfile.CameraHint;
+                    this.CornerRefineMethod = customProfile.CornerRefineMethod;
+                    this.UseEdgeRefinement = customProfile.UseEdgeRefinement;
+                    this.FullAnalysisIntervalHint = customProfile.FullAnalysisIntervalHint;
                 }
             }
         }
     }
 }
-
-#endif

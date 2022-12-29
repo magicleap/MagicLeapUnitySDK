@@ -10,12 +10,10 @@
 
 namespace UnityEngine.XR.MagicLeap
 {
+    using System.Runtime.InteropServices;
     using System.Threading;
     using System.Threading.Tasks;
-    using System.Runtime.InteropServices;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
     using UnityEngine.XR.MagicLeap.Native;
-#endif
 
     /// <summary>
     /// MLWebRTC class contains the API to interface with the
@@ -37,7 +35,6 @@ namespace UnityEngine.XR.MagicLeap
                 this.TrackType = Type.Video;
             }
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             /// <summary>
             /// Initializes the given AppDefinedVideoSource object.
             /// </summary>
@@ -86,7 +83,7 @@ namespace UnityEngine.XR.MagicLeap
 
                     MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCSourceAppDefinedVideoSourcePushFrame));
                 }
-                catch(System.Exception e)
+                catch (System.Exception e)
                 {
                     Debug.LogException(e);
                 }
@@ -106,7 +103,6 @@ namespace UnityEngine.XR.MagicLeap
                 MLResult result = base.DestroyLocal();
                 return result;
             }
-#endif
         }
     }
 }

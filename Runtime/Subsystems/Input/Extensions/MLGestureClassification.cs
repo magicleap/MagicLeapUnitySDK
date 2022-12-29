@@ -127,16 +127,12 @@ namespace UnityEngine.XR.MagicLeap
 
                 public static void StartTracking()
                 {
-#if UNITY_ANDROID
                     MagicLeapXrProviderNativeBindings.StartGestureTracking();
-#endif
                 }
 
                 public static void StopTracking()
                 {
-#if UNITY_ANDROID
                     MagicLeapXrProviderNativeBindings.StopGestureTracking();
-#endif
                 }
 
                 public static bool TryGetFingerState(InputDevice handDevice, FingerType finger, out FingerState fingerStateData) => NativeBindings.TryGetFingerState(handDevice, finger, out fingerStateData);

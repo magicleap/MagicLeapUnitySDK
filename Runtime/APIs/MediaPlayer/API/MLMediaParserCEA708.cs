@@ -40,7 +40,6 @@ namespace UnityEngine.XR.MagicLeap
 
             public ParserCEA708()
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 MLResult.Code resultCode = NativeBindings.MLMediaCea708ParserCreate(out ulong parserHandle);
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaCea708ParserCreate));
                 this.Handle = parserHandle;
@@ -48,26 +47,21 @@ namespace UnityEngine.XR.MagicLeap
                 IntPtr gcHandlePtr = GCHandle.ToIntPtr(this.gcHandle);
                 resultCode = NativeBindings.MLMediaCea708ParserSetEmitEventCallback(this.Handle, NativeBindings.OnEmitEvent, gcHandlePtr);
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaCea708ParserSetEmitEventCallback));
-#endif
             }
 
             ~ParserCEA708()
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 MLResult.Code resultCode = NativeBindings.MLMediaCea708ParserSetEmitEventCallback(this.Handle, null, IntPtr.Zero);
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaCea708ParserSetEmitEventCallback));
                 resultCode = NativeBindings.MLMediaCea708ParserDestroy(this.Handle);
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaCea708ParserDestroy));
                 this.gcHandle.Free();
-#endif
             }
 
             public void ParseAsync(IntPtr data, uint dataSize)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 MLResult.Code resultCode = NativeBindings.MLMediaCea708ParserParse(this.Handle, data, dataSize);
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaCea708ParserParse));
-#endif
             }
 
             internal ulong Handle

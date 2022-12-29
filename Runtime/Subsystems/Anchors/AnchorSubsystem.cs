@@ -143,7 +143,6 @@ namespace UnityEngine.XR.MagicLeap
 
             public override unsafe bool TryAddAnchor(Pose pose, out XRAnchor xrAnchor)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 if (localizationInfo.LocalizationStatus != MLAnchors.LocalizationStatus.Localized)
                 {
                     xrAnchor = default;
@@ -156,7 +155,7 @@ namespace UnityEngine.XR.MagicLeap
                     xrAnchor = default;
                     return false;
                 }
-                
+
                 result = anchor.Publish();
                 if (!result.IsOk)
                 {
@@ -166,10 +165,6 @@ namespace UnityEngine.XR.MagicLeap
 
                 xrAnchor = new XRAnchor(GenerateTrackableId(anchor.Id), anchor.Pose, TrackingState.Tracking, IntPtr.Zero);
                 return result.IsOk;
-#else
-                xrAnchor = default;
-                return false;
-#endif
             }
 
             public override bool TryRemoveAnchor(TrackableId trackableId)
@@ -187,7 +182,6 @@ namespace UnityEngine.XR.MagicLeap
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void RegisterDescriptor()
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             XRAnchorSubsystemDescriptor.Create(new XRAnchorSubsystemDescriptor.Cinfo
             {
                 id = MagicLeapXrProvider.AnchorSubsystemId,
@@ -199,7 +193,6 @@ namespace UnityEngine.XR.MagicLeap
 #endif
                 supportsTrackableAttachments = false
             });
-#endif 
         }
     }
 }

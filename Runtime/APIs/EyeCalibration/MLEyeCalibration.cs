@@ -59,7 +59,6 @@ namespace UnityEngine.XR.MagicLeap
         }
 
         #region MLAutoAPISingleton
-#if UNITY_ANDROID
         /// <summary>
         /// Start the API.
         /// </summary>
@@ -77,7 +76,7 @@ namespace UnityEngine.XR.MagicLeap
         protected override void OnApplicationPause(bool pauseStatus)
         {
             base.OnApplicationPause(pauseStatus);
-            if(pauseStatus)
+            if (pauseStatus)
             {
                 Instance.InternalMLEyeCalibrationDestroyClient();
             }
@@ -86,7 +85,6 @@ namespace UnityEngine.XR.MagicLeap
                 Instance.InternalMLEyeCalibrationCreateClient();
             }
         }
-#endif
         #endregion
 
         /// <summary>

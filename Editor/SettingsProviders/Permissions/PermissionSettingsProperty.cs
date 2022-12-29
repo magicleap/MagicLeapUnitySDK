@@ -56,9 +56,9 @@ namespace UnityEditor.XR.MagicLeap
         private void OnValueChange(ChangeEvent<bool> evt)
         {
             bool shouldInclude = evt.newValue;
-            if(androidManifest != null)
+            if (androidManifest != null)
             {
-                if(shouldInclude)
+                if (shouldInclude)
                 {
                     androidManifest.AddPermission(permission.Name);
                 }

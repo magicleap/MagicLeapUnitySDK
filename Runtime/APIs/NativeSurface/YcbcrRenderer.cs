@@ -94,9 +94,7 @@ namespace UnityEngine.XR.MagicLeap
             }
             else
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 handle = Native.MagicLeapNativeBindings.InvalidHandle;
-#endif
             }
         }
 
@@ -185,7 +183,7 @@ namespace UnityEngine.XR.MagicLeap
                         eventDataPtr);
                 }
                 cmdBuffer.IssuePluginEventAndData(
-                    NativeBindings.MLYcbcrRendererGetCallbackForPluginEvent(pluginEvent), 
+                    NativeBindings.MLYcbcrRendererGetCallbackForPluginEvent(pluginEvent),
                     NativeBindings.MLYcbcrRendererGetEventIdForPluginEvent(pluginEvent),
                     eventDataPtr);
 
@@ -196,9 +194,7 @@ namespace UnityEngine.XR.MagicLeap
         private void InvokeOnCleanupComplete_CallbackThread()
         {
             OnCleanupComplete_CallbackThread();
-#if UNITY_ANDROID
             Native.MLThreadDispatch.ScheduleMain(() => InvokeOnCleanupCompleted_MainThread());
-#endif
         }
 
         private void InvokeOnCleanupCompleted_MainThread()
@@ -219,9 +215,7 @@ namespace UnityEngine.XR.MagicLeap
 
         private void InvokeOnFirstFrameRendered()
         {
-#if UNITY_ANDROID
             Native.MLThreadDispatch.Call(OnFirstFrameRendered);
-#endif
         }
     }
 }

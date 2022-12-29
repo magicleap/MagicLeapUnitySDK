@@ -12,15 +12,13 @@ using UnityEngine;
 
 namespace UnityEngine.XR.MagicLeap
 {
-    using System.Runtime.InteropServices;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-    using Native;
     using System;
-    using System.IO;
     using System.Collections.Generic;
-    using UnityEngine.XR.InteractionSubsystems;
+    using System.IO;
+    using System.Runtime.InteropServices;
+    using Native;
     using UnityEngine.XR.ARSubsystems;
-#endif
+    using UnityEngine.XR.InteractionSubsystems;
 
     public sealed class MagicLeapXrProviderNativeBindings : Native.MagicLeapNativeBindings
     {
@@ -43,7 +41,6 @@ namespace UnityEngine.XR.MagicLeap
         internal static extern MLResult.Code MLZIIsServerConfigured([MarshalAs(UnmanagedType.I1)] out bool isConfigured);
 #endif
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
         public enum LogLevel : uint
         {
             Fatal,
@@ -79,6 +76,10 @@ namespace UnityEngine.XR.MagicLeap
         /// <param name="context">Pointer to a context object.</param>
         public delegate void OnDebugMessageDelegate(LogLevel logLevel, [MarshalAs(UnmanagedType.LPStr)] string message, IntPtr context);
 
+        internal delegate void CreateBlockRequestsDelegate(ref MeshingSubsystem.Extensions.MLMeshing.NativeBindings.MLMeshingMeshInfo meshInfo, ref MeshingSubsystem.Extensions.MLMeshing.NativeBindings.MLMeshingMeshRequest data);
+
+        internal delegate void CallFreeBlockRequestPointerDelegate();
+
         [DllImport(MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
         internal static extern bool StartEyeTracking();
 
@@ -99,7 +100,7 @@ namespace UnityEngine.XR.MagicLeap
 
         [DllImport(MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern ulong GetControllerTrackerHandle();
-        
+
         [DllImport(MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern ulong GetHeadTrackerHandle();
 
@@ -114,6 +115,12 @@ namespace UnityEngine.XR.MagicLeap
 
         [DllImport(MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern MLResult.Code StopHaptics();
+
+        [DllImport(MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void MeshingSetMeshRequestCallback(CreateBlockRequestsDelegate createBlockRequest);
+
+        [DllImport(MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void MeshingSetFreeBlockRequestPointerCallback(CallFreeBlockRequestPointerDelegate createFreePointer);
 
         /// <summary>
         /// Native callback that is invoked when a data channel closes.
@@ -179,6 +186,5 @@ namespace UnityEngine.XR.MagicLeap
                 return debugUtils;
             }
         }
-#endif
     }
 }

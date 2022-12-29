@@ -4,8 +4,8 @@ using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
-using UnityEngine.XR.ARSubsystems;
 using UnityEngine.Scripting;
+using UnityEngine.XR.ARSubsystems;
 using UnityEngine.XR.MagicLeap.Native;
 
 namespace UnityEngine.XR.MagicLeap
@@ -127,7 +127,6 @@ namespace UnityEngine.XR.MagicLeap
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void RegisterDescriptor()
         {
-#if UNITY_ANDROID
             XRImageTrackingSubsystemDescriptor.Create(new XRImageTrackingSubsystemDescriptor.Cinfo
             {
                 id = MagicLeapXrProvider.ImageTrackingSubsystemId,
@@ -141,7 +140,6 @@ namespace UnityEngine.XR.MagicLeap
                 supportsMovingImages = false,
                 supportsMutableLibrary = false
             });
-#endif // UNITY_ANDROID
         }
     }
 }

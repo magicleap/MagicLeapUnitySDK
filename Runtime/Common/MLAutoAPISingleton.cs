@@ -12,10 +12,7 @@ namespace UnityEngine.XR.MagicLeap
 {
     using System;
     using System.Reflection;
-
-#if UNITY_MAGICLEAP || UNITY_ANDROID
     using UnityEngine.XR.MagicLeap.Internal;
-#endif
 
     /// <summary>
     /// Place this attribute on a child of MLAutoAPISingleton to prevent its initialization
@@ -33,11 +30,7 @@ namespace UnityEngine.XR.MagicLeap
         /// <summary>
         /// The native handle ID for this API instance. Will be invalid until the API is started.
         /// </summary>
-#if UNITY_MAGICLEAP || UNITY_ANDROID
         protected ulong Handle = Native.MagicLeapNativeBindings.InvalidHandle;
-#else
-        protected ulong Handle = 0;
-#endif
 
         /// <summary>
         /// Lock used to keep api calls synchronous.
@@ -46,7 +39,6 @@ namespace UnityEngine.XR.MagicLeap
 
         private static readonly bool requiresXRLoader = typeof(T).GetCustomAttribute<RequireXRLoader>() != null;
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
         /// <summary>
         /// This is the only way to initialize this class.
         /// </summary>
@@ -146,6 +138,5 @@ namespace UnityEngine.XR.MagicLeap
                 IsStarted = false;
             }
         }
-#endif
     }
 }

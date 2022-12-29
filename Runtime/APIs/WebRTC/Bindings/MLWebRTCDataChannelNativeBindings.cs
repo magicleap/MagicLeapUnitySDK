@@ -12,9 +12,7 @@ namespace UnityEngine.XR.MagicLeap
 {
     using System;
     using System.Runtime.InteropServices;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
     using UnityEngine.XR.MagicLeap.Native;
-#endif
 
     /// <summary>
     /// MLWebRTC class contains the API to interface with the
@@ -30,10 +28,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <summary>
             /// Native bindings for the MLWebRTC.DataChannel class. 
             /// </summary>
-            internal class NativeBindings
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-                : MagicLeapNativeBindings
-#endif
+            internal class NativeBindings : MagicLeapNativeBindings
             {
                 /// <summary>
                 /// A delegate that describes the requirements of the OnOpened callback.
@@ -54,7 +49,6 @@ namespace UnityEngine.XR.MagicLeap
                 /// <param name="context">Pointer to a context object.</param>
                 public delegate void OnMessageDelegate(in MLWebRTCDataChannelMessage message, IntPtr context);
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 /// <summary>
                 /// Creates a data channel.
                 /// </summary>
@@ -153,7 +147,6 @@ namespace UnityEngine.XR.MagicLeap
                 /// </returns>
                 [DllImport(MLWebRTCDLL, CallingConvention = CallingConvention.Cdecl)]
                 public static extern MLResult.Code MLWebRTCDataChannelDestroy(ulong connectionHandle, ulong dataChannelHandle);
-#endif
 
                 /// <summary>
                 /// Sets the callbacks of a data channel.
@@ -167,7 +160,6 @@ namespace UnityEngine.XR.MagicLeap
                 /// </returns>
                 public static MLResult.Code SetCallbacks(MLWebRTC.DataChannel dataChannel)
                 {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                     dataChannel.gcHandle = GCHandle.Alloc(dataChannel);
                     IntPtr gcHandlePtr = GCHandle.ToIntPtr(dataChannel.gcHandle);
 
@@ -179,9 +171,6 @@ namespace UnityEngine.XR.MagicLeap
                     }
 
                     return resultCode;
-#else
-                    return MLResult.Code.Ok;
-#endif
                 }
 
                 /// <summary>
@@ -197,16 +186,12 @@ namespace UnityEngine.XR.MagicLeap
                 /// </returns>
                 public static MLResult.Code SendMessageToDataChannel(MLWebRTC.DataChannel dataChannel, string message)
                 {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                     NativeBindings.MLWebRTCDataChannelMessage messageNative = NativeBindings.MLWebRTCDataChannelMessage.Create(message);
 
                     MLResult.Code resultCode = NativeBindings.MLWebRTCDataChannelSendMessage(dataChannel.Handle, in messageNative);
                     MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCDataChannelSendMessage));
                     Marshal.FreeHGlobal(messageNative.Data);
                     return resultCode;
-#else
-                    return MLResult.Code.Ok;
-#endif
                 }
 
                 /// <summary>
@@ -222,7 +207,6 @@ namespace UnityEngine.XR.MagicLeap
                 /// </returns>
                 public static MLResult.Code SendMessageToDataChannel<T>(MLWebRTC.DataChannel dataChannel, T[] message)
                 {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                     NativeBindings.MLWebRTCDataChannelMessage messageNative = NativeBindings.MLWebRTCDataChannelMessage.Create(message);
 
                     MLResult.Code resultCode = NativeBindings.MLWebRTCDataChannelSendMessage(dataChannel.Handle, in messageNative);
@@ -230,12 +214,8 @@ namespace UnityEngine.XR.MagicLeap
                     Marshal.FreeHGlobal(messageNative.Data);
 
                     return resultCode;
-#else
-                    return MLResult.Code.Ok;
-#endif
                 }
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 /// <summary>
                 /// Native callback that is invoked when a data channel opens.
                 /// </summary>
@@ -302,7 +282,6 @@ namespace UnityEngine.XR.MagicLeap
                         }
                     });
                 }
-#endif
 
                 /// <summary>
                 /// The native representation of the MLWebRTC data channel message.
@@ -412,11 +391,9 @@ namespace UnityEngine.XR.MagicLeap
                     {
                         MLWebRTCDataChannelEventCallbacks callbacks = new MLWebRTCDataChannelEventCallbacks();
                         callbacks.Version = 1;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                         callbacks.OnOpen = DataChannel.NativeBindings.OnOpened;
                         callbacks.OnClosed = DataChannel.NativeBindings.OnClosed;
                         callbacks.OnMessage = DataChannel.NativeBindings.OnMessage;
-#endif
 
                         callbacks.Context = context;
                         return callbacks;

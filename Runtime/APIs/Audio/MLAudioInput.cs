@@ -13,16 +13,13 @@ namespace UnityEngine.XR.MagicLeap
     using System;
     using System.Runtime.InteropServices;
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
     using UnityEngine.XR.MagicLeap.Native;
-#endif
 
     /// <summary>
     /// Manages Audio.
     /// </summary>
     public sealed partial class MLAudioInput : MLAutoAPISingleton<MLAudioInput>
     {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
         /// <summary>
         /// The mute state of the microphone.
         /// </summary>
@@ -263,6 +260,5 @@ namespace UnityEngine.XR.MagicLeap
                 throw;
             }
         }
-#endif
     }
 }

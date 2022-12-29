@@ -9,9 +9,9 @@
 // %BANNER_END%
 
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.XR.MagicLeap;
-using UnityEngine.EventSystems;
 using UnityEngine.XR.MagicLeap.Native;
 
 namespace MagicLeap.Core
@@ -156,7 +156,6 @@ namespace MagicLeap.Core
             height = webViewHeight;
         }
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
         /// <summary>
         /// Registers to Controller Callbacks.
         /// </summary>
@@ -452,6 +451,5 @@ namespace MagicLeap.Core
             webViewRenderer = new MLWebView.Renderer();
             webViewRenderer.SetRenderBuffer(this.webViewTexture);
         }
-#endif
     }
 }

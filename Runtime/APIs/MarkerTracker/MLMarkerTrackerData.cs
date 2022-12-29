@@ -173,9 +173,51 @@ namespace UnityEngine.XR.MagicLeap
         }
 
         /// <summary>
+        /// Represents the different tracker profiles used to optimize marker tracking in difference use cases.
+        /// </summary>
+        public enum Profile
+        {
+            /// <summary>
+            /// Generic tracker profile.
+            /// Tracker profile that covers standard use cases. If this does not fit the
+            /// needs of the application try the other profiles listed below.
+            /// </summary>
+            Default,
+
+            /// <summary>
+            /// Application can define a custom tracker profiler.
+            /// </summary>
+            Custom,
+
+            /// <summary>
+            /// Use this profile to reduce the compute load and increase detection/tracker speed.
+            /// This can result poor poses.
+            /// </summary>
+            Speed,
+
+            /// <summary>
+            /// Use this profile to optimize for accurate marker poses. 
+            /// This can cause increased load on the compute.
+            /// </summary>
+            Accuracy,
+
+            /// <summary>
+            /// Use this profile to optimize for markers that are small or for larger
+            /// markers that need to detected from far.
+            /// </summary>
+            SmallTargets,
+
+            /// <summary>
+            /// Use this profile to be able to detect markers across a larger Field Of View.
+            /// Marker Tracker system will attempt to use multiple cameras to detect the markers.
+            /// </summary>
+            Large_FOV = 6
+        }
+
+        /// <summary>
         /// Used to hint to the back-end the max frames per second
-        /// that should be analyzed.This is set in the
-        /// MLMarkerTrackerSettings structure and this setting
+        /// that should be analyzed. This is set in the
+        /// MLMarkerTrackerCustomProfile structure and this setting
         /// applies to all enabled trackers.
         /// 
         /// CPU load is a combination of enabled detector types,
@@ -192,14 +234,14 @@ namespace UnityEngine.XR.MagicLeap
         }
 
         /// <summary>
-        /// The MLMarkerTrackingResolutionHint enum values are
+        /// The ResolutionHint enum values are
         /// used to hint to the back-end the resolution
-        /// that should be used.This is set in the
-        /// MLMarkerTrackerSettings structure and this setting
+        /// that should be used. This is set in the
+        /// MLMarkerTracker.CustomProfile structure and this setting
         /// currently only applies to the QR, UPC and EAN detectors.
         /// 
         /// CPU load is a combination of enabled detector types,
-        /// FpsHint and ResolutionHint.More detectors and a higher
+        /// FpsHint and ResolutionHint. More detectors and a higher
         /// fps and resolution hints will result in a higher CPU load.
         /// High CPU load can affect the performance of your system.
         /// </summary>
@@ -211,6 +253,34 @@ namespace UnityEngine.XR.MagicLeap
         }
 
         /// <summary>
+        /// The CameraHint enum values are
+        /// used to hint to the camera
+        /// that should be used. This is set in the
+        /// MLMarkerTracker.CustomProfile structure and this setting
+        /// currently only applies to the aruco detectors.
+        /// 
+        /// RGB camera has higher resolution than world cameras and are better suited
+        /// for use cases where the target to be tracked is small or needs to be detected
+        /// from far.
+        /// 
+        /// World cameras make use of multiple world cameras to improve accuracy and
+        /// increase the FoV for detection.
+        /// from far.
+        /// </summary>
+        public enum CameraHint
+        {
+            /// <summary>
+            /// Single RGB Camera.
+            /// </summary>
+            RGB,
+
+            /// <summary>
+            /// One or more world cameras.
+            /// </summary>
+            World
+        }
+
+        /// <summary>
         /// In order to improve performance, the detectors don't always run on the full
         /// frame. Full frame analysis is however necessary to detect new markers that
         /// weren't detected before. Use this option to control how often the detector may
@@ -218,23 +288,54 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public enum FullAnalysisIntervalHint
         {
+            /// <summary>
+            /// Detector analyzes every frame fully.
+            /// </summary>
             Max,
+
+            /// <summary>
+            /// Detector analyzes frame fully very often.
+            /// </summary>
             Fast,
+
+            /// <summary>
+            /// Detector analyzes frame fully a few times per second.
+            /// </summary>
             Medium,
+
+            /// <summary>
+            /// Detector analyzes frame fully about every second.
+            /// </summary>
             Slow
         }
 
         /// <summary>
-        /// The Aruco/April tag detector comes with several corner refinement methods.
-        /// Choosing the right corner refinement method has an impact on the accuracy and
-        /// speed trade-off that comes with each detection pipeline.
-        /// Corner refinement only applies to Aruco and April tags, not QR codes.
+        ///     The Aruco/April tag detector comes with several corner refinement methods.
+        ///     Choosing the right corner refinement method has an impact on the accuracy and
+        ///     speed trade-off that comes with each detection pipeline.
+        ///     Corner refinement only applies to Aruco and April tags, not QR codes.
         /// </summary>
         public enum CornerRefineMethod
         {
+            /// <summary>
+            /// No refinement, may have inaccurate corners.
+            /// </summary>
             None,
+
+            /// <summary>
+            /// Corners have subpixel coordinates. 
+            /// High detection rate, very fast, reasonable accuracy.
+            /// </summary>
             Subpix,
+
+            /// <summary>
+            /// High detection rate, fast, reasonable accuracy. 
+            /// </summary>
             Contour,
+
+            /// <summary>
+            /// Reasonable detection rate, slowest, but very accurate.
+            /// </summary>
             AprilTag
         }
 
@@ -250,13 +351,12 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             public readonly uint Id;
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             internal ArucoData(NativeBindings.MLMarkerTrackerDecodedArucoData nativeArucoData)
             {
                 this.Dictionary = nativeArucoData.Dictionary;
                 this.Id = nativeArucoData.Id;
             }
-#endif
+
             public override string ToString() =>
                 $"Id: {Id}\nDictionaryName: {this.Dictionary}";
         }
@@ -265,12 +365,11 @@ namespace UnityEngine.XR.MagicLeap
         {
             public readonly byte[] Data;
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             internal BinaryData(byte[] data)
             {
                 this.Data = data;
             }
-#endif
+
             public override string ToString() => $"Data: {this.Data}";
         }
 
@@ -312,7 +411,6 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             public readonly float ReprojectionError;
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             internal MarkerData(MarkerType Type, NativeBindings.MLMarkerTrackerDecodedArucoData NativeArucoData, byte[] BinaryDataResult, Pose Pose, float ReprojectionError)
             {
                 this.Type = Type;
@@ -321,7 +419,6 @@ namespace UnityEngine.XR.MagicLeap
                 this.Pose = Pose;
                 this.ReprojectionError = ReprojectionError;
             }
-#endif
             public override string ToString()
             {
                 string toString;

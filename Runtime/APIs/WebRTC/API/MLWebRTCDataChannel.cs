@@ -11,9 +11,7 @@
 namespace UnityEngine.XR.MagicLeap
 {
     using System.Runtime.InteropServices;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
     using UnityEngine.XR.MagicLeap.Native;
-#endif
 
     /// <summary>
     /// MLWebRTC class contains the API to interface with the
@@ -108,7 +106,6 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             public PeerConnection ParentConnection { get; internal set; }
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             /// <summary>
             /// Creates an initialized DataChannel object.
             /// </summary>
@@ -142,7 +139,7 @@ namespace UnityEngine.XR.MagicLeap
 
                 resultCode = NativeBindings.SetCallbacks(dataChannel);
 
-                if (!MLResult.IsOK(resultCode) )
+                if (!MLResult.IsOK(resultCode))
                 {
                     result = MLResult.Create(resultCode);
                     return dataChannel;
@@ -233,7 +230,6 @@ namespace UnityEngine.XR.MagicLeap
                 this.gcHandle.Free();
                 return MLResult.Create(resultCode);
             }
-#endif
         }
     }
 }

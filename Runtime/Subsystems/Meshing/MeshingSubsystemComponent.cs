@@ -11,6 +11,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using UnityEngine.Serialization;
 using UnityEngine.XR.ARSubsystems;
 using UnityEngine.XR.Management;
@@ -45,6 +47,7 @@ namespace UnityEngine.XR.MagicLeap
         /// Describes the level of detail (LOD) to request from the generated meshes. This property is
         /// deprecated, and has been replaced by density.
         /// </summary>
+        [Obsolete("This enum will be removed in a future release. Instead, use MeshingSubsystem.Extensions.MLMeshing.LevelOfDetail.")]
         public enum LevelOfDetail
         {
             /// <summary>
@@ -98,6 +101,27 @@ namespace UnityEngine.XR.MagicLeap
             }
         }
 
+        public static MeshingSubsystem.Extensions.MLMeshing.LevelOfDetail FromDensityToLevelOfDetail(float density)
+        {
+            if (density < 0.33f)
+                return MeshingSubsystem.Extensions.MLMeshing.LevelOfDetail.Minimum;
+            else if (density < 0.66f)
+                return MeshingSubsystem.Extensions.MLMeshing.LevelOfDetail.Medium;
+            else
+                return MeshingSubsystem.Extensions.MLMeshing.LevelOfDetail.Maximum;
+        }
+
+        public static float FromLevelOfDetailToDensity(MeshingSubsystem.Extensions.MLMeshing.LevelOfDetail lod)
+        {
+            if (lod == MeshingSubsystem.Extensions.MLMeshing.LevelOfDetail.Minimum)
+                return 0.0f;
+            else if (lod == MeshingSubsystem.Extensions.MLMeshing.LevelOfDetail.Medium)
+                return 0.5f;
+            else
+                return 1.0f;
+        }
+
+        [Obsolete("This function will be removed in a future release. Instead, use FromLevelOfDetailToDensity() with the MeshingSubsystem.Extensions.MLMeshing.LevelOfDetail parameter.")]
         public static float LevelOfDetailToDensity(LevelOfDetail lod)
         {
             if (lod == LevelOfDetail.Minimum)
@@ -108,6 +132,7 @@ namespace UnityEngine.XR.MagicLeap
                 return 1.0f;
         }
 
+        [Obsolete("This function will be removed in a future release. Instead, use FromDensityToLevelOfDetail() with the MeshingSubsystem.Extensions.MLMeshing.LevelOfDetail parameter.")]
         public static LevelOfDetail DensityToLevelOfDetail(float density)
         {
             if (density < 0.33f)
@@ -118,21 +143,7 @@ namespace UnityEngine.XR.MagicLeap
                 return LevelOfDetail.Maximum;
         }
 
-        [Obsolete("Replaced by density")]
-        public LevelOfDetail levelOfDetail
-        {
-            get
-            {
-                return DensityToLevelOfDetail(m_Density);
-            }
-            set
-            {
-                m_Density = LevelOfDetailToDensity(value);
-                m_SettingsDirty = true;
-            }
-        }
-
-        [SerializeField]
+        [SerializeField, Tooltip("Determines the level of detail that the batched mesh blocks should be. This property is not used if custom mesh block requests are created via the SetCustomMeshBlockRequests() method.")]
         [OnChangedCall(nameof(OnMeshingPropertyChanged))]
         float m_Density = 1.0f;
 
@@ -144,6 +155,26 @@ namespace UnityEngine.XR.MagicLeap
                 if (m_Density != value)
                 {
                     m_Density = value;
+                    m_SettingsDirty = true;
+                }
+            }
+        }
+
+        [SerializeField,Tooltip("Determines how many mesh blocks should be requested by the meshing subsystem at once. This property is not used if custom mesh block requests are created via the SetCustomMeshBlockRequests() method.")]
+        [OnChangedCall(nameof(OnMeshingPropertyChanged))]
+        int m_BatchSize = 16;
+
+        /// <summary>
+        /// How many meshes to update per batch. Larger values are more efficient, but have higher latency.
+        /// </summary>
+        public int batchSize
+        {
+            get { return m_BatchSize; }
+            set
+            {
+                if (m_BatchSize != value)
+                {
+                    m_BatchSize = value;
                     m_SettingsDirty = true;
                 }
             }
@@ -269,26 +300,6 @@ namespace UnityEngine.XR.MagicLeap
         {
             get { return m_PollingRate; }
             set { m_PollingRate = value; }
-        }
-
-        [SerializeField]
-        [OnChangedCall(nameof(OnMeshingPropertyChanged))]
-        int m_BatchSize = 16;
-
-        /// <summary>
-        /// How many meshes to update per batch. Larger values are more efficient, but have higher latency.
-        /// </summary>
-        public int batchSize
-        {
-            get { return m_BatchSize; }
-            set
-            {
-                if (m_BatchSize != value)
-                {
-                    m_BatchSize = value;
-                    m_SettingsDirty = true;
-                }
-            }
         }
 
         [SerializeField]
@@ -453,6 +464,8 @@ namespace UnityEngine.XR.MagicLeap
             }
         }
 
+        public static void SetCustomMeshBlockRequests(MeshingSubsystem.Extensions.MLMeshing.OnMeshBlockRequests onBlockRequests) => MeshingSubsystem.Extensions.MLMeshing.Config.SetCustomMeshBlockRequests(onBlockRequests);
+
 #if UNITY_EDITOR
         MeshingSubsystem.Extensions.MLMeshing.Config.Settings m_CachedSettings;
         float m_CachedDensity;
@@ -529,6 +542,7 @@ namespace UnityEngine.XR.MagicLeap
             m_MeshesNeedingGeneration = new Dictionary<MeshId, MeshInfo>();
             m_MeshesBeingGenerated = new Dictionary<MeshId, MeshInfo>();
         }
+
 
         IEnumerator Init()
         {
@@ -665,11 +679,14 @@ namespace UnityEngine.XR.MagicLeap
             // Polling at twice the rate will ensure that data appears at the desired interval.  
             float timeSinceLastUpdate = (float)(DateTime.Now - m_TimeLastUpdated).TotalSeconds;
             bool allowUpdate = (timeSinceLastUpdate > (m_PollingRate / 2.0f));
-
-            if (allowUpdate && m_MeshSubsystem.TryGetMeshInfos(meshInfos))
+            bool meshes = m_MeshSubsystem.TryGetMeshInfos(meshInfos);
+            if (allowUpdate && meshes)
             {
+                int i = 0;
                 foreach (var meshInfo in meshInfos)
                 {
+                    i++;
+
                     switch (meshInfo.ChangeState)
                     {
                         case MeshChangeState.Added:
@@ -690,7 +707,6 @@ namespace UnityEngine.XR.MagicLeap
                                 Destroy(meshGameObject);
                                 meshIdToGameObjectMap.Remove(meshInfo.MeshId);
                             }
-
                             break;
 
                         default:

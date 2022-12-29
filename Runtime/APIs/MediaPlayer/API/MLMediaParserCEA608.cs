@@ -37,7 +37,6 @@ namespace UnityEngine.XR.MagicLeap
 
             public ParserCEA608()
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 MLResult.Code resultCode = NativeBindings.MLMediaCCParserCreate(out ulong parserHandle);
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaCCParserCreate));
                 this.Handle = parserHandle;
@@ -45,26 +44,21 @@ namespace UnityEngine.XR.MagicLeap
                 IntPtr gcHandlePtr = GCHandle.ToIntPtr(this.gcHandle);
                 resultCode = NativeBindings.MLMediaCCParserSetDisplayChangedCallback(this.Handle, NativeBindings.OnDisplayChanged, gcHandlePtr);
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaCCParserSetDisplayChangedCallback));
-#endif
             }
 
             ~ParserCEA608()
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 MLResult.Code resultCode = NativeBindings.MLMediaCCParserSetDisplayChangedCallback(this.Handle, null, IntPtr.Zero);
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaCCParserSetDisplayChangedCallback));
                 resultCode = NativeBindings.MLMediaCCParserDestroy(this.Handle);
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaCCParserDestroy));
                 this.gcHandle.Free();
-#endif
             }
 
             public void ParseAsync(IntPtr data, uint dataSize)
             {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 MLResult.Code resultCode = NativeBindings.MLMediaCCParserParse(this.Handle, data, dataSize);
                 MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaCCParserParse));
-#endif
             }
 
             internal ulong Handle
@@ -107,11 +101,9 @@ namespace UnityEngine.XR.MagicLeap
                 public string text;
 
                 // TODO : native bindings classes should not be used in public stuff
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 public NativeBindings.CaptionStyleColor[] midRowStyles;
 
                 public NativeBindings.CaptionPAC[] pacStyles;
-#endif
             }
         }
     }

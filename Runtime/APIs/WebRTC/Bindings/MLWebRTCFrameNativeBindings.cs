@@ -13,9 +13,7 @@ namespace UnityEngine.XR.MagicLeap
     using System;
     using System.Collections.Generic;
     using System.Runtime.InteropServices;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
     using UnityEngine.XR.MagicLeap.Native;
-#endif
 
     /// <summary>
     /// MLWebRTC class contains the API to interface with the
@@ -36,12 +34,8 @@ namespace UnityEngine.XR.MagicLeap
                 /// <summary>
                 /// Native bindings for the MLWebRTC.Frame struct. 
                 /// </summary>
-                internal class NativeBindings
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-                    : MagicLeapNativeBindings
-#endif
+                internal class NativeBindings : MagicLeapNativeBindings
                 {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                     /// <summary>
                     /// Gets frame data.
                     /// </summary>
@@ -54,7 +48,6 @@ namespace UnityEngine.XR.MagicLeap
                     /// </returns>
                     [DllImport(MLWebRTCDLL, CallingConvention = CallingConvention.Cdecl)]
                     public static extern MLResult.Code MLWebRTCFrameGetData(ulong frameHandle, ref MLWebRTCFrame frame);
-#endif
 
                     /// <summary>
                     /// Buffer for native image plane arrays.
@@ -151,7 +144,7 @@ namespace UnityEngine.XR.MagicLeap
 
                         public void FreeUnmanagedMemory()
                         {
-                            if(FrameData != IntPtr.Zero)
+                            if (FrameData != IntPtr.Zero)
                             {
                                 Marshal.FreeHGlobal(FrameData);
                                 FrameData = IntPtr.Zero;

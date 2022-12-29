@@ -8,8 +8,6 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-
 // Disable warnings about missing documentation for native interop.
 #pragma warning disable 1591
 
@@ -80,11 +78,11 @@ namespace UnityEngine.XR.MagicLeap
 
             public delegate void OnPreviewBufferAvailableDelegate(ulong bufferHandle, ulong metadataHandle,
                 ref MLCameraResultExtras extra, IntPtr data);
-            
+
             public delegate void OnDeviceStreamingDelegate(IntPtr data);
 
             public delegate void OnDeviceIdleDelegate(IntPtr data);
-            
+
             public delegate void OnImageBufferAvailableDelegate(ref MLCameraOutput output, ulong metadataHandle,
                 ref MLCameraResultExtras extra, IntPtr data);
 
@@ -99,4 +97,3 @@ namespace UnityEngine.XR.MagicLeap
         }
     }
 }
-#endif

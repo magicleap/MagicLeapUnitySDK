@@ -23,7 +23,6 @@ namespace UnityEngine.XR.MagicLeap
 
         private bool isEnabled()
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             bool enableCheck = false;
             MLResult.Code result = MLVoice.NativeBindings.MLVoiceIntentIsEnabled(this.Handle, out enableCheck);
 
@@ -32,12 +31,8 @@ namespace UnityEngine.XR.MagicLeap
                 MLPluginLog.Error("MLVoice failed to check MLVoiceIntentIsEnabled: " + result);
             }
             return enableCheck;
-#else
-            return false;
-#endif
         }
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
         protected override void OnApplicationPause(bool pauseStatus)
         {
             if (this.Handle == Native.MagicLeapNativeBindings.InvalidHandle)
@@ -90,25 +85,19 @@ namespace UnityEngine.XR.MagicLeap
                 }
             }
         }
-#endif
 
         private MLResult.Code ConfigureSettings(string JSONString)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             NativeBindings.IntentSettings newSettings = NativeBindings.IntentSettings.Create();
             newSettings.AppIntent = JSONString;
 
             var resultCode = NativeBindings.MLVoiceIntentConfigureSettings(this.Handle, in newSettings);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLVoiceIntentConfigureSettings));
             return resultCode;
-#else
-            return MLResult.Code.APIDLLNotFound;
-#endif
         }
 
         private MLResult.Code SetCallbacks(bool unregister)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             NativeBindings.IntentCallbacks newCallbacks = NativeBindings.IntentCallbacks.Create();
 
             if (unregister)
@@ -119,9 +108,6 @@ namespace UnityEngine.XR.MagicLeap
             var resultCode = MLVoice.NativeBindings.MLVoiceIntentSetCallbacks(this.Handle, newCallbacks, System.IntPtr.Zero);
             MLResult.DidNativeCallSucceed(resultCode, nameof(MLVoice.NativeBindings.MLVoiceIntentSetCallbacks));
             return resultCode;
-#else
-            return MLResult.Code.APIDLLNotFound;
-#endif
         }
     }
 }

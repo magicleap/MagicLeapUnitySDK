@@ -13,7 +13,6 @@ namespace UnityEngine.XR.MagicLeap
     using System;
     using System.Runtime.InteropServices;
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
     /// <summary>
     /// MLMediaFormat description goes here.
     /// </summary>
@@ -320,5 +319,4 @@ namespace UnityEngine.XR.MagicLeap
         public static string Feature_ => Marshal.PtrToStringAnsi(NativeBindings.MLMediaFormatGetKey_Feature_());
 
     }
-#endif
 }

@@ -8,8 +8,8 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-using System.Runtime.InteropServices;
 using System;
+using System.Runtime.InteropServices;
 
 namespace UnityEngine.XR.MagicLeap
 {
@@ -80,7 +80,6 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="context">User context passed during instance creation</param>
             public delegate void ReleaseHwBufferDelegate(IntPtr hwBuffer, IntPtr context);
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             /// <summary>
             /// Delegate signature for the callback invoked by the native rendering plugin, requesting the
             /// frame transform matrix for the last acquired native buffer handle.
@@ -89,7 +88,6 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="frameMat">Frame transform matrix</param>
             /// <param name="context">User context passed during instance creation</param>
             public delegate void GetFrameTransformMatrixDelegate([MarshalAs(UnmanagedType.I1)][In][Out] ref bool success, [In][Out] ref Native.MagicLeapNativeBindings.MLMat4f frameMat, IntPtr context);
-#endif
 
             public delegate void IsNewFrameAvailableDelegate([MarshalAs(UnmanagedType.I1)][In][Out] ref bool success, IntPtr context);
 
@@ -151,7 +149,6 @@ namespace UnityEngine.XR.MagicLeap
                 provider.ReleaseHwBuffer(hwBuffer);
             }
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             [AOT.MonoPInvokeCallback(typeof(GetFrameTransformMatrixDelegate))]
             private static void GetFrameTransformMatrix([MarshalAs(UnmanagedType.I1)][In][Out] ref bool success, [In][Out] ref Native.MagicLeapNativeBindings.MLMat4f frameMat, IntPtr context)
             {
@@ -164,7 +161,6 @@ namespace UnityEngine.XR.MagicLeap
 
                 success = provider.GetFrameTransformMatrix(frameMat.MatrixColmajor);
             }
-#endif
 
             [AOT.MonoPInvokeCallback(typeof(IsNewFrameAvailableDelegate))]
             private static void IsNewFrameAvailable([MarshalAs(UnmanagedType.I1)][In][Out] ref bool success, IntPtr context)
@@ -323,12 +319,10 @@ namespace UnityEngine.XR.MagicLeap
 
                 public ReleaseHwBufferDelegate ReleaseHwBufferCallback;
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                 /// <summary>
                 /// Callback invoked by the native plugin to get the frame transform matrix.
                 /// </summary>
                 public GetFrameTransformMatrixDelegate GetFrameTransformMatrixCallback;
-#endif
 
                 public IsNewFrameAvailableDelegate IsNewFrameAvailableCallback;
 
@@ -368,13 +362,12 @@ namespace UnityEngine.XR.MagicLeap
                         this.ReleaseHwBufferCallback = ReleaseHwBuffer;
                     }
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                     this.GetFrameTransformMatrixCallback = null;
                     if (renderer is IFrameTransformMatrixProvider)
                     {
                         this.GetFrameTransformMatrixCallback = GetFrameTransformMatrix;
                     }
-#endif
+
                     this.IsNewFrameAvailableCallback = null;
                     if (renderer is IFrameAvailabilityProvider)
                     {

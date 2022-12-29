@@ -10,9 +10,7 @@
 
 using System;
 using System.Runtime.InteropServices;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
 using UnityEngine.XR.MagicLeap.Native;
-#endif
 
 namespace UnityEngine.XR.MagicLeap
 {
@@ -80,7 +78,6 @@ namespace UnityEngine.XR.MagicLeap
                 MuxerData = 16
             }
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             private ulong handle = MagicLeapNativeBindings.InvalidHandle;
 
             public Muxer()
@@ -226,7 +223,6 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="flags"><c>MLMediaCodecBufferFlag</c>. Supported values: <c>KeyFrame</c>, <c>EOS</c>, and <c>MuxerData</c></param>
             /// <returns><see cref="MLResult"/> with Code "Ok" if the operation completed successfully without errors. Check <see cref="MLResult.IsOk"/> for status.</returns>
             public MLResult WriteSampleData(int trackIndex, byte[] data, long time, CodecBufferFlags flags) => MLResult.Create(InternalWriteSampleData(trackIndex, data, time, flags));
-#endif
         }
     }
 }

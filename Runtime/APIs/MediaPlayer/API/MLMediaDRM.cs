@@ -13,9 +13,7 @@ namespace UnityEngine.XR.MagicLeap
 {
     using System.Collections.Generic;
     using System.Runtime.InteropServices;
-#if UNITY_MAGICLEAP || UNITY_ANDROID
     using MagicLeap.Native;
-#endif
 
     /// <summary>
     /// MLMedia APIs.
@@ -159,7 +157,6 @@ namespace UnityEngine.XR.MagicLeap
                         /// </summary>
                         KeysChange,
                     };
-#if UNITY_MAGICLEAP || UNITY_ANDROID
 
                     /// <summary>
                     /// Type of track this DRM is used for.
@@ -243,7 +240,7 @@ namespace UnityEngine.XR.MagicLeap
                         requestData = new byte[provisionRequest.Request.Length];
                         Marshal.Copy(provisionRequest.Request.Data, requestData, 0, requestData.Length);
                         defaultURL = provisionRequest.DefaultURL;
-                        
+
                         NativeBindings.MLMediaDRMRequestMessageRelease(ref provisionRequest);
                         return MLResult.Create(resultCode);
                     }
@@ -258,13 +255,13 @@ namespace UnityEngine.XR.MagicLeap
                         MLResult.Code resultCode = NativeBindings.MLMediaDRMProvideProvisionResponse(this.handle, ref responseDRMByteArray, out NativeBindings.MLMediaDRMByteArray certificate, out NativeBindings.MLMediaDRMByteArray wrappedKey);
                         MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaDRMProvideProvisionResponse));
                         responseDRMByteArray.FreeResources();
-                        
+
                         NativeBindings.MLMediaDRMByteArrayRelease(ref wrappedKey);
                         NativeBindings.MLMediaDRMByteArrayRelease(ref certificate);
 
                         return MLResult.Create(resultCode);
                     }
-                    
+
                     /// <summary>
                     /// ***CURRENTLY UNTESTED ON CAPI***
                     /// Access all secure stops.  Secure Stop: A means of enforcing limits on the number of concurrent streams per subscriber
@@ -438,7 +435,7 @@ namespace UnityEngine.XR.MagicLeap
                             public readonly string Algorithm;
                             public readonly byte[] WrappedRsaKey;
                         }
-                        
+
                         /// <summary>
                         /// Provides initilization of the <see cref="Session" /> class with the two given parameters.
                         /// </summary>
@@ -688,7 +685,7 @@ namespace UnityEngine.XR.MagicLeap
 
                             return MLResult.Create(resultCode);
                         }
-                        
+
                         /// <summary>
                         /// ***CURRENTLY UNTESTED ON CAPI***
                         /// Perform a signature verification using the specified algorithm (if specified) over the message data referenced by the
@@ -725,7 +722,7 @@ namespace UnityEngine.XR.MagicLeap
                         /// Since DRM license policies vary by vendor, the specific status field names are determined by each DRM vendor.  Refer to
                         /// your DRM provider documentation for definitions of the field names for a particular DRM engine plugin.
                         /// </summary>
-                        public MLResult GetKeyValues(out KeyValuePair<string,string>[] keyValues)
+                        public MLResult GetKeyValues(out KeyValuePair<string, string>[] keyValues)
                         {
                             MLResult.Code resultCode = NativeBindings.MLMediaDRMQueryKeyStatus(this.Drm.handle, ref this.id, out NativeBindings.MLMediaDRMKeyValueArray keyValuesNative);
                             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaDRMQueryKeyStatus));
@@ -752,7 +749,7 @@ namespace UnityEngine.XR.MagicLeap
                         /// ***CURRENTLY UNTESTED ON CAPI***
                         /// Add a {key, value} pair to the array of {key, value} pairs.
                         /// </summary>
-                        public MLResult AddKeyValue(KeyValuePair<string,string> pair, out KeyValuePair<string,string>[] allKeys)
+                        public MLResult AddKeyValue(KeyValuePair<string, string> pair, out KeyValuePair<string, string>[] allKeys)
                         {
                             NativeBindings.MLMediaDRMKeyValue keyValueNative = new NativeBindings.MLMediaDRMKeyValue(pair);
                             MLResult.Code resultCode = NativeBindings.MLMediaDRMKeyValueArrayAdd(ref keyValueNative, out NativeBindings.MLMediaDRMKeyValueArray keyValuesNative);
@@ -765,14 +762,14 @@ namespace UnityEngine.XR.MagicLeap
                         /// ***CURRENTLY UNTESTED ON CAPI***
                         /// Allocate array of {key, value} pairs.
                         /// </summary>
-                        public MLResult AllocateKeyValueArray(uint size, out KeyValuePair<string,string>[] allKeys)
+                        public MLResult AllocateKeyValueArray(uint size, out KeyValuePair<string, string>[] allKeys)
                         {
                             MLResult.Code resultCode = NativeBindings.MLMediaDRMKeyValueArrayAllocate(size, out NativeBindings.MLMediaDRMKeyValueArray keyValuesNative);
                             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaDRMKeyValueArrayAllocate));
                             allKeys = keyValuesNative.KeyValues;
                             return MLResult.Create(resultCode);
                         }
-                        
+
                         /// <summary>
                         /// ***CURRENTLY UNTESTED ON CAPI***
                         /// Remove the current keys from a session.
@@ -787,13 +784,12 @@ namespace UnityEngine.XR.MagicLeap
                             return MLResult.Create(resultCode);
                         }
                     }
-#endif
+
                     /// <summary>
                     /// MediaPlayer DRM Info for a Media Track.
                     /// </summary>
                     public struct Info
                     {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
                         /// <summary>
                         /// The UUIDs provided by the MLMediaPlayerTrackDRMInfo structure.
                         /// </summary>
@@ -803,7 +799,7 @@ namespace UnityEngine.XR.MagicLeap
                         /// The PSSH keys provided by the MLMediaPlayerTrackDRMInfo structure.
                         /// </summary>
                         internal Player.NativeBindings.MLMediaPlayerPSSHEntry[] PSSHEntries;
-#endif
+
                         /// <summary>
                         /// Media track type, can be either audio or video.
                         /// </summary>

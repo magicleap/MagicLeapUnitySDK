@@ -8,7 +8,6 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
 namespace UnityEngine.XR.MagicLeap
 {
     using System;
@@ -177,7 +176,7 @@ namespace UnityEngine.XR.MagicLeap
                         {
                             string trackId = string.Empty;
                             MLResult.Code resultCode = NativeBindings.MLWebRTCSourceGetTrackId(this.Handle, out IntPtr trackIdPtr);
-                            
+
                             if (MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLWebRTCSourceGetTrackId)))
                             {
                                 if (trackIdPtr != IntPtr.Zero)
@@ -244,4 +243,3 @@ namespace UnityEngine.XR.MagicLeap
         }
     }
 }
-#endif

@@ -8,9 +8,7 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
 using UnityEngine.XR.MagicLeap.Native;
-#endif
 
 namespace UnityEngine.XR.MagicLeap
 {
@@ -320,7 +318,7 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             public int Extra;
         };
-        
+
         /// <summary>
         /// Info received when the media recorder runs into a track error.
         /// </summary>
@@ -354,7 +352,7 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             public int Extra;
         };
-        
+
         public struct OnTrackInfoData
         {
             /// <summary>
@@ -399,14 +397,10 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public event OnTrackErrorDelegate OnTrackError = delegate { };
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
         /// <summary>
         /// Handle to the underlying media recorder object.
         /// </summary>
         public ulong Handle { get; private set; } = MagicLeapNativeBindings.InvalidHandle;
-#else
-        public ulong Handle { get; private set; }
-#endif
 
         /// <summary>
         /// Native surface object which should be used to get the
@@ -425,25 +419,19 @@ namespace UnityEngine.XR.MagicLeap
         /// <returns>Media recorder object if construction was successful, null otherwise</returns>
         public static MLMediaRecorder Create()
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             MLResult.Code resultCode = NativeBindings.MLMediaRecorderCreate(out ulong handle);
             return MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaRecorderCreate)) ? new MLMediaRecorder(handle) : null;
-#else
-            return null;
-#endif
         }
 
         private MLMediaRecorder(ulong handle)
         {
             this.Handle = handle;
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             NativeBindings.MLMediaRecorderEventCallbacks callbacks = NativeBindings.MLMediaRecorderEventCallbacks.Create();
             this.gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
             IntPtr gcHandlePtr = GCHandle.ToIntPtr(this.gcHandle);
             var resultCode = NativeBindings.MLMediaRecorderSetEventCallbacks(handle, ref callbacks, gcHandlePtr);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaRecorderSetEventCallbacks));
-#endif
         }
 
         ~MLMediaRecorder()
@@ -454,7 +442,6 @@ namespace UnityEngine.XR.MagicLeap
 
         private void Destroy()
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             if (!MagicLeapNativeBindings.MLHandleIsValid(Handle))
                 return;
 
@@ -463,7 +450,6 @@ namespace UnityEngine.XR.MagicLeap
             MLResult.Code resultCode = NativeBindings.MLMediaRecorderDestroy(Handle);
             if (MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaRecorderDestroy)))
                 Handle = MagicLeapNativeBindings.InvalidHandle;
-#endif
         }
 
         /// <summary>
@@ -474,13 +460,9 @@ namespace UnityEngine.XR.MagicLeap
         /// <param name="fd">Unmanaged file descriptor of the output file.</param>
         public MLResult SetOutputFileForFD(int fd)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             var resultCode = NativeBindings.MLMediaRecorderSetOutputFileForFD(Handle, fd);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaRecorderSetOutputFileForFD));
             return MLResult.Create(resultCode);
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         /// <summary>
@@ -491,13 +473,9 @@ namespace UnityEngine.XR.MagicLeap
         /// <param name="path">Path to output file. Folders should exist already.</param>
         public MLResult SetOutputFileForPath(string path)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             var resultCode = NativeBindings.MLMediaRecorderSetOutputFileForPath(Handle, path);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaRecorderSetOutputFileForPath));
             return MLResult.Create(resultCode);
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         /// <summary>
@@ -506,13 +484,9 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public MLResult SetVideoSource(VideoSource inVideoSource)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             var resultCode = NativeBindings.MLMediaRecorderSetVideoSource(Handle, inVideoSource);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaRecorderSetVideoSource));
             return MLResult.Create(resultCode);
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         /// <summary>
@@ -521,13 +495,9 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public MLResult SetAudioSource(AudioSource inAudioSource)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             var resultCode = NativeBindings.MLMediaRecorderSetAudioSource(Handle, inAudioSource);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaRecorderSetAudioSource));
             return MLResult.Create(resultCode);
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         /// <summary>
@@ -535,13 +505,9 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public MLResult SetOutputFormat(OutputFormat inFormat)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             var resultCode = NativeBindings.MLMediaRecorderSetOutputFormat(Handle, inFormat);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaRecorderSetOutputFormat));
             return MLResult.Create(resultCode);
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         /// <summary>
@@ -553,13 +519,9 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public MLResult SetVideoEncoder(VideoEncoder inVideoEncoder)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             var resultCode = NativeBindings.MLMediaRecorderSetVideoEncoder(Handle, inVideoEncoder);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaRecorderSetVideoEncoder));
             return MLResult.Create(resultCode);
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         /// <summary>
@@ -570,13 +532,9 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public MLResult SetAudioEncoder(AudioEncoder inAudioEncoder)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             var resultCode = NativeBindings.MLMediaRecorderSetAudioEncoder(Handle, inAudioEncoder);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaRecorderSetAudioEncoder));
             return MLResult.Create(resultCode);
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         /// <summary>
@@ -590,13 +548,9 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public MLResult SetMaxDuration(int inMaxDurationMsec)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             var resultCode = NativeBindings.MLMediaRecorderSetMaxDuration(Handle, inMaxDurationMsec);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaRecorderSetMaxDuration));
             return MLResult.Create(resultCode);
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         /// <summary>
@@ -610,13 +564,9 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public MLResult SetMaxFileSize(long inMaxFileSize)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             var resultCode = NativeBindings.MLMediaRecorderSetMaxFileSize(Handle, inMaxFileSize);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaRecorderSetMaxFileSize));
             return MLResult.Create(resultCode);
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         /// <summary>
@@ -626,13 +576,9 @@ namespace UnityEngine.XR.MagicLeap
         /// <param name="inLongitude10000">the 10000 multiplies longitude of location.</param>
         public MLResult SetGeoLocation(long inLatitude10000, long inLongitude10000)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             var resultCode = NativeBindings.MLMediaRecorderSetGeoLocation(Handle, inLatitude10000, inLongitude10000);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaRecorderSetGeoLocation));
             return MLResult.Create(resultCode);
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         /// <summary>
@@ -643,13 +589,9 @@ namespace UnityEngine.XR.MagicLeap
         /// <param name="format">Media format object to configure the video & audio track.</param>
         public MLResult Prepare(MLMediaFormat format)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             MLResult.Code resultCode = NativeBindings.MLMediaRecorderPrepare(Handle, format.Handle);
-            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaRecorderPrepare));            
+            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaRecorderPrepare));
             return MLResult.Create(resultCode);
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         /// <summary>
@@ -659,13 +601,9 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public MLResult Start()
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             var resultCode = NativeBindings.MLMediaRecorderStart(Handle);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaRecorderStart));
             return MLResult.Create(resultCode);
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         /// <summary>
@@ -679,17 +617,13 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public MLResult GetInputSurface()
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             var resultCode = NativeBindings.MLMediaRecorderGetInputSurface(Handle, out ulong inputSurface);
             if (MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaRecorderGetInputSurface)))
             {
                 InputSurface = new MLNativeSurface(inputSurface);
             }
-            
+
             return MLResult.Create(resultCode);
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         /// <summary>
@@ -699,14 +633,9 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public MLResult GetMaxAmplitude(out int maxAmp)
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             var resultCode = NativeBindings.MLMediaRecorderGetMaxAmplitude(Handle, out maxAmp);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaRecorderGetMaxAmplitude));
             return MLResult.Create(resultCode);
-#else
-            maxAmp = 0;
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         /// <summary>
@@ -716,13 +645,9 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public MLResult Stop()
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             var resultCode = NativeBindings.MLMediaRecorderStop(Handle);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaRecorderStop));
             return MLResult.Create(resultCode);
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         /// <summary>
@@ -731,19 +656,14 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public MLResult Reset()
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             MLResult.Code resultCode = NativeBindings.MLMediaRecorderReset(Handle);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaRecorderReset));
             ReleaseInputSurface();
             return MLResult.Create(resultCode);
-#else
-            return MLResult.Create(MLResult.Code.NotImplemented);
-#endif
         }
 
         private MLResult.Code ReleaseInputSurface()
         {
-#if UNITY_MAGICLEAP || UNITY_ANDROID
             MLResult.Code resultCode = MLResult.Code.Ok;
             if (InputSurface != null && MagicLeapNativeBindings.MLHandleIsValid(InputSurface.Handle))
             {
@@ -753,9 +673,6 @@ namespace UnityEngine.XR.MagicLeap
             }
 
             return resultCode;
-#else
-            return MLResult.Code.NotImplemented;
-#endif
         }
     }
 }

@@ -8,8 +8,6 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-
 // Disable warnings about missing documentation for native interop.
 #pragma warning disable 1591
 
@@ -45,7 +43,7 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             private const int MLCameraMaxStreams = 2;
 
-#region V2
+            #region V2
 
             [DllImport(MLCameraDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLCameraInit(ref MLCameraDeviceAvailabilityStatusCallbacks deviceAvailabilityStatusCallback, IntPtr userData);
@@ -226,8 +224,7 @@ namespace UnityEngine.XR.MagicLeap
             [DllImport(MLCameraDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLCameraGetCameraCharacteristics(ulong contextHandle, out ulong outMetadataHandle);
 
-#endregion
+            #endregion
         }
     }
 }
-#endif

@@ -8,8 +8,6 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-#if UNITY_MAGICLEAP || UNITY_ANDROID
-
 namespace UnityEngine.XR.MagicLeap
 {
     using System;
@@ -88,7 +86,7 @@ namespace UnityEngine.XR.MagicLeap
                             [MarshalAs(UnmanagedType.LPStr)]
                             public readonly string Value;
 
-                            public KeyValuePair<string,string> KeyValue => new KeyValuePair<string, string>(this.Key, this.Value);
+                            public KeyValuePair<string, string> KeyValue => new KeyValuePair<string, string>(this.Key, this.Value);
                         };
 
                         /// <summary>
@@ -96,7 +94,7 @@ namespace UnityEngine.XR.MagicLeap
                         /// </summary>
                         [StructLayout(LayoutKind.Sequential)]
                         public struct MLMediaDRMByteArray
-                        {                           
+                        {
                             /// <summary>
                             /// Byte array buffer.
                             /// </summary>
@@ -106,7 +104,7 @@ namespace UnityEngine.XR.MagicLeap
                             /// Size of Data.
                             /// </summary>
                             public ulong Length;
-                            
+
                             public void AllocResources(byte[] data)
                             {
                                 this.Data = Marshal.AllocHGlobal(data.Length);
@@ -124,8 +122,8 @@ namespace UnityEngine.XR.MagicLeap
                                 get
                                 {
                                     if (IntPtr.Zero == this.Data)
-                                       return new byte[0];
-                                        
+                                        return new byte[0];
+
                                     byte[] bytes = new byte[this.Length];
                                     Marshal.Copy(this.Data, bytes, 0, (int)this.Length);
                                     return bytes;
@@ -149,7 +147,7 @@ namespace UnityEngine.XR.MagicLeap
                             /// The identifier for the key to be used.
                             /// </summary>
                             public IntPtr KeySetId;
-                            
+
                             internal void AllocResources(string algorithm, MLMediaDRMByteArray keySetId)
                             {
                                 this.Algorithm = algorithm;
@@ -169,17 +167,17 @@ namespace UnityEngine.XR.MagicLeap
                         [StructLayout(LayoutKind.Sequential)]
                         public struct MLMediaDRMRSAInputParam
                         {
-					
+
                             /// <summary>
                             /// The MAC algorithm used for padding/signing. "HmacSHA256" is the only supported algorithm now.
                             /// </summary>
                             public string Algorithm;
-					
+
                             /// <summary>
                             /// The wrapped RSA key to be used.
                             /// </summary>
                             public IntPtr WrappedRsaKey;
-				
+
                             internal void AllocResources(string algorithm, MLMediaDRMByteArray keySetId)
                             {
                                 this.Algorithm = algorithm;
@@ -192,7 +190,7 @@ namespace UnityEngine.XR.MagicLeap
                                 Marshal.FreeHGlobal(this.WrappedRsaKey);
                             }
                         };
-                        
+
                         /// <summary>
                         /// Data type containing list of byte array buffers and the size.
                         /// </summary>
@@ -248,7 +246,7 @@ namespace UnityEngine.XR.MagicLeap
                             /// </summary>
                             public readonly uint Index;
 
-                            public KeyValuePair<string,string>[] KeyValues
+                            public KeyValuePair<string, string>[] KeyValues
                             {
                                 get
                                 {
@@ -290,7 +288,7 @@ namespace UnityEngine.XR.MagicLeap
                             }
 
                             internal void FreeResources()
-                            { 
+                            {
                                 Marshal.FreeHGlobal(this.InitData);
                                 Marshal.FreeHGlobal(this.OptionalParams);
                             }
@@ -479,7 +477,7 @@ namespace UnityEngine.XR.MagicLeap
 
                             public Key Data => new Key(this.keyId.Bytes, this.status);
                         }
-                        
+
 
                         /// <summary>
                         /// MediaDRM session keys status change info.
@@ -547,7 +545,7 @@ namespace UnityEngine.XR.MagicLeap
                         /// </summary>
                         [DllImport(MLMediaDRMDll, CallingConvention = CallingConvention.Cdecl)]
                         public static extern MLResult.Code MLMediaDRMRemoveKeys(ulong MediaDrm, [In] ref MLMediaDRMByteArray SessionId, [In] ref MLMediaDRMByteArray KeySetId);
-                            
+
                         /// <summary>
                         /// String property name: identifies the maker of the DRM engine plugin.
                         /// </summary>
@@ -638,7 +636,7 @@ namespace UnityEngine.XR.MagicLeap
                         /// null key_set_id is returned.
                         /// </summary>
                         [DllImport(MLMediaDRMDll, CallingConvention = CallingConvention.Cdecl)]
-                        public static extern MLResult.Code MLMediaDRMProvideKeyResponse(ulong drmHandle, [In] ref MLMediaDRMByteArray sessionId, [In]  ref MLMediaDRMByteArray response, out MLMediaDRMByteArray keySetId);
+                        public static extern MLResult.Code MLMediaDRMProvideKeyResponse(ulong drmHandle, [In] ref MLMediaDRMByteArray sessionId, [In] ref MLMediaDRMByteArray response, out MLMediaDRMByteArray keySetId);
 
                         /// <summary>
                         /// Restore persisted offline keys into a new session.  key_set_id identifies the keys to load, obtained from a prior call
@@ -687,7 +685,7 @@ namespace UnityEngine.XR.MagicLeap
                         /// </summary>
                         [DllImport(MLMediaDRMDll, CallingConvention = CallingConvention.Cdecl)]
                         public static extern MLResult.Code MLMediaDRMGetSecureStop(ulong MediaDrm, [In] ref MLMediaDRMByteArray SecureStopId, out MLMediaDRMByteArray SecureStop);
-                        
+
                         /// <summary>
                         /// Process the SecureStop server response message.  After authenticating the message, remove the SecureStops identified in
                         /// the response.
@@ -812,5 +810,3 @@ namespace UnityEngine.XR.MagicLeap
         }
     }
 }
-
-#endif
