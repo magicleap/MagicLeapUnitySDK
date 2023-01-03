@@ -40,7 +40,8 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         private MLResult.Code InternalMLGazeRecognitionGetState(out State state)
         {
-            MLResult.Code result = NativeBindings.MLGazeRecognitionGetState(Handle, out NativeBindings.MLGazeRecognitionState internalState);
+            NativeBindings.MLGazeRecognitionState internalState = new NativeBindings.MLGazeRecognitionState(1);
+            MLResult.Code result = NativeBindings.MLGazeRecognitionGetState(Handle, ref internalState);
             MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLGazeRecognitionGetState));
             state = new State(internalState);
             return result;
@@ -51,7 +52,8 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         private MLResult.Code InternalMLGazeRecognitionGetStaticData(out StaticData data)
         {
-            MLResult.Code result = NativeBindings.MLGazeRecognitionGetStaticData(Handle, out NativeBindings.MLGazeRecognitionStaticData internalData);
+            NativeBindings.MLGazeRecognitionStaticData internalData = new NativeBindings.MLGazeRecognitionStaticData(1);
+            MLResult.Code result = NativeBindings.MLGazeRecognitionGetStaticData(Handle, ref internalData);
             result = MagicLeapXrProviderNativeBindings.GetUnityPose(internalData.Vergence, out Pose pose);
             data = new StaticData(pose);
             return result;

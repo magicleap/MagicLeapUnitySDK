@@ -39,5 +39,7 @@ namespace UnityEngine.XR.MagicLeap
         public const string VoiceInput = "com.magicleap.permission.VOICE_INPUT";
 
         public const string SpatialMapping = "com.magicleap.permission.SPATIAL_MAPPING";
+
+        public const string DepthCamera = "com.magicleap.permission.DEPTH_CAMERA";
     }
 }

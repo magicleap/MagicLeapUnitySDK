@@ -118,17 +118,17 @@ namespace UnityEngine.XR.MagicLeap
 
                         try
                         {
-                            if (MagicLeapXrProvider.IsZIRunning)
-                            {
-                                keyPointsMask = Enumerable.Repeat(true, MaxKeyPoints).ToArray();
-                                return true;
-                            }
-
                             IntPtr ptr = Marshal.AllocHGlobal(allocatedKeyPointsMaskData.Length);
                             Marshal.Copy(allocatedKeyPointsMaskData, 0, ptr, allocatedKeyPointsMaskData.Length);
                             var nativeStruct = Marshal.PtrToStructure<NativeBindings.KeyPointsMask>(ptr);
                             Marshal.FreeHGlobal(ptr);
-                            keyPointsMask = nativeStruct.Mask;
+                            keyPointsMask = new bool[MaxKeyPoints];
+
+                            for (int i = 0; i < MaxKeyPoints; i++)
+                            {
+                                keyPointsMask[i] = Convert.ToBoolean(nativeStruct.Mask[i]);
+                            }
+
                             return true;
                         }
 
@@ -139,7 +139,7 @@ namespace UnityEngine.XR.MagicLeap
                         }
 
                     Failure:
-                        keyPointsMask = new NativeBindings.KeyPointsMask().Mask;
+                        keyPointsMask = new bool[MaxKeyPoints];
                         return false;
                     }
 
@@ -240,7 +240,7 @@ namespace UnityEngine.XR.MagicLeap
                     public readonly struct KeyPointsMask
                     {
                         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.I1, SizeConst = (int)MaxKeyPoints)]
-                        public readonly bool[] Mask;
+                        public readonly byte[] Mask;
                     }
                 }
             }

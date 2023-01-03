@@ -397,6 +397,11 @@ namespace UnityEngine.XR.MagicLeap.Native
                 t.Rotation = MLQuaternionf.Identity();
                 return t;
             }
+
+            public override string ToString()
+            {
+                return $"Position: ({Position.X}, {Position.Y}, {Position.Z}) Rotation: ({Rotation.X}, {Rotation.Y}, {Rotation.Z}, {Rotation.W})";
+            }
         }
 
         /// <summary>

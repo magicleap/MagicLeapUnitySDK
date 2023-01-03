@@ -1,7 +1,16 @@
 # Changelog
 
-## [1.2.0]
+## [1.3.0]
+### Features
+- Added `MLDepthCamera` and `MLWorldCamera` APIs
 
+### Bugfixes
+- Fixed null reference exception in Meshing subsystem which was causing applications to crash.
+
+### Known Issues
+- Quitting a scene while using `MLMediaPlayer` will cause a timeout error to be logged.
+
+## [1.2.0]
 ### Features
 - Added `GetData` method to `AudioInputBufferClip` that does not automatically wrap the audio data and instead sends you exactly what is in the audio buffer.
 - Added `MLCamera.FlipCameraVertically` method to allow easily flipping camera frames instead of needing to invert Unity Renderer.

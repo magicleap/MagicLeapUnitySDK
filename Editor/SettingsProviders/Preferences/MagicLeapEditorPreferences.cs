@@ -457,7 +457,7 @@ namespace UnityEditor.XR.MagicLeap
                 }
                 else
                 {
-                    ziPathHelp.text = "App Simualtor Runtime detected.";
+                    ziPathHelp.text = "App Sim Runtime detected.";
                     ziPathHelp.messageType = HelpBoxMessageType.Info;
                 }
             }
