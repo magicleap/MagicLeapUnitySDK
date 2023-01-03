@@ -111,13 +111,15 @@ namespace MagicLeap.Core
 
         private MLMedia.Player _mediaPlayer;
 
+        private bool renderVideo = false;
+
         void Update()
         {
             if (!Application.isEditor && MediaPlayer.IsPlaying && MediaPlayer.VideoRenderer != null)
             {
                 MediaPlayer.VideoRenderer.Render();
             }
-            if (DurationInMiliseconds > 0 && IsPlaying && !IsSeeking && !IsBuffering)
+            if (DurationInMiliseconds > 0 && IsPlaying && !IsSeeking && !IsBuffering && renderVideo)
             {
                 UpdateTimeline();
             }
@@ -510,6 +512,12 @@ namespace MagicLeap.Core
                 case MLMedia.Player.Info.BufferingEnd:
                     IsBuffering = false;
                     OnIsBufferingChanged?.Invoke(false);
+                    break;
+                case MLMedia.Player.Info.RenderingStart:
+                    renderVideo = true;
+                    break;
+                case MLMedia.Player.Info.Stopped:
+                    renderVideo = false;
                     break;
             }
         }

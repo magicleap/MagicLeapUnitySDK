@@ -121,7 +121,7 @@ namespace UnityEngine.XR.MagicLeap
                 return 1.0f;
         }
 
-        [Obsolete("This function will be removed in a future release. Instead, use FromLevelOfDetailToDensity() with the MeshingSubsystem.Extensions.MLMeshing.LevelOfDetail parameter.")]
+        [Obsolete("This function will be removed in a future release. Instead, use FromLevelOfDetailToDensity().")]
         public static float LevelOfDetailToDensity(LevelOfDetail lod)
         {
             if (lod == LevelOfDetail.Minimum)
@@ -132,7 +132,7 @@ namespace UnityEngine.XR.MagicLeap
                 return 1.0f;
         }
 
-        [Obsolete("This function will be removed in a future release. Instead, use FromDensityToLevelOfDetail() with the MeshingSubsystem.Extensions.MLMeshing.LevelOfDetail parameter.")]
+        [Obsolete("This function will be removed in a future release. Instead, use FromDensityToLevelOfDetail().")]
         public static LevelOfDetail DensityToLevelOfDetail(float density)
         {
             if (density < 0.33f)

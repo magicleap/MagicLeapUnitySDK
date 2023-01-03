@@ -34,6 +34,12 @@ namespace UnityEngine.XR.MagicLeap
                 /// Location of the 3D vergence point, intersection of 3D gaze vectors.
                 /// </summary>
                 public readonly NativeBindings.MLCoordinateFrameUID Vergence;
+
+                public MLGazeRecognitionStaticData(uint setVersion)
+                {
+                    Version = setVersion;
+                    Vergence = MLCoordinateFrameUID.EmptyFrame;
+                }
             };
 
             /// <summary>
@@ -100,6 +106,23 @@ namespace UnityEngine.XR.MagicLeap
                 /// and pursuit, otherwise NaN
                 /// </summary>
                 public readonly float DirectionRadial;
+
+                public MLGazeRecognitionState(uint setVersion)
+                {
+                    Version = setVersion;
+                    Timestamp = 0;
+                    Error = Error.None;
+                    Behavior = Behavior.Unknown;
+                    EyeLeft.X = 0.0f;
+                    EyeLeft.Y = 0.0f;
+                    EyeRight.X = 0.0f;
+                    EyeRight.Y = 0.0f;
+                    OnsetS = 0.0f;
+                    DurationS = 0.0f;
+                    VelocityDegps = 0.0f;
+                    AmplitudeDeg = 0.0f;
+                    DirectionRadial = 0.0f;
+                }
             };
 
             /// <summary>
@@ -140,7 +163,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <c>MLResult_UnspecifiedFailure</c> Failed to receive gaze Recognition state data.
             /// </returns>
             [DllImport(MLGazeRecognitionDll, CallingConvention = CallingConvention.Cdecl)]
-            public static extern MLResult.Code MLGazeRecognitionGetState(ulong handle, out MLGazeRecognitionState state);
+            public static extern MLResult.Code MLGazeRecognitionGetState(ulong handle, ref MLGazeRecognitionState state);
 
             /// <summary>
             /// Get static information about Gaze Recognition.
@@ -153,7 +176,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <c>MLResult_UnspecifiedFailure</c> Failed to receive gaze Recognition static data.
             /// </returns>
             [DllImport(MLGazeRecognitionDll, CallingConvention = CallingConvention.Cdecl)]
-            public static extern MLResult.Code MLGazeRecognitionGetStaticData(ulong handle, out MLGazeRecognitionStaticData data);
+            public static extern MLResult.Code MLGazeRecognitionGetStaticData(ulong handle, ref MLGazeRecognitionStaticData data);
         }
     }
 }
