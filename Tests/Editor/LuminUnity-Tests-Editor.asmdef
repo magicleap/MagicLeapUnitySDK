@@ -5,7 +5,8 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "MagicLeap.SDK",
-        "MagicLeap.SDK.Editor"
+        "MagicLeap.SDK.Editor",
+        "UnityEditor.XR.MagicLeap"
     ],
     "includePlatforms": [
         "Editor"

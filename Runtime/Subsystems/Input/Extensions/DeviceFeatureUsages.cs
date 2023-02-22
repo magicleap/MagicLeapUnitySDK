@@ -33,13 +33,12 @@ namespace UnityEngine.XR.MagicLeap
                 public static class Controller
                 {
                     public static InputFeatureUsage<float> Touch1Force = new InputFeatureUsage<float>("MLControllerTouch1Force");
-                    public static InputFeatureUsage<byte[]> State = new InputFeatureUsage<byte[]>("MLInputControllerState");
+                    public static InputFeatureUsage<byte[]> State = new InputFeatureUsage<byte[]>("MLInputControllerStateEx");
                 }
 
                 public static class Hand
                 {
                     public static InputFeatureUsage<float> Confidence = new InputFeatureUsage<float>("MLHandConfidence");
-
                     public static InputFeatureUsage<Bone> WristCenter = new InputFeatureUsage<Bone>("MLHandWristCenter");
                     public static InputFeatureUsage<Bone> WristUlnar = new InputFeatureUsage<Bone>("MLHandWristUlnar");
                     public static InputFeatureUsage<Bone> WristRadial = new InputFeatureUsage<Bone>("MLHandWristRadial");

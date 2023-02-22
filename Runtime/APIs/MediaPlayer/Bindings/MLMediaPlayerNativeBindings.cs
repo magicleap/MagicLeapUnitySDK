@@ -847,13 +847,7 @@ namespace UnityEngine.XR.MagicLeap
                 /// </summary>
                 [DllImport(MLMediaPlayerDll, CallingConvention = CallingConvention.Cdecl)]
                 public static extern MLResult.Code MLMediaPlayerCreate(out ulong handle);
-
-                /// <summary>
-                /// Release a native buffer previously acquired.
-                /// </summary>
-                [DllImport(MLMediaPlayerDll, CallingConvention = CallingConvention.Cdecl)]
-                public static extern MLResult.Code MLMediaPlayerReleaseBuffer(ulong mediaPlayerHandle, ulong NativeBuffer);
-
+                
                 /// <summary>
                 /// Reset the
                 /// </summary>
@@ -871,17 +865,7 @@ namespace UnityEngine.XR.MagicLeap
                 /// </summary>
                 [DllImport(MLMediaPlayerDll, CallingConvention = CallingConvention.Cdecl)]
                 public static extern MLResult.Code MLMediaPlayerStop(ulong mediaPlayerHandle);
-
-                /// <summary>
-                /// Set callback to get notified when a decoded frame is available.  When MLMediaPlayerOnFrameAvailableCallback() function
-                /// gets called-back because there is a buffer available for consumption, one should immediately call
-                /// MLMediaPlayerAcquireNextAvailableBuffer(...  ) to get the buffer and render from it.  Setting this callback does not prevent caller from using
-                /// the the poll-based buffer interrogation API (MLMediaPlayerPollStates() with the
-                /// #MLMediaPlayerPollingState_IsBufferAvailable flag).
-                /// </summary>
-                [DllImport(MLMediaPlayerDll, CallingConvention = CallingConvention.Cdecl)]
-                public static extern MLResult.Code MLMediaPlayerSetOnBufferAvailableCallback(ulong mediaPlayerHandle, OnFrameAvailableDelegate OnBufferAvailable, IntPtr Data);
-
+                
                 /// <summary>
                 /// Set the looping mode of the player.
                 /// </summary>
@@ -1031,54 +1015,7 @@ namespace UnityEngine.XR.MagicLeap
                 /// </summary>
                 [DllImport(MLMediaPlayerDll, CallingConvention = CallingConvention.Cdecl)]
                 public static extern MLResult.Code MLMediaPlayerSeekTo(ulong mediaPlayerHandle, int Msec, SeekMode Mode);
-
-                /// <summary>
-                /// Consume next available buffer.  Note: This function is non-blocking and should only be called after
-                /// MLMediaPlayerPollStates() with #MLMediaPlayerPollingState_IsBufferAvailable mask returned true, or when registered callback
-                /// MLMediaPlayerOnFrameAvailableCallback just fired.  Note: The returned buffer's color format is multi-planar YUV420.  Since our
-                /// underlying hardware interops do not support multiplanar formats, advanced texture features like mipmaping, anisotropic filtering
-                /// and MSAA will *not* work on those returned buffers.  If such advanced texturing features are required, one has to
-                /// acquire the YUV buffers as usual and *render* to an RGB texture and only then, will one be able to enable hardware
-                /// optimization for such advanced texture features.
-                /// </summary>
-                [DllImport(MLMediaPlayerDll, CallingConvention = CallingConvention.Cdecl)]
-                public static extern MLResult.Code MLMediaPlayerAcquireNextAvailableBuffer(ulong mediaPlayerHandle, out ulong nativeBuffer);
-
-                /// <summary>
-                /// Retrieves the 4x4 texture coordinate transform matrix associated with the last acquired Frame.  This transform matrix
-                /// maps 2D homogeneous texture coordinates of the form (s, t, 0, 1) with s and t in the inclusive range [0, 1] to the texture
-                /// coordinate that should be used to sample that location from the texture.  Sampling the texture outside of the range of
-                /// this transform is undefined.  This transform is necessary to compensate for transforms that the stream content producer
-                /// may implicitly apply to the content.  By forcing users of a GLConsumer to apply this transform we avoid performing an
-                /// extra copy of the data that would be needed to hide the transform from the user.  The matrix is stored in column-major
-                /// order so that it may be passed directly to OpenGL ES via the glLoadMatrixf or glUniformMatrix4fv functions.
-                /// </summary>
-                [DllImport(MLMediaPlayerDll, CallingConvention = CallingConvention.Cdecl)]
-                public static extern MLResult.Code MLMediaPlayerGetFrameTransformationMatrix(ulong mediaPlayerHandle, [MarshalAs(UnmanagedType.LPArray, SizeConst = 16)] float[] OutMtx); //this array size of 16 floats
-
-                /// <summary>
-                /// Retrieves the timestamp associated with the last acquired Frame The timestamp is in nanoseconds, and is monotonically
-                /// increasing.  Its other semantics (zero point, etc) are codec-dependent and should be documented by the codec vendor.
-                /// </summary>
-                [DllImport(MLMediaPlayerDll, CallingConvention = CallingConvention.Cdecl)]
-                public static extern MLResult.Code MLMediaPlayerGetFrameTimestamp(ulong mediaPlayerHandle, out long timestamp);
-
-                /// <summary>
-                /// Retrieves the QueueBuffer timestamp associated with the last acquired Frame This timestamp is for profiling purposes
-                /// only and corresponds to the time when this frame was queued by internal Codec's producer code.  The timestamp is in
-                /// nanoseconds, and is monotonically increasing.  Its other semantics (zero point, etc) are codec- dependent and should by
-                /// documented by the codec vendor.
-                /// </summary>
-                [DllImport(MLMediaPlayerDll, CallingConvention = CallingConvention.Cdecl)]
-                public static extern MLResult.Code MLMediaPlayerGetFrameQueueBufferTimestamp(ulong mediaPlayerHandle, IntPtr OutTimestamp);
-
-                /// <summary>
-                /// Retrieves the last acquired frame number.  The frame number is an incrementing counter set to 0 at Codec configuration
-                /// time.
-                /// </summary>
-                [DllImport(MLMediaPlayerDll, CallingConvention = CallingConvention.Cdecl)]
-                public static extern MLResult.Code MLMediaPlayerGetFrameNumber(ulong mediaPlayerHandle, IntPtr OutNumber);
-
+                
                 /// <summary>
                 /// Return the size of the video frame.
                 /// </summary>
@@ -1108,13 +1045,7 @@ namespace UnityEngine.XR.MagicLeap
                 /// </summary>
                 [DllImport(MLMediaPlayerDll, CallingConvention = CallingConvention.Cdecl)]
                 public static extern MLResult.Code MLMediaPlayerGetSubtitleEx(ulong mediaPlayerHandle, IntPtr OutSubtitleData);
-
-                /// <summary>
-                /// Release last Timed Text event information.
-                /// </summary>
-                [DllImport(MLMediaPlayerDll, CallingConvention = CallingConvention.Cdecl)]
-                public static extern MLResult.Code MLMediaPlayerReleaseTimedTextEx(ulong mediaPlayerHandle, ulong TimedText);
-
+                
                 /// <summary>
                 /// Release last subtitle event information.
                 /// </summary>
@@ -1191,13 +1122,7 @@ namespace UnityEngine.XR.MagicLeap
                 /// </summary>
                 [DllImport(MLMediaPlayerDll, CallingConvention = CallingConvention.Cdecl)]
                 public static extern MLResult.Code MLMediaPlayerSetBufferingSettings(ulong mediaPlayerHandle, NativeBindings.MLMediaPlayerBufferingSettings BufSettings);
-
-                /// <summary>
-                /// Return last Timed Text event information.
-                /// </summary>
-                [DllImport(MLMediaPlayerDll, CallingConvention = CallingConvention.Cdecl)]
-                public static extern MLResult.Code MLMediaPlayerGetTimedTextEx(ulong mediaPlayerHandle, IntPtr OutTimedText);
-
+                
                 /// <summary>
                 /// Set callback to get invoked when a Timed Text update is available along with its data.
                 /// </summary>

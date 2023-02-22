@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEditor;
 using System.IO;
 using System.Collections.Generic;
+using System;
 
 namespace UnityEditor.XR.MagicLeap
 {
@@ -12,6 +13,7 @@ namespace UnityEditor.XR.MagicLeap
         private static readonly string Arg_OneApkPerScene = "--one-apk-per-scene";
         private static readonly string Arg_CheckProLicense = "--check-pro-license";
         private static readonly string Arg_ForceSDKPathFromEnvVar = "--force_sdk_path_from_env_var";
+        private static readonly string Arg_AppVersionCodeValue = "--version-code";
 
 #if !UNITY_2022_2_OR_NEWER
         private static readonly Dictionary<BuildTarget, BuildTargetGroup> BuildTargetToGroup = new Dictionary<BuildTarget, BuildTargetGroup>()
@@ -85,6 +87,27 @@ namespace UnityEditor.XR.MagicLeap
                 if (IsArgSet(Arg_CheckProLicense) && !UnityEngine.Application.HasProLicense())
                 {
                     throw new System.Exception($"{Arg_CheckProLicense} was passed but Unity Pro License not found!");
+                }
+
+                string versionCodeArgVal = "0";
+                if (TryGetArgValue(Arg_AppVersionCodeValue, ref versionCodeArgVal))
+                {
+                    if (int.TryParse(versionCodeArgVal, out int versionCode))
+                    {
+                        PlayerSettings.Android.bundleVersionCode = versionCode;
+                    }
+                }
+
+                var jsonPath = Path.GetFullPath("Packages/com.magicleap.unitysdk/package.json");
+                var jsonText = File.ReadAllText(jsonPath);
+                if (string.IsNullOrEmpty(jsonText))
+                {
+                    Debug.LogWarning($"failed to load SDK package manifest from path {jsonPath}");
+                }
+                else
+                {
+                    var packageManifest = JsonUtility.FromJson<SimplePackageManifest>(jsonText);
+                    PlayerSettings.bundleVersion = packageManifest.version;
                 }
 
                 if (IsArgSet(Arg_OneApkPerScene))
@@ -260,6 +283,15 @@ namespace UnityEditor.XR.MagicLeap
             }
 
             this.didSetSDKPathFromEnvVar = didSetFromEnvVar;
+        }
+
+        [Serializable]
+        private class SimplePackageManifest
+        {
+            public string name;
+            public string displayName;
+            public string version;
+            public string description;
         }
     }
 }

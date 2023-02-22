@@ -95,8 +95,8 @@ namespace UnityEngine.XR.MagicLeap
 
         //Profiler markers for MLCamera calls.
 
-        private readonly static ProfilerMarker connectPerfMarker = new ProfilerMarker("MLCamera.Connect");
-        private readonly static ProfilerMarker disconnectPerfMarker = new ProfilerMarker("MLCamera.Disconnect");
+        internal readonly static ProfilerMarker connectPerfMarker = new ProfilerMarker("MLCamera.Connect");
+        internal readonly static ProfilerMarker disconnectPerfMarker = new ProfilerMarker("MLCamera.Disconnect");
         private readonly static ProfilerMarker captureImagePerfMarker = new ProfilerMarker("MLCamera.CaptureImage");
         private readonly static ProfilerMarker captureRawImageAsyncPerfMarker = new ProfilerMarker("MLCamera.CaptureRawImageAsync");
         private readonly static ProfilerMarker startVideoCapturecPerfMarker = new ProfilerMarker("MLCamera.StartVideoCapture");

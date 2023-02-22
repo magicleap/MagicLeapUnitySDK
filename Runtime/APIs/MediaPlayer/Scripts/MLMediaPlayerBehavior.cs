@@ -363,6 +363,16 @@ namespace MagicLeap.Core
         }
 
         /// <summary>
+        /// Resets the video.
+        /// </summary>
+        public void Reset()
+        {
+            MediaPlayer.Reset();
+            videoWidth = 0;
+            videoHeight = 0;
+        }
+
+        /// <summary>
         /// Handler on video prepared.
         /// Plays the video.
         /// </summary>

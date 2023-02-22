@@ -5,7 +5,9 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "UnityEngine.SpatialTracking",
-        "MagicLeap.SDK"
+        "MagicLeap.SDK",
+        "UnityEngine.XR.MagicLeap",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

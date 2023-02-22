@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Collections;
@@ -39,6 +40,12 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         [SerializeField]
         private bool fixProblemsOnStartup = true;
+
+        /// <summary>
+        /// Recenter the XROrigin one frame after Start() is called.
+        /// </summary>
+        [SerializeField]
+        private bool recenterXROriginAtStart = true;
 
         /// <summary>
         /// The minimum recommended near clip value
@@ -92,6 +99,17 @@ namespace UnityEngine.XR.MagicLeap
         {
             camera = GetComponent<Camera>();
             FixupCamera(fixProblemsOnStartup);
+        }
+
+        private IEnumerator Start()
+        {
+            yield return new WaitForEndOfFrame();
+            if (recenterXROriginAtStart)
+            {
+                var xro = FindObjectOfType<Unity.XR.CoreUtils.XROrigin>();
+                xro?.MoveCameraToWorldLocation(Vector3.zero);
+                xro?.MatchOriginUpCameraForward(Vector3.up, Vector3.forward);
+            }
         }
 
         private void Reset()

@@ -273,6 +273,17 @@ namespace UnityEngine.XR.MagicLeap.Native
         public static extern MLResult.Code MLPlatformGetAPILevel(ref uint level);
 
         /// <summary>
+        /// Returns the minimum API level of the MLSDK used by Unity
+        /// </summary>
+        /// <param name="minApiLevel">Value containing the minimum API level.</param>
+        /// <returns>
+        /// <c>MLResult.Code.Ok</c>: Minimum API level was retrieved successfully.<br/>
+        /// <c>MLResult.Code.NotImplemented</c>: The ml_sdk_loader plugin was not compiled with knowledge of the minimum API level.
+        /// </returns>
+        [DllImport(MLSdkLoaderDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern MLResult.Code MLUnitySdkGetMinApiLevel(out uint minApiLevel);
+
+        /// <summary>
         /// Tries to get the pose for the given coordinate frame id.
         /// </summary>
         /// <param name="id">The coordinate frame id to get the pose of.</param>

@@ -278,18 +278,7 @@ namespace UnityEngine.XR.MagicLeap
             /// </returns>
             [DllImport(MLPerceptionClientDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLMarkerTrackerUpdateSettings(ulong scanner_handle, in MLMarkerTrackerSettings scanner_settings);
-
-            /// <summary>
-            ///     Initializes default values for MLMarkerTrackerResultArray.
-            /// </summary>
-            /// <param name="result"> The object to initialize as default result array. </param>
-            /// <returns>
-            ///     MLResult_InvalidParam Failed to init result array due to pointer being NULL.
-            ///     MLResult_Ok Successfully initialized Marker result array.
-            /// </returns>
-            [DllImport(MLPerceptionClientDll, CallingConvention = CallingConvention.Cdecl)]
-            public static extern MLResult.Code MLMarkerTrackerResultArrayInit(in MLMarkerTrackerResultArray result);
-
+            
             /// <summary>
             ///     Different Marker Decoders will produce different data. Use this
             ///     structure to find what the data structure is.

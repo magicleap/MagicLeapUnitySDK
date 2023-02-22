@@ -127,13 +127,9 @@ namespace UnityEngine.XR.MagicLeap
                     CounterClockwise
                 }
 
-                /// <summary>
-                /// Links to MLInputConnectedDevicesList in ml_input.h.
-                /// </summary>
-                [StructLayout(LayoutKind.Sequential)]
-                public struct MLInputControllerTouchpadGesture
+                public struct Data
                 {
-                    public MagicLeapNativeBindings.MLVec3f PositionAndForce;
+                    public Vector3 PositionAndForce;
 
                     public Type Type;
 
@@ -146,6 +142,8 @@ namespace UnityEngine.XR.MagicLeap
                     public float Radius;
 
                     public float Angle;
+
+                    public override string ToString() => $"PositionAndForce: {PositionAndForce},  Type: {Type}, Direction: {Direction}, Speed: {Speed}, Distance: {Distance}, Radius: {Radius}, Angle: {Angle}";
                 }
             }
         }

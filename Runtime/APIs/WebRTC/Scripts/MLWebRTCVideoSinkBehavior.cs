@@ -35,8 +35,6 @@ namespace MagicLeap.Core
         // Only relevant for YUV / RGB frames
         private MLWebRTC.VideoSink.Frame currentFrame;
 
-        private bool hasDeterminedFrameFormat;
-
         private Timer fpsTimer;
 
         private Texture2D[] rawVideoTexturesYUV = new Texture2D[MLWebRTC.VideoSink.Frame.NativeImagePlanesLength[MLWebRTC.VideoSink.Frame.OutputFormat.YUV_420_888]];
@@ -61,7 +59,6 @@ namespace MagicLeap.Core
             }
             VideoSink.OnStreamChanged += OnVideoSinkStreamChanged;
             fpsTimer = new Timer(1000);
-            hasDeterminedFrameFormat = false;
         }
 
         private void OnFrameResolutionChanged(uint newWidth, uint newHeight)
@@ -83,7 +80,6 @@ namespace MagicLeap.Core
 
             nativeBufferRenderer = null;
             rawVideoTextureNative = null;
-            hasDeterminedFrameFormat = false;
 
             if (stream == null)
             {
@@ -103,34 +99,37 @@ namespace MagicLeap.Core
 
             StartFrameTimer();
 
-            // Only check for and acquire frame from VideoSink here if we have not determined
+            // Only check for and acquire frame from VideoSink here if we have not yet determined
             // the format for the stream to be NativeSurface - in which case nativeBufferRenderer 
-            // will be initialized
+            // will have been initialized
             if (nativeBufferRenderer == null)
             {
                 if (VideoSink.IsNewFrameAvailable())
                 {
                     if (VideoSink.AcquireNextAvailableFrame(out currentFrame))
                     {
-                        hasDeterminedFrameFormat = true;
-
                         if (currentFrame.Format == MLWebRTC.VideoSink.Frame.OutputFormat.NativeBuffer)
                         {
                             // We release the frame immediately so that the
                             // YcbcrRenderer can drive the acquisition and release.
                             VideoSink.ReleaseFrame();
-
                             nativeBufferRenderer = new MLWebRTC.VideoSink.Renderer(VideoSink);
-
                             CreateNativeBufferRenderTarget(currentFrame.NativeFrame.Width, currentFrame.NativeFrame.Height);
+                        }
+                        else
+                        {
+                            RenderWebRTCFrame(currentFrame);
                         }
                     }
                 }
             }
 
-            else if (hasDeterminedFrameFormat)
+            if (nativeBufferRenderer != null && currentFrame.Format == MLWebRTC.VideoSink.Frame.OutputFormat.NativeBuffer)
             {
-                RenderWebRTCFrame(currentFrame);
+                nativeRenderer.enabled = true;
+                yuvRenderer.enabled = false;
+                rgbRenderer.enabled = false;
+                nativeBufferRenderer.Render();
             }
 
             ResetFrameTimer();
@@ -145,56 +144,44 @@ namespace MagicLeap.Core
 
         private void RenderWebRTCFrame(MLWebRTC.VideoSink.Frame frame)
         {
-            if (frame.Format != MLWebRTC.VideoSink.Frame.OutputFormat.NativeBuffer)
+            if (frame.Format == MLWebRTC.VideoSink.Frame.OutputFormat.NativeBuffer || frame.ImagePlanes == null)
             {
-                if (frame.ImagePlanes == null)
-                {
-                    return;
-                }
-
-                if (frame.ImagePlanes.Length >= 1)
-                {
-                    float aspectRatio = frame.ImagePlanes[0].Width / (float)frame.ImagePlanes[0].Height;
-                    float scaleWidth = transform.lossyScale.y * aspectRatio;
-
-                    // sets the plane to the aspect ratio of the frame
-                    if (transform.lossyScale.x != scaleWidth)
-                    {
-                        Transform parent = transform.parent;
-                        transform.parent = null;
-                        transform.localScale = new Vector3(scaleWidth, transform.localScale.y, transform.localScale.z);
-                        transform.parent = parent;
-                    }
-                }
-                else
-                {
-                    Debug.Log($"{gameObject.name}: frame.ImagePlanes is empty! ");
-                }
+                // this method should only be used for CPU buffers (YUV or RGB format)
+                return;
             }
 
-            switch (frame.Format)
+            if (frame.ImagePlanes.Length >= 1)
             {
-                case MLWebRTC.VideoSink.Frame.OutputFormat.YUV_420_888:
+                float aspectRatio = frame.ImagePlanes[0].Width / (float)frame.ImagePlanes[0].Height;
+                float scaleWidth = transform.lossyScale.y * aspectRatio;
+
+                // sets the plane to the aspect ratio of the frame
+                if (transform.lossyScale.x != scaleWidth)
+                {
+                    Transform parent = transform.parent;
+                    transform.parent = null;
+                    transform.localScale = new Vector3(scaleWidth, transform.localScale.y, transform.localScale.z);
+                    transform.parent = parent;
+                }
+
+                if (frame.Format == MLWebRTC.VideoSink.Frame.OutputFormat.YUV_420_888)
+                {
                     nativeRenderer.enabled = false;
                     rgbRenderer.enabled = false;
                     yuvRenderer.enabled = true;
                     RenderWebRTCFrameYUV(frame);
-                    break;
-                case MLWebRTC.VideoSink.Frame.OutputFormat.RGBA_8888:
+                }
+                else // RGBA_8888
+                {
                     nativeRenderer.enabled = false;
                     yuvRenderer.enabled = false;
                     rgbRenderer.enabled = true;
                     RenderWebRTCFrameRGB(frame);
-                    break;
-                case MLWebRTC.VideoSink.Frame.OutputFormat.NativeBuffer:
-                    nativeRenderer.enabled = true;
-                    yuvRenderer.enabled = false;
-                    rgbRenderer.enabled = false;
-                    if (nativeBufferRenderer != null)
-                    {
-                        nativeBufferRenderer.Render();
-                    }
-                    break;
+                }
+            }
+            else
+            {
+                Debug.Log($"{gameObject.name}: frame.ImagePlanes is empty! ");
             }
         }
 

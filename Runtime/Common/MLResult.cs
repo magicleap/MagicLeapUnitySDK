@@ -831,6 +831,9 @@ namespace UnityEngine.XR.MagicLeap
                     // No MLWebViewGetResultString in API 
                     codeString = "Web View Result Code - String Not Available";
                     break;
+                case CodePrefix.MLAnchorsResult:
+                    codeString = "MLResult_" + resultCode;
+                    break;
                 default:
                     // This will catch any unknown/invalid return values.
                     codeString = MagicLeapNativeBindings.MLGetResultString(resultCode);

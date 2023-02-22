@@ -155,7 +155,10 @@ namespace UnityEngine.XR.MagicLeap
                     public static bool TryGetMapEvents(InputDevice device, out MLHeadTracking.MapEvents mapEvents)
                     {
                         if (!device.TryGetFeatureValue(InputSubsystem.Extensions.DeviceFeatureUsages.Head.TrackingMapEvents, allocatedHeadTrackingMapEventsData))
-                            goto Failure;
+                        {
+                            mapEvents = default;
+                            return false;
+                        }
 
                         try
                         {
@@ -166,13 +169,9 @@ namespace UnityEngine.XR.MagicLeap
                         catch (Exception e)
                         {
                             Debug.LogError("TryGetMapEvents failed with the exception: " + e);
-                            goto Failure;
+                            mapEvents = default;
+                            return false;
                         }
-
-                    Failure:
-                        mapEvents = default;
-                        return false;
-
                     }
 
                     /// <summary>

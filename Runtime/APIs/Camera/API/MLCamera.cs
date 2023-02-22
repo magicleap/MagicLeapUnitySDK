@@ -8,32 +8,53 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-using System;
-using System.Runtime.InteropServices;
 
 namespace UnityEngine.XR.MagicLeap
 {
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Native;
+
     /// <summary>
-    /// APIs for accessing Camera Device and to do Camera Capture.
+    /// Provides a multithreadig implementation of the camera api.
+    /// Handles pause behavior automatically.
     /// </summary>
-    public sealed partial class MLCamera : MLAPIBase
+    public sealed partial class MLCamera : MLCameraBase
     {
-        /// <summary>
-        /// Connection status of the camera.
-        /// </summary>
-        public bool ConnectionEstablished => cameraConnectionEstablished;
+        private static int instanceCounter = 0;
+
+        private MLCamera() : base() => Interlocked.Increment(ref instanceCounter);
+
+        ~MLCamera()
+        {
+            Cleanup();
+            cameraDisconnectWaitHandle.WaitOne();
+            if (Interlocked.Decrement(ref instanceCounter) == 0)
+                InternalUninitialize();
+        }
+
+        new public static MLCamera Create() => new MLCamera();
 
         /// <summary>
-        /// A reference to Camera Preview texture. 
+        /// Wait handle used to syncronize MLCamera.Stop() and any ongoing disconnect request.
         /// </summary>
-        public RenderTexture PreviewTexture => previewTexture;
-
-        public float CurrentFPS => currentFPS;
+        private AutoResetEvent cameraDisconnectWaitHandle = new AutoResetEvent(true);
 
         /// <summary>
-        /// The connection context used to create this MLCamera object.
+        /// Used by the Async methods to ensure things don't happen concurrently when they shouldn't,
+        /// since C-API is not threadsafe. 
         /// </summary>
-        public ConnectContext ConnectionContext => cameraConnectContext;
+        private static readonly object apiLock = new object();
+
+        /// <summary>
+        /// Gets the texture for the camera preview render.
+        /// (null) when preview is not available yet.
+        /// </summary>
+        private Texture2D PreviewTexture2D
+        {
+            get => isCapturingPreview ? previewTexture2D : null;
+            set => previewTexture2D = value;
+        }
 
         /// <summary>
         /// Creates an MLCamera instance and connects the camera device. Will return null if
@@ -46,189 +67,317 @@ namespace UnityEngine.XR.MagicLeap
         /// <returns>MLCamera instance if connection was successful, null otherwise</returns>
         public static MLCamera CreateAndConnect(ConnectContext connectContext)
         {
-            return CreateAndConnectAsync(connectContext).Result;
+            var camera = MLCamera.Create();
+            return camera.InternalConnect(connectContext) == MLResult.Code.Ok ? camera : null;
         }
 
+
         /// <summary>
-        /// Get the <see cref="StreamCapabilitiesInfo">StreamCapabilitiesInfo</see> for the connected camera, which contains the 
-        /// <see cref="StreamCapability">stream capabilities</see> for each supported capture stream.
+        /// Asynchronously creates an MLCamera instance and connects the camera device. Will return null if
+        /// the <see cref="ConnectContext">ConnectContext</see> is incorrectly configured.
+        /// For example, if the context's <see cref="ConnectContext.Flags">Flags</see> are set to
+        /// <see cref="ConnectFlag">MLCamera.ConnectFlag.VirtualOnly</see> when targeting the 
+        /// <see cref="Identifier.CV">CV camera</see>.
         /// </summary>
-        /// <remarks>
-        /// One camera can support multiple capture streams and each stream has it's own set of
-        /// <see cref="StreamCapability">StreamCapabilities</see> (capture types and resolutions).
-        /// </remarks>
-        /// <param name="streamCapabilities">Each item in the array refers to a possible capture stream.
-        /// Every index within <see cref="StreamCapabilitiesInfo.StreamCapabilities">StreamCapabilitiesInfo.StreamCapabilities</see>
-        /// represents a StreamCapability of that particular stream.</param>
-        public MLResult GetStreamCapabilities(out StreamCapabilitiesInfo[] streamCapabilities)
+        /// <param name="connectContext">Connection settings</param>
+        /// <returns>MLCamera instance if connection was successful, null otherwise</returns>
+        public static Task<MLCamera> CreateAndConnectAsync(ConnectContext connectContext)
         {
-            return InternalGetStreamCapabilities(out streamCapabilities);
+            if (InternalCheckCameraPermission() == MLResult.Code.Ok)
+            {
+                var camera = new MLCamera()
+                {
+#if !UNITY_EDITOR   // preview rendering not supported under Magic Leap App Simulator
+                    previewRenderer = new Renderer()
+#endif
+                };
+                return Task.Run(() =>
+                {
+                    var resultCode = camera.InternalConnect(connectContext);
+                    return resultCode == MLResult.Code.Ok ? camera : null;
+                });
+            }
+            else
+            {
+                return new Task<MLCamera>(() => { return null; });
+            }
         }
 
         /// <summary>
-        /// Disconnect the current camera.
+        /// Asynchronously isconnect the camera.
         /// Should call MLCamera.Connect() again on this instance or create a new
         /// MLCamera object using MLCamera.CreateAndConnect() function.
         /// </summary>
-        public MLResult Disconnect()
+        public Task<MLResult> DisconnectAsync()
         {
-            return DisconnectAsync().Result;
-        }
-
-        public static MLResult Uninitialize()
-        {
-            return InternalUninitialize();
-        }
-
-        /// <summary>
-        /// Prepare for capture.
-        /// </summary>
-        /// <param name="captureConfig">Capture configuration.</param>
-        /// <param name="cameraMetadata">Camera metadata object to configure the camera for captures.</param>
-        public MLResult PrepareCapture(CaptureConfig captureConfig, out Metadata cameraMetadata)
-        {
-            return MLResult.Create(InternalPrepareCapture(captureConfig, out cameraMetadata));
+            return Task.Run(() =>
+            {
+                var resultCode = InternalDisconnect();
+                return MLResult.Create(resultCode);
+            });
         }
 
         /// <summary>
-        /// Trigger AEAWB Convergence.
-        /// This API triggers AEAWB sequence and returns when AEAWB convergence has been
+        /// Trigger asynchronous AEAWB Convergence.
+        /// This API triggers AEAWB sequence and completes when AEAWB convergence has been
         /// achieved. The users can either trigger and converge AEAWB metadata settings
         /// or use this API.
         /// </summary>
-        public MLResult PreCaptureAEAWB()
+        public Task<MLResult> PreCaptureAEAWBAsync()
         {
-            return PreCaptureAEAWBAsync().Result;
+            return Task.Run(() =>
+            {
+                lock (apiLock)
+                {
+                    MLResult.Code resultCode = NativeBindings.MLCameraPreCaptureAEAWB(Handle);
+                    MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraPreCaptureAEAWB));
+                    return MLResult.Create(resultCode);
+                }
+            });
         }
 
         /// <summary>
-        /// Update capture setting
-        /// This API updates the capture settings for an active preview/video stream.
-        /// The API can be used to update capture settings like exposure compensation
-        /// manual exposure settings like exposure time, iso setting. The capture settings
-        /// can be changed in MLCamera.Metadata object returned by MLCamera.PrepareCapture()
-        /// function and then this API can be called to apply the capture settings.
-        /// </summary>
-        public MLResult UpdateCaptureSettings()
-        {
-            MLResult.Code resultCode = NativeBindings.MLCameraUpdateCaptureSettings(Handle);
-            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraUpdateCaptureSettings));
-            return MLResult.Create(resultCode);
-        }
-
-        /// <summary>
-        /// Capture still image.
-        /// Result will be availble via the MLCamera.OnRawImageAvailable event.
-        /// </summary>
-        /// <param name="numImages">no of images to capture valid range is 1-10</param>
-        public MLResult CaptureImage(uint numImages = 1)
-        {
-            return CaptureImageAsync(numImages).Result;
-        }
-
-        /// <summary>
-        /// Start video capture. capture either encoded video or YUV/RGBA frames.
+        /// Asynchronously start video capture of either encoded video or YUV/RGBA frames.
         /// YUV/RGBA frames are provides through callback. For encoded video capture
-        /// valid MediaRecorder object should be configured in the PrepareCapture()
+        /// valid MediaRecorder object should be configured in the <see cref="PrepareCapture(CaptureConfig, out Metadata)"/>
         /// call. The captured video YUV/RGBA frames will be returned via the
         /// OnRawVideoFrameAvailable and OnRawVideoFrameAvailable_NativeCallbackThread
         /// events.
         /// </summary>
-        public MLResult CaptureVideoStart()
+        public Task<MLResult> CaptureVideoStartAsync()
         {
-            return CaptureVideoStartAsync().Result;
-        }
-
-        /// <summary>
-        /// Stop video capture.
-        /// Should only be called at least 500ms after a CaptureVideoStart().
-        /// </summary>
-        public MLResult CaptureVideoStop()
-        {
-            return CaptureVideoStopAsync().Result;
-        }
-
-        /// <summary>
-        /// Start preview provide raw frames through callback
-        /// </summary>
-        public MLResult CapturePreviewStart()
-        {
-            return CapturePreviewStartAsync().Result;
-        }
-
-        /// <summary>
-        /// Stop preview.
-        /// </summary>
-        /// <returns></returns>
-        public MLResult CapturePreviewStop()
-        {
-            return CapturePreviewStopAsync().Result;
-        }
-
-        /// <summary>
-        /// Poll camera device status.
-        /// Use <see cref="DeviceStatusFlag"/> to view specific status bit.
-        /// Call <see cref="GetErrorCode(out ErrorType)"/> to obtain the error code if
-        /// <see cref="DeviceStatusFlag.Error"/> bit is set.
-        /// </summary>
-        /// <param name="status"></param>
-        /// <returns></returns>
-        public MLResult GetDeviceStatus(out DeviceStatusFlag status)
-        {
-            status = DeviceStatusFlag.Error;
-
-            MLResult.Code resultCode = NativeBindings.MLCameraGetDeviceStatus(Handle, out uint statusFlags);
-            if (MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraGetDeviceStatus)))
+            return Task.Run(() =>
             {
-                status = (DeviceStatusFlag)statusFlags;
-            }
-            return MLResult.Create(resultCode);
+                MLResult.Code resultCode = MLResult.Code.Ok;
+                lock (apiLock)
+                {
+                    if (!isCapturingVideo)
+                    {
+                        resultCode = NativeBindings.MLCameraCaptureVideoStart(Handle);
+                        isCapturingVideo = MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraCaptureVideoStart));
+                    }
+                }
+                return MLResult.Create(resultCode);
+            });
         }
 
         /// <summary>
-        /// Obtain device error code.
+        /// Asynchronously stop video capture.
+        /// Should only be called at least 500ms after <see cref="CaptureVideoStart"/> or <see cref="CaptureVideoStartAsync"/>.
         /// </summary>
-        /// <param name="error">The <see cref="ErrorType"/> which triggered <see cref="DeviceStatusFlag.Error"/></param>
-        /// <returns></returns>
-        public MLResult GetErrorCode(out ErrorType error)
+        public Task<MLResult> CaptureVideoStopAsync()
         {
-            MLResult.Code resultCode = NativeBindings.MLCameraGetErrorCode(Handle, out error);
-            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraGetErrorCode));
-            return MLResult.Create(resultCode);
-        }
-
-        /// <summary>
-        /// Provides an MLCamera.Metadata object to configure the camera settings.
-        /// </summary>
-        public MLResult GetCameraCharacteristics(out Metadata cameraMetadata)
-        {
-            cameraMetadata = null;
-
-            MLResult.Code resultCode = NativeBindings.MLCameraGetCameraCharacteristics(Handle, out ulong metadataHandle);
-            if (MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraGetErrorCode)))
+            return Task.Run(() =>
             {
-                cameraMetadata = new Metadata(metadataHandle);
-            }
-            return MLResult.Create(resultCode);
+                MLResult.Code resultCode = MLResult.Code.Ok;
+                lock (apiLock)
+                {
+                    if (isCapturingVideo)
+                    {
+                        resultCode = NativeBindings.MLCameraCaptureVideoStop(Handle);
+                        MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraCaptureVideoStop));
+                        isCapturingVideo = false;
+                    }
+                }
+                return MLResult.Create(resultCode);
+            });
         }
 
         /// <summary>
-        /// Check availablity of a given camera device.
-        /// MLCamera instance should only be created & connected when the device is available.
+        /// Asynchronously start preview capture
+        /// The captured preview YUV frames will be returned to the application via <see cref="OnPreviewCaptureCompleted"/>.
+        /// Use <see cref="CapturePreviewStop"/> or <see cref="CapturePreviewStopAsync"/> to stop the capture.
         /// </summary>
-        /// <param name="camId">Camera id to check availability for</param>
-        /// <param name="deviceAvailable">True if device is available, false otherwise</param>
-        /// <returns></returns>
-        public static MLResult GetDeviceAvailabilityStatus(Identifier camId, out bool deviceAvailable)
+        public Task<MLResult> CapturePreviewStartAsync()
         {
-            if (!cameraInited)
+            // this has to be called on main thread
+            CreatePreviewTexture();
+
+            return Task.Run(() =>
             {
-                InternalInitialize();
+                MLResult.Code resultCode = MLResult.Code.Ok;
+                lock (apiLock)
+                {
+                    if (!isCapturingPreview)
+                    {
+                        resultCode = NativeBindings.MLCameraCapturePreviewStart(Handle);
+                        isCapturingPreview = MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraCapturePreviewStart));
+                    }
+                }
+                return MLResult.Create(resultCode);
+            });
+        }
+
+        /// <summary>
+        /// Asynchronously stop preview capture.
+        /// </summary>
+        public Task<MLResult> CapturePreviewStopAsync()
+        {
+            return Task.Run(() =>
+            {
+                MLResult.Code resultCode = MLResult.Code.Ok;
+                lock (apiLock)
+                {
+                    if (isCapturingPreview)
+                    {
+                        resultCode = NativeBindings.MLCameraCapturePreviewStop(Handle);
+                        MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraCapturePreviewStop));
+                        isCapturingPreview = false;
+                    }
+
+                    MLThreadDispatch.ScheduleMain(ClearPreviewTexture);
+                }
+                return MLResult.Create(resultCode);
+            });
+        }
+
+        /// <summary>
+        /// Asynchronously capture still image.
+        /// Result will be availble via the MLCamera.OnRawImageAvailable event.
+        /// </summary>
+        /// <param name="numImages">Number of images to capture. Valid range is 1-10</param>
+        public Task<MLResult> CaptureImageAsync(uint numImages = 1)
+        {
+            return Task.Run(() =>
+            {
+                MLResult.Code resultCode = MLResult.Code.Ok;
+                lock (apiLock)
+                {
+                    resultCode = NativeBindings.MLCameraCaptureImage(Handle, numImages);
+                    MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraCaptureImage));
+                }
+                return MLResult.Create(resultCode);
+            });
+        }
+
+
+        protected override void OnApplicationPause(bool pauseStatus)
+        {
+            applicationPausePerfMarker.Begin();
+            MLResult.Code result = pauseStatus ? Pause() : Resume();
+            applicationPausePerfMarker.End();
+            if (result != MLResult.Code.Ok)
+            {
+                Debug.LogErrorFormat("MLCamera.ApplicationPause failed to {0} the camera. Reason: {1}",
+                    pauseStatus ? "pause" : "resume", result);
+            }
+        }
+
+        /// <summary>
+        /// Pause the camera capture.
+        /// </summary>
+        /// <param name="flagsOnly">Set to true if you only need to store the current state of camera captures from Unity's perspective without actually invoking platform functions. False by default.</param>
+        /// <returns>
+        /// MLResult.Result will be <c>MLResult.Code.Ok</c> if successful.
+        /// MLResult.Result will be <c>MLResult.Code.UnspecifiedFailure</c> if failed due to internal error.
+        /// </returns>
+        private MLResult.Code Pause(bool flagsOnly = false)
+        {
+            MLResult.Code result = MLResult.Code.Ok;
+
+            if (cameraConnectionEstablished)
+            {
+                resumeConnect = true;
+                resumePreviewCapture = isCapturingPreview;
+                resumeVideoCapture = isCapturingVideo;
+
+                result = InternalDisconnect(flagsOnly);
+                if (!MLResult.IsOK(result))
+                {
+                    return result;
+                }
             }
 
-            var resultCode = NativeBindings.MLCameraGetDeviceAvailabilityStatus(camId, out deviceAvailable);
-            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCameraGetDeviceAvailabilityStatus));
-            return MLResult.Create(resultCode);
+            return result;
+        }
+
+        /// <summary>
+        /// Resume the camera capture.
+        /// </summary>
+        /// <returns>
+        /// MLResult.Result will be <c>MLResult.Code.Ok</c> if successful.
+        /// MLResult.Result will be <c>MLResult.Code.MediaGenericUnexpectedNull</c> if failed to connect to camera device due to null pointer.
+        /// MLResult.Result will be <c>MLResult.Code.InvalidParam</c> if a parameter is invalid (null).
+        /// MLResult.Result will be <c>MLResult.Code.Timeout</c> if failed to connect to camera device due to timeout.
+        /// MLResult.Result will be <c>MLResult.Code.UnspecifiedFailure</c> if failed due to internal error.
+        /// MLResult.Result will be <c>MLResult.Code.AllocFailed</c> if failed to allocate memory.
+        /// MLResult.Result will be <c>MLResult.Code.PermissionDenied</c> if necessary permission is missing.
+        /// </returns>
+        private MLResult.Code Resume()
+        {
+            MLResult.Code resultCode = MLResult.Code.Ok;
+
+            if (resumeConnect)
+            {
+                if (InternalCheckCameraPermission() != MLResult.Code.Ok)
+                {
+                    return MLResult.Code.PermissionDenied;
+                }
+
+                resultCode = InternalConnect(cameraConnectContext);
+
+                resumeConnect = false;
+                if (!MLResult.IsOK(resultCode))
+                {
+                    MLPluginLog.ErrorFormat("MLCamera.Resume failed to connect camera. Reason: {0}", resultCode);
+                    return resultCode;
+                }
+
+                if (resumePreviewCapture)
+                {
+                    resultCode = InternalPrepareCapture(cameraCaptureConfig, out MLCamera.Metadata _);
+
+                    if (!MLResult.IsOK(resultCode))
+                    {
+                        MLPluginLog.ErrorFormat("MLCamera.Resume failed to prepare capture. Reason: {0}", resultCode);
+                        return resultCode;
+                    }
+
+                    PreCaptureAEAWB();
+
+                    resultCode = CapturePreviewStart().Result;
+
+                    resumePreviewCapture = false;
+                    if (!MLResult.IsOK(MLResult.Code.Ok))
+                    {
+                        MLPluginLog.ErrorFormat("MLCamera.Resume failed to start camera preview. Reason: {0}", resultCode);
+                        return resultCode;
+                    }
+                }
+                else if (resumeVideoCapture)
+                {
+                    PrepareCapture(cameraCaptureConfig, out Metadata _);
+
+                    if (!MLResult.IsOK(resultCode))
+                    {
+                        MLPluginLog.ErrorFormat("MLCamera.Resume failed to prepare capture. Reason: {0}", resultCode);
+                        return resultCode;
+                    }
+
+                    PreCaptureAEAWB();
+                    resultCode = CaptureVideoStart().Result;
+
+                    resumeVideoCapture = false;
+                    if (!MLResult.IsOK(MLResult.Code.Ok))
+                    {
+                        MLPluginLog.ErrorFormat("MLCamera.Resume failed to start camera preview. Reason: {0}", resultCode);
+                        return resultCode;
+                    }
+                }
+            }
+
+            return resultCode;
+        }
+
+        /// <summary>
+        /// Releases allocated memory for video capture circular buffers.
+        /// </summary>
+        private void ReleaseCaptureBuffers()
+        {
+            for (int i = 0; i < byteArrays.Length; ++i)
+            {
+                byteArrays[i] = null;
+            }
         }
     }
 }
