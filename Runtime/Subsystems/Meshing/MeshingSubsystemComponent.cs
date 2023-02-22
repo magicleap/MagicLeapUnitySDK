@@ -380,6 +380,7 @@ namespace UnityEngine.XR.MagicLeap
         /// <returns>True if confidence values were successfully retrieved for the mesh with id <paramref name="meshId"/>.</returns>
         public bool TryGetConfidence(MeshId meshId, List<float> confidenceOut)
         {
+#if UNITY_MAGICLEAP
             if (confidenceOut == null)
             {
                 throw new ArgumentNullException("confidenceOut");
@@ -413,6 +414,9 @@ namespace UnityEngine.XR.MagicLeap
             }
             MeshingSubsystem.Extensions.MLMeshing.Config.ReleaseConfidence(meshId);
             return true;
+#else
+            return false;
+#endif
         }
 
         /// <summary>
@@ -587,7 +591,9 @@ namespace UnityEngine.XR.MagicLeap
 
         void OnEnable()
         {
+#if UNITY_MAGICLEAP && !UNITY_EDITOR
             StartCoroutine(Init());
+#endif
         }
 
         void OnDisable()
@@ -628,11 +634,14 @@ namespace UnityEngine.XR.MagicLeap
             DestroyAllMeshes();
             UpdateBatchSize();
 
-            var settings = GetMeshingSettings();
+            MeshingSubsystem.Extensions.MLMeshing.Config.Settings settings = new ();
+#if UNITY_MAGICLEAP
+            settings = GetMeshingSettings();
             MeshingSubsystem.Extensions.MLMeshing.Config.meshingSettings = settings;
             MeshingSubsystem.Extensions.MLMeshing.Config.density = density;
 
             m_SettingsDirty = false;
+#endif
 #if UNITY_EDITOR
             m_CachedSettings = settings;
             m_CachedDensity = density;
@@ -641,13 +650,17 @@ namespace UnityEngine.XR.MagicLeap
 
         void UpdateBounds()
         {
+#if UNITY_MAGICLEAP
             MeshingSubsystem.Extensions.MLMeshing.Config.SetBounds(transform, boundsExtents);
             transform.hasChanged = false;
+#endif
         }
 
         void UpdateBatchSize()
         {
+#if UNITY_MAGICLEAP
             MeshingSubsystem.Extensions.MLMeshing.Config.batchSize = batchSize;
+#endif
         }
 
         // Every frame, poll the MeshSubsystem for mesh updates (Added, Updated, Removed)
@@ -665,6 +678,7 @@ namespace UnityEngine.XR.MagicLeap
 #if UNITY_EDITOR
             m_SettingsDirty |= haveSettingsChanged;
 #endif
+#if UNITY_MAGICLEAP && !UNITY_EDITOR
             CheckHeadTrackingMapEvents();
 
             if (m_SettingsDirty)
@@ -796,6 +810,7 @@ namespace UnityEngine.XR.MagicLeap
                 meshId = MeshId.InvalidId;
                 return false;
             }
+#endif
         }
 
         void OnMeshGenerated(MeshGenerationResult result)

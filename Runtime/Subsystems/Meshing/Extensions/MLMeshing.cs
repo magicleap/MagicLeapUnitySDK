@@ -258,6 +258,7 @@ namespace UnityEngine.XR.MagicLeap
                 {
                     public static void SetCustomMeshBlockRequests(OnMeshBlockRequests onBlockRequests)
                     {
+#if UNITY_MAGICLEAP
                         customBlockRequests = onBlockRequests;
 
                         if (customBlockRequests != null)
@@ -270,6 +271,7 @@ namespace UnityEngine.XR.MagicLeap
                             MagicLeapXrProviderNativeBindings.MeshingSetMeshRequestCallback(null);
                             MagicLeapXrProviderNativeBindings.MeshingSetFreeBlockRequestPointerCallback(null);
                         }
+#endif
                     }
 
                     public static IntPtr AcquireConfidence(MeshId meshId, out int count) => NativeBindings.MeshingAcquireConfidence(meshId, out count);
@@ -322,6 +324,7 @@ namespace UnityEngine.XR.MagicLeap
                     [AOT.MonoPInvokeCallback(typeof(MagicLeapXrProviderNativeBindings.CreateBlockRequestsDelegate))]
                     private static void OnMeshRequest(ref MeshingSubsystem.Extensions.MLMeshing.NativeBindings.MLMeshingMeshInfo meshInfo, ref MeshingSubsystem.Extensions.MLMeshing.NativeBindings.MLMeshingMeshRequest meshRequest)
                     {
+#if UNITY_MAGICLEAP
                         if (meshInfo.data == IntPtr.Zero)
                             return;
 
@@ -344,6 +347,7 @@ namespace UnityEngine.XR.MagicLeap
 
                         meshRequest.requestCount = nativeBlockRequests.Length;
                         meshRequest.blockRequests = MarshalArrayToPtr(nativeBlockRequests);
+#endif
                     }
 
                     [AOT.MonoPInvokeCallback(typeof(MagicLeapXrProviderNativeBindings.CallFreeBlockRequestPointerDelegate))]
