@@ -29,17 +29,7 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public List<Extensions.TouchpadGestureEvent> touchpadGestureEvents { get { return magicLeapProvider.touchpadGestureEvents; } }
 
-        MagicLeapGestureProvider magicLeapProvider;
-
-        /// <summary>
-        /// Creates the provider interface.
-        /// </summary>
-        /// <returns>The provider interface for MagicLeap</returns>
-        protected override Provider CreateProvider()
-        {
-            magicLeapProvider = new MagicLeapGestureProvider();
-            return magicLeapProvider;
-        }
+        MagicLeapGestureProvider magicLeapProvider = new MagicLeapGestureProvider();
 
         internal bool ControllerGesturesEnabled
         {
@@ -125,7 +115,8 @@ namespace UnityEngine.XR.MagicLeap
                 new XRGestureSubsystemDescriptor.Cinfo
                 {
                     id = MagicLeapXrProvider.GestureSubsystemId,
-                    subsystemImplementationType = typeof(GestureSubsystem),
+                    providerType = typeof(MagicLeapGestureProvider),
+                    subsystemTypeOverride = typeof(GestureSubsystem),
                 }
             );
         }
@@ -156,7 +147,7 @@ namespace UnityEngine.XR.MagicLeap
 
             public Extensions.TouchpadGestureEvent currentGestureEvent;
 
-            private byte[] stateData = new byte[Marshal.SizeOf<InputSubsystem.Extensions.Controller.NativeBindings.MLInputControllerState>()];
+            private byte[] stateData = new byte[Marshal.SizeOf<InputSubsystem.Extensions.Controller.NativeBindings.MLInputControllerStateEx>()];
 
             public override void UpdateGesture(out bool isNewGesture)
             {
@@ -172,7 +163,7 @@ namespace UnityEngine.XR.MagicLeap
                 {
                     IntPtr ptr = Marshal.AllocHGlobal(this.stateData.Length);
                     Marshal.Copy(this.stateData, 0, ptr, this.stateData.Length);
-                    var controllerState = Marshal.PtrToStructure<InputSubsystem.Extensions.Controller.NativeBindings.MLInputControllerState>(ptr);
+                    var controllerState = Marshal.PtrToStructure<InputSubsystem.Extensions.Controller.NativeBindings.MLInputControllerStateEx>(ptr);
                     Marshal.FreeHGlobal(ptr);
 
                     GestureState gestureState = GestureState.Canceled;
@@ -186,7 +177,7 @@ namespace UnityEngine.XR.MagicLeap
                     if (gestureState == GestureState.Completed && this.currentGestureEvent.state == GestureState.Completed)
                         return;
 
-                    this.currentGestureEvent = new Extensions.TouchpadGestureEvent(GetNextGUID(), gestureState, controllerState.HardwareIndex, controllerState.TouchpadGesture.Angle, controllerState.TouchpadGesture.Direction, controllerState.TouchpadGesture.Distance, Native.MLConvert.ToUnity(controllerState.TouchpadGesture.PositionAndForce), controllerState.TouchpadGesture.Radius, controllerState.TouchpadGesture.Speed, controllerState.TouchpadGesture.Type);
+                    this.currentGestureEvent = new Extensions.TouchpadGestureEvent(GetNextGUID(), gestureState, controllerState.HardwareIndex, controllerState.TouchpadGestureData.Angle, controllerState.TouchpadGestureData.Direction, controllerState.TouchpadGestureData.Distance, Native.MLConvert.ToUnity(controllerState.TouchpadGestureData.PositionAndForce), controllerState.TouchpadGestureData.Radius, controllerState.TouchpadGestureData.Speed, controllerState.TouchpadGestureData.Type);
 
                     isNewGesture = true;
                     return;

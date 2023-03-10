@@ -124,19 +124,7 @@ namespace UnityEngine.XR.MagicLeap
                     AppDefinedAudioSource audioSource = gcHandle.Target as AppDefinedAudioSource;
                     audioSource?.OnSourceDestroy();
                 }
-
-                /// <summary>
-                /// Creates the local source that links to the user's camera and mic.
-                /// </summary>
-                /// <param name="sourceHandle">The handle to the local source to return to the caller.</param>
-                /// <returns>
-                /// MLResult.Result will be <c>MLResult.Code.Ok</c> if the local source was successfully created.
-                /// MLResult.Result will be <c>MLResult.Code.PermissionDenied</c> if necessary permission is missing.
-                /// MLResult.Result will be <c>MLResult.Code.UnspecifiedFailure</c> if failed due to other internal error.
-                /// </returns>
-                [DllImport(MLWebRTCDLL, CallingConvention = CallingConvention.Cdecl)]
-                public static extern MLResult.Code MLWebRTCSourceCreateAppDefinedAudioSource(in AppDefinedSource.NativeBindings.MLWebRTCAppDefinedSourceEventCallbacks callbacks, out ulong sourceHandle);
-
+                
                 /// <summary>
                 /// Creates the local source that links to the user's camera and mic.
                 /// </summary>

@@ -45,7 +45,17 @@ namespace UnityEngine.XR.MagicLeap
             /// <summary>
             ///  User is making a saccade, eye velocity is high.
             /// </summary>
-            Saccade
+            Saccade,
+            
+            /// <summary>
+            /// User is winking with the left eye
+            /// </summary>
+            WinkLeft,
+            
+            /// <summary>
+            /// User is winking with the right eye
+            /// </summary>
+            WinkRight
         };
 
         /// <summary>

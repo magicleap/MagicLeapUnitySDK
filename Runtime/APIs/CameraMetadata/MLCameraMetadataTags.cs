@@ -10,7 +10,7 @@
 
 namespace UnityEngine.XR.MagicLeap
 {
-    public partial class MLCamera
+    public partial class MLCameraBase
     {
         /// <summary>
         /// MLCameraMetadata Summary placeholder.

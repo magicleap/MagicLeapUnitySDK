@@ -138,7 +138,7 @@ namespace UnityEngine.XR.MagicLeap
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void SetupLoaderLibPathInXRPackage()
         {
-#if !UNITY_EDITOR && UNITY_MAGICLEAP
+#if !UNITY_EDITOR
             // AddLibrarySearchPaths() is only invoked by AppSimShimLibSupport.cs and contains more complex logic to setting the various
             // lib search paths which isnt really required when running on device. On device, we need to simply set a dummy path in the
             // xr package (because on android we don't need to dlopen() on full lib paths, all valid paths are already in LD_LIBRARY_PATH

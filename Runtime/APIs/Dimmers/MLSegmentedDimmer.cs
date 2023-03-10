@@ -1,3 +1,4 @@
+using System;
 using UnityEngine.Rendering;
 #if URP_14_0_0_OR_NEWER
 using UnityEngine.Rendering.Universal;
@@ -12,20 +13,20 @@ namespace UnityEngine.XR.MagicLeap
         /// <summary>
         /// The actual URP feature that represents the Segmented Dimmer to Unity
         /// </summary>
-        private static SegmentedDimmerFeature urpFeature;
-        private static SegmentedDimmerFeature Feature
+        private static SegmentedDimmerFeature segmentedDimmerFeature;
+        private static SegmentedDimmerFeature SegmentedDimmerFeature
         {
             get
             {
-                if(urpFeature == null)
+                if(segmentedDimmerFeature == null)
                 {
                     var urp = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
                     if(urp != null)
                     {
-                        urpFeature = urp.GetRendererFeature<SegmentedDimmerFeature>() as SegmentedDimmerFeature;
+                        segmentedDimmerFeature = urp.GetRendererFeature<SegmentedDimmerFeature>() as SegmentedDimmerFeature;
                     }
                 }
-                return urpFeature;
+                return segmentedDimmerFeature;
             }
         }
 #endif
@@ -33,7 +34,8 @@ namespace UnityEngine.XR.MagicLeap
         private static int defaultLayer = -1;
 
         /// <summary>
-        /// Turn on the ability to display Segmented Dimmer in your scenes by requesting support from the ML Graphics API
+        /// Turn on the ability to display Segmented Dimmer in your scenes.
+        /// This instructs MLGraphics to provide frames using the AlphaBlend blend mode.
         /// </summary>
         public static void Activate()
         {
@@ -41,7 +43,8 @@ namespace UnityEngine.XR.MagicLeap
         }
 
         /// <summary>
-        /// Inform the ML Graphics API to turn off the ability to display Segmented Dimmer
+        /// Turn off the ability to display Segmented Dimmer in your scenes.
+        /// This reverts to accepting frames with the default blend mode from MLGraphics.
         /// </summary>
         public static void Deactivate()
         {
@@ -52,38 +55,10 @@ namespace UnityEngine.XR.MagicLeap
         /// Does the Universal Render Pipeline contain a Segmented Dimmer feature in its renderers
         /// </summary>
 #if URP_14_0_0_OR_NEWER
-        public static bool Exists => Feature != null;
+        public static bool Exists => SegmentedDimmerFeature != null;
 #else
         public static bool Exists => false;
 #endif
-
-        /// <summary>
-        /// Enables or disables all Mesh Renderers in the current scene which are on a SegmentedDimmer layer. <br/>
-        /// WARNING: This is expensive and it is recommended not to use it often! 
-        /// </summary>
-        /// <param name="enabled"></param>
-        public static void SetEnabled(bool enabled)
-        {
-#if URP_14_0_0_OR_NEWER
-            if (Exists)
-            {
-                var renderers = GameObject.FindObjectsOfType<MeshRenderer>();
-                foreach (var r in renderers)
-                {
-                    if ((Feature.settings.layerMask & (1 << r.gameObject.layer)) != 0)
-                    {
-                        r.enabled = enabled;
-                    }
-                }
-            }
-            else
-            {
-                Debug.LogError("Segmented Dimmer requirement not met: URP SegmentedDimmer RenderFeature was not configured.");
-            }
-#else
-            Debug.LogError("Segmented Dimmer requirement not met: Package com.unity.render-pipelines.universal >= 14.0.0 was not installed.");
-#endif
-        }        
 
         /// <summary>
         /// Returns the first available Unity Layer specified in the LayerMask for the SegmentedDimmer Feature. This will be the default layer SegmentedDimmer mesh objects
@@ -99,7 +74,7 @@ namespace UnityEngine.XR.MagicLeap
             }
             for (int i = 0; i < 32; i++)
             {
-                if (Feature.settings.layerMask == (Feature.settings.layerMask | (1 << i)))
+                if (SegmentedDimmerFeature.settings.layerMask == (SegmentedDimmerFeature.settings.layerMask | (1 << i)))
                 {
                     defaultLayer = i;
                     break;

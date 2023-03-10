@@ -565,6 +565,8 @@ namespace UnityEngine.XR.MagicLeap
                 }
 
                 container.SelectedTrack = track;
+                OnTrackSelected(this, track);
+
                 return MLResult.Create(resultCode);
             }
 
@@ -578,6 +580,7 @@ namespace UnityEngine.XR.MagicLeap
                 }
 
                 container.SelectedTrack = null;
+                OnTrackSelected(this, track);
 
                 return MLResult.Create(resultCode);
             }
@@ -610,12 +613,14 @@ namespace UnityEngine.XR.MagicLeap
 
                     TracksContainer container = this.trackContainers[track.TrackType];
                     container.Tracks.Add(track);
+
+                    OnTrackFound(this, track);
+
                     if (container.Tracks.Count == 1)
                     {
                         container.SelectedTrack = track;
+                        OnTrackSelected(this, track);
                     }
-
-                    OnTrackFound(this, track);
                 }
             }
 

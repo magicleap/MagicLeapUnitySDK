@@ -50,7 +50,11 @@ namespace UnityEngine.XR.MagicLeap
                 return;
             }
             else
+            {
                 Instance.StartInternal();
+
+                MagicLeapXrProviderNativeBindings.InputSetOnPerceptionShutdownCallback(OnPerceptionShutdown);
+            }
         }
 
         /// <summary>
@@ -105,6 +109,9 @@ namespace UnityEngine.XR.MagicLeap
         /// Callback sent to all MagicLeap APIs when device enters active mode.
         /// </summary>
         protected virtual void OnDeviceActive() { }
+
+        [AOT.MonoPInvokeCallback(typeof(MagicLeapXrProviderNativeBindings.CallOnPerceptionShutdownDelegate))]
+        private static void OnPerceptionShutdown() => Instance.StopInternal();
 
         private void StartInternal()
         {

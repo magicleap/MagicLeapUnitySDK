@@ -35,11 +35,8 @@ public class MLVoiceIntentsConfiguration : ScriptableObject
     /// </summary>
     public struct JSONData
     {
-        [SerializeField]
         public string name;
-        [SerializeField]
         public string id;
-        [SerializeField]
         public string value;
     }
 
@@ -49,7 +46,6 @@ public class MLVoiceIntentsConfiguration : ScriptableObject
     /// </summary>
     public struct SystemJSONData
     {
-        [SerializeField]
         public List<string> name;
     }
 
@@ -60,10 +56,8 @@ public class MLVoiceIntentsConfiguration : ScriptableObject
     /// </summary>
     public struct CustomVoiceIntents
     {
-        [SerializeField]
         [Tooltip("Must Be Unique.")]
         public uint Id;
-        [SerializeField]
         [Tooltip("The command to be spoken. Can have 2 phrases seperated by an | to indicate multiple commands triggering the same event.")]
         public string Value;
     }
@@ -74,13 +68,28 @@ public class MLVoiceIntentsConfiguration : ScriptableObject
     /// </summary>
     public class JSONContainer
     {
-        [SerializeField]
         public List<JSONData> app_intents;
-        [SerializeField]
         public SystemJSONData sys_intent_list;
     }
 
+    [System.Serializable]
+    /// <summary>
+    /// JSONContainer to Auto allowing all System Intents.
+    /// </summary>
+    private class JSONContainerAutoSystem
+    {
+        public List<JSONData> app_intents;
+    }
+
+    /// <summary>
+    /// JSONContainer that gets built in setupJSONContainer and used in GetJSONString.
+    /// </summary>
     private JSONContainer container;
+
+    /// <summary>
+    /// JSONContainer without defined System Intents to Auto Allow all System Intents.
+    /// </summary>
+    private JSONContainerAutoSystem containerAutoSys;
 
     /// <summary>
     /// Used to auto create a unique name field for the final JSON data with the Unique ID provided in the list VoiceCommandsToAdd.
@@ -105,10 +114,11 @@ public class MLVoiceIntentsConfiguration : ScriptableObject
     /// </summary>
     public List<CustomVoiceIntents> VoiceCommandsToAdd;
 
+    [Tooltip("If True, will disregard the SystemCommands selected and allow all System Intents. If no System Inents are desired, leave this false and the SystemCommands empty.")]
+    public bool AutoAllowAllSystemIntents;
+
     [Header("Experimental")]
-    /// <summary>
-    /// Flag to indicate which System Intents should be enabled from within the application. In an experimental state as there may be issues using voice commands on any pop-up windows that appear because of the enabled system commands.
-    /// </summary>
+    [Tooltip("Flag to indicate which System Intents should be enabled from within the application. In an experimental state as there may be issues using voice commands on any pop-up windows that appear because of the enabled system commands. If no System Inents are desired, leave this list empty.")]
     public SystemIntentFlags SystemCommands;
 
     /// <summary>
@@ -116,10 +126,19 @@ public class MLVoiceIntentsConfiguration : ScriptableObject
     /// </summary>
     private List<String> supportedSystemIntents = new List<string> { "ML_CAPTURE_STILL", "ML_CAPTURE_VIDEO_START", "ML_CAPTURE_VIDEO_STOP", "ML_CLOSE" , "ML_GLOBAL_HOME", "ML_LAUNCH" , "ML_SYSAUDIO_MUTE" , "ML_SYSAUDIO_UNMUTE" , "ML_SYSAUDIO_VOLUME_DOWN" , "ML_SYSAUDIO_VOLUME_SET" , "ML_SYSAUDIO_VOLUME_UP" , "ML_GLOBAL_HELP" };
 
-
+    /// <summary>
+    /// Return a string of the proper JSON format needed by the Voice Intents API.
+    /// </summary>
     public string GetJSONString()
     {
-        setupJSONContainer();
+        SetupJSONContainer();
+
+        if(AutoAllowAllSystemIntents)
+        {
+            SetupJSONContainerAutoSystem();
+            return JsonUtility.ToJson(containerAutoSys);
+        }
+
         return JsonUtility.ToJson(container);
     }
 
@@ -128,7 +147,7 @@ public class MLVoiceIntentsConfiguration : ScriptableObject
     /// </summary>
     public List<string> GetValues()
     {
-        setupJSONContainer();
+        SetupJSONContainer();
         List<string> values = new List<string>();
 
         for (int i = 0; i < container.app_intents.Count; i++)
@@ -139,16 +158,13 @@ public class MLVoiceIntentsConfiguration : ScriptableObject
         return values;
     }
 
-    private void setupJSONContainer()
+    private void SetupJSONContainer()
     {
-        if (container == null)
-        {
-            container = new JSONContainer();
-        }
+        container ??= new JSONContainer();
 
         if (VoiceCommandsToAdd.Count > 0)
         {
-            addCustomVoiceCommands();
+            AddCustomVoiceCommands();
         }
 
         ValidationCheck();
@@ -170,7 +186,15 @@ public class MLVoiceIntentsConfiguration : ScriptableObject
 
     }
 
-    private void addCustomVoiceCommands()
+    private void SetupJSONContainerAutoSystem()
+    {
+        containerAutoSys ??= new JSONContainerAutoSystem();
+
+        containerAutoSys.app_intents = new List<JSONData>();
+        containerAutoSys.app_intents.AddRange(container.app_intents);
+    }
+
+    private void AddCustomVoiceCommands()
     {
         foreach (CustomVoiceIntents customCommand in VoiceCommandsToAdd)
         {

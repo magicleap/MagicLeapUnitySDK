@@ -17,6 +17,8 @@ namespace MagicLeap.Core
         {
             get; private set;
         }
+        
+        public event Action<MLWebViewTabBehavior> OnTabSelected;
 
         private MLWebViewTabBarBehavior tabBar;
         private MLWebViewScreenBehavior webViewScreen;
@@ -26,11 +28,14 @@ namespace MagicLeap.Core
         private Text text;
 
         private bool loadOnServiceConnected = false;
+        private bool isPaused;
 
         public string tabUrl
         {
             get; private set;
         }
+
+        public bool IsPaused => isPaused;
 
         void Awake()
         {
@@ -194,6 +199,16 @@ namespace MagicLeap.Core
                     addressBar.text = WebView.GetURL();
                 }
             }
+        }
+
+        public void Pause()
+        {
+            isPaused = true;
+        }
+        
+        public void Resume()
+        {
+            isPaused = false;
         }
     }
 }

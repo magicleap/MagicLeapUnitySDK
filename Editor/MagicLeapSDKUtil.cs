@@ -14,6 +14,7 @@ using System;
 
 namespace UnityEditor.XR.MagicLeap
 {
+    [InitializeOnLoad]
     public sealed class MagicLeapSDKUtil
     {
         private const string kManifestPath = ".metadata/sdk.manifest";
@@ -23,6 +24,20 @@ namespace UnityEditor.XR.MagicLeap
 #else
         private const UnityEditor.BuildTarget kBuildTarget = BuildTarget.Relish;
 #endif
+        private static uint minApiLevel = 0;
+
+        static MagicLeapSDKUtil()
+        {
+            try
+            {
+                var result = UnityEngine.XR.MagicLeap.Native.MagicLeapNativeBindings.MLUnitySdkGetMinApiLevel(out minApiLevel);
+                UnityEngine.XR.MagicLeap.MLResult.DidNativeCallSucceed(result, nameof(UnityEngine.XR.MagicLeap.Native.MagicLeapNativeBindings.MLUnitySdkGetMinApiLevel));
+            }
+            catch(Exception e)
+            {
+                Debug.LogError($"Failed looking up minimum API level for Magic Leap SDK due to exception: {e}"); 
+            }
+        }
 
         [Serializable]
         private class SDKManifest
@@ -45,6 +60,8 @@ namespace UnityEditor.XR.MagicLeap
                 return File.Exists(Path.Combine(SdkPath, kManifestPath));
             }
         }
+
+        public static uint MinimumApiLevel => minApiLevel;
 
         /// <summary>
         /// MLSDK path for the relish target.

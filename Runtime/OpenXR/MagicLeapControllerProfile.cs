@@ -20,7 +20,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
     /// </summary>
 #if UNITY_EDITOR
     [UnityEditor.XR.OpenXR.Features.OpenXRFeature(UiName = "Magic Leap Controller Interaction Profile",
-        BuildTargetGroups = new[] {BuildTargetGroup.Android},
+        BuildTargetGroups = new[] {BuildTargetGroup.Android, BuildTargetGroup.Standalone},
         Company = "Magic Leap",
         Desc = "Allows for mapping input to the Magic Leap Controller interaction profile.",
         OpenxrExtensionStrings = extensionString,
