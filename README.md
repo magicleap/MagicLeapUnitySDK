@@ -7,7 +7,7 @@ Scope: com.magicleap
 
 This SDK is provided in the form of an npm package, just like Unity's official add-ons. Therefore, integration into your Unity project is as easy as adding our scoped registry to your project settings and using the Unity Package Manager to install. After integration, upgrades and dependencies can also be managed via the Unity Package Manager.
 
-For a full list of features and documentation on how to use the Magic Leap Unity SDK, see [this page on the Magic Leap Developer Portal](https://developer-docs.magicleap.cloud/docs/guides/unity/getting-started/unity-getting-started).
+For a full list of features and documentation on how to use the Magic Leap Unity SDK, see [this page on the Magic Leap Developer Portal](https://developer-docs.magicleap.cloud/docs/guides/unity/unity-overview).
 
 Examples and a project template for quick setup can be found at our [Example Project page](https://github.com/magicleap/MagicLeapUnityExamples).
 
