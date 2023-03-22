@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "MLVoiceIntentsConfiguration", menuName = "Magic Leap/Voice Intents Configuration", order = 1)]
@@ -64,12 +65,30 @@ public class MLVoiceIntentsConfiguration : ScriptableObject
 
     [System.Serializable]
     /// <summary>
+    /// The Slot Data to be used in the CustomVoiceIntents' value. To use a slot, put the SlotData name between { } inside of the CustomVoiceIntents' value.
+    /// </summary>
+    public struct SlotData
+    {
+        public string name;
+        public List<string> values;
+    }
+
+    [System.Serializable]
+    public struct SlotDataInternal
+    {
+        public string name;
+        public string value;
+    }
+
+    [System.Serializable]
+    /// <summary>
     /// The container for the data being changed into a JSON string to send to the MLVoice API.
     /// </summary>
     public class JSONContainer
     {
         public List<JSONData> app_intents;
         public SystemJSONData sys_intent_list;
+        public List<SlotDataInternal> app_slots;
     }
 
     [System.Serializable]
@@ -79,6 +98,7 @@ public class MLVoiceIntentsConfiguration : ScriptableObject
     private class JSONContainerAutoSystem
     {
         public List<JSONData> app_intents;
+        public List<SlotDataInternal> app_slots;
     }
 
     /// <summary>
@@ -105,6 +125,8 @@ public class MLVoiceIntentsConfiguration : ScriptableObject
     /// </summary>
     public List<JSONData> AllVoiceIntents;
 
+    [Header("App Specific Voice Commands")]
+    [Tooltip("Any word followed by a ? will be optional as will any phrase within [ ]. Values are allowed to use | as an OR. Anything after the pipe will be considered a seperate expression. To just use an OR between two words in an expression surround them with ( ). This can also be used for Slots. To indicate use of a slot, put the slot name within { }.")]
     /// <summary>
     /// The simplified list of Voice Command data to be filled out in the inspector or manually added to. A unique name field will be created
     /// based on the Unique Id provided.
@@ -114,12 +136,16 @@ public class MLVoiceIntentsConfiguration : ScriptableObject
     /// </summary>
     public List<CustomVoiceIntents> VoiceCommandsToAdd;
 
+    [Header("System Voice Commands")]
     [Tooltip("If True, will disregard the SystemCommands selected and allow all System Intents. If no System Inents are desired, leave this false and the SystemCommands empty.")]
     public bool AutoAllowAllSystemIntents;
 
-    [Header("Experimental")]
     [Tooltip("Flag to indicate which System Intents should be enabled from within the application. In an experimental state as there may be issues using voice commands on any pop-up windows that appear because of the enabled system commands. If no System Inents are desired, leave this list empty.")]
     public SystemIntentFlags SystemCommands;
+
+    [Header("Slot Data")]
+    [Tooltip("Slot Name should be unique as it will be used as a reference in CustomVoiceIntents values when placed between { }")]
+    public List<SlotData> SlotsForVoiceCommands;
 
     /// <summary>
     /// List of the system intent names to be added to the JSON file.
@@ -173,6 +199,9 @@ public class MLVoiceIntentsConfiguration : ScriptableObject
         container.app_intents.AddRange(AllVoiceIntents);
         container.sys_intent_list = new SystemJSONData();
         container.sys_intent_list.name = new List<string>();
+        container.app_slots = new List<SlotDataInternal>();
+
+        AddSlotsToJSON();
 
         int index = 0;
         foreach(SystemIntentFlags flag in Enum.GetValues(typeof(SystemIntentFlags)))
@@ -192,6 +221,8 @@ public class MLVoiceIntentsConfiguration : ScriptableObject
 
         containerAutoSys.app_intents = new List<JSONData>();
         containerAutoSys.app_intents.AddRange(container.app_intents);
+        containerAutoSys.app_slots = new List<SlotDataInternal>();
+        containerAutoSys.app_slots.AddRange(container.app_slots);
     }
 
     private void AddCustomVoiceCommands()
@@ -207,6 +238,30 @@ public class MLVoiceIntentsConfiguration : ScriptableObject
         }
 
         VoiceCommandsToAdd.Clear();
+    }
+
+    private void AddSlotsToJSON()
+    {
+        if(SlotsForVoiceCommands.Count == 0)
+        {
+            return;
+        }
+
+
+        foreach (SlotData slot in SlotsForVoiceCommands)
+        {
+            SlotDataInternal newSlot = new SlotDataInternal();
+
+            newSlot.name = slot.name;
+
+            StringBuilder slotValueJSONString = new StringBuilder();
+
+            slotValueJSONString.Append($"{string.Join("|", slot.values)}");
+
+            newSlot.value = slotValueJSONString.ToString();
+
+            container.app_slots.Add(newSlot);
+        }
     }
 
     private void ValidationCheck()

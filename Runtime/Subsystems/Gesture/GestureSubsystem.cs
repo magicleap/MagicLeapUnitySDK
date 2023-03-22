@@ -18,7 +18,8 @@ using UnityEngine.XR.InteractionSubsystems;
 namespace UnityEngine.XR.MagicLeap
 {
     /// <summary>
-    /// MagicLeap implementation of the <c>XRGestureSubsystem</c>. Do not create this directly. Use the <c>SubsystemManager</c> instead.
+    /// MagicLeap implementation of the <c>XRGestureSubsystem</c>. Do not create this directly. 
+    /// Use <c>XRGestureSubsystemDescriptor.RegisterDescriptor()</c> instead.
     /// </summary>
     [Preserve]
     public sealed partial class GestureSubsystem : XRGestureSubsystem
@@ -27,9 +28,7 @@ namespace UnityEngine.XR.MagicLeap
         /// A collection of all MagicLeapTouchpadGestureEvents managed by this subsystem.
         /// This is cleared every frame and refreshed with new gesture events.
         /// </summary>
-        public List<Extensions.TouchpadGestureEvent> touchpadGestureEvents { get { return magicLeapProvider.touchpadGestureEvents; } }
-
-        MagicLeapGestureProvider magicLeapProvider = new MagicLeapGestureProvider();
+        public List<Extensions.TouchpadGestureEvent> touchpadGestureEvents { get { return ((MagicLeapGestureProvider)provider).touchpadGestureEvents; } }
 
         internal bool ControllerGesturesEnabled
         {
@@ -41,7 +40,7 @@ namespace UnityEngine.XR.MagicLeap
 
         class MagicLeapGestureProvider : Provider
         {
-            public List<Extensions.TouchpadGestureEvent> touchpadGestureEvents { get { return m_TouchpadGestureEvents; } }
+            internal List<Extensions.TouchpadGestureEvent> touchpadGestureEvents { get { return m_TouchpadGestureEvents; } }
             List<Extensions.TouchpadGestureEvent> m_TouchpadGestureEvents = new List<Extensions.TouchpadGestureEvent>();
 
             List<GestureInputDevice> gestureInputDevices = new List<GestureInputDevice>()

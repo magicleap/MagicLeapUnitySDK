@@ -99,6 +99,8 @@ namespace UnityEngine.XR.MagicLeap
         {
             camera = GetComponent<Camera>();
             FixupCamera(fixProblemsOnStartup);
+
+            RenderingSettings.enforceNearClip = enforceNearClip;
         }
 
         private IEnumerator Start()
@@ -126,7 +128,6 @@ namespace UnityEngine.XR.MagicLeap
 
             RenderingSettings.cameraScale = RenderingUtility.GetParentScale(transform);
             ValidateFarClip();
-            ValidateNearClip();
 
             camera.stereoConvergence = CalculateFocusDistance();
             RenderingSettings.focusDistance = camera.stereoConvergence;
@@ -146,22 +147,6 @@ namespace UnityEngine.XR.MagicLeap
                 if (enforceFarClip)
                 {
                     camera.farClipPlane = max;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Validate the Near Clip plane
-        /// </summary>
-        public void ValidateNearClip()
-        {
-            var nearClip = camera.nearClipPlane;
-            var min = RenderingSettings.minNearClipDistance;
-            if (nearClip < min)
-            {
-                if (enforceNearClip)
-                {
-                    camera.nearClipPlane = min;
                 }
             }
         }

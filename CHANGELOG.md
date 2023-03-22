@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.5.0]
+### Features
+- Added support for `XRHandSubsystem`
+- Added slots to `MLVoiceIntents`
+- Update Magic Leap XR Plugin requirement to version `7.0.0`
+- Added option to recenter the `XROrigin` component at `Start()` via the inspector inside the `MagicLeapCamera` component.
+### Bugfixes
+- Fixed enforcement of Main Camera's near clip distance to respect user setting.
+- Fixed a NullReferenceException being thrown when stopping and replaying video with `MLMediaPlayer`
+- Fixed invalid handle check with `MLMeshing` subsystem
+
+### Known Issues
+- `MLWebRTC`: When disconnecting from a session, the camera does not shut down cleanly if the NativeSurface buffer format was used, causing the application to hang for as much as 30 seconds.
+
 ## [1.4.0]
 ### Features
 - Added `MLNativeBindings.MLUnitySdkGetMinApiLevel()` method which reports the minimum Magic Leap API level supported by the package.

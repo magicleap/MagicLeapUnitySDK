@@ -14,6 +14,9 @@ using System.IO;
 using UnityEditor;
 using UnityEngine.XR.ARSubsystems;
 using UnityEngine.XR.InteractionSubsystems;
+#if XR_HANDS
+using UnityEngine.XR.Hands;
+#endif
 
 namespace UnityEngine.XR.MagicLeap
 {
@@ -27,6 +30,8 @@ namespace UnityEngine.XR.MagicLeap
         public const string AnchorSubsystemId = "MagicLeapXr-Anchors";
         public const string ImageTrackingSubsystemId = "MagicLeapXr-ImageTracking";
         public const string RaycastSubsystemId = "MagicLeapXr-Raycast";
+        public const string HandSubsystemId = "MagicLeapXr-Hand";
+
 
         public static bool IsZIRunning { get; private set; } = false;
 
@@ -173,6 +178,10 @@ namespace UnityEngine.XR.MagicLeap
             // Percpetion system was shutdown without the knowledge of MagicLeapXrProvider and subsequent api calls from
             // our own subsystems fail.
             MagicLeapSettings.Subsystems.RegisterSubsystemOverride<XRRaycastSubsystem>(RaycastSubsystemId);
+
+#if XR_HANDS
+            MagicLeapSettings.Subsystems.RegisterSubsystemOverride<XRHandSubsystem>(HandSubsystemId);
+#endif
         }
     }
 }

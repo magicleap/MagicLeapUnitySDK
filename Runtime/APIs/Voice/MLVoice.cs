@@ -11,6 +11,7 @@
 namespace UnityEngine.XR.MagicLeap
 {
     using UnityEngine;
+    using System.Collections.Generic;
 
     /// <summary>
     /// APIs for the voice service system.
@@ -90,6 +91,27 @@ namespace UnityEngine.XR.MagicLeap
         };
 
         /// <summary>
+        /// Slot Data in voice event.
+        /// </summary>
+        public struct EventSlot
+        {
+            /// <summary>
+            /// Name of slot used.
+            /// </summary>
+            public string SlotName;
+            /// <summary>
+            /// Value of the specific slot used.
+            /// </summary>
+            public string SlotValue;
+
+            public EventSlot(string name, string value)
+            {
+                this.SlotName = name;
+                this.SlotValue = value;
+            }
+        }
+
+        /// <summary>
         /// A structure containing voice intent event information.
         /// </summary>
         public struct IntentEvent
@@ -114,6 +136,11 @@ namespace UnityEngine.XR.MagicLeap
             /// User defined intent index which is detected.
             /// </summary>
             public uint EventID;
+
+            // <summary>
+            /// List of Slot Data used in this specific event.
+            /// </summary>
+            public List<EventSlot> EventSlotsUsed;
         };
 
         /// <summary>
