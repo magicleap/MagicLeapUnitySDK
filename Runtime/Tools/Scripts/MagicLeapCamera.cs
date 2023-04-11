@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Collections;
 using UnityEngine.Jobs;
+using UnityEngine.Serialization;
 using UnityEngine.XR.MagicLeap.Rendering;
 
 namespace UnityEngine.XR.MagicLeap
@@ -34,6 +35,8 @@ namespace UnityEngine.XR.MagicLeap
         private Transform stereoConvergencePoint;
         [SerializeField]
         private bool protectedSurface;
+
+        private bool _useEyeTrackingForStereoConvergence;
 
         /// <summary>
         /// Correct any issues with the camera on startup
@@ -76,6 +79,15 @@ namespace UnityEngine.XR.MagicLeap
         /// The recommended camera scale
         /// </summary>
         private static readonly Vector3 DEFAULT_CAMERA_SCALE = Vector3.one;
+
+        /// <summary>
+        /// Getter/Setter for the _useEyeTrackingForStereoConvergence bool
+        /// </summary>
+        public bool UseEyeTrackingForStereoConvergence
+        {
+            get => _useEyeTrackingForStereoConvergence;
+            set => _useEyeTrackingForStereoConvergence = value;
+        }
 
         /// <summary>
         /// Getter/Setter for the stereo convergence point
@@ -155,7 +167,7 @@ namespace UnityEngine.XR.MagicLeap
         {
             // Get Focus Distance and log warnings if not within the allowed value bounds.
             float focusDistance = camera.stereoConvergence;
-            if (StereoConvergencePoint != null)
+            if (_useEyeTrackingForStereoConvergence && StereoConvergencePoint != null)
             {
                 // From Unity documentation:
                 // Note that camera space matches OpenGL convention: camera's forward is the negative Z axis.
