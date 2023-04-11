@@ -11,6 +11,7 @@
 namespace UnityEngine.XR.MagicLeap
 {
     using System;
+    using System.Linq;
     using System.Runtime.InteropServices;
     using Native;
 
@@ -45,11 +46,38 @@ namespace UnityEngine.XR.MagicLeap
                 newEvent.EventName = intentEvent.Text;
                 newEvent.EventID = intentEvent.IntentID;
 
+                IntentSlotInternal[] internalSlots = ConvertArray<IntentSlotInternal>(intentEvent.AppIntentSlots, intentEvent.AppIntentSlotCount);
+
+                newEvent.EventSlotsUsed = new System.Collections.Generic.List<EventSlot>();
+
+                newEvent.EventSlotsUsed.AddRange(internalSlots.Select(slot => new MLVoice.EventSlot(slot.SlotName, slot.SlotValue)));
+
                 bool eventSuccessful = intentEvent.IsSuccess;
                 MLThreadDispatch.ScheduleMain(() =>
                 {
                     OnVoiceEventInternal?.Invoke(eventSuccessful, newEvent);
                 });
+            }
+
+            /// <summary>
+            /// A structure containing voice app-intent slot in voice event.
+            /// </summary>
+            [StructLayout(LayoutKind.Sequential)]
+            public struct IntentSlotInternal
+            {
+                /// <summary>
+                /// The C string carrying slot name which is UTF-8 and null terminated.
+                /// And the memory of this variable is managed by system.
+                /// </summary>
+                [MarshalAs(UnmanagedType.LPStr)]
+                public string SlotName;
+
+                /// <summary>
+                /// The C string carrying concept value which is UTF-8 and null terminated.
+                /// And the memory of this variable is managed by system.
+                /// </summary>
+                [MarshalAs(UnmanagedType.LPStr)]
+                public string SlotValue;
             }
 
             /// <summary>
@@ -87,6 +115,17 @@ namespace UnityEngine.XR.MagicLeap
                 /// User defined intent index which is detected.
                 /// </summary>
                 public uint IntentID;
+
+                /// <summary>
+                /// Array of app-intent slot, array count is set in app_intent_slot_count.
+                /// Count of an array app_intent_slots.
+                /// </summary>
+                public IntPtr AppIntentSlots;
+
+                /// <summary>
+                /// Count of an array AppIntentSlots.
+                /// </summary>
+                public uint AppIntentSlotCount;
             };
 
             /// <summary>
@@ -118,7 +157,7 @@ namespace UnityEngine.XR.MagicLeap
                 public static IntentCallbacks Create()
                 {
                     IntentCallbacks callbacks = new IntentCallbacks();
-                    callbacks.Version = 1;
+                    callbacks.Version = 2u;
                     callbacks.OnEvent = MLVoice.NativeBindings.OnEvent;
                     return callbacks;
                 }
@@ -156,6 +195,22 @@ namespace UnityEngine.XR.MagicLeap
 
                     return settings;
                 }
+            }
+
+            /// <summary>
+            /// Converts an unmanged array to a managed array of type T.
+            /// </summary>
+            private static T[] ConvertArray<T>(IntPtr arrayPtr, ulong count)
+            {
+                T[] convertedArray = new T[count];
+                IntPtr walkPtr = arrayPtr;
+                for (ulong i = 0; i < count; ++i)
+                {
+                    convertedArray[i] = Marshal.PtrToStructure<T>(walkPtr);
+                    walkPtr = new IntPtr(walkPtr.ToInt64() + Marshal.SizeOf<IntPtr>());
+                }
+
+                return convertedArray;
             }
 
             /// <summary>

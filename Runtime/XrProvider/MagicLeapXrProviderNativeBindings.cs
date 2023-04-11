@@ -92,6 +92,9 @@ namespace UnityEngine.XR.MagicLeap
         internal static extern void StartHandTracking();
 
         [DllImport(MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void StopHandTracking();
+
+        [DllImport(MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void StartGestureTracking();
 
         [DllImport(MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]

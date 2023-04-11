@@ -3,7 +3,7 @@ using System.IO;
 using UnityEditor.XR.MagicLeap;
 using UnityEngine;
 
-namespace Tests.Editor
+namespace UnitySDKEditorTests
 {
     public class MlSdkDllLoader
     {

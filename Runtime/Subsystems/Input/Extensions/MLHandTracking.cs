@@ -85,10 +85,9 @@ namespace UnityEngine.XR.MagicLeap
                     FifthBone = 24
                 }
 
-                public static void StartTracking()
-                {
-                    MagicLeapXrProviderNativeBindings.StartHandTracking();
-                }
+                public static void StartTracking() => MagicLeapXrProviderNativeBindings.StartHandTracking();
+
+                public static void StopTracking() => MagicLeapXrProviderNativeBindings.StopHandTracking();
 
                 /// <summary>
                 /// By default the keypoints data is updated twice. To turn this off

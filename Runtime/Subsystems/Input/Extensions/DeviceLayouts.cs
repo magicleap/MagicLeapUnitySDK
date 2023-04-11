@@ -195,11 +195,20 @@ namespace UnityEngine.XR.MagicLeap
                     [InputControl]
                     public IntegerControl keyPose { get; private set; }
 
-                    //Need Bone control and Hand Control
-
                     protected override void FinishSetup()
                     {
                         base.FinishSetup();
+
+                        var capabilities = description.capabilities;
+                        var deviceDescriptor = XRDeviceDescriptor.FromJson(capabilities);
+
+                        if (deviceDescriptor != null)
+                        {
+                            if ((deviceDescriptor.characteristics & InputDeviceCharacteristics.Left) != 0)
+                                InputSystem.InputSystem.SetDeviceUsage(this, InputSystem.CommonUsages.LeftHand);
+                            else if ((deviceDescriptor.characteristics & InputDeviceCharacteristics.Right) != 0)
+                                InputSystem.InputSystem.SetDeviceUsage(this, InputSystem.CommonUsages.RightHand);
+                        }
 
                         handConfidence = GetChildControl<AxisControl>("handConfidence");
                         normalizeCenter = GetChildControl<Vector3Control>("normalizeCenter");

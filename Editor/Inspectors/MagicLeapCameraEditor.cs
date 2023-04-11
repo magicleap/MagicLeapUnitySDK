@@ -14,12 +14,14 @@ namespace UnityEditor.XR.MagicLeap
         private static GUIContent fixIssuesText = new GUIContent("Fix Problems On Startup", "Should the Camera settings be automatically adjusted to preferred Magic Leap values on scene startup?");
         private static GUIContent nearClipText = new GUIContent("Enforce Near Clip Distance", "Enforce Camera Near Clip Plane validation.");
         private static GUIContent farClipText = new GUIContent("Enforce Far Clip Distance", "Enforce Camera Far Clip Plane validation");
+        private static GUIContent recenterText = new GUIContent("Recenter XR Origin At Start", "Determine if the app should recenter the XR Origin object so that the Main Camera is at the scene's origin on start");
 
         private SerializedProperty stereoConvergencePointProp;
         private SerializedProperty protectedSurfaceProp;
         private SerializedProperty fixeIssuesProp;
         private SerializedProperty enforceNearClipProp;
         private SerializedProperty enforceFarClipProp;
+        private SerializedProperty recenterXROriginProp;
 
         void OnEnable()
         {
@@ -28,6 +30,7 @@ namespace UnityEditor.XR.MagicLeap
             enforceNearClipProp = serializedObject.FindProperty("enforceNearClip");
             enforceFarClipProp = serializedObject.FindProperty("enforceFarClip");
             fixeIssuesProp = serializedObject.FindProperty("fixProblemsOnStartup");
+            recenterXROriginProp = serializedObject.FindProperty("recenterXROriginAtStart");
         }
 
         public override void OnInspectorGUI()
@@ -44,6 +47,7 @@ namespace UnityEditor.XR.MagicLeap
             EditorGUILayout.ObjectField(stereoConvergencePointProp, typeof(Transform), stereoConvergencePointText);
 
             EditorGUILayout.PropertyField(protectedSurfaceProp, protectedSurfaceText);
+            EditorGUILayout.PropertyField(recenterXROriginProp, recenterText);
 
             serializedObject.ApplyModifiedProperties();
         }

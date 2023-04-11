@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Collections;
@@ -39,6 +40,12 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         [SerializeField]
         private bool fixProblemsOnStartup = true;
+
+        /// <summary>
+        /// Recenter the XROrigin one frame after Start() is called.
+        /// </summary>
+        [SerializeField]
+        private bool recenterXROriginAtStart = true;
 
         /// <summary>
         /// The minimum recommended near clip value
@@ -92,6 +99,19 @@ namespace UnityEngine.XR.MagicLeap
         {
             camera = GetComponent<Camera>();
             FixupCamera(fixProblemsOnStartup);
+
+            RenderingSettings.enforceNearClip = enforceNearClip;
+        }
+
+        private IEnumerator Start()
+        {
+            yield return new WaitForEndOfFrame();
+            if (recenterXROriginAtStart)
+            {
+                var xro = FindObjectOfType<Unity.XR.CoreUtils.XROrigin>();
+                xro?.MoveCameraToWorldLocation(Vector3.zero);
+                xro?.MatchOriginUpCameraForward(Vector3.up, Vector3.forward);
+            }
         }
 
         private void Reset()
@@ -108,7 +128,6 @@ namespace UnityEngine.XR.MagicLeap
 
             RenderingSettings.cameraScale = RenderingUtility.GetParentScale(transform);
             ValidateFarClip();
-            ValidateNearClip();
 
             camera.stereoConvergence = CalculateFocusDistance();
             RenderingSettings.focusDistance = camera.stereoConvergence;
@@ -128,22 +147,6 @@ namespace UnityEngine.XR.MagicLeap
                 if (enforceFarClip)
                 {
                     camera.farClipPlane = max;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Validate the Near Clip plane
-        /// </summary>
-        public void ValidateNearClip()
-        {
-            var nearClip = camera.nearClipPlane;
-            var min = RenderingSettings.minNearClipDistance;
-            if (nearClip < min)
-            {
-                if (enforceNearClip)
-                {
-                    camera.nearClipPlane = min;
                 }
             }
         }
