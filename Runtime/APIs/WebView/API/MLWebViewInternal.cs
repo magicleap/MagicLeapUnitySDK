@@ -402,7 +402,6 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         /// <param name="Handle">handle to the WebView tab to request scroll size from.</param>
         /// <returns>Vector2Int representing the entire width and height of the webview, in pixels.</returns>
-        /// TODO: To be removed due to deprecation.
         private Vector2Int GetScrollSizeInternal()
         {
             int width = 0;
@@ -423,7 +422,6 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         /// <param name="Handle">handle to the WebView tab request scroll offset from.</param>
         /// <returns>Vector2Int representing the horizontal and vertical offset of the webview, in pixels.</returns>
-        /// TODO: To be removed due to deprecation.
         private Vector2Int GetScrollOffsetInternal()
         {
             int x = 0;

@@ -222,6 +222,8 @@ namespace MagicLeap.Core
             if (_mediaPlayer.IsPrepared)
             {
                 _mediaPlayer.Stop();
+                // Prepare player to reduce buffer delay
+                _mediaPlayer.PreparePlayer();
             }
         }
 

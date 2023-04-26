@@ -219,11 +219,16 @@ namespace UnityEngine.XR.MagicLeap
                 /// </summary>
                 public readonly IntPtr Frames;
 
-                public MLWorldCameraData(uint version)
+                private MLWorldCameraData(uint version)
                 {
                     Version = version;
                     FrameCount = 0;
                     Frames = IntPtr.Zero;
+                }
+
+                public static MLWorldCameraData Init()
+                {
+                    return new MLWorldCameraData(1);
                 }
             };
 

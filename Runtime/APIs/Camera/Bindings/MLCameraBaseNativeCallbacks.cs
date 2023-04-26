@@ -181,7 +181,7 @@ namespace UnityEngine.XR.MagicLeap
 
                 if (shouldCopyToManaged)
                 {
-                    MLThreadDispatch.Call(frameInfo, lambdaExtra, new MLCamera.Metadata(metadataHandle), camera.OnRawVideoFrameAvailableInternal);
+                    MLThreadDispatch.Call(frameInfo, lambdaExtra, new MLCamera.Metadata(metadataHandle), camera.OnRawVideoFrameAvailable);
                 }
             }
 

@@ -205,7 +205,7 @@ namespace UnityEngine.XR.MagicLeap
             {
                 Debug.LogWarning("[Magic Leap] The near clipping plane of the main camera is closer than " + MINIMUM_NEAR_CLIP_METERS + "m, which can cause artifacts.");
 
-                if (!enforceNearClip && fixIssues)
+                if (fixIssues)
                 {
                     camera.nearClipPlane = MINIMUM_NEAR_CLIP_METERS * scale;
                 }

@@ -12,7 +12,6 @@ namespace UnityEngine.XR.MagicLeap
 {
     using System;
     using System.Runtime.InteropServices;
-    using System.Threading.Tasks;
     using Native;
 
     /// <summary>
@@ -94,19 +93,19 @@ namespace UnityEngine.XR.MagicLeap
 
         public partial class Request : MLRequest<Request.Params, Request.Result>
         {
-            private uint resultsCount;
-
             public Request()
             {
-                handle = MagicLeapNativeBindings.InvalidHandle;
+                this.handle = MagicLeapNativeBindings.InvalidHandle;
             }
 
-            public override MLResult Start(Params queryParams)
+            private uint resultsCount;
+
+            public override MLResult Start(Params parameters)
             {
-                Dispose(true);
-                parameters = queryParams;
-                var q = MLAnchors.Instance.CreateQuery(parameters, out handle, out resultsCount);
-                var mlResult = MLResult.Create(q);
+                this.Dispose(true);
+                this.parameters = parameters;
+
+                var mlResult = MLResult.Create(MLAnchors.Instance.CreateQuery(this.parameters, out this.handle, out this.resultsCount));
                 return mlResult;
             }
 
@@ -133,6 +132,7 @@ namespace UnityEngine.XR.MagicLeap
                 MLResult mlResult = MLResult.Create(resultCode);
                 result = new Result(anchors);
                 return mlResult;
+
             }
 
             protected override void Dispose(bool disposing)
@@ -227,7 +227,7 @@ namespace UnityEngine.XR.MagicLeap
         {
             public readonly struct Result
             {
-                internal Result(NativeBindings.MLSpatialAnchor[] nativeAnchors)
+                public Result(NativeBindings.MLSpatialAnchor[] nativeAnchors)
                 {
                     var anchors = new Anchor[nativeAnchors.Length];
 

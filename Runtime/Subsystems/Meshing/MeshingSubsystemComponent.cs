@@ -650,16 +650,6 @@ namespace UnityEngine.XR.MagicLeap
             MeshingSubsystem.Extensions.MLMeshing.Config.batchSize = batchSize;
         }
 
-        // When returning from an application pause, refresh the meshes to prevent potential excess 
-        // meshing data from rendering if a head tracking pose resets within another application.
-        void OnApplicationPause(bool pauseStatus)
-        {
-            if (!pauseStatus)
-            {
-                RefreshAllMeshes();
-            }
-        }
-
         // Every frame, poll the MeshSubsystem for mesh updates (Added, Updated, Removed)
         // If the mesh is Added or Updated, then add it to the generation queue.
         //

@@ -11,7 +11,6 @@
 
 namespace UnityEngine.XR.MagicLeap
 {
-    using System;
     using System.Collections.Generic;
     using System.Runtime.InteropServices;
     using MagicLeap.Native;
@@ -36,43 +35,37 @@ namespace UnityEngine.XR.MagicLeap
             {
                 /// <summary>
                 /// MediaDRM to obtain the content keys for decrypting protected media streams.
-                /// </summary>                
+                /// </summary>
                 public partial class DRM
                 {
                     /// <summary>
                     /// Delegate for the any OnEvent event.
                     /// </summary>
-                    [Obsolete("OnEventDelegate has been deprecated and will be removed in a future release.")]
                     public delegate void OnEventDelegate(DRM drm, Event eventInfo);
 
                     /// <summary>
                     /// Delegate for the any OnExpirationUpdate event.
                     /// </summary>
-                    [Obsolete("OnExpirationUpdateDelegate has been deprecated and will be removed in a future release.")]
                     public delegate void OnExpirationUpdateDelegate(DRM drm, Expiration expirationInfo);
 
                     /// <summary>
                     /// Delegate for the any OnKeyStatusChange event.
                     /// </summary>
-                    [Obsolete("OnKeyStatusChangeDelegate has been deprecated and will be removed in a future release.")]
                     public delegate void OnKeyStatusChangeDelegate(DRM drm, KeyStatuses KeyStatuses);
 
                     /// <summary>
                     /// Event used to listen for different drm events.
                     /// </summary>
-                    [Obsolete("OnEvent has been deprecated and will be removed in a future release.")]
                     public event OnEventDelegate OnEvent = delegate { };
 
                     /// <summary>
                     /// Event used to listen for when there is an update in expiration.
                     /// </summary>
-                    [Obsolete("OnExpirationUpdateDelegate has been deprecated and will be removed in a future release.")]
                     public event OnExpirationUpdateDelegate OnExpirationUpdate = delegate { };
 
                     /// <summary>
                     /// Event used to listen for when a key's status has changed.
                     /// </summary>
-                    [Obsolete("OnKeyStatusChangeDelegate has been deprecated and will be removed in a future release.")]
                     public event OnKeyStatusChangeDelegate OnKeyStatusChange = delegate { };
 
                     public enum Property
@@ -168,7 +161,6 @@ namespace UnityEngine.XR.MagicLeap
                     /// <summary>
                     /// Type of track this DRM is used for.
                     /// </summary>
-                    [Obsolete("TrackType has been deprecated and will be removed in a future release.")]
                     public Track.Type TrackType { get; private set; }
 
                     /// <summary>
@@ -201,7 +193,6 @@ namespace UnityEngine.XR.MagicLeap
                     /// </summary>
                     /// <param name="mlPlayer">The media player this DRM is associated with.</param>
                     /// <param name="trackInfo">The info from the media player track that this DRM is associated with.</param>
-                    [Obsolete("DRM has been deprecated and will be removed in a future release.")]
                     public DRM(MLMedia.Player mlPlayer, Info trackDRMInfo)
                     {
                         this.mediaPlayer = mlPlayer;
@@ -220,7 +211,6 @@ namespace UnityEngine.XR.MagicLeap
                     /// Creates a new session for the DRM with the provided track information.
                     /// </summary>
                     /// <param name="trackInfo">The provided track information to create the new session with.</param>
-                    [Obsolete("CreateSession has been deprecated and will be removed in a future release.")]
                     public Session CreateSession(Info trackInfo) => new Session(this, trackInfo.PSSHEntries[0]);
 
                     /// <summary>
@@ -241,7 +231,6 @@ namespace UnityEngine.XR.MagicLeap
                     /// MLMediaDRMGetProvisionRequest() is used to obtain the opaque provision request byte array that should be delivered to the provisioning
                     /// server.
                     /// </summary>
-                    [Obsolete("ProvisionRequest has been deprecated and will be removed in a future release.")]
                     public MLResult ProvisionRequest(out byte[] requestData, out string defaultURL)
                     {
                         MLResult.Code resultCode = NativeBindings.MLMediaDRMGetProvisionRequest(this.handle, "none", out NativeBindings.MLMediaDRMRequestMessage provisionRequest);
@@ -259,7 +248,6 @@ namespace UnityEngine.XR.MagicLeap
                     /// <summary>
                     /// After a provision response is received by the app, it is provided to the DRM engine plugin using this method.
                     /// </summary>
-                    [Obsolete("ProvisionResponse has been deprecated and will be removed in a future release.")]
                     public MLResult ProvisionResponse(byte[] responseData)
                     {
                         NativeBindings.MLMediaDRMByteArray responseDRMByteArray = new NativeBindings.MLMediaDRMByteArray();
@@ -284,7 +272,6 @@ namespace UnityEngine.XR.MagicLeap
                     /// signature and notifies the server side database that the session destruction has been confirmed.  The persisted record on
                     /// the client is only removed after positive confirmation that the server received the message using releaseSecureStops().
                     /// </summary>
-                    [Obsolete("GetSecureStops has been deprecated and will be removed in a future release.")]
                     public MLResult GetSecureStops(out byte[][] secureStops)
                     {
                         MLResult.Code resultCode = NativeBindings.MLMediaDRMGetSecureStops(this.handle, out NativeBindings.MLMediaDRMByteArrayList secureStopsNative);
@@ -298,7 +285,6 @@ namespace UnityEngine.XR.MagicLeap
                     /// ***CURRENTLY UNTESTED ON CAPI***
                     ///  Access secure stop by secure stop ID. \see MLMediaDRMGetSecureStops()
                     /// </summary>
-                    [Obsolete("GetSecureStop has been deprecated and will be removed in a future release.")]
                     public MLResult GetSecureStop(byte[] secureStopId, out byte[] secureStop)
                     {
                         NativeBindings.MLMediaDRMByteArray secureStopIdNative = new NativeBindings.MLMediaDRMByteArray();
@@ -315,7 +301,6 @@ namespace UnityEngine.XR.MagicLeap
                     /// ***CURRENTLY UNTESTED ON CAPI***
                     /// Remove all the SecureStops.
                     /// </summary>
-                    [Obsolete("ReleaseAllSecureStops has been deprecated and will be removed in a future release.")]
                     public MLResult ReleaseAllSecureStops()
                     {
                         MLResult.Code resultCode = NativeBindings.MLMediaDRMReleaseAllSecureStops(this.handle);
@@ -327,7 +312,6 @@ namespace UnityEngine.XR.MagicLeap
                     /// ***CURRENTLY UNTESTED ON CAPI***
                     /// Process the SecureStop server response message. After authenticating the message, remove the SecureStops identified in the response.
                     /// </summary>
-                    [Obsolete("ReleaseSecureStops has been deprecated and will be removed in a future release.")]
                     public MLResult ReleaseSecureStops(byte[] secureStops)
                     {
                         NativeBindings.MLMediaDRMByteArray secureStopNative = new NativeBindings.MLMediaDRMByteArray();
@@ -343,7 +327,6 @@ namespace UnityEngine.XR.MagicLeap
                     /// Query if the given scheme identified by its UUID is supported on this device. And whether the drm plugin is able to
                     /// handle the media container format.
                     /// </summary>
-                    [Obsolete("IsCryptoSchemeSupported has been deprecated and will be removed in a future release.")]
                     public MLResult IsCryptoSchemeSupported(MagicLeapNativeBindings.MLUUID uuid, string mime, out bool isSupported)
                     {
                         byte[] mimeBytes = System.Text.Encoding.ASCII.GetBytes(mime);
@@ -361,7 +344,6 @@ namespace UnityEngine.XR.MagicLeap
                     /// ***CURRENTLY UNTESTED ON CAPI***
                     /// Read a DRM engine plugin String property value, given the property name.
                     /// </summary>
-                    [Obsolete("GetPropertyString has been deprecated and will be removed in a future release.")]
                     public MLResult GetPropertyString(Property property, out string propertyValue)
                     {
                         NativeBindings.Properties.TryGetValue(property, out string propertyName);
@@ -374,7 +356,6 @@ namespace UnityEngine.XR.MagicLeap
                     /// ***CURRENTLY UNTESTED ON CAPI***
                     /// Set a DRM engine plugin String property value.
                     /// </summary>
-                    [Obsolete("SetPropertyString has been deprecated and will be removed in a future release.")]
                     public MLResult SetPropertyString(Property property, string propertyValue)
                     {
                         NativeBindings.Properties.TryGetValue(property, out string propertyName);
@@ -387,7 +368,6 @@ namespace UnityEngine.XR.MagicLeap
                     /// ***CURRENTLY UNTESTED ON CAPI***
                     /// Read a DRM engine plugin byte array property value, given the property name.
                     /// </summary>
-                    [Obsolete("GetPropertyByteArray has been deprecated and will be removed in a future release.")]
                     public MLResult GetPropertyByteArray(Property property, out byte[] propertyValue)
                     {
                         NativeBindings.Properties.TryGetValue(property, out string propertyName);
@@ -402,7 +382,6 @@ namespace UnityEngine.XR.MagicLeap
                     /// ***CURRENTLY UNTESTED ON CAPI***
                     /// Set a DRM engine plugin byte array property value.
                     /// </summary>
-                    [Obsolete("SetPropertyByteArray has been deprecated and will be removed in a future release.")]
                     public MLResult SetPropertyByteArray(Property property, byte[] propertyValue)
                     {
                         NativeBindings.Properties.TryGetValue(property, out string propertyName);
@@ -417,13 +396,10 @@ namespace UnityEngine.XR.MagicLeap
                     /// <summary>
                     /// A DRM session that's required for a media player track to be prepared.
                     /// </summary>
-                    [Obsolete("Session has been deprecated and will be removed in a future release.")]
                     public class Session
                     {
-                        [Obsolete("CryptoKeyParam has been deprecated and will be removed in a future release.")]
                         public readonly struct CryptoKeyParam
                         {
-                            [Obsolete("CryptoKeyParam has been deprecated and will be removed in a future release.")]
                             public CryptoKeyParam(string algorithm, byte[] keySetId, byte[] initialVector)
                             {
                                 this.Algorithm = algorithm;
@@ -431,17 +407,11 @@ namespace UnityEngine.XR.MagicLeap
                                 this.InitialVector = initialVector;
                             }
 
-                            [Obsolete("Algorithm has been deprecated and will be removed in a future release.")]
                             public readonly string Algorithm;
-
-                            [Obsolete("KeySetId has been deprecated and will be removed in a future release.")]
                             public readonly byte[] KeySetId;
-
-                            [Obsolete("InitialVector has been deprecated and will be removed in a future release.")]
                             public readonly byte[] InitialVector;
                         }
 
-                        [Obsolete("HMACParam has been deprecated and will be removed in a future release.")]
                         public readonly struct HMACParam
                         {
                             public HMACParam(string algorithm, byte[] keySetId)
@@ -454,20 +424,15 @@ namespace UnityEngine.XR.MagicLeap
                             public readonly byte[] KeySetId;
                         }
 
-                        [Obsolete("RSAParam has been deprecated and will be removed in a future release.")]
                         public readonly struct RSAParam
                         {
-                            [Obsolete("RSAParam has been deprecated and will be removed in a future release.")]
                             public RSAParam(string algorithm, byte[] wrappedRsaKey)
                             {
                                 this.Algorithm = algorithm;
                                 this.WrappedRsaKey = wrappedRsaKey;
                             }
 
-                            [Obsolete("Algorithm has been deprecated and will be removed in a future release.")]
                             public readonly string Algorithm;
-
-                            [Obsolete("WrappedRsaKey has been deprecated and will be removed in a future release.")]
                             public readonly byte[] WrappedRsaKey;
                         }
 
@@ -494,13 +459,11 @@ namespace UnityEngine.XR.MagicLeap
                         /// <summary>
                         /// The drm this session is associated with.
                         /// </summary>
-                        [Obsolete("Drm has been deprecated and will be removed in a future release.")]
                         public DRM Drm { get; private set; }
 
                         /// <summary>
                         /// Determines if the session is prepared or not.
                         /// </summary>
-                        [Obsolete("IsPrepared has been deprecated and will be removed in a future release.")]
                         public bool IsPrepared { get; private set; }
 
                         /// <summary>
@@ -521,7 +484,6 @@ namespace UnityEngine.XR.MagicLeap
                         /// <summary>
                         /// Opens a new session.
                         /// </summary>
-                        [Obsolete("Open has been deprecated and will be removed in a future release.")]
                         public MLResult Open()
                         {
                             MLResult.Code resultCode = NativeBindings.MLMediaDRMOpenSession(this.Drm.handle, out this.id);
@@ -534,7 +496,6 @@ namespace UnityEngine.XR.MagicLeap
                         /// <summary>
                         /// Prepare DRM for the selected media (either audio or video) track with the CurrentSession member.
                         /// </summary>
-                        [Obsolete("Prepare has been deprecated and will be removed in a future release.")]
                         public MLResult Prepare()
                         {
                             MLMedia.Player.NativeBindings.MLMediaPlayerTrackDRMSessionInfo sessionInfo = new Player.NativeBindings.MLMediaPlayerTrackDRMSessionInfo(this.Drm.TrackType);
@@ -549,7 +510,6 @@ namespace UnityEngine.XR.MagicLeap
                         /// <summary>
                         /// Closes a session that was previously opened.
                         /// </summary>
-                        [Obsolete("Close has been deprecated and will be removed in a future release.")]
                         public MLResult Close()
                         {
                             MLResult.Code resultCode = NativeBindings.MLMediaDRMByteArrayRelease(ref this.keySetId);
@@ -570,7 +530,6 @@ namespace UnityEngine.XR.MagicLeap
                         /// from the server, it should deliver to the response to the DRM engine plugin using the method
                         /// MLMediaDRMProvideKeyResponse().
                         /// </summary>
-                        [Obsolete("KeysRequest has been deprecated and will be removed in a future release.")]
                         public MLResult KeysRequest(out byte[] requestData)
                         {
                             NativeBindings.MLMediaDRMKeyRequestInputParam keyRequestParam = new NativeBindings.MLMediaDRMKeyRequestInputParam("cenc", KeyType.Streaming);
@@ -591,7 +550,6 @@ namespace UnityEngine.XR.MagicLeap
                         /// later restore the keys to a new session with restoreKeys().  When the response is for a streaming or release request, a
                         /// null key_set_id is returned.
                         /// </summary>
-                        [Obsolete("KeysResponse has been deprecated and will be removed in a future release.")]
                         public MLResult KeysResponse(byte[] responseData, out byte[] keySetData)
                         {
                             NativeBindings.MLMediaDRMByteArray responseDRMByteArray = new NativeBindings.MLMediaDRMByteArray();
@@ -610,7 +568,6 @@ namespace UnityEngine.XR.MagicLeap
                         /// to use is identified by the 16 byte keyId.  The key must have been loaded into the session using
                         /// MLMediaDRMProvideKeyResponse().
                         /// </summary>
-                        [Obsolete("Encrypt has been deprecated and will be removed in a future release.")]
                         public MLResult Encrypt(CryptoKeyParam cryptoKeyParam, byte[] input, out byte[] output)
                         {
                             NativeBindings.MLMediaDRMByteArray keySetIdByteArray = new NativeBindings.MLMediaDRMByteArray();
@@ -644,7 +601,6 @@ namespace UnityEngine.XR.MagicLeap
                         /// to use is identified by the 16 byte keyId.  The key must have been loaded into the session using
                         /// MLMediaDRMProvideKeyResponse().
                         /// </summary>
-                        [Obsolete("Decrypt has been deprecated and will be removed in a future release.")]
                         public MLResult Decrypt(CryptoKeyParam cryptoKeyParam, byte[] input, out byte[] output)
                         {
                             NativeBindings.MLMediaDRMByteArray keySetIdByteArray = new NativeBindings.MLMediaDRMByteArray();
@@ -678,7 +634,6 @@ namespace UnityEngine.XR.MagicLeap
                         /// to use is identified by the 16 byte keyId.  The key must have been loaded into the session using
                         /// MLMediaDRMProvideKeyResponse().
                         /// </summary>
-                        [Obsolete("Sign has been deprecated and will be removed in a future release.")]
                         public MLResult Sign(HMACParam hmacParam, byte[] message, out byte[] signature)
                         {
                             NativeBindings.MLMediaDRMByteArray keySetIdByteArray = new NativeBindings.MLMediaDRMByteArray();
@@ -708,7 +663,6 @@ namespace UnityEngine.XR.MagicLeap
                         /// to use is identified by the 16 byte keyId.  The key must have been loaded into the session using
                         /// MLMediaDRMProvideKeyResponse().
                         /// </summary>
-                        [Obsolete("Sign has been deprecated and will be removed in a future release.")]
                         public MLResult Sign(RSAParam rsaParam, byte[] message, out byte[] signature)
                         {
                             NativeBindings.MLMediaDRMByteArray keySetIdByteArray = new NativeBindings.MLMediaDRMByteArray();
@@ -737,7 +691,6 @@ namespace UnityEngine.XR.MagicLeap
                         /// Perform a signature verification using the specified algorithm (if specified) over the message data referenced by the
                         /// message parameter.  The key must have been loaded into the session using MLMediaDRMProvideKeyResponse().
                         /// </summary>
-                        [Obsolete("Verify has been deprecated and will be removed in a future release.")]
                         public MLResult Verify(HMACParam hmacParam, byte[] message, byte[] signature, out bool isMatch)
                         {
                             NativeBindings.MLMediaDRMByteArray keySetIdByteArray = new NativeBindings.MLMediaDRMByteArray();
@@ -769,7 +722,6 @@ namespace UnityEngine.XR.MagicLeap
                         /// Since DRM license policies vary by vendor, the specific status field names are determined by each DRM vendor.  Refer to
                         /// your DRM provider documentation for definitions of the field names for a particular DRM engine plugin.
                         /// </summary>
-                        [Obsolete("GetKeyValues has been deprecated and will be removed in a future release.")]
                         public MLResult GetKeyValues(out KeyValuePair<string, string>[] keyValues)
                         {
                             MLResult.Code resultCode = NativeBindings.MLMediaDRMQueryKeyStatus(this.Drm.handle, ref this.id, out NativeBindings.MLMediaDRMKeyValueArray keyValuesNative);
@@ -783,7 +735,6 @@ namespace UnityEngine.XR.MagicLeap
                         /// Restore persisted offline keys into a new session.  key_set_id identifies the keys to load, obtained from a prior call
                         /// to MLMediaDRMProvideKeyResponse().
                         /// </summary>
-                        [Obsolete("RestoreKeys has been deprecated and will be removed in a future release.")]
                         public MLResult RestoreKeys(byte[] keySetId)
                         {
                             NativeBindings.MLMediaDRMByteArray keySetIdByteArray = new NativeBindings.MLMediaDRMByteArray();
@@ -798,7 +749,6 @@ namespace UnityEngine.XR.MagicLeap
                         /// ***CURRENTLY UNTESTED ON CAPI***
                         /// Add a {key, value} pair to the array of {key, value} pairs.
                         /// </summary>
-                        [Obsolete("AddKeyValue has been deprecated and will be removed in a future release.")]
                         public MLResult AddKeyValue(KeyValuePair<string, string> pair, out KeyValuePair<string, string>[] allKeys)
                         {
                             NativeBindings.MLMediaDRMKeyValue keyValueNative = new NativeBindings.MLMediaDRMKeyValue(pair);
@@ -812,7 +762,6 @@ namespace UnityEngine.XR.MagicLeap
                         /// ***CURRENTLY UNTESTED ON CAPI***
                         /// Allocate array of {key, value} pairs.
                         /// </summary>
-                        [Obsolete("AllocateKeyValueArray has been deprecated and will be removed in a future release.")]
                         public MLResult AllocateKeyValueArray(uint size, out KeyValuePair<string, string>[] allKeys)
                         {
                             MLResult.Code resultCode = NativeBindings.MLMediaDRMKeyValueArrayAllocate(size, out NativeBindings.MLMediaDRMKeyValueArray keyValuesNative);
@@ -825,7 +774,6 @@ namespace UnityEngine.XR.MagicLeap
                         /// ***CURRENTLY UNTESTED ON CAPI***
                         /// Remove the current keys from a session.
                         /// </summary>
-                        [Obsolete("RemoveKeys has been deprecated and will be removed in a future release.")]
                         public MLResult RemoveKeys(byte[] keySetId)
                         {
                             NativeBindings.MLMediaDRMByteArray keySetIdByteArray = new NativeBindings.MLMediaDRMByteArray();

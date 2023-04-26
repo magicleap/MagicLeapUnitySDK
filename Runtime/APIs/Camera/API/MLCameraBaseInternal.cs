@@ -104,11 +104,6 @@ namespace UnityEngine.XR.MagicLeap
         protected MLCamera.CaptureConfig cameraCaptureConfig;
 
         /// <summary>
-        /// Callback is invoked when a captured raw/compressed video frame buffer is available, invoked on the main thread.
-        /// </summary>
-        protected event MLCamera.OnCapturedFrameAvailableDelegate OnRawVideoFrameAvailableInternal;
-
-        /// <summary>
         /// Capture status of the camera before application pause.
         /// </summary>
         private bool wasCapturingVideo = false;
@@ -133,7 +128,6 @@ namespace UnityEngine.XR.MagicLeap
             gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
             Handle = Native.MagicLeapNativeBindings.InvalidHandle;
             byteArrays = new byte[MLCamera.NativeBindings.MLCameraMaxImagePlanes][];
-            OnRawVideoFrameAvailableInternal += HandleOnRawVideoFrameAvailableInternal;
         }
 
         /// <summary>
@@ -225,6 +219,7 @@ namespace UnityEngine.XR.MagicLeap
                 resultCode = MLCamera.NativeBindings.MLCameraInit(ref callbacks, IntPtr.Zero);
                 cameraInited = MLResult.DidNativeCallSucceed(resultCode, nameof(MLCamera.NativeBindings.MLCameraInit));
             }
+
 
             return MLResult.Create(resultCode);
         }
@@ -415,18 +410,6 @@ namespace UnityEngine.XR.MagicLeap
                 cameraMetadata = new MLCamera.Metadata(metadataHandle);
             }
             return resultCode;
-        }
-
-        /// <summary>
-        /// Handles the event of a new image getting captured.
-        /// </summary>
-        /// <param name="imageData">The raw data of the image.</param>
-        protected void HandleOnRawVideoFrameAvailableInternal(MLCamera.CameraOutput capturedFrame, MLCamera.ResultExtras resultExtras, MLCamera.Metadata metadataHandle)
-        {
-            if ((isCapturingVideo/* || isCapturingPreview*/) && (!wasCapturingVideo/* && !wasCapturingPreview*/))
-            {
-                OnRawVideoFrameAvailable?.Invoke(capturedFrame, resultExtras, metadataHandle);
-            }
         }
     }
 }

@@ -37,10 +37,22 @@ namespace UnityEngine.XR.MagicLeap
             VoiceCapture,
 
             /// <summary>
+            ///	 Raw stream from front two mics.
+            ///	 Stereo, 16 bit integer, 48k sampling rate.
+            /// </summary>
+            FrontMics,
+
+            /// <summary>
+            ///	Raw stream from side two mics.
+            ///	Stereo, 16 bit integer, 48k sampling rate.
+            /// </summary>
+            SideMics,
+
+            /// <summary>
             ///	Mic mix representing the user's surroundings.
             ///	Stereo, 16 bit integer, 48k sampling rate.
             /// </summary>
-            WorldCapture = 4
+            WorldCapture
         }
 
         /// <summary>
@@ -57,6 +69,8 @@ namespace UnityEngine.XR.MagicLeap
                     break;
 
                 case MicCaptureType.VoiceCapture:
+                case MicCaptureType.FrontMics:
+                case MicCaptureType.SideMics:
                 case MicCaptureType.WorldCapture:
                     sampleRate = 48000;
                     break;
@@ -80,6 +94,8 @@ namespace UnityEngine.XR.MagicLeap
                     channels = 1;
                     break;
 
+                case MicCaptureType.FrontMics:
+                case MicCaptureType.SideMics:
                 case MicCaptureType.WorldCapture:
                     channels = 2;
                     break;

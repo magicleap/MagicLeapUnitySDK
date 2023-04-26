@@ -19,7 +19,7 @@ namespace UnityEngine.XR.MagicLeap
     /// <para>This is an experimental API which may be modified or removed without any prior notice.</para>
     /// <para>The API only supports reading data from the depth camera. Apps cannot modify the camera settings, support for the same may be added in a future release.</para>
     /// </summary>
-    public partial class MLDepthCamera : MLAutoAPISingleton<MLDepthCamera>
+    public partial class MLDepthCamera : MLAPIBase
     {
         /// <summary>
         /// Depth Camera modes<br/>
@@ -293,30 +293,15 @@ namespace UnityEngine.XR.MagicLeap
         /// <summary>
         /// The settings the Depth Camera is currently configured with.
         /// </summary>
-        public static Settings CurrentSettings { get; private set; }
+        public Settings CurrentSettings { get; private set; }
 
-        /// <summary>
-        /// Sets the current settings of Depth Camera.
-        /// </summary>
-        /// <param name="settings"></param>
-        public static void SetSettings(Settings settings) => CurrentSettings = settings;
-
-        public static bool IsConnected { get; private set; }
+        public bool IsConnected { get; private set; }
 
         private bool connectionPaused;
 
-        protected override MLResult.Code StartAPI() => MLResult.Code.Ok;
-
-        protected override MLResult.Code StopAPI()
+        public MLDepthCamera(Settings settings)
         {
-            var result = MLResult.Code.Ok;
-
-            if (IsConnected)
-            {
-                result = InternalDisconnect().Result;
-            }
-
-            return result;
+            CurrentSettings = settings;
         }
 
         protected override void OnApplicationPause(bool pauseStatus)
@@ -351,7 +336,7 @@ namespace UnityEngine.XR.MagicLeap
         /// MLResult.Code.LicenseError: Necessary license is missing.<br/>
         /// MLResult.Code.UnspecifiedFailure: The operation failed with an unspecified error.
         /// </returns>
-        public static MLResult Connect() => Instance.InternalConnect(CurrentSettings);
+        public MLResult Connect() => InternalConnect(CurrentSettings);
 
         /// <summary>
         /// Disconnect from depth camera.
@@ -363,7 +348,7 @@ namespace UnityEngine.XR.MagicLeap
         /// MLResult.Code.Ok: Disconnected camera successfully.<br/>
         /// MLResult.Code.UnspecifiedFailure: Failed to disconnect camera for some unknown reason.
         /// </returns>
-        public static MLResult Disconnect() => Instance.InternalDisconnect();
+        public MLResult Disconnect() => InternalDisconnect();
 
         /// <summary>
         /// Update the depth camera settings.
@@ -376,7 +361,7 @@ namespace UnityEngine.XR.MagicLeap
         /// MLResult.Code.Ok: Settings updated successfully.<br/>
         /// MLResult.Code.UnspecifiedFailure: Failed due to internal error.
         /// </returns>
-        public static MLResult UpdateSettings(Settings settings) => Instance.InternalUpdateSettings(settings);
+        public MLResult UpdateSettings(Settings settings) => InternalUpdateSettings(settings);
 
         /// <summary>
         /// Poll for Frames.
@@ -394,7 +379,7 @@ namespace UnityEngine.XR.MagicLeap
         /// MLResult.Code.Timeout: No frame available within time limit.<br/>
         /// MLResult.Code.UnspecifiedFailure: Failed due to internal error.
         /// </returns>
-        public static MLResult GetLatestDepthData(ulong timeoutMs, out Data data) => Instance.InternalGetLatestDepthData(timeoutMs, out data);
+        public MLResult GetLatestDepthData(ulong timeoutMs, out Data data) => InternalGetLatestDepthData(timeoutMs, out data);
 
         #region internal
         private MLResult InternalConnect(Settings settings)

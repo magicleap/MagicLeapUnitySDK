@@ -26,134 +26,179 @@ namespace UnitySDKPlayTests
             Assert.IsTrue(CheckWebViewPermissions());
         }
 
-        [Test]
-        public void MLWebView_Create()
+        [UnityTest]
+        public IEnumerator MLWebView_Create()
         {
+            yield return SetUp();
             Assert.NotNull(webView);
+            yield return TearDown();
         }
 
-        [Test]
-        public void MLWebView_Destroy()
+        [UnityTest]
+        public IEnumerator MLWebView_Destroy()
         {
+            yield return SetUp();
             callbackReceived = false;
             MLResult result = webView.Destroy();
+            yield return TearDownYieldCallback(result);
             Assert.That(result.IsOk, result.Result.ToString());
         }
 
-        [Test]
-        public void MLWebView_GoTo()
+        // [UnityTest]
+        public IEnumerator MLWebView_GoTo()
         {
+            yield return SetUp();
             ResetFlags();
             var result = webView.GoTo(HomeUrl);
+            yield return new WaitUntil(() => callbackReceived && (loadEnded || errorLoaded));
+            yield return TearDown();
             Assert.That(result.IsOk, result.Result.ToString());
         }
 
-        [Test]
-        public void MLWebView_Reload()
+        // [UnityTest]
+        public IEnumerator MLWebView_Reload()
         {
+            yield return SetUp();
             ResetFlags();
             webView.GoTo(HomeUrl);
+            yield return new WaitUntil(() => callbackReceived && (loadEnded || errorLoaded));
             ResetFlags();
             var result = webView.Reload();
+            yield return new WaitUntil(() => callbackReceived && (loadEnded || errorLoaded));
+            yield return TearDown();
             Assert.That(result.IsOk, result.Result.ToString());
         }
 
-        [Test]
-        public void MLWebView_GetURL()
+        // [UnityTest]
+        public IEnumerator MLWebView_GetURL()
         {
+            yield return SetUp();
             ResetFlags();
             webView.GoTo(HomeUrl);
+            yield return new WaitUntil(() => callbackReceived && (loadEnded || errorLoaded));
             ResetFlags();
             var result = webView.GetURL();
+            yield return TearDown();
             Assert.That(result == HomeUrl, result);
         }
 
-        [Test]
-        public void MLWebView_CanGoBackPositive()
+        // [UnityTest]
+        public IEnumerator MLWebView_CanGoBackPositive()
         {
+            yield return SetUp();
             ResetFlags();
             webView.GoTo(ExampleUrl);
+            yield return new WaitUntil(() => callbackReceived && (loadEnded || errorLoaded));
             ResetFlags();
             webView.GoTo(HomeUrl);
+            yield return new WaitUntil(() => callbackReceived && (loadEnded || errorLoaded));
             ResetFlags();
             var result = webView.CanGoBack();
+            yield return TearDown();
             Assert.IsTrue(result);
         }
 
-        [Test]
-        public void MLWebView_CanGoBackNegative()
+        // [UnityTest]
+        public IEnumerator MLWebView_CanGoBackNegative()
         {
+            yield return SetUp();
             var result = webView.CanGoBack();
+            yield return TearDown();
             Assert.IsFalse(result);
         }
 
-        [Test]
-        public void MLWebView_GoBackPositive()
+        // [UnityTest]
+        public IEnumerator MLWebView_GoBackPositive()
         {
+            yield return SetUp();
             ResetFlags();
             webView.GoTo(ExampleUrl);
+            yield return new WaitUntil(() => callbackReceived && (loadEnded || errorLoaded));
             ResetFlags();
             webView.GoTo(HomeUrl);
+            yield return new WaitUntil(() => callbackReceived && (loadEnded || errorLoaded));
             ResetFlags();
             var result = webView.GoBack();
+            yield return new WaitUntil(() => callbackReceived && (loadEnded || errorLoaded));
+            yield return TearDown();
             Assert.That(result.IsOk, result.Result.ToString());
         }
 
-        [Test]
-        public void MLWebView_GoBackNegative()
+        // [UnityTest]
+        public IEnumerator MLWebView_GoBackNegative()
         {
+            yield return SetUp();
             ResetFlags();
             var result = webView.GoBack();
+            yield return new WaitUntil(() => (callbackReceived && (loadEnded || errorLoaded)) || !webView.CanGoBack());
+            yield return TearDown();
             Assert.That(result.IsOk, result.Result.ToString());
         }
 
-        [Test]
-        public void MLWebView_CanGoForwardPositive()
+        // [UnityTest]
+        public IEnumerator MLWebView_CanGoForwardPositive()
         {
+            yield return SetUp();
             ResetFlags();
             webView.GoTo(ExampleUrl);
+            yield return new WaitUntil(() => callbackReceived && (loadEnded || errorLoaded));
             ResetFlags();
             webView.GoTo(HomeUrl);
+            yield return new WaitUntil(() => callbackReceived && (loadEnded || errorLoaded));
             ResetFlags();
             webView.GoBack();
+            yield return new WaitUntil(() => callbackReceived && (loadEnded || errorLoaded));
             ResetFlags();
             var result = webView.CanGoForward();
+            yield return TearDown();
             Assert.IsTrue(result);
         }
 
-        [Test]
-        public void MLWebView_CanGoForwardNegative()
+        // [UnityTest]
+        public IEnumerator MLWebView_CanGoForwardNegative()
         {
+            yield return SetUp();
             ResetFlags();
             var result = webView.CanGoForward();
+            yield return TearDown();
             Assert.IsFalse(result);
         }
 
-        [Test]
-        public void MLWebView_GoForwardPositive()
+        // [UnityTest]
+        public IEnumerator MLWebView_GoForwardPositive()
         {
+            yield return SetUp();
             ResetFlags();
             webView.GoTo(ExampleUrl);
+            yield return new WaitUntil(() => callbackReceived && (loadEnded || errorLoaded));
             ResetFlags();
             webView.GoTo(HomeUrl);
+            yield return new WaitUntil(() => callbackReceived && (loadEnded || errorLoaded));
             ResetFlags();
             webView.GoBack();
+            yield return new WaitUntil(() => callbackReceived && (loadEnded || errorLoaded));
             ResetFlags();
             var result = webView.GoForward();
+            yield return new WaitUntil(() => callbackReceived && (loadEnded || errorLoaded));
+            yield return TearDown();
             Assert.That(result.IsOk, result.Result.ToString());
         }
 
-        [Test]
-        public void MLWebView_GoForwardNegative()
+        // [UnityTest]
+        public IEnumerator MLWebView_GoForwardNegative()
         {
+            yield return SetUp();
             ResetFlags();
             var result = webView.GoForward();
+            yield return new WaitUntil(() => (callbackReceived && (loadEnded || errorLoaded)) || !webView.CanGoForward());
+            yield return TearDown();
             Assert.That(result.IsOk, result.Result.ToString());
         }
 
-        [Test]
-        public void MLWebView_GetZoomFactor()
+        // [UnityTest]
+        public IEnumerator MLWebView_GetZoomFactor()
         {
+            yield return SetUp();
             ResetFlags();
             try
             {
@@ -164,213 +209,317 @@ namespace UnitySDKPlayTests
             {
                 Assert.Fail(ex.Message);
             }
+            yield return TearDown();
         }
 
-        [Test]
-        public void MLWebView_ClearCache()
+        // [UnityTest]
+        public IEnumerator MLWebView_ClearCache()
         {
+            yield return SetUp();
             ResetFlags();
             var result = webView.ClearCache();
+            yield return new WaitUntil(() => result.IsOk || callbackReceived);
+            yield return TearDown();
             Assert.That(result.IsOk, result.Result.ToString());
         }
 
-        [Test]
-        public void MLWebView_RemoveAllCookies()
+        // [UnityTest]
+        public IEnumerator MLWebView_RemoveAllCookies()
         {
+            yield return SetUp();
             ResetFlags();
             var result = webView.RemoveAllCookies();
+            yield return new WaitUntil(() => result.IsOk || callbackReceived);
+            yield return TearDown();
             Assert.That(result.IsOk, result.Result.ToString());
         }
 
-        [Test]
-        public void MLWebView_PauseDiscard()
+        // [UnityTest]
+        public IEnumerator MLWebView_PauseDiscard()
         {
+            yield return SetUp();
             ResetFlags();
             var result = webView.Pause(WebView.PauseType.Discard);
+            yield return new WaitUntil(() => result.IsOk || callbackReceived);
+            yield return TearDown();
             Assert.That(result.IsOk, result.Result.ToString());
         }
 
-        [Test]
-        public void MLWebView_PauseMultiMedia()
+        // [UnityTest]
+        public IEnumerator MLWebView_PauseMultiMedia()
         {
+            yield return SetUp();
             ResetFlags();
             var result = webView.Pause(WebView.PauseType.MultiMedia);
+            yield return new WaitUntil(() => result.IsOk || callbackReceived);
+            yield return TearDown();
             Assert.That(result.IsOk, result.Result.ToString());
         }
 
-        [Test]
-        public void MLWebView_PauseTimers()
+        // [UnityTest]
+        public IEnumerator MLWebView_PauseTimers()
         {
+            yield return SetUp();
             ResetFlags();
             var result = webView.Pause(WebView.PauseType.Timers);
+            yield return new WaitUntil(() => result.IsOk || callbackReceived);
+            yield return TearDown();
             Assert.That(result.IsOk, result.Result.ToString());
         }
 
-        [Test]
-        public void MLWebView_ResumeDiscard()
+        // [UnityTest]
+        public IEnumerator MLWebView_ResumeDiscard()
         {
+            yield return SetUp();
             ResetFlags();
             var result = webView.Pause(WebView.PauseType.Discard);
+            yield return new WaitUntil(() => result.IsOk || callbackReceived);
             result = webView.Resume();
+            yield return new WaitUntil(() => result.IsOk || callbackReceived);
+            yield return TearDown();
             Assert.That(result.IsOk, result.Result.ToString());
         }
 
-        [Test]
-        public void MLWebView_ResumeMultiMedia()
+        // [UnityTest]
+        public IEnumerator MLWebView_ResumeMultiMedia()
         {
+            yield return SetUp();
             ResetFlags();
             var result = webView.Pause(WebView.PauseType.MultiMedia);
+            yield return new WaitUntil(() => result.IsOk || callbackReceived);
             result = webView.Resume();
+            yield return new WaitUntil(() => result.IsOk || callbackReceived);
+            yield return TearDown();
             Assert.That(result.IsOk, result.Result.ToString());
         }
 
-        [Test]
-        public void MLWebView_ResumeTimers()
+        // [UnityTest]
+        public IEnumerator MLWebView_ResumeTimers()
         {
+            yield return SetUp();
             ResetFlags();
             var result = webView.Pause(WebView.PauseType.Timers);
+            yield return new WaitUntil(() => result.IsOk || callbackReceived);
             result = webView.Resume();
+            yield return new WaitUntil(() => result.IsOk || callbackReceived);
+            yield return TearDown();
             Assert.That(result.IsOk, result.Result.ToString());
         }
 
-        [Test]
-        public void MLWebView_ZoomIn()
+        // [UnityTest]
+        public IEnumerator MLWebView_ZoomIn()
         {
+            yield return SetUp();
             ResetFlags();
             var result = webView.ZoomIn();
+            yield return new WaitUntil(() => result.IsOk || callbackReceived);
+            yield return TearDown();
             Assert.That(result.IsOk, result.Result.ToString());
         }
 
-        [Test]
-        public void MLWebView_InjectMouseMove()
+        // [UnityTest]
+        public IEnumerator MLWebView_InjectMouseMove()
         {
+            yield return SetUp();
             ResetFlags();
             var result = webView.InjectMouseMove(0u, 0u, WebView.EventFlags.None);
+            yield return new WaitUntil(() => result.IsOk || callbackReceived);
+            yield return TearDown();
             Assert.That(result.IsOk, result.Result.ToString());
         }
 
-        [Test]
-        public void MLWebView_InjectMouseButtonDown_LeftMouseButton()
+        // [UnityTest]
+        public IEnumerator MLWebView_InjectMouseButtonDown_LeftMouseButton()
         {
+            yield return SetUp();
             ResetFlags();
             var result = webView.InjectMouseButtonDown(0u, 0u, WebView.EventFlags.LeftMouseButton);
+            yield return new WaitUntil(() => result.IsOk || callbackReceived);
+            yield return TearDown();
             Assert.That(result.IsOk, result.Result.ToString());
         }
 
-        [Test]
-        public void MLWebView_InjectMouseButtonUp_LeftMouseButton()
+        // [UnityTest]
+        public IEnumerator MLWebView_InjectMouseButtonUp_LeftMouseButton()
         {
+            yield return SetUp();
             ResetFlags();
             var result = webView.InjectMouseButtonUp(0u, 0u, WebView.EventFlags.LeftMouseButton);
+            yield return new WaitUntil(() => result.IsOk || callbackReceived);
+            yield return TearDown();
             Assert.That(result.IsOk, result.Result.ToString());
         }
 
-        [Test]
-        public void MLWebView_InjectMouseButtonDown_MiddleMouseButton()
+        // [UnityTest]
+        public IEnumerator MLWebView_InjectMouseButtonDown_MiddleMouseButton()
         {
+            yield return SetUp();
             ResetFlags();
             var result = webView.InjectMouseButtonDown(0u, 0u, WebView.EventFlags.MiddleMouseButton);
+            yield return new WaitUntil(() => result.IsOk || callbackReceived);
+            yield return TearDown();
             Assert.That(result.IsOk, result.Result.ToString());
         }
 
-        [Test]
-        public void MLWebView_InjectMouseButtonUp_MiddleMouseButton()
+        // [UnityTest]
+        public IEnumerator MLWebView_InjectMouseButtonUp_MiddleMouseButton()
         {
+            yield return SetUp();
             ResetFlags();
             var result = webView.InjectMouseButtonUp(0u, 0u, WebView.EventFlags.MiddleMouseButton);
+            yield return new WaitUntil(() => result.IsOk || callbackReceived);
+            yield return TearDown();
             Assert.That(result.IsOk, result.Result.ToString());
         }
 
-        [Test]
-        public void MLWebView_InjectMouseButtonDown_RightMouseButton()
+        // [UnityTest]
+        public IEnumerator MLWebView_InjectMouseButtonDown_RightMouseButton()
         {
+            yield return SetUp();
             ResetFlags();
             var result = webView.InjectMouseButtonDown(0u, 0u, WebView.EventFlags.RightMouseButton);
+            yield return new WaitUntil(() => result.IsOk || callbackReceived);
+            yield return TearDown();
             Assert.That(result.IsOk, result.Result.ToString());
         }
 
-        [Test]
-        public void MLWebView_InjectMouseButtonUp_RightMouseButton()
+        // [UnityTest]
+        public IEnumerator MLWebView_InjectMouseButtonUp_RightMouseButton()
         {
+            yield return SetUp();
             ResetFlags();
             var result = webView.InjectMouseButtonUp(0u, 0u, WebView.EventFlags.RightMouseButton);
+            yield return new WaitUntil(() => result.IsOk || callbackReceived);
+            yield return TearDown();
             Assert.That(result.IsOk, result.Result.ToString());
         }
 
-        [Test]
-        public void MLWebView_InjectChar_w()
+        // [UnityTest]
+        public IEnumerator MLWebView_InjectChar_w()
         {
+            yield return SetUp();
             ResetFlags();
             var result = webView.InjectChar('w');
+            yield return new WaitUntil(() => result.IsOk || callbackReceived);
+            yield return TearDown();
             Assert.That(result.IsOk, result.Result.ToString());
         }
 
-        [Test]
-        public void MLWebView_InjectKeyDown_Back()
+        // [UnityTest]
+        public IEnumerator MLWebView_InjectKeyDown_Back()
         {
+            yield return SetUp();
             ResetFlags();
             var result = webView.InjectKeyDown(WebView.KeyCode.Back, (uint)WebView.EventFlags.None);
+            yield return new WaitUntil(() => result.IsOk || callbackReceived);
+            yield return TearDown();
             Assert.That(result.IsOk, result.Result.ToString());
         }
 
-        [Test]
-        public void MLWebView_InjectKeyUp_Back()
+        // [UnityTest]
+        public IEnumerator MLWebView_InjectKeyUp_Back()
         {
+            yield return SetUp();
             ResetFlags();
             var result = webView.InjectKeyUp(WebView.KeyCode.Back, (uint)WebView.EventFlags.None);
+            yield return new WaitUntil(() => result.IsOk || callbackReceived);
+            yield return TearDown();
             Assert.That(result.IsOk, result.Result.ToString());
         }
 
-        [Test]
-        public void MLWebView_ZoomOut()
+        // [UnityTest]
+        public IEnumerator MLWebView_GetScrollSize()
         {
+            yield return SetUp();
+            ResetFlags();
+            try
+            {
+                var result = webView.GetScrollSize();
+                Assert.IsNotNull(result);
+            }
+            catch (Exception ex)
+            {
+                Assert.Fail(ex.Message);
+            }
+            yield return TearDown();
+        }
+
+        // [UnityTest]
+        public IEnumerator MLWebView_GetScrollOffset()
+        {
+            yield return SetUp();
+            ResetFlags();
+            try
+            {
+                var result = webView.GetScrollOffset();
+                Assert.IsNotNull(result);
+            }
+            catch (Exception ex)
+            {
+                Assert.Fail(ex.Message);
+            }
+            yield return TearDown();
+        }
+
+        // [UnityTest]
+        public IEnumerator MLWebView_ZoomOut()
+        {
+            yield return SetUp();
             ResetFlags();
             var result = webView.ZoomOut();
+            yield return new WaitUntil(() => result.IsOk || callbackReceived);
+            yield return TearDown();
             Assert.That(result.IsOk, result.Result.ToString());
         }
 
-        [Test]
-        public void MLWebView_ResetZoomNoChange()
+        // [UnityTest]
+        public IEnumerator MLWebView_ResetZoomNoChange()
         {
+            yield return SetUp();
             ResetFlags();
             var result = webView.ResetZoom();
+            yield return new WaitUntil(() => result.IsOk || callbackReceived);
+            yield return TearDown();
             Assert.That(result.IsOk, result.Result.ToString());
         }
 
-        [Test]
-        public void MLWebView_ResetZoomIn()
+        // [UnityTest]
+        public IEnumerator MLWebView_ResetZoomIn()
         {
+            yield return SetUp();
             ResetFlags();
             webView.ZoomIn();
             var result = webView.ResetZoom();
+            yield return new WaitUntil(() => result.IsOk || callbackReceived);
+            yield return TearDown();
             Assert.That(result.IsOk, result.Result.ToString());
         }
 
-        [Test]
-        public void MLWebView_ResetZoomOut()
+        // [UnityTest]
+        public IEnumerator MLWebView_ResetZoomOut()
         {
+            yield return SetUp();
             ResetFlags();
             webView.ZoomOut();
             var result = webView.ResetZoom();
+            yield return new WaitUntil(() => result.IsOk || callbackReceived);
+            yield return TearDown();
             Assert.That(result.IsOk, result.Result.ToString());
         }
 
-        [UnitySetUp]
-        private void SetUp()
+        private IEnumerator SetUp()
         {
-            //CheckWebViewPermissions();
+            CheckWebViewPermissions();
             webView = WebView.Create(Width, Height);
             RegisterCallbacks();
-            Assert.IsNotNull(webView);
-            // yield return new WaitUntil(() => callbackReceived);
+            yield return new WaitUntil(() => callbackReceived);
         }
 
-        [UnityTearDown]
-        private void TearDown()
+        private IEnumerator TearDown()
         {
             ResetFlags();
             MLResult result = webView.Destroy();
-            Assert.That(result.IsOk, result.Result.ToString());
+            yield return TearDownYieldCallback(result);
         }
 
         private IEnumerator TearDownYieldCallback(MLResult result)

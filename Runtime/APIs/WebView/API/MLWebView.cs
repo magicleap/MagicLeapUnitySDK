@@ -209,14 +209,12 @@ namespace UnityEngine.XR.MagicLeap
         /// before each frame draw to correctly determine the scrollable size of the webview.
         /// </summary>
         /// <returns>Vector2Int representing the entire width and height of the webview, in pixels.</returns>
-        [Obsolete("GetScrollSize has been deprecated and will be removed in a future release.")]
         public Vector2Int GetScrollSize() => GetScrollSizeInternal();
 
         /// <summary>
         /// Get the scroll offset of the webview.
         /// </summary>
         /// <returns>Vector2Int representing the horizontal and vertical offset of the webview, in pixels.</returns>
-        [Obsolete("GetScrollOffset has been deprecated and will be removed in a future release.")]
         public Vector2Int GetScrollOffset() => GetScrollOffsetInternal();
 
         /// <summary>

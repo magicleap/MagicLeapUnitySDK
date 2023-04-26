@@ -55,7 +55,7 @@ namespace UnitySDKEditorTests
 
         protected string Log(string structName, ulong capiSize, int sdkSize)
         {
-            return $"Size mismatch for struct {structName}, CAPI: {capiSize}, C#: {sdkSize}.";
+            return $"The sizes between c-api and sdk for struct {structName}, do not match, {capiSize} =/= {sdkSize}.";
         }
     }
 }

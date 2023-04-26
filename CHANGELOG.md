@@ -1,26 +1,5 @@
 # Changelog
 
-## [1.7.0]
-### Features
-
-### Bugfixes
-- Fixed compiler errors when the package `com.unity.xr.openxr` is also installed.
-- Fixed `MLDepthCamera` errors when closing the application.
-- Improved performance of `MLWebRTC.MLCameraVideoSource` by making it start the video capture asynchronously.
-- Fixed enforcement of MLCamera's near clip distance when "Fix problems on startup" is enabled
-- Fixed occasional crash when changing scenes while `MLMediaPlayer` is playing local video file
-- Addressed `MLAnchors` query timing to reduce likelihood of missing pose errors.
-- Fixed CV camera errors when resuming from sleep mode
-- Fixed CV camera errors when resuming from menu
-- Fixed `MLWorldCamera` Invalid Parameter error spams.
-- Renamed Tests assembly definition.
-
-### Deprecations & Removals
-- `MLWebView.GetScrollSize()` `MLWebView.GetScrollOffset()` have been marked as `Obsolete` and will be removed in a future release.
-
-### Known Issues
-- `MLWebRTC`: When disconnecting from a session, the camera does not shut down cleanly if the NativeSurface buffer format was used, causing the application to hang for as much as 30 seconds.
-
 ## [1.6.0]
 ### Features
 - Added `MLNotifications` API to suppress default notifications in medical SKUs. 
@@ -34,10 +13,10 @@
 - Fixed camera errors after the device enters sleep mode.
 - Fixed issue with `MLMarkerTracker` not working  after device enters sleep mode
 - Fixed issue with creating spatial anchors with an expiration value of `0` causing errors.
-- Fixed issue where meshing system would render excess data when returning to the application if head tracking was reset in another application.
 
 ### Known Issues
 - `MLWebRTC`: When disconnecting from a session, the camera does not shut down cleanly if the NativeSurface buffer format was used, causing the application to hang for as much as 30 seconds.
+- `MLAnchors` API returns the same anchor poses after a headpose reset
 
 ## [1.5.0]
 ### Features
@@ -487,7 +466,6 @@
 - `WinkLeft`, `WinkRight`, `Push` & `Pull` behaviors have been removed from the MLGazeRecognition API.
 - MLBluetooth APIs have been removed. Apps are expected to use Android Java APIs for bluetooth support.
 - Moved the prefab `AR Default Plane` and material `DebugPlane` from the SDK into the example project.
-- The MLMediaDRM API has been marked as `Obsolete` and will be removed in a future release.
 
 ### Known Issues / Limitations
 - WebRTC: local video rendering does not work when using native buffers
