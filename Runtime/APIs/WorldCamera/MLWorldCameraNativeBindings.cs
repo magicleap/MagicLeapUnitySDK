@@ -218,6 +218,13 @@ namespace UnityEngine.XR.MagicLeap
                 /// Camera frame data.
                 /// </summary>
                 public readonly IntPtr Frames;
+
+                public MLWorldCameraData(uint version)
+                {
+                    Version = version;
+                    FrameCount = 0;
+                    Frames = IntPtr.Zero;
+                }
             };
 
             /// <summary>

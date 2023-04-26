@@ -1,7 +1,7 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
 using UnityEngine.XR.MagicLeap;
 
 namespace MagicLeap.Core
@@ -27,7 +27,7 @@ namespace MagicLeap.Core
 
         private Stack<MLWebViewTabBehavior> previousTabs = new Stack<MLWebViewTabBehavior>();
 
-        public Action<MLWebViewTabBehavior> OnTabCreated;
+        public Action<MLWebViewTabBehavior, string> OnTabCreated;
         public Action<MLWebViewTabBehavior> OnTabDestroyed;
 
         void Awake()
@@ -58,7 +58,20 @@ namespace MagicLeap.Core
                 SelectTab(newTab);
 
                 // notify listeners that the tab was created
-                OnTabCreated?.Invoke(newTab);
+                OnTabCreated?.Invoke(newTab, null);
+            }
+        }
+
+        public void CreatePopupTab(MLWebView popupWebView, ulong popupID, string url)
+        {
+            MLWebViewTabBehavior newTab = Instantiate(tabPrefab, this.transform);
+            newTab.GetComponent<Toggle>().group = toggleGroup;
+            if (newTab.CreateTab(this, webViewScreen, addressBar, (popupWebView != null), popupID))
+            {
+                SelectTab(newTab);
+
+                // notify listeners that the tab was created
+                OnTabCreated?.Invoke(newTab, url);
             }
         }
 

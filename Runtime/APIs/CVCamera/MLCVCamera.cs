@@ -24,6 +24,11 @@ namespace UnityEngine.XR.MagicLeap
     public sealed partial class MLCVCamera : MLAutoAPISingleton<MLCVCamera>
     {
         /// <summary>
+        /// API status before application pause.
+        /// </summary>
+        private bool WasStarted = false;
+
+        /// <summary>
         /// Get transform between world origin and the camera. This method relies on a camera timestamp
         /// that is normally acquired from the MLCameraResultExtras structure, therefore this method is
         /// best used within a capture callback to maintain as much accuracy as possible.
@@ -39,8 +44,10 @@ namespace UnityEngine.XR.MagicLeap
         /// </returns>
         public static MLResult GetFramePose(MLTime vcamTimestamp, out Matrix4x4 outTransform)
         {
+            MLResult result;
+
             getFramePosePerfMarker.Begin();
-            MLResult result = Instance.InternalGetFramePose(NativeBindings.CameraID.ColorCamera, vcamTimestamp, out outTransform);
+            result = Instance.InternalGetFramePose(NativeBindings.CameraID.ColorCamera, vcamTimestamp, out outTransform);
             getFramePosePerfMarker.End();
 
             return result;
@@ -98,6 +105,42 @@ namespace UnityEngine.XR.MagicLeap
             }
 
             return poseResult;
+        }
+
+        protected override void OnApplicationPause(bool pauseStatus)
+        {
+            if (pauseStatus)
+            {
+                HandleApplicationPause();
+            }
+            else
+            {
+                HandleApplicationUnpause();
+            }
+        }
+
+        private void HandleApplicationPause()
+        {
+            if (IsStarted)
+            {
+                MLResult.Code result = StopAPI();
+                if (result == MLResult.Code.Ok)
+                {
+                    WasStarted = true;
+                }
+            }
+        }
+
+        private void HandleApplicationUnpause()
+        {
+            if (WasStarted)
+            {
+                MLResult.Code result = StartAPI();
+                if (result == MLResult.Code.Ok)
+                {
+                    WasStarted = false;
+                }
+            }
         }
     }
 }

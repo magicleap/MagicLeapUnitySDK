@@ -92,6 +92,28 @@ namespace UnityEngine.XR.MagicLeap
         public delegate void OnServiceFailedDelegate(MLWebView webView, MLResult result);
 
         /// <summary>
+        /// The delegate for the webview before popup event.
+        /// </summary>
+        /// <param name="webView">The MLWebView associated with this callback.</param>
+        /// <param name="url">The URL for the popup to load.</param>
+        public delegate void OnBeforePopupDelegate(MLWebView webView, string url, bool popupAccepted);
+
+        /// <summary>
+        /// The delegate for the webview popup opened event.
+        /// </summary>
+        /// <param name="webView">The MLWebView associated with this callback.</param>
+        /// <param name="popupID">The ID of the popup.</param>
+        /// <param name="url">The URL associated with the popup.</param>
+        public delegate void OnPopupOpenedDelegate(MLWebView webView, ulong popupID, string url);
+
+        /// <summary>
+        /// The delegate fpr the webview popup closed event.
+        /// </summary>
+        /// <param name="webView">The MLWebView associated with this callback.</param>
+        /// <param name="handle">The webview handle of the popup being closed.</param>
+        public delegate void OnPopupClosedDelegate(MLWebView webView, ulong handle);
+
+        /// <summary>
         /// Event raised just before resources are loaded.
         /// </summary>
         public event OnBeforeResourceLoadDelegate OnBeforeResourceLoaded = delegate { };
@@ -140,6 +162,21 @@ namespace UnityEngine.XR.MagicLeap
         /// Event raised when WebView service fails to connect.
         /// </summary>
         public event OnServiceFailedDelegate OnServiceFailed = delegate { };
+
+        /// <summary>
+        /// Event raised when WebView checks if a URL is OK to load in a popup.
+        /// </summary>
+        public event OnBeforePopupDelegate OnBeforePopup = delegate { };
+
+        /// <summary>
+        /// Event raised when WebView opened a popup.
+        /// </summary>
+        public event OnPopupOpenedDelegate OnPopupOpened = delegate { };
+
+        /// <summary>
+        /// Event raised when Webview is closing a popup.
+        /// </summary>
+        public event OnPopupClosedDelegate OnPopupClosed = delegate { };
     }
 }
 

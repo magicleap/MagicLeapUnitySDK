@@ -48,7 +48,7 @@ namespace UnityEngine.XR.MagicLeap
         /// <returns>MLResult.Code.UnspecifiedFailure if Unable to create the MLWebView.</returns>
         /// <returns>MLResult.Code.InvalidParam if the parameter was null pointer.</returns>
         /// <returns>MLResult.Code.PermissionDenied its missing the permission(s).</returns>
-        private MLResult.Code CreateInternal(uint width, uint height)
+        private MLResult.Code CreateInternal(uint width, uint height, bool isPopup, ulong popupID)
         {
             Handle = MagicLeapNativeBindings.InvalidHandle;
             var resultCode = MLPermissions.CheckPermission(MLPermission.WebView).Result;
@@ -58,7 +58,7 @@ namespace UnityEngine.XR.MagicLeap
                 return MLResult.Code.PermissionDenied;
             }
 
-            var settings = NativeBindings.Settings.Create(gcHandle, width, height);
+            var settings = NativeBindings.Settings.Create(gcHandle, width, height, isPopup, popupID);
 
             MLResult.Code result = NativeBindings.MLWebViewCreate(out Handle, ref settings);
             MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLWebViewCreate));
@@ -402,6 +402,7 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         /// <param name="Handle">handle to the WebView tab to request scroll size from.</param>
         /// <returns>Vector2Int representing the entire width and height of the webview, in pixels.</returns>
+        /// TODO: To be removed due to deprecation.
         private Vector2Int GetScrollSizeInternal()
         {
             int width = 0;
@@ -422,6 +423,7 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         /// <param name="Handle">handle to the WebView tab request scroll offset from.</param>
         /// <returns>Vector2Int representing the horizontal and vertical offset of the webview, in pixels.</returns>
+        /// TODO: To be removed due to deprecation.
         private Vector2Int GetScrollOffsetInternal()
         {
             int x = 0;
