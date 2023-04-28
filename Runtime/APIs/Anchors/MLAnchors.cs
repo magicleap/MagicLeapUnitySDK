@@ -259,16 +259,25 @@ namespace UnityEngine.XR.MagicLeap
             /// </returns>
             public static MLResult Create(Pose pose, long expirationSeconds, out Anchor anchor)
             {
-                var maxExpirationSeconds = (long)DateTime.MaxValue.Subtract(DateTime.UtcNow).TotalSeconds;
-                var clampedExpirationSeconds = Math.Clamp(expirationSeconds, 0, maxExpirationSeconds);
-
-                var unixTimestamp = (DateTime.UtcNow.AddSeconds(clampedExpirationSeconds)).Subtract(DateTime.UnixEpoch).TotalSeconds;
+                anchor = new Anchor();
+                
+                if (expirationSeconds < 0)
+                    return MLResult.Create(MLResult.Code.InvalidParam,
+                        "The expirationSeconds parameter was a negative number and should be positive or 0.");
+                
+                double unixTimestamp = 0;
+                if (expirationSeconds > 0)
+                {
+                    var maxExpirationSeconds = (long)DateTime.MaxValue.Subtract(DateTime.UtcNow).TotalSeconds;
+                    var clampedExpirationSeconds = Math.Clamp(expirationSeconds, 0, maxExpirationSeconds);
+                    
+                    unixTimestamp = (DateTime.UtcNow.AddSeconds(clampedExpirationSeconds)).Subtract(DateTime.UnixEpoch).TotalSeconds;
+                }
+                
                 var createInfo = new NativeBindings.MLSpatialAnchorCreateInfo(pose, (ulong)unixTimestamp);
                 var resultCode = MLAnchors.Instance.CreateAnchor(createInfo, out NativeBindings.MLSpatialAnchor nativeAnchor);
                 anchor = new Anchor(nativeAnchor);
-                return expirationSeconds < 0
-                    ? MLResult.Create(MLResult.Code.InvalidParam, "The expirationSeconds parameter was a negative number and should be positive or 0.")
-                    : MLResult.Create(resultCode);
+                return MLResult.Create(resultCode);
             }
 
             public static MLResult DeleteAnchorWithId(string anchorId)

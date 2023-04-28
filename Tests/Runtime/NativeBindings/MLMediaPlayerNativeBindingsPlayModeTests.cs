@@ -1,21 +1,24 @@
 using System.Reflection;
 using NUnit.Framework;
 
-namespace Tests.Runtime.NativeBindings
+namespace UnitySDKPlayTests
 {
-    public class MLMediaPlayerNativeBindingsPlayModeTests : NativeBindingsPlayTests
+    public partial class MLMedia
     {
-        [SetUp]
-        public void SetupNativeBindings()
+        public partial class Player : NativeBindingsPlayTests
         {
-            var apiType = typeof(UnityEngine.XR.MagicLeap.MLMedia.Player);
-            nativeBindings = apiType.GetNestedType("NativeBindings", BindingFlags.NonPublic);
-        }
+            [SetUp]
+            public void SetupNativeBindings()
+            {
+                var apiType = typeof(UnityEngine.XR.MagicLeap.MLMedia.Player);
+                nativeBindings = apiType.GetNestedType("NativeBindings", BindingFlags.NonPublic);
+            }
 
-        [Test]
-        public void NativeBinding_MLUnityQueueMediaPlayerResetAndDestroy_Exists()
-        {
-            AssertThatMethodExists("MLUnityQueueMediaPlayerResetAndDestroy");
+            [Test]
+            public void NativeBinding_MLUnityQueueMediaPlayerResetAndDestroy_Exists()
+            {
+                AssertThatMethodExists("MLUnityQueueMediaPlayerResetAndDestroy");
+            }
         }
     }
 }

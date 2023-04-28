@@ -1,9 +1,9 @@
 using NUnit.Framework;
 using System.Reflection;
 
-namespace Tests.Runtime.NativeBindings
+namespace UnitySDKPlayTests
 {
-    public class MLWebViewNativeBindingsPlayModeTestsBindings : NativeBindingsPlayTests
+    public partial class MLWebView : NativeBindingsPlayTests
     {
         [SetUp]
         public void SetupNativeBindings()

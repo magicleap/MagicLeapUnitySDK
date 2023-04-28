@@ -1,21 +1,18 @@
 using System.Reflection;
 using NUnit.Framework;
 
-namespace Tests.Runtime.NativeBindings
+namespace UnitySDKPlayTests
 {
-    public class MLMediaPlayerTrackNativeBindingsPlayModeTests : NativeBindingsPlayTests
+    public partial class MLMedia
     {
-        [SetUp]
-        public void SetupNativeBindings()
+        public partial class Player
         {
-            var apiType = typeof(UnityEngine.XR.MagicLeap.MLMedia.Player.Track);
-            nativeBindings = apiType.GetNestedType("NativeBindings", BindingFlags.NonPublic);
+            [Test]
+            public void NativeBinding_FreeUnmanagedMemory_Exists()
+            {
+                AssertThatMethodExists("FreeUnmanagedMemory");
+            }
         }
-
-        [Test]
-        public void NativeBinding_FreeUnmanagedMemory_Exists()
-        {
-            AssertThatMethodExists("FreeUnmanagedMemory");
-        }
+  
     }
 }

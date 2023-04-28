@@ -271,5 +271,41 @@ namespace UnityEngine.XR.MagicLeap
             return MLResult.Create(MLResult.Code.NotImplemented);
 #endif
         }
+
+        protected override void OnApplicationPause(bool pauseStatus)
+        {
+            if (pauseStatus)
+            {
+                HandleApplicationPause();
+            }
+            else
+            {
+                HandleApplicationUnpause();
+            }
+        }
+
+        private void HandleApplicationPause()
+        {
+            if (isCapturingVideo)
+            {
+                MLResult result = CaptureVideoStop();
+                if (result.IsOk)
+                {
+                    wasCapturingVideo = true;
+                }
+            }
+        }
+
+        private void HandleApplicationUnpause()
+        {
+            if (wasCapturingVideo)
+            {
+                MLResult result = CaptureVideoStart();
+                if (result.IsOk)
+                {
+                    wasCapturingVideo = false;
+                }
+            }
+        }
     }
 }

@@ -104,6 +104,11 @@ namespace UnityEngine.XR.MagicLeap
         protected MLCamera.CaptureConfig cameraCaptureConfig;
 
         /// <summary>
+        /// Capture status of the camera before application pause.
+        /// </summary>
+        private bool wasCapturingVideo = false;
+
+        /// <summary>
         /// Gets the texture for the camera preview render.
         /// (null) when preview is not available yet.
         /// </summary>

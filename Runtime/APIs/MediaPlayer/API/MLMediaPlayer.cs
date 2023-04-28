@@ -41,6 +41,9 @@ namespace UnityEngine.XR.MagicLeap
             public const string VTTMime = "text/vtt";
             public const string TTMLMime = "application/ttml+xml";
 
+            private IntPtr WebVTTDataPtr;
+            private IntPtr TTMLDataPtr;
+
             /// <summary>
             /// Handle for the unmanaged media player object.
             /// </summary>
@@ -140,6 +143,9 @@ namespace UnityEngine.XR.MagicLeap
                     return;
                 }
 
+                WebVTTDataPtr = Marshal.AllocHGlobal(Marshal.SizeOf<NativeBindings.WebVTTData>());
+                TTMLDataPtr = Marshal.AllocHGlobal(Marshal.SizeOf<NativeBindings.TTMLData>());
+
                 MLDevice.RegisterApplicationPause(this.OnApplicationPause);
 
                 NativeBindings.MLMediaPlayerEventCallbacksEx callbacks = NativeBindings.MLMediaPlayerEventCallbacksEx.Create();
@@ -184,6 +190,9 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             ~Player()
             {
+                Marshal.FreeHGlobal(WebVTTDataPtr);
+                Marshal.FreeHGlobal(TTMLDataPtr);
+
                 Destroy();
             }
 
@@ -276,7 +285,7 @@ namespace UnityEngine.XR.MagicLeap
             }
 
             public MLResult Stop()
-            { 
+            {
                 MLResult.Code resultCode = NativeBindings.MLMediaPlayerStop(this.handle);
                 bool stopped = MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerStop));
                 if (stopped)
@@ -560,7 +569,6 @@ namespace UnityEngine.XR.MagicLeap
             public MLResult SelectTrack(Track track)
             {
                 TracksContainer container = this.trackContainers[track.TrackType];
-
                 MLResult.Code resultCode = NativeBindings.MLMediaPlayerSelectTrack(this.handle, track.Index);
                 if (!MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMediaPlayerSelectTrack)))
                 {

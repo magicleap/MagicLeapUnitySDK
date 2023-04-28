@@ -101,6 +101,26 @@ namespace UnityEngine.XR.MagicLeap
             public delegate void OnServiceFailedCallback(MLResult result, IntPtr userData);
 
             /// <summary>
+            /// The delegate for the webview before popup event.
+            /// </summary>
+            public delegate bool OnBeforePopupCallback([MarshalAs(UnmanagedType.LPStr)] string url, IntPtr userData);
+
+            /// <summary>
+            /// The delegate for the webview popup opened event.
+            /// </summary>
+            public delegate void OnPopupOpenedCallback(ulong popupID, [MarshalAs(UnmanagedType.LPStr)] string url, IntPtr userData);
+
+            /// <summary>
+            /// The delegate for the webview popup closed event. <br />
+            /// This callback is used to notify the application of a popup that is being closed.
+            /// For example, this can happen if window.close() is used. This is not always called.
+            /// If the application closes the popup itself, then this function is not called.
+            /// An application should call MLWebViewDestroy as soon as possible on the popup's
+            /// handle after receiving this callback.
+            /// </summary>
+            public delegate void OnPopupClosedCallback(ulong handle, IntPtr userData);
+
+            /// <summary>
             /// Struct to define the cursor's state.
             /// </summary>
             [StructLayout(LayoutKind.Sequential)]
@@ -179,19 +199,31 @@ namespace UnityEngine.XR.MagicLeap
                 public EventCallbacks Callbacks;
 
                 /// <summary>
+                /// Is this a popup?
+                /// </summary>
+                public bool IsPopup;
+
+                /// <summary>
+                /// Popup identifier used to create a webview.
+                /// </summary>
+                public ulong PopupID;
+
+                /// <summary>
                 /// Create and return an initialized version of this struct.
                 /// </summary>
                 /// <returns>A new instance of this struct.</returns>
-                public static Settings Create(GCHandle gcHandle, uint width, uint height)
+                public static Settings Create(GCHandle gcHandle, uint width, uint height, bool isPopup, ulong popupID)
                 {
                     return new Settings()
                     {
-                        Version = 1,
+                        Version = 3,
                         Width = width,
                         Height = height,
                         ApplicationVm = GetJavaVM(),
                         Context = GetAppContext(),
-                        Callbacks = EventCallbacks.Create(gcHandle)
+                        Callbacks = EventCallbacks.Create(gcHandle),
+                        IsPopup = isPopup,
+                        PopupID = popupID
                     };
                 }
             };
@@ -264,6 +296,21 @@ namespace UnityEngine.XR.MagicLeap
                 public OnServiceFailedCallback OnServiceFailed;
 
                 /// <summary>
+                /// This callback is used to ask the application if is OK to load a URL.
+                /// </summary>
+                public OnBeforePopupCallback OnBeforePopup;
+
+                /// <summary>
+                /// This callback is used to notify application that popup is opened.
+                /// </summary>
+                public OnPopupOpenedCallback OnPopupOpened;
+
+                /// <summary>
+                /// This callback is used to notify the application of a closing popup.
+                /// </summary>
+                public OnPopupClosedCallback OnPopupClosed;
+
+                /// <summary>
                 /// Create and return an initialized version of this struct.
                 /// <param name="userData">Pointer to user data to be used to reference the originating web view tab</param>
                 /// </summary>
@@ -272,7 +319,7 @@ namespace UnityEngine.XR.MagicLeap
                 {
                     return new EventCallbacks()
                     {
-                        Version = 2u,
+                        Version = 3u,
                         UserData = GCHandle.ToIntPtr(gcHandle),
                         OnBeforeResourceLoad = HandleOnBeforeResourceLoad,
                         OnLoadEnd = HandleOnLoadEnd,
@@ -283,7 +330,10 @@ namespace UnityEngine.XR.MagicLeap
                         OnDestroy = HandleOnDestroy,
                         OnServiceConnected = HandleServiceConnected,
                         OnServiceDisconnected = HandleServiceDisconnected,
-                        OnServiceFailed = HandleServiceFailed
+                        OnServiceFailed = HandleServiceFailed,
+                        OnBeforePopup = HandleBeforePopup,
+                        OnPopupOpened = HandlePopupOpened,
+                        OnPopupClosed = HandlePopupClosed
                     };
                 }
             };
@@ -821,6 +871,48 @@ namespace UnityEngine.XR.MagicLeap
                 GCHandle gcHandle = GCHandle.FromIntPtr(userData);
                 MLWebView webView = gcHandle.Target as MLWebView;
                 MLThreadDispatch.Call(webView, result, webView.OnServiceFailed);
+            }
+
+            /// <summary>
+            /// Callback from the native code to check if URL is OK to load in a popup.
+            /// </summary>
+            /// <param name="url">The URL for the popup to load.</param>
+            /// <param name="userData">User defined data, typically a pointer to the originating MLWebView object.</param>
+            /// <returns>The application should return true if it accepts the popup and false otherwise.</returns>
+            [AOT.MonoPInvokeCallback(typeof(OnBeforePopupCallback))]
+            private static bool HandleBeforePopup([MarshalAs(UnmanagedType.LPStr)] string url, IntPtr userData)
+            {
+                GCHandle gcHandle = GCHandle.FromIntPtr(userData);
+                MLWebView webView = gcHandle.Target as MLWebView;
+                MLThreadDispatch.Call(webView, url, webView.AcceptPopup, webView.OnBeforePopup);
+                return webView.AcceptPopup;
+            }
+
+            /// <summary>
+            /// Callback from the native code when a popup is opened.
+            /// </summary>
+            /// <param name="popupID">The ID of the popup.</param>
+            /// <param name="url">The URL associated with the popup.</param>
+            /// <param name="userData">User defined data, typically a pointer to the originating MLWebView object.</param>
+            [AOT.MonoPInvokeCallback(typeof(OnPopupOpenedCallback))]
+            private static void HandlePopupOpened(ulong popupID, [MarshalAs(UnmanagedType.LPStr)] string url, IntPtr userData)
+            {
+                GCHandle gcHandle = GCHandle.FromIntPtr(userData);
+                MLWebView webView = gcHandle.Target as MLWebView;
+                MLThreadDispatch.Call(webView, popupID, url, webView.OnPopupOpened);
+            }
+
+            /// <summary>
+            /// Callback from the native code when a popup is closing.
+            /// </summary>
+            /// <param name="handle">The webview handle of the popup being closed.</param>
+            /// <param name="userData">User defined data, typically a pointer to the originating MLWebView object.</param>
+            [AOT.MonoPInvokeCallback(typeof(OnPopupClosedCallback))]
+            private static void HandlePopupClosed(ulong handle, IntPtr userData)
+            {
+                GCHandle gcHandle = GCHandle.FromIntPtr(userData);
+                MLWebView webView = gcHandle.Target as MLWebView;
+                MLThreadDispatch.Call(webView, handle, webView.OnPopupClosed);
             }
         }
     }

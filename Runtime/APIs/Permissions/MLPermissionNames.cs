@@ -41,5 +41,7 @@ namespace UnityEngine.XR.MagicLeap
         public const string SpatialMapping = "com.magicleap.permission.SPATIAL_MAPPING";
 
         public const string DepthCamera = "com.magicleap.permission.DEPTH_CAMERA";
+
+        public const string SystemNotification = "com.magicleap.permission.SYSTEM_NOTIFICATION";
     }
 }

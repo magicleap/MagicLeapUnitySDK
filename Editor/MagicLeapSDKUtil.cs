@@ -106,9 +106,12 @@ namespace UnityEditor.XR.MagicLeap
         {
             if (target == BuildTarget.Android)
             {
-                string path = EditorPrefs.GetString(kMagicLeapSDKRoot, null);
-                if (!string.IsNullOrEmpty(path))
-                    return path;
+                string path = GetMLSDKCmdLineArg();
+                if (string.IsNullOrEmpty(path))
+                {
+                    path = EditorPrefs.GetString(kMagicLeapSDKRoot, null);
+                }
+                return path;                
             }
             string targetPath = EditorPrefs.GetString(target.ToString() + "SDKRoot");
             if (string.IsNullOrEmpty(targetPath))
@@ -116,6 +119,19 @@ namespace UnityEditor.XR.MagicLeap
                 Debug.LogWarningFormat("MagicLeapSDKUtil couldn't determine SDK path for BuildTarget {0}.", target.ToString());
             }
             return targetPath;
+        }
+
+        private static string GetMLSDKCmdLineArg()
+        {
+            string path = "";
+            var args = new System.Collections.Generic.List<string>(Environment.GetCommandLineArgs());
+            var mlsdkParam = args.IndexOf("-mlsdk");
+            if (mlsdkParam >= 0 && mlsdkParam < args.Count - 1)
+            {
+                path = args[mlsdkParam + 1].Replace("\\", "/");
+                Debug.Log("GetSDKPath got -mlsdk path from command line args: " + path);
+            }
+            return path;
         }
 
         private static void SetSDKPath(BuildTarget target, string path)

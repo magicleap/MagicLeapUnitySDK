@@ -50,11 +50,11 @@ namespace MagicLeap.Core
             DestroyTab();
         }
 
-        public bool CreateTab(MLWebViewTabBarBehavior tabBar, MLWebViewScreenBehavior webViewScreen, InputField addressBar)
+        public bool CreateTab(MLWebViewTabBarBehavior tabBar, MLWebViewScreenBehavior webViewScreen, InputField addressBar, bool isPopup = false, ulong popupID = 0)
         {
             if (!MLPermissions.CheckPermission(MLPermission.WebView).IsOk)
             {
-                Debug.LogError($"You must include {MLPermission.WebView} in AndroidManifest.xml to run this example");
+                Debug.LogError($"Missing permission {MLPermission.WebView}");
                 Destroy(this);
                 return false;
             }
@@ -64,7 +64,10 @@ namespace MagicLeap.Core
             this.addressBar = addressBar;
             webViewScreen.GetWebViewSize(out uint width, out uint height);
 
-            WebView = MLWebView.Create(width, height);
+            WebView = MLWebView.Create(width, height, isPopup, popupID);
+
+            WebView.OnPopupClosed += OnPopupClosed;
+
             if (WebView == null)
             {
                 Debug.LogError("Failed to create new web view tab");
@@ -75,6 +78,12 @@ namespace MagicLeap.Core
             WebView.OnLoadEnded += OnLoadEnded;
             WebView.OnServiceConnected += OnServiceConnected;
             return true;
+        }
+
+        private void OnPopupClosed(MLWebView webView, ulong handle)
+        {
+            WebView.OnPopupClosed -= OnPopupClosed;
+            DestroyTab();
         }
 
         public void SelectTab()
@@ -154,7 +163,6 @@ namespace MagicLeap.Core
                     tabUrl = url;
                     loadOnServiceConnected = true;
                 }
-
             }
         }
 
@@ -205,7 +213,7 @@ namespace MagicLeap.Core
         {
             isPaused = true;
         }
-        
+
         public void Resume()
         {
             isPaused = false;

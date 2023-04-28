@@ -46,10 +46,10 @@ namespace UnityEngine.XR.MagicLeap
         /// <param name="width">Width of the WebView in pixels.</param>
         /// <param name="height">Height of the WebView in pixels.</param>
         /// <returns>MLWebView instance if creation was successful, null otherwise.</returns>
-        public static MLWebView Create(uint width, uint height)
+        public static MLWebView Create(uint width, uint height, bool isPopup = false, ulong popupId = 0)
         {
             MLWebView webView = new MLWebView();
-            return webView.CreateInternal(width, height) == MLResult.Code.Ok ? webView : null;
+            return webView.CreateInternal(width, height, isPopup, popupId) == MLResult.Code.Ok ? webView : null;
 
         }
 
@@ -77,6 +77,15 @@ namespace UnityEngine.XR.MagicLeap
         {
             get; set;
         } = false;
+
+        /// <summary>
+        /// Flag to indicate if the application accepts the popup
+        /// </summary>
+        /// <value></value>
+        public bool AcceptPopup
+        {
+            get; set;
+        } = true;
 
         /// <summary>
         /// Go to a URL with the specified MLWebView.  Note that success with this call only indicates that a load will be
