@@ -129,8 +129,9 @@ namespace UnityEngine.XR.MagicLeap
             RenderingSettings.cameraScale = RenderingUtility.GetParentScale(transform);
             ValidateFarClip();
 
-            camera.stereoConvergence = CalculateFocusDistance();
-            RenderingSettings.focusDistance = camera.stereoConvergence;
+            // camera.stereoConvergence = CalculateFocusDistance();
+            // camera.stereoConvergence = 0.5f;
+            // RenderingSettings.focusDistance = 0.5f;
             RenderingSettings.farClipDistance = camera.farClipPlane;
             RenderingSettings.nearClipDistance = camera.nearClipPlane;
         }
