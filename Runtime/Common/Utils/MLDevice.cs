@@ -52,12 +52,12 @@ namespace UnityEngine.XR.MagicLeap
         /// <summary>
         /// Hardcoded value approximating minimum near clip plane distance allowed by the platform.
         /// </summary>
-        public const float MinimumNearClipDistance = 0.37f;
+        public const float MinimumNearClipDistance = 0.1f;
 
         /// <summary>
         /// Hardcoded value with the default near clip plane distance to use.
         /// </summary>
-        public const float DefaultNearClipDistance = 0.37f;
+        public const float DefaultNearClipDistance = 0.1f;
 
         /// <summary>
         /// MagicLeap platform Unity name.
