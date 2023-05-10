@@ -98,9 +98,11 @@ namespace UnityEngine.XR.MagicLeap
         private void Awake()
         {
             camera = GetComponent<Camera>();
+#if UNITY_MAGICLEAP
             FixupCamera(fixProblemsOnStartup);
 
             RenderingSettings.enforceNearClip = enforceNearClip;
+#endif
         }
 
         private IEnumerator Start()
