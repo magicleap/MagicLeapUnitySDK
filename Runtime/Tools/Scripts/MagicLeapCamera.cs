@@ -26,8 +26,8 @@ namespace UnityEngine.XR.MagicLeap
         private List<Transform> transforms = new List<Transform>();
         private Unity.Jobs.JobHandle jobHandle;
 
-        [SerializeField]
         private bool enforceNearClip = true;
+        
         [SerializeField]
         private bool enforceFarClip = false;
         [SerializeField]

@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.6.1]
+### Known Issues
+- `MLWebRTC`: When disconnecting from a session, the camera does not shut down cleanly if the NativeSurface buffer format was used, causing the application to hang for as much as 30 seconds.
+- `MLAnchors` API returns the same anchor poses after a headpose reset
+
+### Deprecations & Removals
+- Removed the ability to turn off near clipping plane enforcement in `MagicLeapCamera`.
+
 ## [1.6.0]
 ### Features
 - Added `MLNotifications` API to suppress default notifications in medical SKUs. 
