@@ -644,6 +644,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <returns>MLResult.Code.IllegalState if WebView was paused. See MLWebViewPause.</returns>
             /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
+            /// TODO: To be removed due to deprecation.
             public static extern MLResult.Code MLWebViewGetScrollSize(ulong handle, out int width, out int height);
 
             /// <summary>
@@ -656,6 +657,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <returns>MLResult.Code.IllegalState if WebView was paused. See MLWebViewPause.</returns>
             /// <returns>MLResult.Code.Pending if the MLWebView handle is not ready to use.</returns>
             [DllImport(MLWebViewDll, CallingConvention = CallingConvention.Cdecl)]
+            /// TODO: To be removed due to deprecation.
             public static extern MLResult.Code MLWebViewGetScrollOffset(ulong handle, out int x, out int y);
 
             /// <summary>

@@ -12,6 +12,8 @@
 namespace UnityEngine.XR.MagicLeap
 {
     using System;
+    using System.Runtime.InteropServices;
+    using System.Threading.Tasks;
     using Native;
 
     /// <summary>
@@ -24,7 +26,13 @@ namespace UnityEngine.XR.MagicLeap
     /// </summary>
     public partial class MLAnchors
     {
-        private MLResult.Code CreateQuery(Request.Params requestParams, out ulong queryHandle, out uint resultsCount) => NativeBindings.MLSpatialAnchorQueryFilter.Create(requestParams, out queryHandle, out resultsCount);
+        private MLResult.Code CreateQuery(Request.Params requestParams, out ulong queryHandle, out uint resultsCount)
+        {
+            var queryFilter = new NativeBindings.MLSpatialAnchorQueryFilter(requestParams);
+            var resultCode = MagicLeapXrProviderNativeBindings.AnchorsCreateQueryAndSnapshot(Handle, in queryFilter, out queryHandle, out resultsCount);
+            Marshal.FreeHGlobal(queryFilter.Ids);
+            return resultCode;
+        }
 
         private MLResult.Code GetQueryResult(Request.Params requestParams, ulong queryHandle, uint firstIndex, uint lastIndex, NativeBindings.MLSpatialAnchor[] anchors)
         {
@@ -43,7 +51,7 @@ namespace UnityEngine.XR.MagicLeap
         private MLResult.Code GetLocalizationInformation(out MLAnchors.LocalizationInfo info)
         {
             var nativeInfo = NativeBindings.MLSpatialAnchorLocalizationInfo.Create();
-            var resultCode = NativeBindings.MLSpatialAnchorGetLocalizationInfo(this.Handle, ref nativeInfo);
+            var resultCode = MagicLeapXrProviderNativeBindings.AnchorsGetLocalizationInfoAndSnapshot(this.Handle, ref nativeInfo);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLSpatialAnchorGetLocalizationInfo));
             info = new LocalizationInfo(nativeInfo);
             return resultCode;
@@ -63,10 +71,9 @@ namespace UnityEngine.XR.MagicLeap
             return resultCode;
         }
 
-        private MLResult.Code UpdateAnchor(Anchor anchor, long expirationTimeStamp)
+        private MLResult.Code UpdateAnchor(Anchor anchor, ulong expirationTimeStamp)
         {
-            var unixTimestamp = (DateTime.UtcNow.AddSeconds(expirationTimeStamp)).Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
-            var nativeAnchor = new NativeBindings.MLSpatialAnchor(anchor, (ulong)unixTimestamp);
+            var nativeAnchor = new NativeBindings.MLSpatialAnchor(anchor, expirationTimeStamp);
             var resultCode = NativeBindings.MLSpatialAnchorUpdate(this.Handle, in nativeAnchor);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLSpatialAnchorUpdate));
             return resultCode;

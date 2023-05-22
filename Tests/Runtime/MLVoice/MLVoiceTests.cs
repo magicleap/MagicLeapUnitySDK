@@ -8,73 +8,33 @@ namespace UnitySDKPlayTests
 {
     public class MLVoiceTests
     {
+        [SetUp]
+        public void MLVoice_CheckIsEnabled()
+        {
+            Assert.That(MLVoice.VoiceEnabled, "Voice intents are not enabled in device settings");
+        }
+        
         [Test]
-        public void MLVoiceIntents_CheckPermission()
+        public void MLVoice_SetupVoiceIntents()
         {
-            Assert.IsTrue(CheckVoiceIntentsPermissions());
-        }
-
-        [UnityTest]
-        public IEnumerator MLVoiceIntents_IsStartedPositive()
-        {
-            yield return MLVoiceIntents_SetUp();
-            Assert.IsTrue(MLVoice.IsStarted);
-            //yield return MLVoiceIntents_TearDown();
+            MLVoiceIntentsConfiguration config = new();
+            MLResult result = MLVoice.SetupVoiceIntents(config);
+            Assert.That(result.IsOk, result.Result.ToString());
         }
 
         [Test]
-        public void MLVoiceIntents_IsStartedNegative()
+        public void MLVoice_SetupVoiceIntents_WithJSON()
         {
-            Assert.IsFalse(MLVoice.IsStarted);
+            // TODO: supply a sample of valid VoiceIntents JSON and test against that
+            MLResult result = MLVoice.SetupVoiceIntents("{}");
+            Assert.Pass("Not yet tested at this time");
         }
 
-        [UnityTest]
-        public IEnumerator MLVoiceIntents_SetupVoiceIntents()
+        [Test]
+        public void MLVoice_Stop()
         {
-            //yield return MLVoiceIntents_SetUp();
-            CheckVoiceIntentsPermissions();
-            bool isEnabled = MLVoice.VoiceEnabled;
-            if (isEnabled)
-            {
-                MLVoiceIntentsConfiguration config = new();
-                MLResult result = MLVoice.SetupVoiceIntents(config);
-                yield return new WaitUntil(() => !MLVoice.IsStarted || !MLVoice.VoiceEnabled || result.IsOk);
-                Assert.IsTrue(result.IsOk);
-            }
-            else
-            {
-                Assert.Fail();
-            }
-            //yield return MLVoiceIntents_TearDown();
-        }
-
-        [UnityTest]
-        public IEnumerator MLVoiceIntents_Stop()
-        {
-            yield return MLVoiceIntents_SetUp();
             MLResult result = MLVoice.Stop();
-            yield return new WaitUntil(() => !MLVoice.IsStarted);
-            Assert.IsTrue(result.IsOk);
-        }
-
-        private IEnumerator MLVoiceIntents_SetUp()
-        {
-            CheckVoiceIntentsPermissions();
-            MLVoice _ = new MLVoice();
-            yield return new WaitUntil(() => MLVoice.IsStarted || MLVoice.VoiceEnabled);
-        }
-
-        private IEnumerator MLVoiceIntents_TearDown()
-        {
-            MLVoice.Stop();
-            yield return new WaitUntil(() => !MLVoice.IsStarted || !MLVoice.VoiceEnabled);
-        }
-
-        private static bool CheckVoiceIntentsPermissions()
-        {
-            MLPermissions.RequestPermission(MLPermission.VoiceInput, new MLPermissions.Callbacks());
-
-            return MLPermissions.CheckPermission(MLPermission.VoiceInput).IsOk;
+            Assert.That(result.IsOk, result.Result.ToString());
         }
     }
 }

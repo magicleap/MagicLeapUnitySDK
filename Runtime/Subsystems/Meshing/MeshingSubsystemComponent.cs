@@ -11,8 +11,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
 using UnityEngine.Serialization;
 using UnityEngine.XR.ARSubsystems;
 using UnityEngine.XR.Management;
@@ -41,29 +39,6 @@ namespace UnityEngine.XR.MagicLeap
             /// Generate a point cloud (a mesh with <c>MeshTopology.Points</c>)
             /// </summary>
             PointCloud
-        }
-
-        /// <summary>
-        /// Describes the level of detail (LOD) to request from the generated meshes. This property is
-        /// deprecated, and has been replaced by density.
-        /// </summary>
-        [Obsolete("This enum will be removed in a future release. Instead, use MeshingSubsystem.Extensions.MLMeshing.LevelOfDetail.")]
-        public enum LevelOfDetail
-        {
-            /// <summary>
-            /// Minimum level of detail. Meshes will render faster, but be less accurate.
-            /// </summary>
-            Minimum,
-
-            /// <summary>
-            /// Medium level of detail. A good balance between accuracy and render performance.
-            /// </summary>
-            Medium,
-
-            /// <summary>
-            /// Maximum level of detail. This will take more time to render, but the meshes will be more accurate.
-            /// </summary>
-            Maximum
         }
 
         [SerializeField]
@@ -119,28 +94,6 @@ namespace UnityEngine.XR.MagicLeap
                 return 0.5f;
             else
                 return 1.0f;
-        }
-
-        [Obsolete("This function will be removed in a future release. Instead, use FromLevelOfDetailToDensity().")]
-        public static float LevelOfDetailToDensity(LevelOfDetail lod)
-        {
-            if (lod == LevelOfDetail.Minimum)
-                return 0.0f;
-            else if (lod == LevelOfDetail.Medium)
-                return 0.5f;
-            else
-                return 1.0f;
-        }
-
-        [Obsolete("This function will be removed in a future release. Instead, use FromDensityToLevelOfDetail().")]
-        public static LevelOfDetail DensityToLevelOfDetail(float density)
-        {
-            if (density < 0.33f)
-                return LevelOfDetail.Minimum;
-            else if (density < 0.66f)
-                return LevelOfDetail.Medium;
-            else
-                return LevelOfDetail.Maximum;
         }
 
         [SerializeField, Tooltip("Determines the level of detail that the batched mesh blocks should be. This property is not used if custom mesh block requests are created via the SetCustomMeshBlockRequests() method.")]
@@ -343,10 +296,31 @@ namespace UnityEngine.XR.MagicLeap
             }
         }
 
+        private MeshRenderer prefabRenderer;
+
+        public MeshRenderer PrefabRenderer
+        {
+            get
+            {
+                if (prefabRenderer == null)
+                {
+                    prefabRenderer = meshPrefab.GetComponent<MeshRenderer>();
+                }
+
+                return prefabRenderer;
+            }
+        }
+
         Vector3 boundsExtents
         {
             get { return transform.localScale; }
         }
+
+        [SerializeField] 
+        private int objectPoolSize = 200;
+
+        [SerializeField] 
+        private float objectPoolGrowthRate = 0.5f;
 
         /// <summary>
         /// A <c>Dictionary</c> which maps mesh ids to their <c>GameObject</c>s.
@@ -382,7 +356,7 @@ namespace UnityEngine.XR.MagicLeap
         {
             if (confidenceOut == null)
             {
-                throw new ArgumentNullException("confidenceOut");
+                throw new ArgumentNullException(nameof(confidenceOut));
             }
 
             if (m_MeshSubsystem == null)
@@ -423,13 +397,15 @@ namespace UnityEngine.XR.MagicLeap
         {
             foreach (var kvp in meshIdToGameObjectMap)
             {
-                var mesh = kvp.Value;
-                Destroy(mesh);
+                var go = kvp.Value;
+                ResetGameObject(go);
             }
 
             meshIdToGameObjectMap.Clear();
             m_MeshesBeingGenerated.Clear();
             m_MeshesNeedingGeneration.Clear();
+            Resources.UnloadUnusedAssets();
+            GC.Collect();
         }
 
         /// <summary>
@@ -464,7 +440,8 @@ namespace UnityEngine.XR.MagicLeap
             }
         }
 
-        public static void SetCustomMeshBlockRequests(MeshingSubsystem.Extensions.MLMeshing.OnMeshBlockRequests onBlockRequests) => MeshingSubsystem.Extensions.MLMeshing.Config.SetCustomMeshBlockRequests(onBlockRequests);
+        public static void SetCustomMeshBlockRequests(MeshingSubsystem.Extensions.MLMeshing.OnMeshBlockRequests onBlockRequests) => 
+            MeshingSubsystem.Extensions.MLMeshing.Config.SetCustomMeshBlockRequests(onBlockRequests);
 
 #if UNITY_EDITOR
         MeshingSubsystem.Extensions.MLMeshing.Config.Settings m_CachedSettings;
@@ -518,16 +495,26 @@ namespace UnityEngine.XR.MagicLeap
         // Create new GameObject and parent to ourself
         GameObject CreateGameObject(MeshId meshId)
         {
-            GameObject newGameObject = Instantiate(m_MeshPrefab, meshParent);
-            newGameObject.name = string.Format("Mesh {0}", meshId);
+            if (gameObjectPool.Count == 0)
+            {
+                int amountToAdd = (int)(meshIdToGameObjectMap.Count * objectPoolGrowthRate);
+                while (gameObjectPool.Count < amountToAdd)
+                {
+                    AddNewObjectToPool();
+                }
+                objectPoolSize += (int)(objectPoolSize * objectPoolGrowthRate);
+                Debug.Log($"added {amountToAdd} new gameObjects to pool. current pool count: {gameObjectPool.Count}");
+            }
+            GameObject newGameObject = gameObjectPool.Dequeue();
+            newGameObject.GetComponent<MeshRenderer>().sharedMaterial = PrefabRenderer.sharedMaterial;
+            newGameObject.name = $"Mesh {meshId}";
             newGameObject.SetActive(true);
             return newGameObject;
         }
 
         GameObject GetOrCreateGameObject(MeshId meshId)
         {
-            GameObject go = null;
-            if (!meshIdToGameObjectMap.TryGetValue(meshId, out go))
+            if (!meshIdToGameObjectMap.TryGetValue(meshId, out var go))
             {
                 go = CreateGameObject(meshId);
                 meshIdToGameObjectMap[meshId] = go;
@@ -536,11 +523,36 @@ namespace UnityEngine.XR.MagicLeap
             return go;
         }
 
+        void AddNewObjectToPool()
+        {
+            var go = Instantiate(meshPrefab, meshParent);
+            go.SetActive(false);
+            gameObjectPool.Enqueue(go);
+        }
+
+        void ResetGameObject(GameObject go)
+        {
+            if (gameObjectPool.Count < objectPoolSize)
+            {
+                go.SetActive(false);
+                gameObjectPool.Enqueue(go);
+            }
+            else
+            {
+                Debug.Log($"destroying excess gameObject since gameObjectPool.Count >= size {objectPoolSize}");
+                DestroyImmediate(go);
+            }
+        }
+
+        private bool gameObjectPoolInitialized = false;
+
         void Awake()
         {
             meshIdToGameObjectMap = new Dictionary<MeshId, GameObject>();
             m_MeshesNeedingGeneration = new Dictionary<MeshId, MeshInfo>();
             m_MeshesBeingGenerated = new Dictionary<MeshId, MeshInfo>();
+            gameObjectPool = new Queue<GameObject>();
+            
         }
 
 
@@ -553,6 +565,21 @@ namespace UnityEngine.XR.MagicLeap
             while (XRGeneralSettings.Instance.Manager == null)
             {
                 yield return null;
+            }
+
+            while (meshPrefab == null)
+            {
+                yield return null;
+            }
+
+            if (!gameObjectPoolInitialized)
+            {
+                while (gameObjectPool.Count < objectPoolSize)
+                {
+                    AddNewObjectToPool();
+                }
+
+                gameObjectPoolInitialized = true;
             }
             m_Loader = XRGeneralSettings.Instance.Manager.ActiveLoaderAs<MagicLeapLoader>();
             if (m_Loader != null)
@@ -650,6 +677,16 @@ namespace UnityEngine.XR.MagicLeap
             MeshingSubsystem.Extensions.MLMeshing.Config.batchSize = batchSize;
         }
 
+        // When returning from an application pause, refresh the meshes to prevent potential excess 
+        // meshing data from rendering if a head tracking pose resets within another application.
+        void OnApplicationPause(bool pauseStatus)
+        {
+            if (!pauseStatus)
+            {
+                RefreshAllMeshes();
+            }
+        }
+
         // Every frame, poll the MeshSubsystem for mesh updates (Added, Updated, Removed)
         // If the mesh is Added or Updated, then add it to the generation queue.
         //
@@ -679,14 +716,11 @@ namespace UnityEngine.XR.MagicLeap
             // Polling at twice the rate will ensure that data appears at the desired interval.  
             float timeSinceLastUpdate = (float)(DateTime.Now - m_TimeLastUpdated).TotalSeconds;
             bool allowUpdate = (timeSinceLastUpdate > (m_PollingRate / 2.0f));
-            bool meshes = m_MeshSubsystem.TryGetMeshInfos(meshInfos);
-            if (allowUpdate && meshes)
+            bool gotMeshInfos = m_MeshSubsystem.TryGetMeshInfos(meshInfos);
+            if (allowUpdate && gotMeshInfos)
             {
-                int i = 0;
                 foreach (var meshInfo in meshInfos)
                 {
-                    i++;
-
                     switch (meshInfo.ChangeState)
                     {
                         case MeshChangeState.Added:
@@ -695,20 +729,23 @@ namespace UnityEngine.XR.MagicLeap
                             break;
 
                         case MeshChangeState.Removed:
-                            RaiseMeshRemoved(meshInfo.MeshId);
+                            meshRemoved?.Invoke(meshInfo.MeshId);
 
                             // Remove from processing queue
-                            m_MeshesNeedingGeneration.Remove(meshInfo.MeshId);
+                            if (m_MeshesNeedingGeneration.ContainsKey(meshInfo.MeshId))
+                            {
+                                m_MeshesNeedingGeneration.Remove(meshInfo.MeshId);
+                            }
 
                             // Destroy the GameObject
-                            GameObject meshGameObject;
-                            if (meshIdToGameObjectMap.TryGetValue(meshInfo.MeshId, out meshGameObject))
+                            if (meshIdToGameObjectMap.TryGetValue(meshInfo.MeshId, out var meshGameObject))
                             {
-                                Destroy(meshGameObject);
+                                ResetGameObject(meshGameObject);
                                 meshIdToGameObjectMap.Remove(meshInfo.MeshId);
                             }
                             break;
 
+                        case MeshChangeState.Unchanged:
                         default:
                             break;
                     }
@@ -719,36 +756,27 @@ namespace UnityEngine.XR.MagicLeap
 
             if (meshPrefab != null)
             {
-                MeshId meshId;
-                while (m_MeshesBeingGenerated.Count < meshQueueSize && GetNextMeshToGenerate(out meshId))
+                while (m_MeshesBeingGenerated.Count < meshQueueSize && m_MeshesNeedingGeneration.Count > 0)
                 {
+                    MeshId meshId = GetNextMeshToGenerate();
                     GameObject meshGameObject = GetOrCreateGameObject(meshId);
                     var meshCollider = meshGameObject.GetComponent<MeshCollider>();
                     var meshFilter = meshGameObject.GetComponent<MeshFilter>();
-                    var mesh = GetOrCreateMesh(meshFilter);
                     var meshAttributes = computeNormals ? MeshVertexAttributes.Normals : MeshVertexAttributes.None;
-                    m_MeshSubsystem.GenerateMeshAsync(meshId, mesh, meshCollider, meshAttributes, OnMeshGenerated);
+                    m_MeshSubsystem.GenerateMeshAsync(meshId, meshFilter.mesh, meshCollider, meshAttributes, OnMeshGenerated);
                     m_MeshesBeingGenerated.Add(meshId, m_MeshesNeedingGeneration[meshId]);
-                    m_MeshesNeedingGeneration.Remove(meshId);
+                    if (m_MeshesNeedingGeneration.ContainsKey(meshId))
+                    {
+                        m_MeshesNeedingGeneration.Remove(meshId);
+                    }
                 }
             }
         }
 
-        Mesh GetOrCreateMesh(MeshFilter meshFilter)
-        {
-            if (meshFilter == null)
-                return null;
-
-            if (meshFilter.sharedMesh != null)
-                return meshFilter.sharedMesh;
-
-            return meshFilter.mesh;
-        }
-
         // Find the oldest one. Prioritize new ones.
-        bool GetNextMeshToGenerate(out MeshId meshId)
+        private MeshId GetNextMeshToGenerate()
         {
-            Nullable<KeyValuePair<MeshId, MeshInfo>> highestPriorityPair = null;
+            KeyValuePair<MeshId, MeshInfo>? highestPriorityPair = null;
             foreach (var pair in m_MeshesNeedingGeneration)
             {
                 // Skip meshes currently being generated
@@ -782,20 +810,15 @@ namespace UnityEngine.XR.MagicLeap
                 if (consideredMeshInfo.PriorityHint < selectedMeshInfo.PriorityHint)
                 {
                     highestPriorityPair = pair;
-                    continue;
                 }
             }
 
             if (highestPriorityPair.HasValue)
             {
-                meshId = highestPriorityPair.Value.Key;
-                return true;
+                return highestPriorityPair.Value.Key;
             }
-            else
-            {
-                meshId = MeshId.InvalidId;
-                return false;
-            }
+
+            return MeshId.InvalidId;
         }
 
         void OnMeshGenerated(MeshGenerationResult result)
@@ -803,27 +826,30 @@ namespace UnityEngine.XR.MagicLeap
             if (result.Status == MeshGenerationStatus.Success)
             {
                 // The mesh may have been removed by external code
-                MeshInfo meshInfo;
-                if (!m_MeshesBeingGenerated.TryGetValue(result.MeshId, out meshInfo))
+                if (!m_MeshesBeingGenerated.TryGetValue(result.MeshId, out var meshInfo))
                     return;
 
                 m_MeshesBeingGenerated.Remove(result.MeshId);
+                
                 switch (meshInfo.ChangeState)
                 {
                     case MeshChangeState.Added:
-                        RaiseMeshAdded(result.MeshId);
+                        meshAdded?.Invoke(result.MeshId);
                         break;
                     case MeshChangeState.Updated:
-                        RaiseMeshUpdated(result.MeshId);
+                        meshUpdated?.Invoke(result.MeshId);
                         break;
 
                     // Removed/unchanged meshes don't get generated.
+                    case MeshChangeState.Removed:
+                        break;
+                    case MeshChangeState.Unchanged:
+                        break;
                     default:
                         break;
                 }
 
-                GameObject meshGameObject = null;
-                if (meshIdToGameObjectMap.TryGetValue(result.MeshId, out meshGameObject))
+                if (meshIdToGameObjectMap.TryGetValue(result.MeshId, out var meshGameObject))
                 {
                     // Disable the collision mesh if we're in point cloud mode
                     var meshCollider = meshGameObject.GetComponent<MeshCollider>();
@@ -833,28 +859,6 @@ namespace UnityEngine.XR.MagicLeap
                     }
                 }
             }
-            else
-            {
-                m_MeshesBeingGenerated.Remove(result.MeshId);
-            }
-        }
-
-        void RaiseMeshAdded(MeshId meshId)
-        {
-            if (meshAdded != null)
-                meshAdded(meshId);
-        }
-
-        void RaiseMeshUpdated(MeshId meshId)
-        {
-            if (meshUpdated != null)
-                meshUpdated(meshId);
-        }
-
-        void RaiseMeshRemoved(MeshId meshId)
-        {
-            if (meshRemoved != null)
-                meshRemoved(meshId);
         }
 
         bool m_SettingsDirty;
@@ -866,6 +870,8 @@ namespace UnityEngine.XR.MagicLeap
         Dictionary<MeshId, MeshInfo> m_MeshesBeingGenerated;
 
         List<MeshInfo> meshInfos = new List<MeshInfo>();
+
+        Queue<GameObject> gameObjectPool;
 
         MagicLeapLoader m_Loader;
         XRMeshSubsystem m_MeshSubsystem;

@@ -1,5 +1,41 @@
 # Changelog
 
+## [1.7.0]
+### Features
+- Minimum ML API level updated to `26`.
+
+### Bugfixes
+- Fixed compiler errors when the package `com.unity.xr.openxr` is also installed.
+- Fixed `MLDepthCamera` errors when closing the application.
+- Improved performance of `MLWebRTC.MLCameraVideoSource` by making it start the video capture asynchronously.
+- Fixed enforcement of MLCamera's near clip distance when "Fix problems on startup" is enabled
+- Fixed occasional crash when changing scenes while `MLMediaPlayer` is playing local video file
+- Addressed `MLAnchors` query timing to reduce likelihood of missing pose errors.
+- Fixed CV camera errors when resuming from sleep mode
+- Fixed CV camera errors when resuming from menu
+- Fixed `MLWorldCamera` Invalid Parameter error spams.
+- Renamed Tests assembly definition.
+- Fixed caching logic for `CustomHapticsPattern`s to avoid using incorrect cached patterns.
+- Fixed `MLVoice.IntentEvent`'s EventSlotsUsed list within the `OnVoiceEvent` so it properly lists all Slots used in the voice command.
+- Optimized `MLMeshing` API and components to reduce memory usage. 
+- Fixed spamming errors caused by not detecting eyes in the eye tracking example. 
+
+### Deprecations & Removals
+- The MLMediaDRM API has been marked as `Obsolete` and will be removed in a future release.
+- `MLWebView.GetScrollSize()` and `MLWebView.GetScrollOffset()` have been marked as `Obsolete` and will be removed in a future release.
+- Removed the ability to turn off near clipping plane enforcement in `MagicLeapCamera`.
+
+### Known Issues
+- `MLWebRTC`: When disconnecting from a session, the camera does not shut down cleanly if the NativeSurface buffer format was used, causing the application to hang for as much as 30 seconds.
+
+## [1.6.1]
+### Known Issues
+- `MLWebRTC`: When disconnecting from a session, the camera does not shut down cleanly if the NativeSurface buffer format was used, causing the application to hang for as much as 30 seconds.
+- `MLAnchors` API returns the same anchor poses after a headpose reset
+
+### Deprecations & Removals
+- Removed the ability to turn off near clipping plane enforcement in `MagicLeapCamera`.
+
 ## [1.6.0]
 ### Features
 - Added `MLNotifications` API to suppress default notifications in medical SKUs. 
@@ -11,12 +47,14 @@
 - Fixed broken link in README ([#8](https://github.com/magicleap/MagicLeapUnitySDK/issues/8))
 - Fixed issue with `MLMediaPlayerBehavior` where calling `StopMLMediaPlayer()` would make videos unplayable.
 - Fixed camera errors after the device enters sleep mode.
-- Fixed issue with `MLMarkerTracker` not working  after device enters sleep mode
+- Fixed issue with `MLMarkerTracker` not working  after device enters sleep mode.
 - Fixed issue with creating spatial anchors with an expiration value of `0` causing errors.
+- Fixed issue where meshing system would render excess data when returning to the application if head tracking was reset in another application.
+- Fixed issue with `MLAnchors` update fails when localized to shared space.
+- Fixed issue where `EnforcedNearClipDistance` was enforced in `MagicLeapCamera` even when disabled if `FixProblemsOnStartup` was enabled
 
 ### Known Issues
 - `MLWebRTC`: When disconnecting from a session, the camera does not shut down cleanly if the NativeSurface buffer format was used, causing the application to hang for as much as 30 seconds.
-- `MLAnchors` API returns the same anchor poses after a headpose reset
 
 ## [1.5.0]
 ### Features

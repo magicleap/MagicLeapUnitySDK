@@ -66,6 +66,11 @@ namespace UnityEngine.XR.MagicLeap.Native
         /// Internal DLL used by the Notifications API.
         /// </summary>
         protected const string MLNotificationsManagerDll = MLSdkLoaderDll;
+        
+        /// <summary>
+        /// Internal DLL used by the API.
+        /// </summary>
+        protected const string MLVoiceDll = MLSdkLoaderDll;
 #else
         /// <summary>
         /// Perception library name string.
@@ -116,6 +121,11 @@ namespace UnityEngine.XR.MagicLeap.Native
         /// Internal DLL used by the Notifications API.
         /// </summary>
         protected const string MLNotificationsManagerDll = "system_notification_manager.magicleap";
+        
+        /// <summary>
+        /// Internal DLL used by the API.
+        /// </summary>
+        protected const string MLVoiceDll = "input.magicleap";
 #endif
         /// <summary>
         /// Unity's XR provider library in com.unity.xr.magicleap
@@ -166,11 +176,6 @@ namespace UnityEngine.XR.MagicLeap.Native
         /// Internal DLL used by the API.
         /// </summary>
         protected const string MLNativeSurfaceDll = "native_surface.magicleap";
-
-        /// <summary>
-        /// Internal DLL used by the API.
-        /// </summary>
-        protected const string MLVoiceDll = "input.magicleap";
 
         /// <summary>
         /// Internal DLL used by the API.

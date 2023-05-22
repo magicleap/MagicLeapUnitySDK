@@ -12,6 +12,7 @@ namespace UnityEngine.XR.MagicLeap
 {
     using System;
     using System.Runtime.InteropServices;
+    using System.Threading.Tasks;
     using Native;
 
     /// <summary>
@@ -93,19 +94,19 @@ namespace UnityEngine.XR.MagicLeap
 
         public partial class Request : MLRequest<Request.Params, Request.Result>
         {
-            public Request()
-            {
-                this.handle = MagicLeapNativeBindings.InvalidHandle;
-            }
-
             private uint resultsCount;
 
-            public override MLResult Start(Params parameters)
+            public Request()
             {
-                this.Dispose(true);
-                this.parameters = parameters;
+                handle = MagicLeapNativeBindings.InvalidHandle;
+            }
 
-                var mlResult = MLResult.Create(MLAnchors.Instance.CreateQuery(this.parameters, out this.handle, out this.resultsCount));
+            public override MLResult Start(Params queryParams)
+            {
+                Dispose(true);
+                parameters = queryParams;
+                var q = MLAnchors.Instance.CreateQuery(parameters, out handle, out resultsCount);
+                var mlResult = MLResult.Create(q);
                 return mlResult;
             }
 
@@ -132,7 +133,6 @@ namespace UnityEngine.XR.MagicLeap
                 MLResult mlResult = MLResult.Create(resultCode);
                 result = new Result(anchors);
                 return mlResult;
-
             }
 
             protected override void Dispose(bool disposing)
@@ -227,7 +227,7 @@ namespace UnityEngine.XR.MagicLeap
         {
             public readonly struct Result
             {
-                public Result(NativeBindings.MLSpatialAnchor[] nativeAnchors)
+                internal Result(NativeBindings.MLSpatialAnchor[] nativeAnchors)
                 {
                     var anchors = new Anchor[nativeAnchors.Length];
 
@@ -338,7 +338,20 @@ namespace UnityEngine.XR.MagicLeap
 
             public MLResult Update(long newExpirationTimeStamp)
             {
-                var resultCode = MLAnchors.Instance.UpdateAnchor(this, newExpirationTimeStamp);
+                if (newExpirationTimeStamp < 0)
+                    return MLResult.Create(MLResult.Code.InvalidParam,
+                        "The expirationSeconds parameter was a negative number and should be positive or 0.");
+                
+                double unixTimestamp = 0;
+                if (newExpirationTimeStamp > 0)
+                {
+                    var maxExpirationSeconds = (long)DateTime.MaxValue.Subtract(DateTime.UtcNow).TotalSeconds;
+                    var clampedExpirationSeconds = Math.Clamp(newExpirationTimeStamp, 0, maxExpirationSeconds);
+                    
+                    unixTimestamp = (DateTime.UtcNow.AddSeconds(clampedExpirationSeconds)).Subtract(DateTime.UnixEpoch).TotalSeconds;
+                }
+                
+                var resultCode = MLAnchors.Instance.UpdateAnchor(this, (ulong)unixTimestamp);
                 return MLResult.Create(resultCode);
             }
 
