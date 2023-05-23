@@ -210,7 +210,7 @@ namespace UnityEngine.XR.MagicLeap
 
         public static bool IsOpenXRLoaderActive()
         {
-#if UNITY_OPENXR_1_4_0_OR_NEWER
+#if UNITY_OPENXR_1_4_0
             return  (UnityEngine.XR.Management.XRGeneralSettings.Instance?.Manager?.ActiveLoaderAs<UnityEngine.XR.OpenXR.OpenXRLoader>() != null);
 #else
             return false;

@@ -4,7 +4,7 @@ using System.Xml;
 using UnityEditor.Build.Reporting;
 using UnityEditor.XR.MagicLeap;
 
-#if UNITY_OPENXR_1_4_0_OR_NEWER
+#if UNITY_OPENXR_1_4_0
 using UnityEngine.XR.OpenXR.Features.MagicLeapSupport;
 
 namespace UnityEditor.XR.OpenXR.Features.MagicLeapSupport

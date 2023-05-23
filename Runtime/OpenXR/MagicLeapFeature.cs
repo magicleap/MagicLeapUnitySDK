@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEditor;
 
-#if UNITY_OPENXR_1_4_0_OR_NEWER
+#if UNITY_OPENXR_1_4_0
 #if UNITY_EDITOR
 using UnityEditor.XR.OpenXR.Features;
 #endif
