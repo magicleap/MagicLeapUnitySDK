@@ -10075,6 +10075,7 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -10104,6 +10105,12 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnInputValueChange:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCharacterAdded:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCharacterDeleted:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &7530559486209535661
