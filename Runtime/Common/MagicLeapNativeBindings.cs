@@ -142,6 +142,11 @@ namespace UnityEngine.XR.MagicLeap.Native
                         return "MLResult_PerceptionSystemNotStarted";
                     }
 
+                case MLResult.Code.LicenseError:
+                    {
+                        return "MLResult_LicenseError";
+                    }
+
                 default:
                     {
                         return "MLResult_Unknown";

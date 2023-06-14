@@ -74,7 +74,12 @@ namespace UnityEngine.XR.MagicLeap
             /// <summary>
             /// Enable AmbientRawDepthImage. See <see cref="Data.AmbientRawDepthImage"/> for more details.
             /// </summary>
-            AmbientRawDepthImage = 1 << 3
+            AmbientRawDepthImage = 1 << 3,
+
+            /// <summary>
+            /// Enable RawDepthImage. See <see cref="Data.RawDepthImage"/> for more details.
+            /// </summary>
+            RawDepthImage = 1 << 4
         }
 
         /// <summary>
@@ -489,6 +494,7 @@ namespace UnityEngine.XR.MagicLeap
                 var confidenceMap = CreateFromPtr(depthCamData.ConfidenceBufferFrameBufferPtr);
                 var depthFlags = CreateFromPtr(depthCamData.DepthFlagsBufferFrameBufferPtr);
                 var aiMap = CreateFromPtr(depthCamData.AmbientRawDepthImageFrameBufferPtr);
+                var depthImage = CreateFromPtr(depthCamData.RawDepthImageFrameBufferPtr);
 
                 data = new Data()
                 {
@@ -501,7 +507,8 @@ namespace UnityEngine.XR.MagicLeap
                     DepthImage = (depthMap.Data != null) ? depthMap : null,
                     ConfidenceBuffer = (confidenceMap.Data != null) ? confidenceMap : null,
                     DepthFlagsBuffer = (depthFlags.Data != null) ? depthFlags : null,
-                    AmbientRawDepthImage = (aiMap.Data != null) ? aiMap : null
+                    AmbientRawDepthImage = (aiMap.Data != null) ? aiMap : null,
+                    RawDepthImage = (depthImage.Data != null) ? depthImage : null
                 };
 
                 // CAPI specifies that Release should be called exactly once for each successful call to GetLatest

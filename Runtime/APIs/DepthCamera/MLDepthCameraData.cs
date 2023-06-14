@@ -74,6 +74,13 @@ namespace UnityEngine.XR.MagicLeap
             /// illumination and corresponds to the amount of ambient light incident on the sensor.
             /// </summary>
             public FrameBuffer? AmbientRawDepthImage { get; internal set; }
+
+            /// <summary>
+            /// This is the raw depth camera sensor data captured with the depth camera
+            /// illumination and corresponds to the amount of total light incident on the
+            /// sensor.
+            /// </summary>
+            public FrameBuffer? RawDepthImage { get; internal set; }
         }
     }
 }

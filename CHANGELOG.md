@@ -1,8 +1,25 @@
 # Changelog
 
+## [1.8.0]
+### Features
+- `MLEyes`: Updated `leftEyeOpenAmount` and `rightEyeOpenAmount` on `UnityEngine.InputSystem.XR.Eyes` to return values between 0.0 and 1.0.
+- Added support for `EyeHeightMax` and `EyeWidthMax` in `MLGazeRecognitionStaticData` 
+- `MLSpace`: Added a new API for importing and exporting spaces without the need for scanning the environment.
+- `MLDepthCamera`: Added `RawDepthImage` to support raw camera stream with IR Projector ON.
+- Added `MLEyeCamera` API.
+- `MLPowerManager`: Added a new API to obtain current controller state and control controller state transitions.
+- `MLHeadTracking`: Modified headpose lost notifications with new API for MLHeadTrackingStateEx.
+
+### Bugfixes
+
+### Deprecations & Removals
+- `MLHeadTracking`: MLHeadTrackingState and related dependencies marked Obsolete.
+
+### Known Issues
+- `MLWebRTC`: When disconnecting from a session, the camera does not shut down cleanly if the NativeSurface buffer format was used, causing the application to hang for as much as 30 seconds.
+
 ## [1.7.0]
 ### Features
-- Minimum ML API level updated to `26`.
 
 ### Bugfixes
 - Fixed compiler errors when the package `com.unity.xr.openxr` is also installed.
@@ -18,7 +35,7 @@
 - Fixed caching logic for `CustomHapticsPattern`s to avoid using incorrect cached patterns.
 - Fixed `MLVoice.IntentEvent`'s EventSlotsUsed list within the `OnVoiceEvent` so it properly lists all Slots used in the voice command.
 - Optimized `MLMeshing` API and components to reduce memory usage. 
-- Fixed spamming errors caused by not detecting eyes in the eye tracking example. 
+- Fixed spamming errors caused by not detecting eyes in eye tracking. 
 
 ### Deprecations & Removals
 - The MLMediaDRM API has been marked as `Obsolete` and will be removed in a future release.

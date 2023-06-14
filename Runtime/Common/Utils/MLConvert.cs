@@ -508,5 +508,20 @@ namespace UnityEngine.XR.MagicLeap.Native
 
             return mat;
         }
+
+        /// <summary>
+        /// Converts an unmanged array to a managed array of type T.
+        /// </summary>
+        public static T[] MarshalUnmanagedArray<T>(IntPtr arrayPtr, int count)
+        {
+            T[] convertedArray = new T[count];
+            int tSize = Marshal.SizeOf<T>();
+            for (int i = 0; i < count; ++i)
+            {
+                convertedArray[i] = Marshal.PtrToStructure<T>((arrayPtr + (tSize * i)));
+            }
+
+            return convertedArray;
+        }
     }
 }

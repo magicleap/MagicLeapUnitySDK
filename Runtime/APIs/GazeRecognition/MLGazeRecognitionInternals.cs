@@ -52,10 +52,10 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         private MLResult.Code InternalMLGazeRecognitionGetStaticData(out StaticData data)
         {
-            NativeBindings.MLGazeRecognitionStaticData internalData = new NativeBindings.MLGazeRecognitionStaticData(1);
+            NativeBindings.MLGazeRecognitionStaticData internalData = new NativeBindings.MLGazeRecognitionStaticData(2);
             MLResult.Code result = NativeBindings.MLGazeRecognitionGetStaticData(Handle, ref internalData);
             result = MagicLeapXrProviderNativeBindings.GetUnityPose(internalData.Vergence, out Pose pose);
-            data = new StaticData(pose);
+            data = new StaticData(pose, internalData.EyeHeightMax, internalData.EyeWidthMax);
             return result;
         }
     }

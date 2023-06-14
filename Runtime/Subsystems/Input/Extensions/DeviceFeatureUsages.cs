@@ -8,6 +8,7 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
+using System;
 using UnityEngine.XR;
 
 namespace UnityEngine.XR.MagicLeap
@@ -21,7 +22,9 @@ namespace UnityEngine.XR.MagicLeap
                 public static class Head
                 {
                     public static InputFeatureUsage<float> Confidence = new InputFeatureUsage<float>("MLHeadConfidence");
+                    [Obsolete]
                     public static InputFeatureUsage<byte[]> TrackingState = new InputFeatureUsage<byte[]>("MLHeadTrackingState");
+                    public static InputFeatureUsage<byte[]> TrackingStateEx = new InputFeatureUsage<byte[]>("MLHeadTrackingStateEx");
                     public static InputFeatureUsage<byte[]> TrackingMapEvents = new InputFeatureUsage<byte[]>("MLHeadTrackingMapEvents");
                 }
 
