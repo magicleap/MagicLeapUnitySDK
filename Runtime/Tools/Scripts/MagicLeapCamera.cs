@@ -26,8 +26,8 @@ namespace UnityEngine.XR.MagicLeap
         private List<Transform> transforms = new List<Transform>();
         private Unity.Jobs.JobHandle jobHandle;
 
+        [SerializeField]
         private bool enforceNearClip = true;
-        
         [SerializeField]
         private bool enforceFarClip = false;
         [SerializeField]
@@ -98,9 +98,11 @@ namespace UnityEngine.XR.MagicLeap
         private void Awake()
         {
             camera = GetComponent<Camera>();
+#if UNITY_MAGICLEAP
             FixupCamera(fixProblemsOnStartup);
 
             RenderingSettings.enforceNearClip = enforceNearClip;
+#endif
         }
 
         private IEnumerator Start()
@@ -129,8 +131,9 @@ namespace UnityEngine.XR.MagicLeap
             RenderingSettings.cameraScale = RenderingUtility.GetParentScale(transform);
             ValidateFarClip();
 
-            camera.stereoConvergence = CalculateFocusDistance();
-            RenderingSettings.focusDistance = camera.stereoConvergence;
+            // camera.stereoConvergence = CalculateFocusDistance();
+            // camera.stereoConvergence = 0.5f;
+            // RenderingSettings.focusDistance = 0.5f;
             RenderingSettings.farClipDistance = camera.farClipPlane;
             RenderingSettings.nearClipDistance = camera.nearClipPlane;
         }
@@ -205,7 +208,7 @@ namespace UnityEngine.XR.MagicLeap
             {
                 Debug.LogWarning("[Magic Leap] The near clipping plane of the main camera is closer than " + MINIMUM_NEAR_CLIP_METERS + "m, which can cause artifacts.");
 
-                if (enforceNearClip && fixIssues)
+                if (fixIssues)
                 {
                     camera.nearClipPlane = MINIMUM_NEAR_CLIP_METERS * scale;
                 }
