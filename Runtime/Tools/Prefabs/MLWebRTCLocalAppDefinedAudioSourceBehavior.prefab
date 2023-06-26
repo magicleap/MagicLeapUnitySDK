@@ -44,7 +44,8 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bc9bcfc8afe712040b4958fc2b271558, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: MagicLeap.Core.MLWebRTCLocalAppDefinedAudioSourceBehavior,
+    MagicLeap.SDK
 --- !u!82 &4685316340041102438
 AudioSource:
   m_ObjectHideFlags: 0

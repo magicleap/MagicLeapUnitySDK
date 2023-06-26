@@ -44,7 +44,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 74c60bb56ac19394ba3946e7a3ccbf63, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: MagicLeap.Core.MLWebRTCAudioSinkBehavior, MagicLeap.SDK
   sinkBufferNotifyMode: 0
 --- !u!82 &8444434050578818551
 AudioSource:
