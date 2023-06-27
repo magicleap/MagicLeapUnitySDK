@@ -47,7 +47,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c2fadf230d1919748a9aa21d40f74619, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: UnityEngine.InputSystem.XR.TrackedPoseDriver, Unity.InputSystem
   m_TrackingType: 0
   m_UpdateType: 0
   m_IgnoreTrackingState: 0
@@ -119,7 +119,8 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: caff514de9b15ad48ab85dcff5508221, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: UnityEngine.XR.Interaction.Toolkit.ActionBasedController,
+    Unity.XR.Interaction.Toolkit
   m_UpdateTrackingType: 0
   m_EnableInputTracking: 1
   m_EnableInputActions: 1
@@ -323,7 +324,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6803edce0201f574f923fd9d10e5b30a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: UnityEngine.XR.Interaction.Toolkit.XRRayInteractor, Unity.XR.Interaction.Toolkit
   m_InteractionManager: {fileID: 0}
   m_InteractionLayerMask:
     serializedVersion: 2
@@ -552,7 +553,8 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e988983f96fe1dd48800bcdfc82f23e9, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: UnityEngine.XR.Interaction.Toolkit.XRInteractorLineVisual,
+    Unity.XR.Interaction.Toolkit
   m_LineWidth: 0.02
   m_OverrideInteractorLineLength: 1
   m_LineLength: 10
@@ -727,7 +729,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e0cb9aa70a22847b5925ee5f067c10a9, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: Unity.XR.CoreUtils.XROrigin, Unity.XR.CoreUtils
   m_Camera: {fileID: 5609791579423962305}
   m_OriginBaseGameObject: {fileID: 5589497133593145652}
   m_CameraFloorOffsetObject: {fileID: 5589497132891496769}
@@ -2032,7 +2034,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3859a92a05d4f5d418cb6ca605290e74, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: UnityEngine.XR.ARFoundation.ARSession, Unity.XR.ARFoundation
   m_AttemptUpdate: 1
   m_MatchFrameRate: 1
   m_TrackingMode: 2
@@ -2047,7 +2049,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fa850fbd5b8aded44846f96e35f1a9f5, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: UnityEngine.XR.ARFoundation.ARInputManager, Unity.XR.ARFoundation
 --- !u!114 &479116178
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2059,7 +2061,8 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017c5e3933235514c9520e1dace2a4b2, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: UnityEngine.XR.Interaction.Toolkit.Inputs.InputActionManager,
+    Unity.XR.Interaction.Toolkit
   m_ActionAssets:
   - {fileID: -944628639613478452, guid: a7b3d28b346833f4ea10936be7a9f18c, type: 3}
 --- !u!1 &5589497134372387911
@@ -2771,6 +2774,36 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4214550324010282, guid: 24158fb1437dc8e418d893939758764d, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3771369551179688024, guid: 24158fb1437dc8e418d893939758764d,
+        type: 3}
+      propertyPath: m_PositionInput.m_Action.m_Id
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3771369551179688024, guid: 24158fb1437dc8e418d893939758764d,
+        type: 3}
+      propertyPath: m_RotationInput.m_Action.m_Id
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3771369551179688024, guid: 24158fb1437dc8e418d893939758764d,
+        type: 3}
+      propertyPath: m_PositionInput.m_Action.m_Name
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3771369551179688024, guid: 24158fb1437dc8e418d893939758764d,
+        type: 3}
+      propertyPath: m_RotationInput.m_Action.m_Name
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3771369551179688024, guid: 24158fb1437dc8e418d893939758764d,
+        type: 3}
+      propertyPath: m_PositionInput.m_Action.m_SingletonActionBindings.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3771369551179688024, guid: 24158fb1437dc8e418d893939758764d,
+        type: 3}
+      propertyPath: m_RotationInput.m_Action.m_SingletonActionBindings.Array.size
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5850404675360181103, guid: 24158fb1437dc8e418d893939758764d,
