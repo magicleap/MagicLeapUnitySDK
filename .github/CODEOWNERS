@@ -1,0 +1,3 @@
+# These people will be auto-assigned to PRs in this repository
+# The * is a file pattern and denotes global ownership
+* @njain @jdiehl @bsawyer @kgrinberg @csteinberg
