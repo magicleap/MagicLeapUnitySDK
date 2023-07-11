@@ -148,16 +148,18 @@ namespace UnityEditor.XR.MagicLeap
                 activeScenes.Add(scene.path);
             }
 
+            string apkName = PlayerSettings.applicationIdentifier;
+            if (IsArgSet(Arg_Development))
+            {
+                apkName = $"{apkName}-dev";
+            }
+
             BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions();
             buildPlayerOptions.target = EditorUserBuildSettings.activeBuildTarget;
-#if UNITY_2022_2_OR_NEWER
             buildPlayerOptions.targetGroup = BuildTargetGroup.Android;
-#else
-            buildPlayerOptions.targetGroup = BuildTargetToGroup[EditorUserBuildSettings.activeBuildTarget];
-#endif
             buildPlayerOptions.options = GetBuildOptions();
             buildPlayerOptions.scenes = activeScenes.ToArray();
-            buildPlayerOptions.locationPathName = System.IO.Path.Combine(GetBuildFolder().FullName, $"{PlayerSettings.applicationIdentifier}.apk");
+            buildPlayerOptions.locationPathName = System.IO.Path.Combine(GetBuildFolder().FullName, $"{apkName}.apk");
 
             UnityEditor.Build.Reporting.BuildReport report = UnityEditor.BuildPipeline.BuildPlayer(buildPlayerOptions);
             if (report.summary.result == UnityEditor.Build.Reporting.BuildResult.Failed)

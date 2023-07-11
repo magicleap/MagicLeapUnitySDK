@@ -19,11 +19,19 @@ namespace UnitySDKEditorTests
                 Debug.LogError("No SDK path set.");
                 return;
             }
-        
-            var fullPath = Path.GetFullPath(Path.Combine(MagicLeapSDKUtil.SdkPath, @"lib/win/", lib + ".dll"));
+
+            var libFileName =
+#if UNITY_EDITOR_OSX
+                // ex: lib/osx/libcamera.magicleap.dylib
+                Path.Combine(@"lib/osx", "lib" + lib + ".dylib");
+#elif UNITY_EDITOR_WIN
+                // ex: lib\win\camera.magicleap.dll
+                Path.Combine(@"lib\\win", lib + ".dll");
+#endif
+            var fullPath = Path.GetFullPath(Path.Combine(MagicLeapSDKUtil.SdkPath, libFileName));
             if (!File.Exists(fullPath))
             {
-                Debug.LogError("File doesn't exists.");
+                Debug.LogError($"Library {libFileName} doesn't exist in MLSDK.");
                 return;
             }
 

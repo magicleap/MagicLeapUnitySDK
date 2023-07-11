@@ -46,17 +46,9 @@ namespace UnityEngine.XR.MagicLeap
         {
             MLResult result;
 
-            if (IsStarted)
-            {
-                getFramePosePerfMarker.Begin();
-                result = Instance.InternalGetFramePose(NativeBindings.CameraID.ColorCamera, vcamTimestamp, out outTransform);
-                getFramePosePerfMarker.End();
-            }
-            else
-            {
-                result = MLResult.Create(MLResult.Code.UnspecifiedFailure);
-                outTransform = Matrix4x4.identity;
-            }
+            getFramePosePerfMarker.Begin();
+            result = Instance.InternalGetFramePose(NativeBindings.CameraID.ColorCamera, vcamTimestamp, out outTransform);
+            getFramePosePerfMarker.End();
 
             return result;
         }

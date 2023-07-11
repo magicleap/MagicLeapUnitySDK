@@ -18,13 +18,25 @@ namespace UnityEngine.XR.MagicLeap
         public readonly struct StaticData
         {
             /// <summary>
+            /// The maximum value for the height of the eye_left and eye_right vector.
+            /// </summary>
+            public readonly float EyeHeightMax;
+
+            /// <summary>
+            /// The maximum value for the width of the eye_left and eye_right vector.
+            /// </summary>
+            public readonly float EyeWidthMax;
+
+            /// <summary>
             /// Location of the 3D vergence point, intersection of 3D gaze vectors.
             /// </summary>
             public readonly Pose Vergence;
 
-            public StaticData(Pose pose)
+            public StaticData(Pose pose, float eyeHeightMax, float eyeWidthMax)
             {
                 this.Vergence = pose;
+                this.EyeHeightMax = eyeHeightMax;
+                this.EyeWidthMax = eyeWidthMax;
             }
         };
 

@@ -298,7 +298,6 @@ MonoBehaviour:
   yuvRenderer: {fileID: 4226510841995200724}
   rgbRenderer: {fileID: 4226510841015712154}
   fpsText: {fileID: 6769665642149583158}
-  autoResizeNativeRenderer: 0
 --- !u!1 &5366993050260851391
 GameObject:
   m_ObjectHideFlags: 0
@@ -355,7 +354,6 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
-  m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0

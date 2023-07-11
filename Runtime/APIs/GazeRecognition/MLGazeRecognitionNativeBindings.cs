@@ -31,6 +31,16 @@ namespace UnityEngine.XR.MagicLeap
                 public readonly uint Version;
 
                 /// <summary>
+                /// The maximum value for the height of the eye_left and eye_right vector.
+                /// </summary>
+                public readonly float EyeHeightMax;
+
+                /// <summary>
+                /// The maximum value for the width of the eye_left and eye_right vector.
+                /// </summary>
+                public readonly float EyeWidthMax;
+
+                /// <summary>
                 /// Location of the 3D vergence point, intersection of 3D gaze vectors.
                 /// </summary>
                 public readonly NativeBindings.MLCoordinateFrameUID Vergence;
@@ -39,6 +49,8 @@ namespace UnityEngine.XR.MagicLeap
                 {
                     Version = setVersion;
                     Vergence = MLCoordinateFrameUID.EmptyFrame;
+                    EyeHeightMax = 0;
+                    EyeWidthMax = 0;
                 }
             };
 

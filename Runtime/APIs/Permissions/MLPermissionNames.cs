@@ -17,9 +17,9 @@ namespace UnityEngine.XR.MagicLeap
         public const string Camera = Permission.Camera;
 
         public const string RecordAudio = Permission.Microphone;
-        
+
         public const string ReadExternalStorage = Permission.ExternalStorageRead;
-        
+
         public const string WriteExternalStorage = Permission.ExternalStorageWrite;
 
         public const string Internet = "android.permission.INTERNET";
@@ -43,5 +43,11 @@ namespace UnityEngine.XR.MagicLeap
         public const string DepthCamera = "com.magicleap.permission.DEPTH_CAMERA";
 
         public const string SystemNotification = "com.magicleap.permission.SYSTEM_NOTIFICATION";
+
+        public const string SpaceManager = "com.magicleap.permission.SPACE_MANAGER";
+
+        public const string SpaceImportExport = "com.magicleap.permission.SPACE_IMPORT_EXPORT";
+
+        public const string EyeCamera = "com.magicleap.permission.EYE_CAMERA";
     }
 }

@@ -55,7 +55,7 @@ namespace UnityEngine.XR.MagicLeap
                     MagicLeapXrProviderNativeBindings.StopEyeTracking();
                 }
 
-                public static bool TryGetState(InputDevice eyesDevice, out State state) => NativeBindings.TryGetState(eyesDevice, out state);
+                public static bool TryGetState(InputDevice eyesDevice, out State state) => NativeBindings.TryGetTrackingState(eyesDevice, out state);
 
                 public readonly struct State
                 {
@@ -96,6 +96,18 @@ namespace UnityEngine.XR.MagicLeap
                     ///     Timestamp for all the data fields in this struct
                     /// </summary>
                     public readonly MLTime Timestamp;
+                    
+                    /// <summary>
+                    /// Openness of the left eye<br/>
+                    /// Output is 0.0 - 1.0, with 0.0 being fully closed and 1.0 fully open.
+                    /// </summary>
+                    public readonly float LeftEyeOpenness;
+
+                    /// <summary>
+                    /// Openness of the right eye<br/>
+                    /// Output is 0.0 - 1.0, with 0.0 being fully closed and 1.0 fully open.
+                    /// </summary>
+                    public readonly float RightEyeOpenness;
 
                     internal State(NativeBindings.MLEyeTrackingStateEx nativeState)
                     {
@@ -106,6 +118,8 @@ namespace UnityEngine.XR.MagicLeap
                         this.RightBlink = nativeState.RightBlink;
                         this.Error = nativeState.Error == 1;
                         this.Timestamp = nativeState.Timestamp;
+                        this.LeftEyeOpenness = nativeState.LeftEyeOpenness;
+                        this.RightEyeOpenness = nativeState.RightEyeOpenness;
                     }
                 }
 
@@ -113,39 +127,31 @@ namespace UnityEngine.XR.MagicLeap
                 {
                     private static byte[] allocatedStateData = new byte[Marshal.SizeOf<NativeBindings.MLEyeTrackingStateEx>()];
 
-                    public static bool TryGetState(InputDevice eyesDevice, out State state)
+                    public static bool TryGetTrackingState(InputDevice eyesDevice, out State state)
                     {
                         if (!eyesDevice.TryGetFeatureValue(InputSubsystem.Extensions.DeviceFeatureUsages.Eyes.TrackingState, allocatedStateData))
-                            goto Failure;
-
-                        try
                         {
-                            IntPtr ptr = Marshal.AllocHGlobal(allocatedStateData.Length);
-                            Marshal.Copy(allocatedStateData, 0, ptr, allocatedStateData.Length);
-                            var nativeState = Marshal.PtrToStructure<NativeBindings.MLEyeTrackingStateEx>(ptr);
-                            Marshal.FreeHGlobal(ptr);
-                            state = new State(nativeState);
-                            return true;
+                            state = default;
+                            return false;
                         }
 
-                        catch (Exception e)
-                        {
-                            Debug.LogError("TryGetTrackingState failed with the exception: " + e);
-                            goto Failure;
-                        }
-
-                    Failure:
-                        state = default;
-                        return false;
-
+                        IntPtr ptr = Marshal.AllocHGlobal(allocatedStateData.Length);
+                        Marshal.Copy(allocatedStateData, 0, ptr, allocatedStateData.Length);
+                        var nativeState = Marshal.PtrToStructure<NativeBindings.MLEyeTrackingStateEx>(ptr);
+                        Marshal.FreeHGlobal(ptr);
+                        state = new State(nativeState);
+                        return true;
                     }
+                    
                     [StructLayout(LayoutKind.Sequential)]
                     public readonly struct MLEyeTrackingStateEx
                     {
+                        public static MLEyeTrackingStateEx Init() => new (version: 2);
+                        
                         /// <summary>
                         ///     Struct version
                         /// </summary>
-                        private readonly uint Version;
+                        public readonly uint Version;
 
                         /// <summary>
                         ///     A quality metric confidence value 0.0 - 1.0 to indicate accuracy of fixation.
@@ -186,11 +192,37 @@ namespace UnityEngine.XR.MagicLeap
                         ///     Timestamp for all the data fields in this struct
                         /// </summary>
                         public readonly long Timestamp;
+
+                        /// <summary>
+                        /// Openness of the left eye<br/>
+                        /// Output is 0.0 - 1.0, with 0.0 being fully closed and 1.0 fully open.
+                        /// </summary>
+                        public readonly float LeftEyeOpenness;
+
+                        /// <summary>
+                        /// Openness of the right eye<br/>
+                        /// Output is 0.0 - 1.0, with 0.0 being fully closed and 1.0 fully open.
+                        /// </summary>
+                        public readonly float RightEyeOpenness;
+
+                        private MLEyeTrackingStateEx(uint version)
+                        {
+                            Version = version;
+                            #region state defaults
+                            VergenceConfidence = 0;
+                            LeftCenterConfidence = 0;
+                            RightCenterConfidence = 0;
+                            LeftBlink = false;
+                            RightBlink = false;
+                            Error = 0;
+                            Timestamp = 0;
+                            LeftEyeOpenness = 0;
+                            RightEyeOpenness = 0;
+                            #endregion
+                        }
                     }
                 }
             }
-
         }
-
     }
 }

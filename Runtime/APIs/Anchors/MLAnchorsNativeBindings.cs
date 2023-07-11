@@ -178,15 +178,6 @@ namespace UnityEngine.XR.MagicLeap
                 [MarshalAs(UnmanagedType.I1)]
                 public readonly bool Sorted;
 
-                internal static MLResult.Code Create(Request.Params requestParams, out ulong queryHandle, out uint resultsCount)
-                {
-                    var handle = MLAnchors.Instance.Handle;
-                    var queryFilter = new NativeBindings.MLSpatialAnchorQueryFilter(requestParams);
-                    var resultCode = NativeBindings.MLSpatialAnchorQueryCreate(handle, in queryFilter, out queryHandle, out resultsCount);
-                    Marshal.FreeHGlobal(queryFilter.Ids);
-                    return resultCode;
-                }
-
                 // Used by the anchor subsystem.
                 internal MLSpatialAnchorQueryFilter(Vector3 Center, float RadiusM, IntPtr Ids, uint IdsCount, uint MaxResults, bool Sorted)
                 {
@@ -199,7 +190,7 @@ namespace UnityEngine.XR.MagicLeap
                     this.Sorted = Sorted;
                 }
 
-                private MLSpatialAnchorQueryFilter(Request.Params requestParams)
+                internal MLSpatialAnchorQueryFilter(Request.Params requestParams)
                 {
                     this.Version = 1;
                     this.Center = MLConvert.FromUnity(requestParams.Center);
@@ -218,7 +209,7 @@ namespace UnityEngine.XR.MagicLeap
                     this.Sorted = requestParams.Sorted;
                 }
 
-                private static void MarshalArrayToPtr<T>(T[] array, out IntPtr ids, out uint idsCount)
+                internal static void MarshalArrayToPtr<T>(T[] array, out IntPtr ids, out uint idsCount)
                 {
                     IntPtr arrayPtr = Marshal.AllocHGlobal(Marshal.SizeOf<MLUUIDBytes>() * array.Length);
                     IntPtr walkPtr = arrayPtr;

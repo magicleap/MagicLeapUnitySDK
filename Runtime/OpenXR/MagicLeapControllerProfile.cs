@@ -1,5 +1,5 @@
 
-#if UNITY_OPENXR_1_4_0
+#if UNITY_OPENXR_1_4_0_OR_NEWER
 using System.Collections.Generic;
 using UnityEngine.InputSystem.Layouts;
 using UnityEngine.InputSystem.Controls;

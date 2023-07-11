@@ -52,12 +52,12 @@ namespace UnityEngine.XR.MagicLeap
         /// <summary>
         /// Hardcoded value approximating minimum near clip plane distance allowed by the platform.
         /// </summary>
-        public const float MinimumNearClipDistance = 0.1f;
+        public const float MinimumNearClipDistance = 0.37f;
 
         /// <summary>
         /// Hardcoded value with the default near clip plane distance to use.
         /// </summary>
-        public const float DefaultNearClipDistance = 0.1f;
+        public const float DefaultNearClipDistance = 0.37f;
 
         /// <summary>
         /// MagicLeap platform Unity name.
@@ -210,7 +210,7 @@ namespace UnityEngine.XR.MagicLeap
 
         public static bool IsOpenXRLoaderActive()
         {
-#if UNITY_OPENXR_1_4_0
+#if UNITY_OPENXR_1_4_0_OR_NEWER
             return  (UnityEngine.XR.Management.XRGeneralSettings.Instance?.Manager?.ActiveLoaderAs<UnityEngine.XR.OpenXR.OpenXRLoader>() != null);
 #else
             return false;

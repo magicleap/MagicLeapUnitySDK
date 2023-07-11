@@ -162,6 +162,11 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             IllegalState,
 
+            /// <summary>
+            /// Operation failed because of missing/incompatible license.
+            /// </summary>
+            LicenseError,
+
             // MLAudioResult
 
             /// <summary>
@@ -674,6 +679,53 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             WebViewZoomLimitReached = (CodePrefix.MLWebViewResult << 16),
 
+            // MLSpaceResult
+
+            /// <summary>
+            /// There was an error communicating with the server.
+            /// </summary>
+            SpacesServerError = (CodePrefix.MLSpaceResult << 16),
+
+            /// <summary>
+            /// The operation failed because the underlying service is not yet available, retry later.
+            /// </summary>
+            SpacesServiceUnavailable,
+
+            /// <summary>
+            /// Space is not available.
+            /// </summary>
+            UnavailableSpace,
+
+            /// <summary>
+            /// Space is not compatible with the current OS version.
+            /// </summary>
+            IncompatibleSpace,
+
+            /// <summary>
+            /// The operation failed because the Space being imported already exists in the device.
+            /// </summary>
+            SpaceAlreadyExists,
+
+            /// <summary>
+            /// Indicates the component is not connected.
+            /// </summary>
+            PowerManagerNotConnect = (CodePrefix.MLPowerManager << 16),
+
+            /// <summary>
+            /// Indicates the component does not currently support transitioning to requested state.
+            /// </summary>
+            PowerManagerInvalidStateTransition,
+
+            /// <summary>
+            /// Indicates the component does not currently support transitioning to a different state.
+            /// </summary>
+            PowerManagerStateTransitionsDisabled,
+
+            /// <summary>
+            /// Indicates the component does not support the requested power state.
+            /// </summary>
+            PowerManagerUnsupportedState,
+
             /// <summary>
             /// APIDLLNotFound.
             /// </summary>
@@ -747,7 +799,17 @@ namespace UnityEngine.XR.MagicLeap
 
             /// <summary>
             /// Code for MLWebView related MLResults.
-            MLWebViewResult = 0xebf7
+            MLWebViewResult = 0xebf7,
+
+            /// <summary>
+            /// Code for MLSpace related MLResults.
+            /// </summary>
+            MLSpaceResult = 0x10cc,
+
+            /// <summary>
+            /// Code for MLPowerManager related MLResults.
+            /// </summary>
+            MLPowerManager = 0x4c8a
         }
 
         /// <summary>
@@ -830,6 +892,9 @@ namespace UnityEngine.XR.MagicLeap
                 case CodePrefix.MLWebViewResult:
                     // No MLWebViewGetResultString in API 
                     codeString = "Web View Result Code - String Not Available";
+                    break;
+                case CodePrefix.MLPowerManager:
+                    codeString = resultCode.ToString();
                     break;
                 case CodePrefix.MLAnchorsResult:
                     codeString = "MLResult_" + resultCode;

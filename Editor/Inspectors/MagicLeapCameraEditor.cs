@@ -41,7 +41,7 @@ namespace UnityEditor.XR.MagicLeap
             serializedObject.Update();
 
             EditorGUILayout.PropertyField(fixeIssuesProp, fixIssuesText);
-            EditorGUILayout.PropertyField(enforceNearClipProp, nearClipText);
+            //EditorGUILayout.PropertyField(enforceNearClipProp, nearClipText);
             EditorGUILayout.PropertyField(enforceFarClipProp, farClipText);
 
             EditorGUILayout.ObjectField(stereoConvergencePointProp, typeof(Transform), stereoConvergencePointText);

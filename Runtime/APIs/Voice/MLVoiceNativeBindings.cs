@@ -46,7 +46,7 @@ namespace UnityEngine.XR.MagicLeap
                 newEvent.EventName = intentEvent.Text;
                 newEvent.EventID = intentEvent.IntentID;
 
-                IntentSlotInternal[] internalSlots = ConvertArray<IntentSlotInternal>(intentEvent.AppIntentSlots, intentEvent.AppIntentSlotCount);
+                IntentSlotInternal[] internalSlots = ConvertArray<IntentSlotInternal>(intentEvent.AppIntentSlots, (int)intentEvent.AppIntentSlotCount);
 
                 newEvent.EventSlotsUsed = new System.Collections.Generic.List<EventSlot>();
 
@@ -200,14 +200,13 @@ namespace UnityEngine.XR.MagicLeap
             /// <summary>
             /// Converts an unmanged array to a managed array of type T.
             /// </summary>
-            private static T[] ConvertArray<T>(IntPtr arrayPtr, ulong count)
+            private static T[] ConvertArray<T>(IntPtr arrayPtr, int count)
             {
                 T[] convertedArray = new T[count];
-                IntPtr walkPtr = arrayPtr;
-                for (ulong i = 0; i < count; ++i)
+                int tSize = Marshal.SizeOf<T>();
+                for (int i = 0; i < count; ++i)
                 {
-                    convertedArray[i] = Marshal.PtrToStructure<T>(walkPtr);
-                    walkPtr = new IntPtr(walkPtr.ToInt64() + Marshal.SizeOf<IntPtr>());
+                    convertedArray[i] = Marshal.PtrToStructure<T>((arrayPtr + (tSize * i)));
                 }
 
                 return convertedArray;
