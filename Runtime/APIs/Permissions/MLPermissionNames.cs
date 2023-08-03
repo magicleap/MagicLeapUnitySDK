@@ -49,5 +49,7 @@ namespace UnityEngine.XR.MagicLeap
         public const string SpaceImportExport = "com.magicleap.permission.SPACE_IMPORT_EXPORT";
 
         public const string EyeCamera = "com.magicleap.permission.EYE_CAMERA";
+
+        public const string FacialExpression = "com.magicleap.permission.FACIAL_EXPRESSION";
     }
 }

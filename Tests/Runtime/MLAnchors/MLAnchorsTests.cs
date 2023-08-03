@@ -1,51 +1,35 @@
 using NUnit.Framework;
+using System;
+using System.Collections;
 using UnityEngine;
+using UnityEngine.TestTools;
 using UnityEngine.XR.MagicLeap;
 
 namespace UnitySDKPlayTests
 {
     public partial class MLAnchorsTests
     {
-        [Test]
-        public void MLAnchors_IsStarted()
+        MLAnchors.Anchor anchor;
+        MLAnchors.Request query;
+        // Order enforced to ensure anchor and query are valid when they need to be 
+        [Test, Order(1)]
+        public void MLAnchors_CreateAnchor()
         {
             Assert.IsTrue(CheckAnchorsPermissions());
 
-            Assert.IsTrue(MLAnchors.IsStarted);
-        }
-
-        [Test]
-        public void MLAnchors_Create()
-        {
-            Assert.IsTrue(CheckAnchorsPermissions());
-
-            MLAnchors.Anchor.Create(new Pose(Vector3.zero, Quaternion.identity), 300,
-                out MLAnchors.Anchor anchor);
-
+            MLAnchors.Anchor.Create(new Pose(new Vector3(0,0,0), Quaternion.identity), 300, out anchor);
             Assert.IsFalse(string.IsNullOrEmpty(anchor.Id));
             Assert.IsTrue(anchor.Pose.position == Vector3.zero);
-            // Assert.IsTrue(anchor.Pose.rotation == Quaternion.identity);
-
-            anchor.Delete();
-        }
-
-        [Test]
-        public void MLAnchors_Create_Request_Delete_Anchor()
-        {
-            Assert.IsTrue(CheckAnchorsPermissions());
-
-            MLAnchors.Anchor.Create(new Pose(Vector3.zero, Quaternion.identity), 300,
-                out MLAnchors.Anchor anchor);
-
-            Assert.IsFalse(string.IsNullOrEmpty(anchor.Id));
-            Assert.IsTrue(anchor.Pose.position == Vector3.zero);
-            // Assert.IsTrue(anchor.Pose.rotation == Quaternion.identity);
 
             anchor.Publish();
+        }
 
-            MLAnchors.GetLocalizationInfo(out MLAnchors.LocalizationInfo info);
+        [Test, Order(2)]
+        public void MLAnchors_RequestAnchor()
+        {
+            Assert.IsTrue(CheckAnchorsPermissions());
 
-            MLAnchors.Request query = new MLAnchors.Request();
+            query = new MLAnchors.Request();
             query.Start(new MLAnchors.Request.Params(Vector3.zero, 0, 0, true));
             query.TryGetResult(out MLAnchors.Request.Result result);
 
@@ -55,17 +39,31 @@ namespace UnitySDKPlayTests
 
             Assert.IsFalse(string.IsNullOrEmpty(anchor.Id));
             Assert.IsTrue(anchor.Pose.position == Vector3.zero);
-            // Assert.IsTrue(anchor.Pose.rotation == Quaternion.identity);
+
+        }
+
+        [Test, Order(3)]
+        public void MLAnchors_DeleteAnchor()
+        {
+            Assert.IsTrue(CheckAnchorsPermissions());
 
             anchor.Delete();
 
-            query = new MLAnchors.Request();
             query.Start(new MLAnchors.Request.Params(Vector3.zero, 0, 0, true));
-            query.TryGetResult(out result);
+            query.TryGetResult(out MLAnchors.Request.Result result);
 
             Assert.IsTrue(result.anchors.Length == 0);
         }
 
+
+        [Test, Order(4)]
+        public void MLAnchors_IsStarted()
+        {
+            Assert.IsTrue(CheckAnchorsPermissions());
+
+            Assert.IsTrue(MLAnchors.IsStarted);
+        
+        }
         private bool CheckAnchorsPermissions()
         {
             MLPermissions.RequestPermission(MLPermission.SpatialAnchors, new MLPermissions.Callbacks());

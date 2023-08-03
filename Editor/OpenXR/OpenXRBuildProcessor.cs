@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Xml;
 using UnityEditor.Build.Reporting;
 using UnityEditor.XR.MagicLeap;
 
-#if UNITY_OPENXR_1_4_0_OR_NEWER
+#if UNITY_OPENXR_1_7_0_OR_NEWER
 using UnityEngine.XR.OpenXR.Features.MagicLeapSupport;
 
 namespace UnityEditor.XR.OpenXR.Features.MagicLeapSupport
@@ -28,8 +28,8 @@ namespace UnityEditor.XR.OpenXR.Features.MagicLeapSupport
 
             if (report.summary.platform == BuildTarget.Android)
             {
-                bootConfig.SetValueForKey(kHaveAndroidWindowSupportBootSettingsKey, "0", true);
-                bootConfig.SetValueForKey(kUseNullDisplayManagerBootSettingsKey, "1", true);
+                bootConfig.SetValueForKey(kHaveAndroidWindowSupportBootSettingsKey, "1", true);
+                bootConfig.SetValueForKey(kUseNullDisplayManagerBootSettingsKey, "0", true);
                 bootConfig.SetValueForKey(kVulkanForceDisableETCSupport, "1", true);
                 bootConfig.SetValueForKey(kVulkanForceDisableASTCSupport, "1", true);
                 bootConfig.SetValueForKey(kVulkanDisablePreTransform, "1", true);

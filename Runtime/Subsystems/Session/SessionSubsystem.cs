@@ -12,7 +12,9 @@ using System;
 using Unity.Collections;
 using UnityEngine.Scripting;
 using UnityEngine.XR.ARSubsystems;
+#if UNITY_XR_MAGICLEAP_PROVIDER
 using UnityEngine.XR.MagicLeap.Internal;
+#endif
 using UnityEngine.XR.Management;
 
 namespace UnityEngine.XR.MagicLeap
@@ -109,19 +111,23 @@ namespace UnityEngine.XR.MagicLeap
                     // Currently, the MeshingSubsystemComponent is required to do PointClouds on magic leap.  So
                     // if meshing is detected at all then simply request a start to the subsystem because it will be
                     // handled either by ARMeshManager or the MeshingSubsystemComponent.
+#if UNITY_XR_MAGICLEAP_PROVIDER
                     var loader = (MagicLeapLoader)XRGeneralSettings.Instance.Manager.activeLoader;
                     if (loader.meshSubsystem != null && !loader.meshSubsystem.running)
                     {
                         loader.StartMeshSubsystem();
                     }
+#endif
                 }
                 else if (previousConfigurationFeatures.HasFlag(Feature.Meshing | Feature.PointCloud))
                 {
+#if UNITY_XR_MAGICLEAP_PROVIDER
                     var loader = (MagicLeapLoader)XRGeneralSettings.Instance.Manager.activeLoader;
                     if (loader.meshSubsystem != null && loader.meshSubsystem.running)
                     {
                         loader.StopMeshSubsystem();
                     }
+#endif
                 }
 
                 // Only disable and enable features that are managed by the passed in configurations.

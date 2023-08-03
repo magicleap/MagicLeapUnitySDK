@@ -191,7 +191,7 @@ namespace UnityEngine.XR.MagicLeap
         public Task<MLResult> CapturePreviewStartAsync()
         {
             // this has to be called on main thread
-            CreatePreviewTexture();
+            MLThreadDispatch.ScheduleMain(CreatePreviewTexture);
 
             return Task.Run(() =>
             {

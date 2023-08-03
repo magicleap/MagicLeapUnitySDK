@@ -24,7 +24,7 @@ namespace UnityEditor.XR.MagicLeap
 #else
         private const UnityEditor.BuildTarget kBuildTarget = BuildTarget.Relish;
 #endif
-        private static uint minApiLevel = 0;
+        private static readonly uint minApiLevel = 0;
 
         static MagicLeapSDKUtil()
         {
@@ -33,9 +33,10 @@ namespace UnityEditor.XR.MagicLeap
                 var result = UnityEngine.XR.MagicLeap.Native.MagicLeapNativeBindings.MLUnitySdkGetMinApiLevel(out minApiLevel);
                 UnityEngine.XR.MagicLeap.MLResult.DidNativeCallSucceed(result, nameof(UnityEngine.XR.MagicLeap.Native.MagicLeapNativeBindings.MLUnitySdkGetMinApiLevel));
             }
-            catch(Exception e)
+            catch(DllNotFoundException)
             {
-                Debug.LogError($"Failed looking up minimum API level for Magic Leap SDK due to exception: {e}"); 
+                Debug.LogWarning($"Unable to look up minimum Magic Leap API level for editor scripting as the ml_sdk_loader has not been built for host.\n" +
+                                 $"\tDeveloper: Run \"build.py -h\" to rebuild NativeLibs including for host OS to access this value."); 
             }
         }
 

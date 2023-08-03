@@ -366,9 +366,7 @@ namespace UnityEngine.XR.MagicLeap
                 this.id = nativeAnchor.Id;
                 this.spaceId = nativeAnchor.SpaceId;
                 this.cfuid = nativeAnchor.Cfuid;
-
                 MagicLeapXrProviderNativeBindings.GetUnityPose(nativeAnchor.Cfuid, out this.Pose);
-
                 this.ExpirationTimeStamp = nativeAnchor.ExpirationTimeStamp;
                 this.IsPersisted = nativeAnchor.IsPersisted;
             }
@@ -452,9 +450,16 @@ namespace UnityEngine.XR.MagicLeap
                 this.spaceId = nativeInfo.SpaceId;
                 this.spaceOrigin = nativeInfo.TargetSpaceOrigin;
 
-                var resultCode = MagicLeapXrProviderNativeBindings.GetUnityPose(spaceOrigin, out SpaceOrigin);
-                MLResult.DidNativeCallSucceed(resultCode, nameof(MagicLeapXrProviderNativeBindings.GetUnityPose));
+                IntPtr snapshot = IntPtr.Zero;
+                MagicLeapNativeBindings.MLTransform transform = new MagicLeapNativeBindings.MLTransform();
+                MagicLeapNativeBindings.MLCoordinateFrameUID cfuid = nativeInfo.TargetSpaceOrigin;
+                MagicLeapNativeBindings.MLPerceptionGetSnapshot(ref snapshot);
+                MagicLeapNativeBindings.MLSnapshotGetTransform(snapshot, ref cfuid, ref transform);
+                
+                this.SpaceOrigin.position = transform.Position.ToVector3();
+                this.SpaceOrigin.rotation = MLConvert.ToUnity(transform.Rotation);
 
+                MagicLeapNativeBindings.MLPerceptionReleaseSnapshot(snapshot);
             }
 
             public override string ToString() => $"LocalizationStatus: {this.LocalizationStatus},\nMappingMode: {this.MappingMode},\nSpaceName: {this.SpaceName},\nSpaceId: {this.SpaceId}, \nSpaceOriginId: {this.spaceOrigin}, \nSpaceOrigin: {this.SpaceOrigin}";

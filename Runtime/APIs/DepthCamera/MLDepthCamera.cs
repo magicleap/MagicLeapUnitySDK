@@ -21,17 +21,27 @@ namespace UnityEngine.XR.MagicLeap
     /// </summary>
     public partial class MLDepthCamera : MLAutoAPISingleton<MLDepthCamera>
     {
+        public const int FrameTypeCount = 2;
+
         /// <summary>
         /// Depth Camera modes<br/>
         /// Future release may add support to other modes.
         /// </summary>
-        public enum Mode
+        public enum Stream
         {
+            None = 0,
+
             /// <summary>
             /// Long range mode
             /// <para>Under normal operations long range mode has a maximum frequency of 5fps and a range of up to 5m, in some cases this can go as far 7.5m.</para>
             /// </summary>
-            LongRange = 1 << 0
+            LongRange = 1 << 0,
+
+            /// <summary>
+            /// Short range mode
+            /// <para>Under normal operations short range stream has a maximum frequency of 60fps and a range from 0.2m up to 0.9m.</para>
+            /// </summary>
+            ShortRange = 1 << 1
         }
 
         /// <summary>
@@ -40,14 +50,27 @@ namespace UnityEngine.XR.MagicLeap
         public enum FrameType
         {
             /// <summary>
-            /// Unknown or no frame type
+            /// Frame captured using <see cref="Stream.LongRange"/> mode.
             /// </summary>
-            Unknown = 0,
+            LongRange,
 
             /// <summary>
-            /// Frame captured using <see cref="Mode.LongRange"/> mode.
+            /// Frame captured using <see cref="Stream.ShortRange"/> mode.
             /// </summary>
-            LongRange = 1
+            ShortRange
+        }
+
+        /// <summary>
+        /// Enumeration of possible frame rates
+        /// </summary>
+        public enum FrameRate
+        {
+            FPS_1,
+            FPS_5,
+            FPS_25,
+            FPS_30,
+            FPS_50,
+            FPS_60
         }
 
         /// <summary>
@@ -148,28 +171,48 @@ namespace UnityEngine.XR.MagicLeap
             ConnectedComponent = 1 << 10
         }
 
-        /// <summary>
-        /// Depth Camera Settings
-        /// <para>API Level 22</para>
-        /// </summary>
-        public struct Settings
+        public struct StreamConfig
         {
             /// <summary>
             /// Flags to configure the depth data.
             /// </summary>
-            public CaptureFlags Flags;
+            public uint Flags;
 
             /// <summary>
-            /// Depth camera Mode.
-            /// <para>See <see cref="Mode"/> for more details.</para>
-            /// <para>NOTE: The system may not be able to service all the requested modes at any given time. This parameter is treated as a hint and data will be provided for the requested modes if available.</para>
+            /// Exposure in microseconds.
             /// </summary>
-            public Mode Mode;
+            public uint Exposure;
+
+            /// <summary>
+            /// Frame Rate.
+            /// </summary>
+            public FrameRate FrameRateConfig;
+        }
+
+        /// <summary>
+        /// Depth Camera Settings
+        /// <para>API Level 29</para>
+        /// </summary>
+        public struct Settings
+        {
+            /// <summary>
+            /// The system may not be able to service all the requested streams at any
+            /// given time. This parameter is treated as a hint and data will be
+            /// provided for the requested streams if available.
+            /// </summary>
+            public Stream Streams;
+
+            /// <summary>
+            /// Controls for each of the depth camera streams.
+            /// Only controls for streams enabled via streams field will be read.
+            /// Use MLDepthCamera.FrameType enumeration for indexing.
+            /// </summary>
+            public StreamConfig[] StreamConfig;
         }
 
         /// <summary>
         /// Depth camera intrinsic parameters.
-        /// <para>API Level 22</para>
+        /// <para>API Level 292</para>
         /// </summary>
         public struct Intrinsics
         {
@@ -260,7 +303,7 @@ namespace UnityEngine.XR.MagicLeap
 
         /// <summary>
         /// Per-plane info for each depth camera frame.
-        /// <para>API Level 22</para>
+        /// <para>API Level 29</para>
         /// </summary>
         public struct FrameBuffer
         {
@@ -293,6 +336,34 @@ namespace UnityEngine.XR.MagicLeap
             {
                 return $"[FrameBuffer W: {Width}, H: {Height}, Stride: {Stride}, BPU: {BytesPerUnit}, Data: {(Data != null ? Data.Length + " bytes" : "null")}]";
             }
+        }
+
+        /// <summary>
+        /// Structure to encapsulate a possible configuration for a single stream.
+        /// Can be used to understand possible values for a specific StreamConfig element in MLDepthCameraSettings.
+        /// The capabilities supported by the depth camera can be queried with InternalGetCapabilities().
+        /// </summary>
+        public struct StreamCapability
+        {
+            /// <summary>
+            /// Stream for which this capability can be applied.
+            /// </summary>
+            public Stream Stream;
+
+            /// <summary>
+            /// Minimum sensor exposure in microseconds.
+            /// </summary>
+            public uint MinExposure;
+
+            /// <summary>
+            /// Maximum sensor exposure in microseconds.
+            /// </summary>
+            public uint MaxExposure;
+
+            /// <summary>
+            /// Frame rate.
+            /// </summary>
+            public FrameRate FrameRateCapability;
         }
 
         /// <summary>
@@ -346,7 +417,7 @@ namespace UnityEngine.XR.MagicLeap
 
         /// <summary>
         /// Connect to depth camera.
-        /// <para>API Level 22</para>
+        /// <para>API Level 29</para>
         /// permissions com.magicleap.permission.DEPTH_CAMERA (protection level: dangerous)
         /// </summary>
         /// <returns>
@@ -360,7 +431,7 @@ namespace UnityEngine.XR.MagicLeap
 
         /// <summary>
         /// Disconnect from depth camera.
-        /// <para>API Level 22</para>
+        /// <para>API Level 29</para>
         /// permissions None
         /// </summary>
         /// <returns>
@@ -372,7 +443,7 @@ namespace UnityEngine.XR.MagicLeap
 
         /// <summary>
         /// Update the depth camera settings.
-        /// <para>API Level 22</para>
+        /// <para>API Level 29</para>
         /// permissions None
         /// </summary>
         /// <param name="settings">New <see cref="Settings"/> for the depth camera.</param>
@@ -388,7 +459,7 @@ namespace UnityEngine.XR.MagicLeap
         /// <para>Returns a <see cref="Data"/> object referencing the latest available frame data, if any.</para>
         /// <para>This is a blocking call. API is not thread safe.</para>
         /// <para>If there are no new depth data frames for a given duration (duration determined by the system) then the API will return <see cref="MLResult.Code.Timeout"/>.</para>
-        /// <para>API Level 22</para>
+        /// <para>API Level 29</para>
         /// permissions None
         /// </summary>
         /// <param name="timeoutMs">Timeout in milliseconds.</param>
@@ -401,6 +472,8 @@ namespace UnityEngine.XR.MagicLeap
         /// </returns>
         public static MLResult GetLatestDepthData(ulong timeoutMs, out Data data) => Instance.InternalGetLatestDepthData(timeoutMs, out data);
 
+        public static MLResult GetCapabilities(out StreamCapability[] capabilities) => Instance.InternalGetCapabilities(out capabilities);
+
         #region internal
         private MLResult InternalConnect(Settings settings)
         {
@@ -411,13 +484,15 @@ namespace UnityEngine.XR.MagicLeap
             }
 
             var camSettings = NativeBindings.MLDepthCameraSettings.Init();
-            camSettings.Flags = (uint)settings.Flags;
-            camSettings.Mode = (uint)settings.Mode;
+            camSettings.Streams = (uint)settings.Streams;
+            camSettings.StreamConfig = settings.StreamConfig;
+
             var resultCode = NativeBindings.MLDepthCameraConnect(in camSettings, out Handle);
             if (MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLDepthCameraConnect)))
             {
                 IsConnected = true;
             }
+
             return MLResult.Create(resultCode);
         }
 
@@ -436,8 +511,9 @@ namespace UnityEngine.XR.MagicLeap
         private MLResult InternalUpdateSettings(Settings settings)
         {
             var depthCamSettings = NativeBindings.MLDepthCameraSettings.Init();
-            depthCamSettings.Flags = (uint)settings.Flags;
-            depthCamSettings.Mode = (uint)settings.Mode;
+            depthCamSettings.Streams = (uint)settings.Streams;
+            depthCamSettings.StreamConfig = settings.StreamConfig;
+
             var resultCode = NativeBindings.MLDepthCameraUpdateSettings(Handle, in depthCamSettings);
             if (MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLDepthCameraUpdateSettings)))
             {
@@ -449,21 +525,17 @@ namespace UnityEngine.XR.MagicLeap
         private MLResult InternalGetLatestDepthData(ulong timeoutMs, out Data data)
         {
             var depthCamData = NativeBindings.MLDepthCameraData.Init();
-            IntPtr dataPtr = Marshal.AllocHGlobal(Marshal.SizeOf(depthCamData));
-            Marshal.StructureToPtr(depthCamData, dataPtr, false);
 
-            var resultCode = NativeBindings.MLDepthCameraGetLatestDepthData(Handle, timeoutMs, out dataPtr);
+            var resultCode = NativeBindings.MLDepthCameraGetLatestDepthData(Handle, timeoutMs, out depthCamData);
 
             // in this case, a Timeout is an acceptable result that we don't need to log as an error to the console.
             bool resultIsOk = (resultCode == MLResult.Code.Ok || resultCode == MLResult.Code.Timeout);
-            if (!MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLDepthCameraGetLatestDepthData), showError: !resultIsOk) || dataPtr == IntPtr.Zero)
+            if (!MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLDepthCameraGetLatestDepthData), showError: !resultIsOk))
             {
                 data = null;
             }
             else
             {
-                depthCamData = (NativeBindings.MLDepthCameraData)Marshal.PtrToStructure(dataPtr, typeof(NativeBindings.MLDepthCameraData));
-
                 FrameBuffer CreateFromPtr(IntPtr ptr)
                 {
                     var result = new FrameBuffer();
@@ -490,20 +562,25 @@ namespace UnityEngine.XR.MagicLeap
                     return result;
                 }
 
-                var depthMap = CreateFromPtr(depthCamData.DepthImageFrameBufferPtr);
-                var confidenceMap = CreateFromPtr(depthCamData.ConfidenceBufferFrameBufferPtr);
-                var depthFlags = CreateFromPtr(depthCamData.DepthFlagsBufferFrameBufferPtr);
-                var aiMap = CreateFromPtr(depthCamData.AmbientRawDepthImageFrameBufferPtr);
-                var depthImage = CreateFromPtr(depthCamData.RawDepthImageFrameBufferPtr);
+                MarshalUnmananagedArrayToStructArray<NativeBindings.MLDepthCameraFrame>(depthCamData.Frames, depthCamData.FrameCount, out NativeBindings.MLDepthCameraFrame[] managedArray);
+
+                // TODO: Revisit this section if mixed mode (LR+SR) is supported. Currently the array should only have 1 element so it should be safe to assume only the first is needed for now.
+                var frame = managedArray[0];
+
+                var depthMap = CreateFromPtr(frame.DepthImageFrameBufferPtr);
+                var confidenceMap = CreateFromPtr(frame.ConfidenceBufferFrameBufferPtr);
+                var depthFlags = CreateFromPtr(frame.DepthFlagsBufferFrameBufferPtr);
+                var aiMap = CreateFromPtr(frame.AmbientRawDepthImageFrameBufferPtr);
+                var depthImage = CreateFromPtr(frame.RawDepthImageFrameBufferPtr);
 
                 data = new Data()
                 {
-                    FrameNumber = depthCamData.FrameNumber,
-                    FrameTimestamp = depthCamData.FrameTimestamp,
-                    FrameType = depthCamData.FrameType,
-                    Position = Native.MLConvert.ToUnity(depthCamData.CameraPose.Position),
-                    Rotation = Native.MLConvert.ToUnity(depthCamData.CameraPose.Rotation),
-                    Intrinsics = NativeBindings.MLDepthCameraIntrinsics.ToManaged(depthCamData.Intrinsics),
+                    FrameNumber = frame.FrameNumber,
+                    FrameTimestamp = frame.FrameTimestamp,
+                    FrameType = frame.FrameType,
+                    Position = Native.MLConvert.ToUnity(frame.CameraPose.Position),
+                    Rotation = Native.MLConvert.ToUnity(frame.CameraPose.Rotation),
+                    Intrinsics = NativeBindings.MLDepthCameraIntrinsics.ToManaged(frame.Intrinsics),
                     DepthImage = (depthMap.Data != null) ? depthMap : null,
                     ConfidenceBuffer = (confidenceMap.Data != null) ? confidenceMap : null,
                     DepthFlagsBuffer = (depthFlags.Data != null) ? depthFlags : null,
@@ -513,13 +590,54 @@ namespace UnityEngine.XR.MagicLeap
 
                 // CAPI specifies that Release should be called exactly once for each successful call to GetLatest
                 // Since we return a managed "copy" of the data in the out parameter, then we can immediately do this rather than require the application developer to do it themselves.
-                var releaseResult = NativeBindings.MLDepthCameraReleaseDepthData(Handle, dataPtr);
+                var releaseResult = NativeBindings.MLDepthCameraReleaseDepthData(Handle, ref depthCamData);
                 MLResult.DidNativeCallSucceed(releaseResult, nameof(NativeBindings.MLDepthCameraReleaseDepthData));
             }
 
-            Marshal.FreeHGlobal(dataPtr);
+            return MLResult.Create(resultCode);
+        }
+
+        private MLResult InternalGetCapabilities(out StreamCapability[] capabilities)
+        {
+            var filter = NativeBindings.MLDepthCameraCapabilityFilter.Init();
+            filter.Streams = (uint)CurrentSettings.Streams;
+
+            var resultCode = NativeBindings.MLDepthCameraGetCapabilities(Handle, ref filter, out NativeBindings.MLDepthCameraCapabilityList outCaps);
+            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLDepthCameraGetCapabilities));
+
+            MarshalUnmananagedArrayToStructArray<NativeBindings.MLDepthCameraCapability>(outCaps.Capabilities, outCaps.Size, out NativeBindings.MLDepthCameraCapability[] managedCapabilitiesArray);
+
+            capabilities = new StreamCapability[outCaps.Size];
+
+            for (int i = 0; i < capabilities.Length; i++)
+            {
+                MarshalUnmananagedArrayToStructArray<NativeBindings.MLDepthCameraStreamCapability>(managedCapabilitiesArray[i].StreamCapabilities, managedCapabilitiesArray[i].Size, out NativeBindings.MLDepthCameraStreamCapability[] managedStreamCapabilitiesArray);
+
+                // TODO: Revisit this section if mixed mode (LR+SR) is supported. Currently the array should only have 1 element so it should be safe to assume only the first is needed for now.
+                capabilities[i] = new StreamCapability();
+                capabilities[i].Stream = managedStreamCapabilitiesArray[0].Stream;
+                capabilities[i].MinExposure = managedStreamCapabilitiesArray[0].MinExposure;
+                capabilities[i].MaxExposure = managedStreamCapabilitiesArray[0].MaxExposure;
+                capabilities[i].FrameRateCapability = managedStreamCapabilitiesArray[0].FrameRateCapability;
+            }
+
+            var releaseResult = NativeBindings.MLDepthCameraReleaseCapabilities(Handle, ref outCaps);
+            MLResult.DidNativeCallSucceed(releaseResult, nameof(NativeBindings.MLDepthCameraReleaseCapabilities));
+
             return MLResult.Create(resultCode);
         }
         #endregion
+
+        private void MarshalUnmananagedArrayToStructArray<T>(IntPtr unmanagedArray, int length, out T[] mangagedArray)
+        {
+            var size = Marshal.SizeOf(typeof(T));
+            mangagedArray = new T[length];
+
+            for (int i = 0; i < length; i++)
+            {
+                IntPtr ins = new IntPtr(unmanagedArray.ToInt64() + i * size);
+                mangagedArray[i] = Marshal.PtrToStructure<T>(ins);
+            }
+        }
     }
 }

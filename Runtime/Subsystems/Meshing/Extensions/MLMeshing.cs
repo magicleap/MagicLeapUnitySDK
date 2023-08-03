@@ -68,6 +68,36 @@ namespace UnityEngine.XR.MagicLeap
                     /// </summary>
                     Maximum
                 }
+                
+                /// <summary>
+                /// Step the Level of detail to Minimum, Medium and Maximum
+                /// </summary>
+                /// <param name="density">float input value</param>
+                /// <returns></returns>
+                public static LevelOfDetail DensityToLevelOfDetail( float density )
+                {
+                    if (density < 0.33f)
+                        return LevelOfDetail.Minimum;
+                    else if (density < 0.66f)
+                        return LevelOfDetail.Medium;
+                    else
+                        return LevelOfDetail.Maximum;
+                }
+                
+                /// <summary>
+                /// Convert a LevelOfDetail to a float, ranged between 0 and 1
+                /// </summary>
+                /// <param name="lod">Level of detail</param>
+                /// <returns>Float value between 0 and 1</returns>
+                public static float LevelOfDetailToDensity( LevelOfDetail lod )
+                {
+                    if (lod == LevelOfDetail.Minimum)
+                        return 0.0f;
+                    else if (lod == LevelOfDetail.Medium)
+                        return 0.5f;
+                    else
+                        return 1.0f;
+                }
 
                 public delegate MeshingSubsystem.Extensions.MLMeshing.MeshBlockRequest[] OnMeshBlockRequests(MeshingSubsystem.Extensions.MLMeshing.MeshBlockInfo[] blockInfos);
 

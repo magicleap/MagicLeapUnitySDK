@@ -2,14 +2,16 @@ using System;
 using UnityEngine.Rendering;
 #if URP_14_0_0_OR_NEWER
 using UnityEngine.Rendering.Universal;
+#if UNITY_XR_MAGICLEAP_PROVIDER
 using SegmentedDimmerFeature = URP.SegmentedDimmer.SegmentedDimmer;
+#endif
 #endif
 
 namespace UnityEngine.XR.MagicLeap
 {
     public partial class MLSegmentedDimmer
     {
-#if URP_14_0_0_OR_NEWER
+#if URP_14_0_0_OR_NEWER && UNITY_XR_MAGICLEAP_PROVIDER
         /// <summary>
         /// The actual URP feature that represents the Segmented Dimmer to Unity
         /// </summary>
@@ -54,7 +56,7 @@ namespace UnityEngine.XR.MagicLeap
         /// <summary>
         /// Does the Universal Render Pipeline contain a Segmented Dimmer feature in its renderers
         /// </summary>
-#if URP_14_0_0_OR_NEWER
+#if URP_14_0_0_OR_NEWER && UNITY_XR_MAGICLEAP_PROVIDER
         public static bool Exists => SegmentedDimmerFeature != null;
 #else
         public static bool Exists => false;
@@ -67,7 +69,7 @@ namespace UnityEngine.XR.MagicLeap
         /// <returns></returns>
         public static int GetDefaultLayer()
         {
-#if URP_14_0_0_OR_NEWER
+#if URP_14_0_0_OR_NEWER && UNITY_XR_MAGICLEAP_PROVIDER
             if (defaultLayer >= 0)
             {
                 return defaultLayer;

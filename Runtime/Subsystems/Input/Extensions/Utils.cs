@@ -35,6 +35,16 @@ namespace UnityEngine.XR.MagicLeap
 
                 return new InputDevice();
             }
+
+            /// <summary>
+            /// Instructs the input subsystem to use MLPerceptionGetPerdictedSnapshot by default.
+            /// </summary>
+            /// <param name="timestamp">
+            /// Time representing the time in ms for which to predict poses (the max value is 100 ms).
+            /// This timestamp typically comes from out_frame_info.predicted_display_time.
+            /// </param>
+            /// <param name="predictSnapshots">Boolean representing whether or not to predict the snapshot.</param>
+            public static void PredictSnapshot(long timestamp, bool predictSnapshots) => MagicLeapXrProviderNativeBindings.PredictSnapshot(timestamp, predictSnapshots);
         }
     }
 }

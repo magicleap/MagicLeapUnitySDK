@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.9.0]
+
+### Features
+- `MLDepthCamera`: Added support for switching to Short Range streaming mode and to change FPS and exposure values. 
+
+### Bugfixes
+- `MLWebRTC`: Fixed camera disconnection when using `MLNativeSurface` based buffers for rendering.
+- Fixed `MLWorldCamera` error on application quit.
+- `MLSegmentedDimmer`: Fixed crash when playing scene twice in editor.
+
+### Deprecations & Removals
+
+### Known Issues
+
+
 ## [1.8.0]
 ### Features
 - `MLEyes`: Updated `leftEyeOpenAmount` and `rightEyeOpenAmount` on `UnityEngine.InputSystem.XR.Eyes` to return values between 0.0 and 1.0.
@@ -8,7 +23,9 @@
 - `MLDepthCamera`: Added `RawDepthImage` to support raw camera stream with IR Projector ON.
 - Added `MLEyeCamera` API.
 - `MLPowerManager`: Added a new API to obtain current controller state and control controller state transitions.
+- `MLFacialExpression`: Added a new API to obtain eye expressions data.
 - `MLHeadTracking`: Modified headpose lost notifications with new API for MLHeadTrackingStateEx.
+- Added `MLPerceptionGetPredictedSnapshot` and `EnableSnapshotPrediction` to allow controller pose prediction.
 
 ### Bugfixes
 

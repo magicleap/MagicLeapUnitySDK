@@ -32,7 +32,26 @@ namespace UnityEngine.XR.MagicLeap
         public static void RequestAlphaBlendFrameRendering(bool useAlphaBlend)
         {
             preferAlphaBlendMode = useAlphaBlend;
+            if (useAlphaBlend)
+            {
+                RegisterCallbacks();
+            }
+            else
+            {
+                ClearCallbacks();
+            }
+        }
+
+        public static void RequestPredictedSnapshots(bool useSnapshots)
+        {
+            usePredictedSnapshots = useSnapshots;
             RegisterCallbacks();
+        }
+
+        // clean up.
+        public static void Shutdown()
+        {
+            ClearCallbacks();
         }
 
         private static void RegisterCallbacks()
@@ -45,8 +64,18 @@ namespace UnityEngine.XR.MagicLeap
             }
         }
 
+        private static void ClearCallbacks()
+        {
+            if (registeredForRenderCallbacks)
+            {
+                registeredForRenderCallbacks = false;
+                NativeBindings.MLUnityGraphicsClearCallbacks();
+            }
+        }
+
         private static event OnPreBeginRenderFrameDelegate internalOnPreBeginRenderFrame = delegate { };
         private static bool registeredForRenderCallbacks;
         private static bool preferAlphaBlendMode = false;
+        private static bool usePredictedSnapshots = false;
     }
 }

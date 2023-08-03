@@ -216,6 +216,26 @@ namespace UnityEngine.XR.MagicLeap.Native
         public static extern MLResult.Code MLPerceptionGetSnapshot(ref IntPtr snapshot);
 
         /// <summary>
+        /// Pulls in the state of all persistent transforms and all
+        /// enabled trackers extrapolated to the provided timestamp.
+        /// This timestamp typically comes from out_frame_info.predicted_display_time out parameter from
+        /// the MLGraphicsBeginFrameEx function.
+        /// Returns a MLSnapshot with this latest state. This snap should be
+        /// used for the duration of the frame being constructed and then
+        /// released with a call to MLPerceptionReleaseSnapshot().
+        /// </summary>
+        /// <param name="timestamp">Timestamp representing the time for which to predict poses.</param>
+        /// <param name="out_snapshot">Pointer to a pointer containing an MLSnapshot on success.</param>
+        /// <returns>
+        /// MLResult.Result will be <c>MLResult.Code.Ok</c> if operation was successful.
+        /// MLResult.Result will be <c>MLResult.Code.InvalidTimestamp</c> if Timestamp is either more than 100ms in the future or too old for cached state.
+        /// MLResult.Result will be <c>MLResult.Code.InvalidParam</c> if Output parameter was not valid (null).
+        /// MLResult.Result will be <c>MLResult.Code.PerceptionSystemNotStartede</c> if Perception System has not been started.
+        /// </returns>
+        [DllImport(MLPerceptionClientDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern MLResult.Code MLPerceptionGetPredictedSnapshot(ulong timestamp, ref IntPtr out_snapshot);
+
+        /// <summary>
         /// Pull in the latest state of all persistent transforms and all
         /// enabled trackers extrapolated to the next frame time.
         /// Return an MLSnapshot with this latest state. This snap should be

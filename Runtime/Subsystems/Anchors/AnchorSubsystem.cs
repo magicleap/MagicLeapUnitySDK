@@ -6,7 +6,9 @@ using UnityEngine.XR.ARSubsystems;
 
 namespace UnityEngine.XR.MagicLeap
 {
+#if UNITY_XR_MAGICLEAP_PROVIDER
     using MLLog = UnityEngine.XR.MagicLeap.MagicLeapLogger;
+#endif
 
     /// <summary>
     /// The Magic Leap implementation of the <c>XRAnchorSubsystem</c>. Do not create this directly.

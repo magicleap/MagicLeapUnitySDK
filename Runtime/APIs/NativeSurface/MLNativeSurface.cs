@@ -87,11 +87,18 @@ namespace UnityEngine.XR.MagicLeap
         {
             MLResult.Code resultCode = MLResult.Code.NotImplemented;
 
-            if (!isExternallyOwned && Native.MagicLeapNativeBindings.MLHandleIsValid(Handle))
+            if (!isExternallyOwned)
             {
-                resultCode = NativeBindings.MLNativeSurfaceRelease(Handle);
-                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLNativeSurfaceRelease));
-                Handle = Native.MagicLeapNativeBindings.InvalidHandle;
+                if (gcHandle.IsAllocated)
+                {
+                    gcHandle.Free();;
+                }
+                if (Native.MagicLeapNativeBindings.MLHandleIsValid(Handle))
+                {
+                    resultCode = NativeBindings.MLNativeSurfaceRelease(Handle);
+                    MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLNativeSurfaceRelease));
+                    Handle = Native.MagicLeapNativeBindings.InvalidHandle;
+                }
             }
             return MLResult.Create(resultCode);
         }

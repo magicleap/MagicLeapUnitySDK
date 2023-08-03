@@ -52,7 +52,7 @@ namespace UnityEngine.XR.MagicLeap
         {
             var nativeInfo = NativeBindings.MLSpatialAnchorLocalizationInfo.Create();
             var resultCode = MagicLeapXrProviderNativeBindings.AnchorsGetLocalizationInfoAndSnapshot(this.Handle, ref nativeInfo);
-            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLSpatialAnchorGetLocalizationInfo));
+            MLResult.DidNativeCallSucceed(resultCode, nameof(MagicLeapXrProviderNativeBindings.AnchorsGetLocalizationInfoAndSnapshot));
             info = new LocalizationInfo(nativeInfo);
             return resultCode;
         }

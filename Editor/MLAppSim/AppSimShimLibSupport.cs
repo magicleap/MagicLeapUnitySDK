@@ -16,6 +16,9 @@ using System.Linq;
 using UnityEngine.XR.MagicLeap;
 using UnityEngine.XR.Management;
 using UnityEditor.XR.Management;
+#if UNITY_OPENXR_1_7_0_OR_NEWER
+using UnityEngine.XR.OpenXR;
+#endif
 
 namespace UnityEditor.XR.MagicLeap
 {
@@ -35,8 +38,21 @@ namespace UnityEditor.XR.MagicLeap
         private static void CheckForLibrarySearchPaths()
         {
             var settings = XRGeneralSettingsPerBuildTarget.XRGeneralSettingsForBuildTarget(BuildTargetGroup.Standalone);
-            if (settings == null || settings.Manager == null || settings.Manager.activeLoaders.Where(l => l is MagicLeapLoader).Count() == 0)
+            if (settings == null || settings.Manager == null )
             {
+                return;
+            }
+
+            bool foundSupportedLoader = false;
+#if UNITY_XR_MAGICLEAP_PROVIDER
+            foundSupportedLoader = settings.Manager.activeLoaders.Any(l => l is MagicLeapLoader);
+#elif UNITY_OPENXR_1_7_0_OR_NEWER
+            foundSupportedLoader = settings.Manager.activeLoaders.Any(l => l is OpenXRLoader);
+#endif
+
+            if (!foundSupportedLoader)
+            {
+                Debug.LogError("No supported XR loader found for AppSim");
                 return;
             }
 
@@ -74,6 +90,8 @@ namespace UnityEditor.XR.MagicLeap
 
                 string output = outputStream.ReadToEnd();
 
+                discoveryProc.WaitForExit();
+
                 if (discoveryProc.ExitCode != 0)
                 {
                     StreamReader errorStream = discoveryProc.StandardError;
@@ -84,14 +102,13 @@ namespace UnityEditor.XR.MagicLeap
 
                 libSearchPaths = new List<string>(output.Split(new string[] { "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries));
                 SessionState.SetString(SessionStateKey, string.Join(Path.PathSeparator, libSearchPaths));
-                discoveryProc.WaitForExit();
             }
             else
             {
                 libSearchPaths = new List<string>(cachedSearchPaths.Split(Path.PathSeparator));
             }
 
-            MagicLeapXrProvider.AddLibrarySearchPaths(libSearchPaths);
+            MagicLeapXrProvider.AddLibrarySearchPaths(libSearchPaths, settings.Manager.activeLoaders);
         }
     }
 }

@@ -1,7 +1,4 @@
-using UnityEditor.AnimatedValues;
 using UnityEngine;
-using UnityEngine.XR.MagicLeap;
-using UnityEngine.XR.MagicLeap.Rendering;
 using MagicLeapCamera = UnityEngine.XR.MagicLeap.MagicLeapCamera;
 
 namespace UnityEditor.XR.MagicLeap

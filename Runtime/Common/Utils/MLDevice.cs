@@ -8,14 +8,17 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine.XR.MagicLeap.Native;
+using UnityEngine.XR.Management;
+#if UNITY_OPENXR_1_7_0_OR_NEWER
+using UnityEngine.XR.OpenXR;
+#endif
+
 namespace UnityEngine.XR.MagicLeap
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using UnityEditor;
-    using UnityEngine.XR.MagicLeap.Native;
-
     /// <summary>
     /// MagicLeap device class responsible for updating all trackers when they register and are enabled.
     /// </summary>
@@ -205,16 +208,35 @@ namespace UnityEngine.XR.MagicLeap
 
         public static bool IsMagicLeapLoaderActive()
         {
-            return (UnityEngine.XR.Management.XRGeneralSettings.Instance?.Manager?.ActiveLoaderAs<MagicLeapLoader>() != null);
+#if UNITY_XR_MAGICLEAP_PROVIDER
+            if (XRGeneralSettings.Instance != null && XRGeneralSettings.Instance.Manager != null)
+            {
+                return XRGeneralSettings.Instance.Manager.ActiveLoaderAs<MagicLeapLoader>() != null;
+            }
+#endif
+            return false;
         }
 
         public static bool IsOpenXRLoaderActive()
-        {
-#if UNITY_OPENXR_1_4_0_OR_NEWER
-            return  (UnityEngine.XR.Management.XRGeneralSettings.Instance?.Manager?.ActiveLoaderAs<UnityEngine.XR.OpenXR.OpenXRLoader>() != null);
-#else
-            return false;
+        { 
+#if UNITY_OPENXR_1_7_0_OR_NEWER
+            if (XRGeneralSettings.Instance != null && XRGeneralSettings.Instance.Manager != null)
+            {
+                return XRGeneralSettings.Instance.Manager.ActiveLoaderAs<OpenXR.OpenXRLoader>() != null;
+            }
 #endif
+            return false;
+        }
+
+        public static bool IsMagicLeapOrOpenXRLoaderActive()
+        {
+            if (XRGeneralSettings.Instance != null && XRGeneralSettings.Instance.Manager != null)
+            {
+                bool isOpenXRLoaderActive = IsOpenXRLoaderActive();
+                bool isXRSDKLoaderActive = IsMagicLeapLoaderActive();
+                return isOpenXRLoaderActive || isXRSDKLoaderActive;
+            }
+            return false;
         }
 
         /// <summary>

@@ -1,5 +1,5 @@
 
-#if UNITY_OPENXR_1_4_0_OR_NEWER
+#if UNITY_OPENXR_1_7_0_OR_NEWER
 using System.Collections.Generic;
 using UnityEngine.InputSystem.Layouts;
 using UnityEngine.InputSystem.Controls;
@@ -11,7 +11,11 @@ using UnityEngine.XR.OpenXR.Input;
 using UnityEditor;
 #endif
 
+#if USE_INPUT_SYSTEM_POSE_CONTROL
+using PoseControl = UnityEngine.InputSystem.XR.PoseControl;
+#else
 using PoseControl = UnityEngine.XR.OpenXR.Input.PoseControl;
+#endif
 
 namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 {
@@ -19,12 +23,12 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
     /// This <see cref="OpenXRInteractionFeature"/> enables the use of interaction profiles in OpenXR.
     /// </summary>
 #if UNITY_EDITOR
-    [UnityEditor.XR.OpenXR.Features.OpenXRFeature(UiName = "Magic Leap Controller Interaction Profile",
+    [UnityEditor.XR.OpenXR.Features.OpenXRFeature(UiName = "Magic Leap 2 Controller Interaction Profile",
         BuildTargetGroups = new[] {BuildTargetGroup.Android, BuildTargetGroup.Standalone},
         Company = "Magic Leap",
-        Desc = "Allows for mapping input to the Magic Leap Controller interaction profile.",
+        Desc = "Allows for mapping input to the Magic Leap 2 Controller.",
         OpenxrExtensionStrings = extensionString,
-        Version = "0.53.2",
+        Version = "1.0.0",
         Category = UnityEditor.XR.OpenXR.Features.FeatureCategory.Interaction,
         FeatureId = featureId)]
 #endif
@@ -33,7 +37,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         /// <summary>
         /// The feature id string. This is used to give the feature a well known id for reference.
         /// </summary>
-        public const string featureId = "com.magicleap.openxr.feature.input.mlcontrollerprofile";
+        public const string featureId = "com.magicleap.openxr.feature.input.ml2controllerprofile";
 
         /// <summary>
         /// Extension required for enable the Magic Leap 2 Controller Interaction Profile.

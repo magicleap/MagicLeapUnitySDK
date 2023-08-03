@@ -25,7 +25,7 @@ namespace UnityEngine.XR.MagicLeap
     /// This is an experimental API which may be modified or removed without
     /// any prior notice.
     /// </summary>
-    public partial class MLWorldCamera : MLAPIBase
+    public partial class MLWorldCamera : MLAutoAPISingleton<MLWorldCamera>
     {
         /// <summary>
         /// Enumeration of all the available world camera sensors.
@@ -82,6 +82,10 @@ namespace UnityEngine.XR.MagicLeap
         public bool IsConnected { get; private set; }
 
         private bool connectionPaused;
+
+        protected override MLResult.Code StartAPI() => MLResult.Code.Ok;
+
+        protected override MLResult.Code StopAPI() => Disconnect().Result;
 
         /// <summary>
         /// Connect to world cameras.

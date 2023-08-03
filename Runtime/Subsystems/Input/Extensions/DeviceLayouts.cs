@@ -13,6 +13,15 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
 using UnityEngine.InputSystem.Layouts;
 using UnityEngine.InputSystem.XR;
+#if !UNITY_XR_MAGICLEAP_PROVIDER
+using VibePattern = UnityEngine.XR.MagicLeap.InputSubsystem.Extensions.DeviceCommands.VibePattern;
+using VibeIntensity = UnityEngine.XR.MagicLeap.InputSubsystem.Extensions.DeviceCommands.VibeIntensity;
+using SendControllerVibe = UnityEngine.XR.MagicLeap.InputSubsystem.Extensions.DeviceCommands.SendControllerVibe;
+using QueryControllerEnabled = UnityEngine.XR.MagicLeap.InputSubsystem.Extensions.DeviceCommands.QueryControllerEnabled;
+using SetControllerEnabled = UnityEngine.XR.MagicLeap.InputSubsystem.Extensions.DeviceCommands.SetControllerEnabled;
+using QueryEyesEnabled = UnityEngine.XR.MagicLeap.InputSubsystem.Extensions.DeviceCommands.QueryEyesEnabled;
+using SetEyesEnabled = UnityEngine.XR.MagicLeap.InputSubsystem.Extensions.DeviceCommands.SetEyesEnabled;
+#endif
 
 namespace UnityEngine.XR.MagicLeap
 {

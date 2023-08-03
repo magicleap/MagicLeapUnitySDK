@@ -12,7 +12,6 @@ namespace UnityEngine.XR.MagicLeap
 {
     using System;
     using System.Reflection;
-    using UnityEngine.XR.MagicLeap.Internal;
 
     /// <summary>
     /// Place this attribute on a child of MLAutoAPISingleton to prevent its initialization

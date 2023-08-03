@@ -359,7 +359,7 @@ namespace UnityEngine.XR.MagicLeap
                 throw new ArgumentNullException(nameof(confidenceOut));
             }
 
-            if (m_MeshSubsystem == null)
+            if (MeshingSubsystemLifecycle.MeshSubsystem == null)
             {
                 return false;
             }
@@ -558,33 +558,21 @@ namespace UnityEngine.XR.MagicLeap
 
         IEnumerator Init()
         {
-            while (XRGeneralSettings.Instance == null)
-            {
-                yield return null;
-            }
-            while (XRGeneralSettings.Instance.Manager == null)
-            {
-                yield return null;
-            }
-
+            yield return StartCoroutine(MeshingSubsystemLifecycle.WaitUntilInited());
+            
             while (meshPrefab == null)
             {
                 yield return null;
             }
-
+            
             if (!gameObjectPoolInitialized)
             {
                 while (gameObjectPool.Count < objectPoolSize)
                 {
                     AddNewObjectToPool();
                 }
-
+                
                 gameObjectPoolInitialized = true;
-            }
-            m_Loader = XRGeneralSettings.Instance.Manager.ActiveLoaderAs<MagicLeapLoader>();
-            if (m_Loader != null)
-            {
-                m_MeshSubsystem = m_Loader.meshSubsystem;
             }
 
             UpdateSettings();
@@ -596,19 +584,12 @@ namespace UnityEngine.XR.MagicLeap
 
         void StartSubsystem()
         {
-            if (m_Loader != null)
-            {
-                m_Loader.StartMeshSubsystem();
-            }
+            MeshingSubsystemLifecycle.StartSubsystem();
         }
 
         void StopSubsystem()
         {
-            if (m_Loader != null)
-            {
-                m_Loader.StopMeshSubsystem();
-            }
-            m_MeshSubsystem = null;
+            MeshingSubsystemLifecycle.StopSubsystem();
             SubsystemFeatures.SetCurrentFeatureEnabled(Feature.Meshing | Feature.PointCloud, false);
         }
 
@@ -695,9 +676,9 @@ namespace UnityEngine.XR.MagicLeap
         void Update()
         {
 
-            if (m_MeshSubsystem == null)
+            if (MeshingSubsystemLifecycle.MeshSubsystem == null)
                 return;
-            if (!m_MeshSubsystem.running)
+            if (!MeshingSubsystemLifecycle.MeshSubsystem.running)
                 return;
 #if UNITY_EDITOR
             m_SettingsDirty |= haveSettingsChanged;
@@ -716,7 +697,7 @@ namespace UnityEngine.XR.MagicLeap
             // Polling at twice the rate will ensure that data appears at the desired interval.  
             float timeSinceLastUpdate = (float)(DateTime.Now - m_TimeLastUpdated).TotalSeconds;
             bool allowUpdate = (timeSinceLastUpdate > (m_PollingRate / 2.0f));
-            bool gotMeshInfos = m_MeshSubsystem.TryGetMeshInfos(meshInfos);
+            bool gotMeshInfos = MeshingSubsystemLifecycle.MeshSubsystem.TryGetMeshInfos(meshInfos);
             if (allowUpdate && gotMeshInfos)
             {
                 foreach (var meshInfo in meshInfos)
@@ -763,7 +744,7 @@ namespace UnityEngine.XR.MagicLeap
                     var meshCollider = meshGameObject.GetComponent<MeshCollider>();
                     var meshFilter = meshGameObject.GetComponent<MeshFilter>();
                     var meshAttributes = computeNormals ? MeshVertexAttributes.Normals : MeshVertexAttributes.None;
-                    m_MeshSubsystem.GenerateMeshAsync(meshId, meshFilter.mesh, meshCollider, meshAttributes, OnMeshGenerated);
+                    MeshingSubsystemLifecycle.MeshSubsystem.GenerateMeshAsync(meshId, meshFilter.mesh, meshCollider, meshAttributes, OnMeshGenerated);
                     m_MeshesBeingGenerated.Add(meshId, m_MeshesNeedingGeneration[meshId]);
                     if (m_MeshesNeedingGeneration.ContainsKey(meshId))
                     {
@@ -873,7 +854,9 @@ namespace UnityEngine.XR.MagicLeap
 
         Queue<GameObject> gameObjectPool;
 
+#if UNITY_XR_MAGICLEAP_PROVIDER
         MagicLeapLoader m_Loader;
+#endif
         XRMeshSubsystem m_MeshSubsystem;
     }
 }

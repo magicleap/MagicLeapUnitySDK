@@ -122,6 +122,9 @@ namespace UnityEngine.XR.MagicLeap
         public static extern MLResult.Code StopHaptics();
 
         [DllImport(MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void PredictSnapshot(long predictionTimestamp, bool enableSnapshotPrediction);
+
+        [DllImport(MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void InputSetOnPerceptionShutdownCallback(CallOnPerceptionShutdownDelegate createOnPerceptionShutdown);
 
         [DllImport(MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
