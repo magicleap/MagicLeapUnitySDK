@@ -2782,6 +2782,36 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3771369551179688024, guid: 24158fb1437dc8e418d893939758764d,
+        type: 3}
+      propertyPath: m_PositionInput.m_Action.m_Id
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3771369551179688024, guid: 24158fb1437dc8e418d893939758764d,
+        type: 3}
+      propertyPath: m_RotationInput.m_Action.m_Id
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3771369551179688024, guid: 24158fb1437dc8e418d893939758764d,
+        type: 3}
+      propertyPath: m_PositionInput.m_Action.m_Name
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3771369551179688024, guid: 24158fb1437dc8e418d893939758764d,
+        type: 3}
+      propertyPath: m_RotationInput.m_Action.m_Name
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3771369551179688024, guid: 24158fb1437dc8e418d893939758764d,
+        type: 3}
+      propertyPath: m_PositionInput.m_Action.m_SingletonActionBindings.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3771369551179688024, guid: 24158fb1437dc8e418d893939758764d,
+        type: 3}
+      propertyPath: m_RotationInput.m_Action.m_SingletonActionBindings.Array.size
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5850404675360181103, guid: 24158fb1437dc8e418d893939758764d,
         type: 3}
       propertyPath: recenterXROriginAtStart
