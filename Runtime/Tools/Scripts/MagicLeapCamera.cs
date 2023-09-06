@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 #if UNITY_OPENXR_1_7_0_OR_NEWER
+using UnityEngine.XR.OpenXR;
 using UnityEngine.XR.OpenXR.Features.MagicLeapSupport;
 #endif
 #if UNITY_XR_MAGICLEAP_PROVIDER
@@ -103,6 +104,18 @@ namespace UnityEngine.XR.MagicLeap
             set => protectedSurface = value;
         }
 
+        public bool EnforceFarClip
+        {
+            get => enforceFarClip;
+            set => enforceFarClip = value;
+        }
+
+        public bool RecenterXROriginAtStart
+        {
+            get => recenterXROriginAtStart;
+            set => recenterXROriginAtStart = value;
+        }
+
         private void Awake()
         {
             camera = GetComponent<Camera>();
@@ -115,7 +128,12 @@ namespace UnityEngine.XR.MagicLeap
 #if UNITY_OPENXR_1_7_0_OR_NEWER
             if (!Application.isEditor)
             {
-                MLXrRenderSettings.SetFrameEndInfoParams(camera.stereoConvergence, vignette, protectedSurface);
+                var renderFeature = OpenXRSettings.Instance.GetFeature<MagicLeapRenderingExtensionsFeature>();
+                if (renderFeature == null)
+                    return;
+                renderFeature.focusDistance = camera.stereoConvergence;
+                renderFeature.useProtectedSurface = protectedSurface;
+                renderFeature.useVignetteMode = vignette;
             }
 #endif
         }
@@ -150,7 +168,11 @@ namespace UnityEngine.XR.MagicLeap
 
             camera.stereoConvergence = CalculateFocusDistance();
 #if UNITY_OPENXR_1_7_0_OR_NEWER
-            MLXrRenderSettings.SetFrameEndInfoParams(camera.stereoConvergence, vignette, protectedSurface);
+            if (!Utils.TryGetOpenXRFeature<MagicLeapRenderingExtensionsFeature>(out var renderFeature))
+                return;
+            renderFeature.focusDistance = camera.stereoConvergence;
+            renderFeature.useProtectedSurface = protectedSurface;
+            renderFeature.useVignetteMode = vignette;
 #elif UNITY_XR_MAGICLEAP_PROVIDER
             MagicLeapXRRenderSettings.focusDistance = camera.stereoConvergence;
             MagicLeapXRRenderSettings.farClipDistance = camera.farClipPlane;

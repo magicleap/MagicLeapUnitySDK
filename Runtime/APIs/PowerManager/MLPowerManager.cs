@@ -24,27 +24,40 @@ namespace UnityEngine.XR.MagicLeap
         protected override MLResult.Code StopAPI() => Instance.InternalDestroyManager();
 
         /// <summary>
-        /// Set the power state for the controller.
+        /// Sets the power state of a component.
+        /// <param name="settings">
+        ///   Settings used by the Power Manager updating a component's power state.
+        /// </param>
         /// </summary>
         public static MLResult.Code SetPowerState(Settings settings) => Instance.InternalSetPowerState(settings);
 
         /// <summary>
         /// Get controller component properties.
+        /// <param name="out_properties"> Information about the properties of a component.</param>
         /// </summary>
         public static MLResult.Code GetComponentProperties(out PropertyData out_properties) => Instance.InternalGetComponentProperties(out out_properties);
 
         /// <summary>
-        /// Get available power states for the controller.
+        /// Get available power states for a component.
+        /// <param name="data">
+        ///   #PowerStateData holding list of available power states.
+        /// </param>
         /// </summary>
         public static MLResult.Code GetAvailablePowerStates(out PowerStateData data) => Instance.InternalGetAvailablePowerStates(out data);
 
         /// <summary>
-        /// Get the current power state for the controller.
+        /// Get the current power state for a component.
+        /// <param name="data">
+        ///   #PowerStateData with the current power state of the component.
+        /// </param>
         /// </summary>
         public static MLResult.Code GetPowerState(out PowerStateData data) => Instance.InternalGetPowerState(out data);
 
         /// <summary>
-        /// Get available properties for the controller.
+        /// Request a list of the available #PropertyType.
+        /// <param name="data">
+        ///   Information about the properties of a component.
+        /// </param>
         /// </summary>
         public static MLResult.Code GetAvailableProperties(out PropertyTypeData data) => Instance.InternalGetAvailableProperties(out data);
 

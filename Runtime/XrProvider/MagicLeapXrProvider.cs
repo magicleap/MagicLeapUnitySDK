@@ -115,7 +115,14 @@ namespace UnityEngine.XR.MagicLeap
                     var resultCode = MagicLeapXrProviderNativeBindings.MLZIIsServerConfigured(out isZIRunning);
                     if (!MLResult.DidNativeCallSucceed(resultCode, nameof(MagicLeapXrProviderNativeBindings.MLZIIsServerConfigured)) || !isZIRunning)
                     {
-                        Debug.LogError("Failed to detect running Magic Leap App Simulator session.");
+                        // This is expected case: user plays a scene without an AppSim session started. 
+                        // Show a dialog with user-readable message instead of only logging errors that are not obvious nor helpful to users.
+                        EditorUtility.DisplayDialog("Magic Leap", 
+                            "No Magic Leap App Simulator session is running. " +
+                            "Exit Play mode and start App Simulator before entering Play mode again.", 
+                            "Ok");
+                        // This log message is more technical, good for for user to report bug.
+                        Debug.LogError("Failed to detect running Magic Leap App Simulator session, or a running session if any is not compatible (e.g. protocol version is different between the frontend and the backend).");
                         MagicLeapXrProviderNativeBindings.MLSdkLoaderResetLibraryPaths();
                     }
 

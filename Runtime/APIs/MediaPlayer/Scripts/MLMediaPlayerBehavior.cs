@@ -113,15 +113,13 @@ namespace MagicLeap.Core
 
         private MLMedia.Player _mediaPlayer;
 
-        private bool renderVideo = false;
-
         void Update()
         {
             if (!Application.isEditor && MediaPlayer.IsPlaying && MediaPlayer.VideoRenderer != null)
             {
                 MediaPlayer.VideoRenderer.Render();
             }
-            if (DurationInMiliseconds > 0 && IsPlaying && !IsSeeking && !IsBuffering && renderVideo)
+            if (DurationInMiliseconds > 0 && IsPlaying && !IsSeeking && !IsBuffering)
             {
                 UpdateTimeline();
             }
@@ -146,6 +144,12 @@ namespace MagicLeap.Core
                 _mediaPlayer.OnTrackSelected -= HandleOnTrackSelected;
                 _mediaPlayer.OnResetComplete -= HandleOnResetComplete;
                 _mediaPlayer.OnTrackFound -= HandleOnTrackFound;
+
+                if (mediaPlayerTexture != null)
+                {
+                    mediaPlayerTexture.Release();
+                    Destroy(mediaPlayerTexture);
+                }
 
                 StopMLMediaPlayer();
                 _mediaPlayer.Reset();
@@ -203,8 +207,13 @@ namespace MagicLeap.Core
 
             if (!result.IsOk)
             {
-                string message = "PrepareMLMediaPlayer failed, source could not be set.";
-                MLPluginLog.Warning(message);
+                // SetStreamingSourcePath() will call PreparePlayerAsync() and always return 
+                // MLResult.Code.Pending, so we skip logging that result and return.
+                if(result != MLResult.Code.Pending)
+                {
+                    string message = "PrepareMLMediaPlayer failed, source could not be set for " + source + ": " + result.ToString();
+                    MLPluginLog.Error(message);
+                }
                 return;
             }
 
@@ -232,6 +241,7 @@ namespace MagicLeap.Core
         {
             if (mediaPlayerTexture != texture)
             {
+                mediaPlayerTexture.Release();
                 Destroy(mediaPlayerTexture);
                 mediaPlayerTexture = null;
             }
@@ -322,6 +332,7 @@ namespace MagicLeap.Core
 
             if (mediaPlayerTexture != null && (mediaPlayerTexture.width != width || mediaPlayerTexture.height != height))
             {
+                mediaPlayerTexture.Release();
                 Destroy(mediaPlayerTexture);
                 mediaPlayerTexture = null;
             }
@@ -535,12 +546,6 @@ namespace MagicLeap.Core
                 case MLMedia.Player.Info.BufferingEnd:
                     IsBuffering = false;
                     OnIsBufferingChanged?.Invoke(false);
-                    break;
-                case MLMedia.Player.Info.RenderingStart:
-                    renderVideo = true;
-                    break;
-                case MLMedia.Player.Info.Stopped:
-                    renderVideo = false;
                     break;
             }
         }

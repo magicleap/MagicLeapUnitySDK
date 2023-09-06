@@ -77,7 +77,13 @@ namespace UnityEngine.XR.MagicLeap
 
             [AOT.MonoPInvokeCallback(typeof(OnBeginRenderFrameNativeDelegate))]
             private static void OnBeginRenderFrameCallback(IntPtr context, long predictedDisplayTime) => InputSubsystem.Utils.PredictSnapshot(predictedDisplayTime, usePredictedSnapshots);
-
+            
+            public static void ClearCallbacks()
+            {
+                MLUnityGraphicsClearCallbacks();
+                InputSubsystem.Utils.ResetSnapshotPrediction();
+            }
+            
             [StructLayout(LayoutKind.Sequential)]
             public struct MLUnityGraphicsCallbacks
             {

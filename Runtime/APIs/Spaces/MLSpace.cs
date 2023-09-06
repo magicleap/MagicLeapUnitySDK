@@ -28,17 +28,20 @@ namespace UnityEngine.XR.MagicLeap
         protected override MLResult.Code StopAPI() => Instance.InternalMLSpacesStop();
 
         /// <summary>
-        /// Export spaces wrapper.
+        /// Export an on device Magic Leap Space.
         /// </summary>
         public static MLResult.Code ExportSpace(in SpaceInfo info, out SpaceData data) => Instance.InternalExportSpace(in info, out data);
 
         /// <summary>
-        /// Import spaces wrapper.
+        /// Import a Magic Leap Space.
         /// </summary>
         public static MLResult.Code ImportSpace(in SpaceData data, out SpaceInfo id) => Instance.InternalImportSpace(in data, out id);
 
         /// <summary>
-        /// Get list of available spaces.
+        /// Get the list of available spaces.
+        /// The list of spaces returned will depend on the current device mapping mode.
+        /// Only the Spaces associated with the current mapping mode will be returned by
+        /// this call.Device mapping mode can be changed via the system application(s).
         /// </summary>
         public static MLResult.Code GetSpaceList(out Space[] spaceList) => Instance.InternalGetSpaceList(out spaceList);
 

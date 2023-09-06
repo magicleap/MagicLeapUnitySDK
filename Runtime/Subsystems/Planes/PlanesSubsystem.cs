@@ -450,24 +450,23 @@ namespace UnityEngine.XR.MagicLeap
             }
         }
 
+#if !UNITY_OPENXR_1_7_0_OR_NEWER
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void RegisterDescriptor()
         {
             XRPlaneSubsystemDescriptor.Create(new XRPlaneSubsystemDescriptor.Cinfo
             {
                 id = MagicLeapXrProvider.PlanesSubsystemId,
-#if UNITY_2020_2_OR_NEWER
-                providerType = typeof(PlanesSubsystem.MagicLeapProvider),
+                providerType = typeof(MagicLeapProvider),
                 subsystemTypeOverride = typeof(PlanesSubsystem),
-#else
-                subsystemImplementationType = typeof(PlanesSubsystem),
-#endif
                 supportsVerticalPlaneDetection = true,
                 supportsArbitraryPlaneDetection = true,
                 supportsBoundaryVertices = true,
                 supportsClassification = true
             });
         }
+#endif
 
         internal class NativeBindings : MagicLeapNativeBindings
         {

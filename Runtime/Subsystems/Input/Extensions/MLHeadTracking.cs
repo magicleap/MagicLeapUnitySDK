@@ -1,6 +1,8 @@
 using System;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using UnityEngine.XR.MagicLeap.Native;
+using static UnityEngine.XR.MagicLeap.InputSubsystem.Extensions.MLHeadTracking.NativeBindings;
 
 namespace UnityEngine.XR.MagicLeap
 {
@@ -150,6 +152,28 @@ namespace UnityEngine.XR.MagicLeap
 
                 public static bool TryGetStateEx(InputDevice headDevice, out StateEx headTrackingState) => NativeBindings.TryGetStateEx(headDevice, out headTrackingState);
                 public static bool TryGetMapEvents(InputDevice headDevice, out MapEvents mapEvents) => NativeBindings.TryGetMapEvents(headDevice, out mapEvents);
+
+                private static bool gotData = false;
+                private static NativeBindings.MLHeadTrackingStaticData data;
+                public static void GetStaticData(out MagicLeapNativeBindings.MLCoordinateFrameUID outUID)
+                {
+                    outUID = MagicLeapNativeBindings.MLCoordinateFrameUID.EmptyFrame;
+                    if (!gotData)
+                    {
+                        var headHandle = MagicLeapXrProviderNativeBindings.GetHeadTrackerHandle();
+                        data = new();
+                        MLResult result = MLResult.Create(MLHeadTrackingGetStaticData(headHandle, ref data));
+                        if (!result.IsOk)
+                        {
+                            Debug.LogError($"MLHeadTracking::GetStaticData failed: {result}");
+                            gotData = false;
+                            return;
+                        }
+                    }
+
+                    outUID = data.coord_frame_head;
+                    return;
+                }
 
                 /// <summary>
                 /// A structure containing information on the current state of the
@@ -357,6 +381,31 @@ namespace UnityEngine.XR.MagicLeap
                         /// Represents what tracking error (if any) is present.
                         /// </summary>
                         public readonly uint Error;
+                    }
+
+                    /// <summary>
+                    /// Returns static information about the Head Tracker
+                    /// </summary>
+                    /// <param name="handle"> A handle to the tracker retireved by GetHeadTrackerHandle()</param>
+                    /// <param name="data"> Target to populate the data about that Head Tracker</param>
+                    /// <returns>
+                    /// MLResult.Result will be <c>MLResult.Code.InvalidParam</c> if failed to receive static data due to an invalid input parameter.
+                    /// MLResult.Result will be <c>MLResult.Code.Ok</c> if successfully received static data.
+                    /// MLResult.Result will be <c>MLResult.Code.UnspecifiedFailure</c> if failed to receive static data due to an unknown error.
+                    /// </returns>
+                    [DllImport(MagicLeapNativeBindings.MLPerceptionClientDll, CallingConvention = CallingConvention.Cdecl)]
+                    public static extern MLResult.Code MLHeadTrackingGetStaticData(ulong handle, ref MLHeadTrackingStaticData data);
+
+                    /// <summary>
+                    /// Static information about a Head Tracker. Populate this structure with MLHeadTrackingGetStaticData()
+                    /// </summary>
+                    [StructLayout(LayoutKind.Sequential)]
+                    public struct MLHeadTrackingStaticData
+                    {
+                        /// <summary>
+                        /// Coordinate frame ID of the head 
+                        /// </summary>
+                        public MagicLeapNativeBindings.MLCoordinateFrameUID coord_frame_head;
                     }
                 }
             }

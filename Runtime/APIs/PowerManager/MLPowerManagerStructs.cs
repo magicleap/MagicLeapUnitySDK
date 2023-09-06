@@ -76,7 +76,7 @@ namespace UnityEngine.XR.MagicLeap
         public struct PropertyTypeData
         {
             /// <summary>
-            /// Array of #MLPowerManagerPropertyType elements.
+            /// Array of #PropertyType elements.
             /// </summary>
             public PropertyType[] PropertyTypes;
         }

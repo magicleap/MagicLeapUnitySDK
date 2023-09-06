@@ -34,8 +34,8 @@ namespace UnityEngine.XR.MagicLeap
             float clampedValue = Mathf.Clamp(dimmerValue, 0.0f, 1.0f);
             var dimmerInfoStruct = new NativeBindings.XrGlobalDimmerFrameEndInfoML(clampedValue, enabled);
             
-            var resultCode = NativeBindings.MLOpenXRSetGlobalDimmerFrameEndInfo(dimmerInfoStruct);
-            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLOpenXRSetGlobalDimmerFrameEndInfo));
+            var resultCode = NativeBindings.MLOpenXRSetGlobalDimmerFrameEndInfoParams(dimmerInfoStruct);
+            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLOpenXRSetGlobalDimmerFrameEndInfoParams));
             
             return resultCode;
         }

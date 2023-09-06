@@ -35,7 +35,7 @@ namespace UnityEngine.XR.MagicLeap
             public static extern void UnityMagicLeap_RenderingSetGlobalDimmerValue(float dimmerValue);
 
             [DllImport(MagicLeapXrProviderNativeBindings.MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
-            public static extern MLResult.Code MLOpenXRSetGlobalDimmerFrameEndInfo(XrGlobalDimmerFrameEndInfoML globalDimmerFrameEndInfoML);
+            public static extern MLResult.Code MLOpenXRSetGlobalDimmerFrameEndInfoParams(XrGlobalDimmerFrameEndInfoML globalDimmerFrameEndInfoML);
         }
     }
 }

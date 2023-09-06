@@ -5,6 +5,8 @@ using Unity.Collections;
 using UnityEngine.XR.Hands;
 using UnityEngine.XR.Hands.ProviderImplementation;
 using UnityEngine.XR.Management;
+using Unity.Collections.LowLevel.Unsafe;
+using NativeBindings = UnityEngine.XR.OpenXR.Features.MagicLeapSupport.MagicLeapFeature.NativeBindings;
 
 namespace UnityEngine.XR.MagicLeap
 {
@@ -32,13 +34,20 @@ namespace UnityEngine.XR.MagicLeap
     public class MagicLeapProvider : XRHandSubsystemProvider
     {
         private XRHandProviderUtility.SubsystemUpdater subsystemUpdater;
+        private List<int> unsupportedIndices = new List<int>() { XRHandJointID.Palm.ToIndex() };
+#if !UNITY_OPENXR_1_7_0_OR_NEWER
         private bool isHandTrackingStarted;
         private HandDevice leftHandDevice;
-        private HandDevice rightHandDevice;
-        private List<int> unsupportedIndices = new List<int>() { XRHandJointID.Palm.ToIndex() };
-
+        private HandDevice rightHandDevice;     
+#else
+        private XRHandSubsystem subsystem;
+        private List<XRHandJointID> jointOrder;
+#endif
         public override void GetHandLayout(NativeArray<bool> handJointsInLayout)
         {
+#if UNITY_OPENXR_1_7_0_OR_NEWER
+            unsupportedIndices.Clear();
+#endif
             for (int i = 0; i < handJointsInLayout.Length; ++i)
             {
                 if (unsupportedIndices.Contains(i))
@@ -48,20 +57,31 @@ namespace UnityEngine.XR.MagicLeap
             }
         }
 
+
         public override void Start()
         {
+#if !UNITY_OPENXR_1_7_0_OR_NEWER
             leftHandDevice = new HandDevice(InputDeviceCharacteristics.Left);
-            rightHandDevice = new HandDevice(InputDeviceCharacteristics.Right);
-
-            var subsystem = XRGeneralSettings.Instance?.Manager?.activeLoader?.GetLoadedSubsystem<XRHandSubsystem>();
+            rightHandDevice = new HandDevice(InputDeviceCharacteristics.Right);      
+#endif
+            subsystem = XRGeneralSettings.Instance?.Manager?.activeLoader?.GetLoadedSubsystem<HandSubsystem>();
             subsystemUpdater = new XRHandProviderUtility.SubsystemUpdater(subsystem);
             subsystemUpdater.Start();
-        }
 
+            jointOrder = new List<XRHandJointID> 
+            { 
+                XRHandJointID.Palm, XRHandJointID.Wrist, XRHandJointID.ThumbMetacarpal, XRHandJointID.ThumbProximal, XRHandJointID.ThumbDistal, XRHandJointID.ThumbTip,
+                XRHandJointID.IndexMetacarpal, XRHandJointID.IndexProximal, XRHandJointID.IndexIntermediate, XRHandJointID.IndexDistal, XRHandJointID.IndexTip,
+                XRHandJointID.MiddleMetacarpal, XRHandJointID.MiddleProximal, XRHandJointID.MiddleIntermediate, XRHandJointID.MiddleDistal, XRHandJointID.MiddleTip,
+                XRHandJointID.RingMetacarpal, XRHandJointID.RingProximal, XRHandJointID.RingIntermediate, XRHandJointID.RingDistal, XRHandJointID.RingTip,
+                XRHandJointID.LittleMetacarpal, XRHandJointID.LittleProximal, XRHandJointID.LittleIntermediate, XRHandJointID.LittleDistal, XRHandJointID.LittleTip
+            };
+
+        }
         public override XRHandSubsystem.UpdateSuccessFlags TryUpdateHands(XRHandSubsystem.UpdateType updateType, ref Pose leftHandRootPose, NativeArray<XRHandJoint> leftHandJoints, ref Pose rightHandRootPose, NativeArray<XRHandJoint> rightHandJoints)
         {
             var successFlags = XRHandSubsystem.UpdateSuccessFlags.None;
-
+#if !UNITY_OPENXR_1_7_0_OR_NEWER
             if (!isHandTrackingStarted)
             {
                 // Do not try to start permissions api if MLDevice has not yet been created.
@@ -112,18 +132,80 @@ namespace UnityEngine.XR.MagicLeap
                 rightHandDevice.FillJoints(ref rightHandJoints);
                 successFlags |= XRHandSubsystem.UpdateSuccessFlags.RightHandJoints;
             }
+#else
+            using var leftJoints = new NativeArray<NativeBindings.XrHandJointLocationEXT>(26 /* Hand Joints max*/, Allocator.Temp);
+            using var rightJoints = new NativeArray<NativeBindings.XrHandJointLocationEXT>(26 /* Hand Joints max*/, Allocator.Temp);
+            unsafe
+            {
+                MLResult.Code result = NativeBindings.MLOpenXRGetXRHandTrackingJoints(NativeBindings.XrHandEXT.Left, (NativeBindings.XrHandJointLocationEXT*)leftJoints.GetUnsafePtr());
 
+                if (result == MLResult.Code.Ok)
+                {
+                    successFlags = XRHandSubsystem.UpdateSuccessFlags.LeftHandRootPose;
+                    successFlags |= XRHandSubsystem.UpdateSuccessFlags.LeftHandJoints;
+
+
+                    for (int jointIndex = 0; jointIndex < leftJoints.Length; jointIndex++)
+                    {
+                        Pose currentPose = new Pose();
+                        currentPose.position = new Vector3(leftJoints[jointIndex].pose.position.x, leftJoints[jointIndex].pose.position.y, -leftJoints[jointIndex].pose.position.z);
+                        currentPose.rotation = new Quaternion(-leftJoints[jointIndex].pose.orientation.x, -leftJoints[jointIndex].pose.orientation.y, leftJoints[jointIndex].pose.orientation.z, leftJoints[jointIndex].pose.orientation.w);
+
+                        XRHandJointTrackingState currentState = XRHandJointTrackingState.Pose;
+                        currentState |= XRHandJointTrackingState.Radius;
+
+                        leftHandJoints[jointOrder[jointIndex].ToIndex()] = XRHandProviderUtility.CreateJoint(Handedness.Left, currentState, XRHandJointIDUtility.FromIndex(jointOrder[jointIndex].ToIndex()), currentPose, leftJoints[jointIndex].radius);
+
+                        if (jointOrder[jointIndex] == XRHandJointID.Wrist)
+                        {
+                            leftHandRootPose = currentPose;
+                        }
+                    }
+                }
+
+                leftJoints.Dispose();
+
+                result = NativeBindings.MLOpenXRGetXRHandTrackingJoints(NativeBindings.XrHandEXT.Right, (NativeBindings.XrHandJointLocationEXT*)rightJoints.GetUnsafePtr());
+
+                if (result == MLResult.Code.Ok)
+                {
+                    successFlags |= XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose;
+                    successFlags |= XRHandSubsystem.UpdateSuccessFlags.RightHandJoints;
+
+                    for (int jointIndex = 0; jointIndex < rightJoints.Length; jointIndex++)
+                    {
+                        Pose currentPose = new Pose();
+                        currentPose.position = new Vector3(rightJoints[jointIndex].pose.position.x, rightJoints[jointIndex].pose.position.y, -rightJoints[jointIndex].pose.position.z);
+                        currentPose.rotation = new Quaternion(-rightJoints[jointIndex].pose.orientation.x, -rightJoints[jointIndex].pose.orientation.y, rightJoints[jointIndex].pose.orientation.z, rightJoints[jointIndex].pose.orientation.w);
+
+                        XRHandJointTrackingState currentState = XRHandJointTrackingState.Pose;
+                        currentState |= XRHandJointTrackingState.Radius;
+
+                        rightHandJoints[jointOrder[jointIndex].ToIndex()] = XRHandProviderUtility.CreateJoint(Handedness.Right, currentState, XRHandJointIDUtility.FromIndex(jointOrder[jointIndex].ToIndex()), currentPose, rightJoints[jointIndex].radius);
+
+                        if (jointOrder[jointIndex] == XRHandJointID.Wrist)
+                        {
+                            rightHandRootPose = currentPose;
+                        }
+                    }
+                }
+
+                rightJoints.Dispose();
+            }
+#endif
             return successFlags;
         }
 
         public override void Stop()
         {
+#if !UNITY_OPENXR_1_7_0_OR_NEWER
             InputSubsystem.Extensions.MLHandTracking.StopTracking();
+#endif
             subsystemUpdater.Stop();
         }
 
         public override void Destroy() => subsystemUpdater.Destroy();
-
+#if !UNITY_OPENXR_1_7_0_OR_NEWER
         private class HandDevice
         {
             public HandDevice(InputDeviceCharacteristics characteristics)
@@ -189,6 +271,7 @@ namespace UnityEngine.XR.MagicLeap
                 return XRHandProviderUtility.CreateJoint(XRHandJointTrackingState.Pose, jointId, new Pose(pos, rot));
             }
         }
+#endif
     }
 
 }

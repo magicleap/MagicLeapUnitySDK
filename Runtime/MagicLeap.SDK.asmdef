@@ -10,7 +10,9 @@
         "GUID:75469ad4d38634e559750d17036d5f7c",
         "GUID:15fc0a57446b3144c949da3e2b9737a9",
         "GUID:dc960734dc080426fa6612f1c5fe95f3",
-        "GUID:4847341ff46394e83bb78fbd0652937e"
+        "GUID:4847341ff46394e83bb78fbd0652937e",
+        "GUID:ce522b6ed64c8be4c989a1d26d0e3275",
+        "Unity.XR.OpenXR.Editor"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

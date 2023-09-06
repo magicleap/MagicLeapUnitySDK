@@ -402,7 +402,6 @@ namespace UnityEngine.XR.MagicLeap
                         return MLResult.Create(MLResult.Code.AllocFailed);
                     }
 
-                    //streamingAssetWebRequest.downloadHandler = new DownloadHandlerBuffer();
                     streamingAssetWebRequestAsyncOp = streamingAssetWebRequest.SendWebRequest();
                     streamingAssetWebRequestAsyncOp.completed += (AsyncOperation asyncOp) =>
                     {
@@ -424,7 +423,6 @@ namespace UnityEngine.XR.MagicLeap
                             Debug.LogError($"Failed to create dataSource for {path}");
                             return;
                         }
-
                         this.Source = path;
                         PreparePlayerAsync();
                     };

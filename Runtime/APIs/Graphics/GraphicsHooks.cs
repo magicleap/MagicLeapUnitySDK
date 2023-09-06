@@ -38,7 +38,7 @@ namespace UnityEngine.XR.MagicLeap
             }
             else
             {
-                ClearCallbacks();
+                CleanUp();
             }
         }
 
@@ -51,7 +51,8 @@ namespace UnityEngine.XR.MagicLeap
         // clean up.
         public static void Shutdown()
         {
-            ClearCallbacks();
+            usePredictedSnapshots = false;
+            CleanUp();
         }
 
         private static void RegisterCallbacks()
@@ -64,13 +65,13 @@ namespace UnityEngine.XR.MagicLeap
             }
         }
 
-        private static void ClearCallbacks()
+        private static void CleanUp()
         {
             if (registeredForRenderCallbacks)
             {
-                registeredForRenderCallbacks = false;
-                NativeBindings.MLUnityGraphicsClearCallbacks();
+                NativeBindings.ClearCallbacks();
             }
+            registeredForRenderCallbacks = false;
         }
 
         private static event OnPreBeginRenderFrameDelegate internalOnPreBeginRenderFrame = delegate { };

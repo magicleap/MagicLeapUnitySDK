@@ -266,6 +266,35 @@ namespace UnityEngine.XR.MagicLeap.Native
         public static extern MLResult.Code MLSnapshotGetTransform(IntPtr snap, ref MLCoordinateFrameUID id, ref MLTransform outTransform);
 
         /// <summary>
+        /// Get the static data pertaining to the snapshot system. Requires API level 30.
+        /// </summary>
+        /// <param name="outStaticData">Valid pointer to an MLSnapshotStaticData. To be filled out with snapshot static data.</param>
+        /// <returns>
+        /// MLResult.Result will be <c>MLResult.Code.InvalidParam</c> if failed to obtain static data due to invalid parameter.
+        /// MLResult.Result will be <c>MLResult.Code.Ok</c> if obtained static data successfully.
+        /// MLResult.Result will be <c>MLResult.Code.UnspecifiedFailure</c> if failed to obtain static data due to internal error.
+        /// </returns>
+        [DllImport(MLPerceptionClientDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern MLResult.Code MLSnapshotGetStaticData(ref MLSnapshotStaticData outStaticData);
+
+        /// <summary>
+        /// Get transform between coordinate frame 'base_id' and the coordinate frame `id' as well as any derivatives
+        /// that have been calculated.
+        /// </summary>
+        /// <param name="snap">A snapshot of tracker state. Can be obtained with MLPerceptionGetSnapshot().</param>
+        /// <param name="base_id">The coordinate frame in which to locate 'id'.</param>
+        /// <param name="id">The coordinate frame which needs to be located in the base_id coordinate frame.</param>
+        /// <param name="outPose">Valid pointer to an MLPose. To be filled out with requested pose data.</param>
+        /// <returns>
+        /// MLResult.Result will be <c>MLResult.Code.InvalidParam</c> if failed to obtain transform due to invalid parameter.
+        /// MLResult.Result will be <c>MLResult.Code.Ok</c> if obtained transform successfully.
+        /// MLResult.Result will be <c>MLResult.Code.PoseNotFoundk</c> if coordinate Frame is valid, but not found in the current pose snapshot.
+        /// MLResult.Result will be <c>MLResult.Code.UnspecifiedFailure</c> if failed to obtain transform due to internal error.
+        /// </returns>
+        [DllImport(MLPerceptionClientDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern MLResult.Code MLSnapshotGetPoseInBase(IntPtr snap, ref MLCoordinateFrameUID base_id, ref MLCoordinateFrameUID id, ref MLPose outPose);
+
+        /// <summary>
         /// Returns a pointer to an ASCII string representation for each result code.
         /// This call can return a pointer to the string for any of the MLSnapshot related MLResult codes.
         /// Developers should use MLResult.CodeToString(MLResult.Code).
@@ -847,5 +876,82 @@ namespace UnityEngine.XR.MagicLeap.Native
                 }
             }
         }
+
+        /// <summary>
+        /// Geometric relationship between two coordinate frames.
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential)]
+        public struct MLPose
+        {
+            /// <summary>
+            /// 6-DoF transformation between the two coordinate frames that can be
+            /// directly used to express source frame coordinates in destination frame
+            /// coordinates.
+            /// </summary>
+            public MLTransform Transform;
+
+            /// <summary>
+            /// Indicate if this pose has derivative values.
+            /// </summary>
+            public bool HasDerivatives;
+
+            /// <summary>
+            /// The linear velocity in meters per second.
+            /// </summary>
+            public MLVec3f LinearVelocity;
+
+            /// <summary>
+            /// The linear acceleration in meters per second squared.
+            /// </summary>
+            public MLVec3f LinearAcceleration;
+
+            /// <summary>
+            /// Angular velocity in radians per second.
+            /// </summary>
+            public MLVec3f AngularVelocity;
+
+            /// <summary>
+            /// Angular accleration in radians per second squared.
+            /// </summary>
+            public MLVec3f AngularAcceleration;
+
+            /// <summary>
+            /// Time when this relationship was measured.
+            /// </summary>
+            public long OriginTimeNs;
+
+            /// <summary>
+            /// Time to which this relationship has been predicted.
+            /// May be equal to origin_time_ns.
+            /// </summary>
+            public long PredictTimeNs;
+        }
+
+        /// <summary>
+        /// Static information about the snapshot system.
+        /// Initalize this structure with MLSnapshotStaticDataInit() and populate with MLSnapshotGetStaticData()
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential)]
+        public struct MLSnapshotStaticData
+        {
+            /// <summary>
+            /// Version of this structure.
+            /// </summary>
+            UInt32 version;
+
+            /// <summary>
+            /// Coordinate frame ID.
+            /// </summary>
+            MLCoordinateFrameUID CoordWorldOrigin;
+
+            public static MLSnapshotStaticData Init()
+            {
+                return new MLSnapshotStaticData()
+                {
+                    version = 1u,
+                };
+            }
+        }
+
     }
 }

@@ -24,21 +24,7 @@ namespace UnityEditor.XR.MagicLeap
 #else
         private const UnityEditor.BuildTarget kBuildTarget = BuildTarget.Relish;
 #endif
-        private static readonly uint minApiLevel = 0;
-
-        static MagicLeapSDKUtil()
-        {
-            try
-            {
-                var result = UnityEngine.XR.MagicLeap.Native.MagicLeapNativeBindings.MLUnitySdkGetMinApiLevel(out minApiLevel);
-                UnityEngine.XR.MagicLeap.MLResult.DidNativeCallSucceed(result, nameof(UnityEngine.XR.MagicLeap.Native.MagicLeapNativeBindings.MLUnitySdkGetMinApiLevel));
-            }
-            catch(DllNotFoundException)
-            {
-                Debug.LogWarning($"Unable to look up minimum Magic Leap API level for editor scripting as the ml_sdk_loader has not been built for host.\n" +
-                                 $"\tDeveloper: Run \"build.py -h\" to rebuild NativeLibs including for host OS to access this value."); 
-            }
-        }
+        private static uint minApiLevel = 0;
 
         [Serializable]
         private class SDKManifest
@@ -62,7 +48,25 @@ namespace UnityEditor.XR.MagicLeap
             }
         }
 
-        public static uint MinimumApiLevel => minApiLevel;
+        public static uint MinimumApiLevel
+        {
+            get
+            {
+                if(minApiLevel == 0)
+                {
+                    try
+                    {
+                        var result = UnityEngine.XR.MagicLeap.Native.MagicLeapNativeBindings.MLUnitySdkGetMinApiLevel(out minApiLevel);
+                        UnityEngine.XR.MagicLeap.MLResult.DidNativeCallSucceed(result, nameof(UnityEngine.XR.MagicLeap.Native.MagicLeapNativeBindings.MLUnitySdkGetMinApiLevel));
+                    }
+                    catch(DllNotFoundException)
+                    {
+                        Debug.LogWarning($"Native plugins have not been built for host ({Application.platform}). Minimum API level can't be queried.");
+                    }
+                }
+                return minApiLevel;
+            }
+        }
 
         /// <summary>
         /// MLSDK path for the relish target.

@@ -30,11 +30,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         BuildTargetGroups = new []{ BuildTargetGroup.Android, BuildTargetGroup.Standalone },
         CustomRuntimeLoaderBuildTargets = new []{ BuildTarget.Android },
         FeatureId = featureId,
-        OpenxrExtensionStrings = "XR_ML_compat " +
-                                 "XR_ML_frame_end_info " +
-                                 "XR_ML_global_dimmer " +
-                                 "XR_EXT_view_configuration_depth_range " +
-                                 "XR_KHR_convert_timespec_time"
+        OpenxrExtensionStrings = "XR_ML_compat XR_KHR_convert_timespec_time"
     )]
 #endif
     public partial class MagicLeapFeature : OpenXRFeature
@@ -56,13 +52,29 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         public bool IsMLAudioEnabled => enableMLAudio;
 
         private static List<XRMeshSubsystemDescriptor> s_MeshSubsysDesc = new List<XRMeshSubsystemDescriptor>();
-        private static List<XRPlaneSubsystemDescriptor> s_PlaneSubsysDesc = new List<XRPlaneSubsystemDescriptor>();
         private static List<XRSessionSubsystemDescriptor> s_SessionSubsysDesc = new List<XRSessionSubsystemDescriptor>();
 
         public delegate void OnXRSessionStateChangeDelegate(int oldState, int newState);
         public static event OnXRSessionStateChangeDelegate OnXRSessionStateChange;
 
         private static List<xrSessionCached> xrSessionCacheList;
+
+#if UNITY_EDITOR
+        // TODO :: Get actual legal justification for requiring clipping plane enforcement.
+        protected override void GetValidationChecks(List<ValidationRule> rules, BuildTargetGroup targetGroup)
+        {
+            base.GetValidationChecks(rules, targetGroup);
+
+#if !DISABLE_MAGICLEAP_CLIP_ENFORCEMENT
+            rules.Add(new ValidationRule(this)
+            {
+                checkPredicate = ()=> Utils.IsFeatureEnabled<MagicLeapClippingPlaneEnforcementFeature>(targetGroup),
+                error = true,
+                message = $"[PLEASE VERIFY] {Utils.GetNiceTypeName<MagicLeapClippingPlaneEnforcementFeature>()} is required to enforce important safety restrictions."
+            });
+#endif
+        }
+#endif
 
         protected override IntPtr HookGetInstanceProcAddr(IntPtr func)
         {
@@ -104,7 +116,6 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                 xrSessionCached newEvent;
                 newEvent.oldState = oldState;
                 newEvent.newState = newState;
-
                 xrSessionCacheList.Add(newEvent);
             }
         }
@@ -114,31 +125,14 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             xrSessionCacheList = new List<xrSessionCached>();
 
             base.OnSubsystemCreate();
-
-            CreateSubsystem<XRPlaneSubsystemDescriptor, XRPlaneSubsystem>(s_PlaneSubsysDesc, MagicLeapXrProvider.PlanesSubsystemId);
+            
             CreateSubsystem<XRMeshSubsystemDescriptor, XRMeshSubsystem>(s_MeshSubsysDesc, MagicLeapXrProvider.MeshingSubsystemId);
             CreateSubsystem<XRSessionSubsystemDescriptor, XRSessionSubsystem>(s_SessionSubsysDesc, MagicLeapXrProvider.SessionSubsystemId);
         }
-
-        protected override void OnSubsystemStart()
-        {
-            base.OnSubsystemStart();
-
-            StartSubsystem<XRPlaneSubsystem>();
-        }
-
-        protected override void OnSubsystemStop()
-        {
-            base.OnSubsystemStop();
-
-            StopSubsystem<XRPlaneSubsystem>();
-        }
-
+        
         protected override void OnSubsystemDestroy()
         {
             base.OnSubsystemDestroy();
-
-            DestroySubsystem<XRPlaneSubsystem>();
             DestroySubsystem<XRMeshSubsystem>();
             DestroySubsystem<XRSessionSubsystem>();
         }

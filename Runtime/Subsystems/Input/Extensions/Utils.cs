@@ -45,6 +45,11 @@ namespace UnityEngine.XR.MagicLeap
             /// </param>
             /// <param name="predictSnapshots">Boolean representing whether or not to predict the snapshot.</param>
             public static void PredictSnapshot(long timestamp, bool predictSnapshots) => MagicLeapXrProviderNativeBindings.PredictSnapshot(timestamp, predictSnapshots);
+            
+            /// <summary>
+            /// Reset the snapshot state of the subsystem to before prediction. Use this to cleanup after PredictSnapshot
+            /// </summary>
+            public static void ResetSnapshotPrediction() => MagicLeapXrProviderNativeBindings.ResetSnapshotPrediction();
         }
     }
 }

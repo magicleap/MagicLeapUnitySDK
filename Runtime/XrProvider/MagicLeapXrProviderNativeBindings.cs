@@ -110,6 +110,9 @@ namespace UnityEngine.XR.MagicLeap
         public static extern ulong GetHeadTrackerHandle();
 
         [DllImport(MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern ulong GetEyeTrackerHandle();
+
+        [DllImport(MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern ulong GetInputHandle();
 
         [DllImport(MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
@@ -123,6 +126,9 @@ namespace UnityEngine.XR.MagicLeap
 
         [DllImport(MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern void PredictSnapshot(long predictionTimestamp, bool enableSnapshotPrediction);
+
+        [DllImport(MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ResetSnapshotPrediction();
 
         [DllImport(MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void InputSetOnPerceptionShutdownCallback(CallOnPerceptionShutdownDelegate createOnPerceptionShutdown);

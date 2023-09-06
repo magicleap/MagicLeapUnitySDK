@@ -33,11 +33,6 @@ namespace UnityEngine.XR.MagicLeap
             public static extern MLResult.Code MLSpaceSetCallbacks(ulong handle, ref SpaceCallbacks callbacks, IntPtr userData );
 
             /// <summary>
-            /// Get the list of available spaces.
-            /// The list of spaces returned will depend on the current device mapping mode.
-            /// Only the Spaces associated with the current mapping mode will be returned by
-            /// this call.Device mapping mode can be changed via the system application(s).
-            ///
             /// The list memory is owned by the library, call #MLSpaceReleaseSpaceList to
             /// release the memory. Each get #MLSpaceGetSpaceList should have a corresponding
             /// #MLSpaceReleaseSpaceList.
@@ -70,7 +65,6 @@ namespace UnityEngine.XR.MagicLeap
             public static extern MLResult.Code MLSpaceManagerDestroy(ulong handle);
 
             /// <summary>
-            /// Import a Magic Leap Space.
             /// The #MLSpaceImportInfo memory is owned by the app and the app should make sure
             /// to release the memory once the API call has returned
             /// </summary>

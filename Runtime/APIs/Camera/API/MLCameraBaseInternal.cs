@@ -144,14 +144,8 @@ namespace UnityEngine.XR.MagicLeap
             int width = cameraCaptureConfig.StreamConfigs[0].Width;
             int height = cameraCaptureConfig.StreamConfigs[0].Height;
 
-            if (previewTexture != null && (previewTexture.width != width || previewTexture.height != height))
-            {
-                ClearPreviewTexture();
-            }
-            if (previewTexture == null)
-            {
-                previewTexture = new RenderTexture(width, height, 0, RenderTextureFormat.ARGB32);
-            }
+            ClearPreviewTexture();
+            previewTexture = new RenderTexture(width, height, 0, RenderTextureFormat.ARGB32);
 
             // preview rendering not supported under Magic Leap App Simulator
 #if !UNITY_EDITOR

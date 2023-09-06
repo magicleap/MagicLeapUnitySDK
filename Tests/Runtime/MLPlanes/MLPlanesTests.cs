@@ -4,6 +4,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.XR.MagicLeap;
+using UnityEngine.XR.OpenXR.Features.MagicLeapSupport;
 
 namespace UnitySDKPlayTests
 {

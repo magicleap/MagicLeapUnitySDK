@@ -11,6 +11,7 @@
 
 namespace UnityEngine.XR.MagicLeap
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Native;
@@ -21,6 +22,8 @@ namespace UnityEngine.XR.MagicLeap
     /// </summary>
     public sealed partial class MLCamera : MLCameraBase
     {
+        private const int WakeTime = 2000;
+
         private static int instanceCounter = 0;
 
         private MLCamera() : base() => Interlocked.Increment(ref instanceCounter);
@@ -254,7 +257,15 @@ namespace UnityEngine.XR.MagicLeap
         protected override void OnApplicationPause(bool pauseStatus)
         {
             applicationPausePerfMarker.Begin();
-            MLResult.Code result = pauseStatus ? Pause() : Resume();
+            MLResult.Code result = MLResult.Code.Ok;
+            if (pauseStatus)
+            {
+                result = Pause();
+            }
+            else
+            {
+                AsyncResume();
+            }
             applicationPausePerfMarker.End();
             if (result != MLResult.Code.Ok)
             {
@@ -289,6 +300,12 @@ namespace UnityEngine.XR.MagicLeap
             }
 
             return result;
+        }
+
+        private async void AsyncResume()
+        {
+            await Task.Delay(WakeTime);
+            Resume();
         }
 
         /// <summary>

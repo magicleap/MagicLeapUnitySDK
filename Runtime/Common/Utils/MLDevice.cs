@@ -15,8 +15,8 @@ using UnityEngine.XR.MagicLeap.Native;
 using UnityEngine.XR.Management;
 #if UNITY_OPENXR_1_7_0_OR_NEWER
 using UnityEngine.XR.OpenXR;
+using UnityEngine.XR.OpenXR.Features.MagicLeapSupport;
 #endif
-
 namespace UnityEngine.XR.MagicLeap
 {
     /// <summary>
@@ -166,6 +166,12 @@ namespace UnityEngine.XR.MagicLeap
 
         private int mainThreadId = -1;
 
+        private Camera unityCamera;
+        
+#if UNITY_OPENXR_1_7_0_OR_NEWER
+        private MagicLeapFeature mlOpenXrFeature;
+#endif
+
         /// <summary>
         /// Gets the platform API level that the OS supports.
         /// </summary>
@@ -220,12 +226,11 @@ namespace UnityEngine.XR.MagicLeap
         public static bool IsOpenXRLoaderActive()
         { 
 #if UNITY_OPENXR_1_7_0_OR_NEWER
-            if (XRGeneralSettings.Instance != null && XRGeneralSettings.Instance.Manager != null)
-            {
-                return XRGeneralSettings.Instance.Manager.ActiveLoaderAs<OpenXR.OpenXRLoader>() != null;
-            }
+            return Utils.TryGetOpenXRLoader(out _);
 #endif
+#pragma warning disable CS0162
             return false;
+#pragma warning restore CS0162
         }
 
         public static bool IsMagicLeapOrOpenXRLoaderActive()
@@ -443,6 +448,14 @@ namespace UnityEngine.XR.MagicLeap
         protected void Awake()
         {
             this.mainThreadId = System.Threading.Thread.CurrentThread.ManagedThreadId;
+
+#if UNITY_OPENXR_1_7_0_OR_NEWER
+            if (IsOpenXRLoaderActive())
+            {
+                mlOpenXrFeature = OpenXRSettings.Instance.GetFeature<MagicLeapFeature>();
+            }
+#endif
+
         }
 
         /// <summary>

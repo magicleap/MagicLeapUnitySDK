@@ -131,6 +131,11 @@ namespace UnityEngine.XR.MagicLeap
             // Only execute SetTexture cmd buffer if render target hw resources have been created.
             if (renderTarget != null && renderTarget.IsCreated() && !didExecuteSetTextureCmdBuffer)
             {
+                if(renderTarget.colorBuffer.GetNativeRenderBufferPtr() == IntPtr.Zero) 
+                {
+                    Debug.LogWarning("Skipping null render buffer");
+                    return;
+                }
                 eventData = new NativeBindings.PluginEventData(handle, renderTarget);
                 Marshal.StructureToPtr(eventData, eventDataPtr, false);
                 CreateAndStoreCommandBufferForEvent(NativeBindings.PluginEvent.SetTexture);
