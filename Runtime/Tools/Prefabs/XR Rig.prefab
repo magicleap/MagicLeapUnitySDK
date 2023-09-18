@@ -54,10 +54,10 @@ MonoBehaviour:
   m_PositionInput:
     m_UseReference: 1
     m_Action:
-      m_Name: Position Input
+      m_Name: 
       m_Type: 0
       m_ExpectedControlType: 
-      m_Id: 926c430d-c00c-4814-95c7-dd11aeb347f4
+      m_Id: 
       m_Processors: 
       m_Interactions: 
       m_SingletonActionBindings: []
@@ -67,10 +67,10 @@ MonoBehaviour:
   m_RotationInput:
     m_UseReference: 1
     m_Action:
-      m_Name: Rotation Input
+      m_Name: 
       m_Type: 0
       m_ExpectedControlType: 
-      m_Id: 4a05d322-5d55-4e5e-8daa-43d46725d6ec
+      m_Id: 
       m_Processors: 
       m_Interactions: 
       m_SingletonActionBindings: []
@@ -832,10 +832,10 @@ MonoBehaviour:
   m_PositionInput:
     m_UseReference: 1
     m_Action:
-      m_Name: Position Input
+      m_Name: 
       m_Type: 0
       m_ExpectedControlType: 
-      m_Id: 67ce97ca-5fdc-4ec8-aa29-079636413e6a
+      m_Id: 
       m_Processors: 
       m_Interactions: 
       m_SingletonActionBindings: []
@@ -845,10 +845,10 @@ MonoBehaviour:
   m_RotationInput:
     m_UseReference: 1
     m_Action:
-      m_Name: Rotation Input
+      m_Name: 
       m_Type: 0
       m_ExpectedControlType: 
-      m_Id: 246a4442-9d40-4784-a76d-b2b9999450d3
+      m_Id: 
       m_Processors: 
       m_Interactions: 
       m_SingletonActionBindings: []
@@ -2252,10 +2252,10 @@ MonoBehaviour:
   m_PositionInput:
     m_UseReference: 1
     m_Action:
-      m_Name: Position Input
+      m_Name: 
       m_Type: 0
       m_ExpectedControlType: 
-      m_Id: 67ce97ca-5fdc-4ec8-aa29-079636413e6a
+      m_Id: 
       m_Processors: 
       m_Interactions: 
       m_SingletonActionBindings: []
@@ -2265,10 +2265,10 @@ MonoBehaviour:
   m_RotationInput:
     m_UseReference: 1
     m_Action:
-      m_Name: Rotation Input
+      m_Name: 
       m_Type: 0
       m_ExpectedControlType: 
-      m_Id: 246a4442-9d40-4784-a76d-b2b9999450d3
+      m_Id: 
       m_Processors: 
       m_Interactions: 
       m_SingletonActionBindings: []

@@ -56,42 +56,26 @@ MonoBehaviour:
   m_PositionInput:
     m_UseReference: 0
     m_Action:
-      m_Name: Position Input
+      m_Name: 
       m_Type: 0
       m_ExpectedControlType: 
-      m_Id: ce78dce0-18b0-4c00-9447-e580e8bc1d12
+      m_Id: 
       m_Processors: 
       m_Interactions: 
-      m_SingletonActionBindings:
-      - m_Name: 
-        m_Id: fd560ebc-a009-4051-82f9-93fd9cc2feca
-        m_Path: <XRHMD>/centerEyePosition
-        m_Interactions: 
-        m_Processors: 
-        m_Groups: 
-        m_Action: Position Input
-        m_Flags: 0
+      m_SingletonActionBindings: []
       m_Flags: 0
     m_Reference: {fileID: -8330880175803813698, guid: e0ca4504471ca124088e1e2cfe6804ae,
       type: 3}
   m_RotationInput:
     m_UseReference: 0
     m_Action:
-      m_Name: Rotation Input
+      m_Name: 
       m_Type: 0
       m_ExpectedControlType: 
-      m_Id: 23c4c17c-cee1-4c36-88fd-a57ca8085454
+      m_Id: 
       m_Processors: 
       m_Interactions: 
-      m_SingletonActionBindings:
-      - m_Name: 
-        m_Id: 8b1aa2e1-ecc0-4f31-85b6-bd63b463cd08
-        m_Path: <XRHMD>/centerEyeRotation
-        m_Interactions: 
-        m_Processors: 
-        m_Groups: 
-        m_Action: Rotation Input
-        m_Flags: 0
+      m_SingletonActionBindings: []
       m_Flags: 0
     m_Reference: {fileID: 3113219943245244623, guid: e0ca4504471ca124088e1e2cfe6804ae,
       type: 3}
