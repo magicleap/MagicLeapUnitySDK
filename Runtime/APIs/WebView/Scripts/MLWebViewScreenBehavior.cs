@@ -304,7 +304,6 @@ namespace MagicLeap.Core
         /// </summary>
         private void ProcessInput()
         {
-
             if (Physics.Raycast(pointRayTransform.position, pointRayTransform.forward, out raycastHit) && raycastHit.collider.gameObject == this.gameObject)
             {
                 if (!EventSystem.current.IsPointerOverGameObject())

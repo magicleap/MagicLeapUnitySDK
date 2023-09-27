@@ -21,11 +21,14 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         SupportedBuildTargets = new [] { BuildTargetGroup.Android, BuildTargetGroup.Standalone },
         FeatureIds = new [] {
             MagicLeapFeature.featureId ,
+#if XR_HANDS
             MagicLeapHandTrackingFeature.featureId,
+#endif
             MagicLeapRenderingExtensionsFeature.featureId,
             MagicLeapReferenceSpacesFeature.featureId,
             MagicLeapClippingPlaneEnforcementFeature.featureId,
             MagicLeapPlanesFeature.FeatureId,
+            MagicLeapUserCalibrationFeature.featureId,
         }
     )]
     public class MagicLeapFeatureGroup

@@ -81,6 +81,12 @@ namespace UnityEngine.XR.MagicLeap.Native
         /// Internal DLL used by the API.
         /// </summary>
         protected const string MLPowerManagerDll = MLSdkLoaderDll;
+
+        /// <summary>
+        /// MLMediaError library name.
+        /// </summary>
+        protected const string MLMediaErrorDLL = MLSdkLoaderDll;
+        
 #else
         /// <summary>
         /// Perception library name string.
@@ -146,6 +152,12 @@ namespace UnityEngine.XR.MagicLeap.Native
         /// Internal DLL used by the API.
         /// </summary>
         protected const string MLPowerManagerDll = "power_manager.magicleap";
+
+        /// <summary>
+        /// MLMediaError library name.
+        /// </summary>
+        protected const string MLMediaErrorDLL = "media_error.magicleap";
+        
 #endif
         /// <summary>
         /// Unity's XR provider library in com.unity.xr.magicleap
@@ -166,11 +178,6 @@ namespace UnityEngine.XR.MagicLeap.Native
         /// Internal DLL used by the API.
         /// </summary>
         protected const string MLMediaDRMDll = "media_drm.magicleap";
-
-        /// <summary>
-        /// MLMediaError library name.
-        /// </summary>
-        protected const string MLMediaErrorDLL = "media_error.magicleap";
 
         /// <summary>
         /// Media CC parser library name

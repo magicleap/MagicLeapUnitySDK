@@ -61,7 +61,7 @@ namespace UnityEngine.XR.MagicLeap.Native
         /// <param name="callback">A callback function to be called when the action is invoked </param>
         public static void ScheduleMain(System.Action callback)
         {
-            if (MLDevice.MainThreadId != -1 && MLDevice.MainThreadId == System.Threading.Thread.CurrentThread.ManagedThreadId)
+            if (MLDevice.Instance != null && MLDevice.MainThreadId != -1 && MLDevice.MainThreadId == System.Threading.Thread.CurrentThread.ManagedThreadId)
             {
                 callback();
             }

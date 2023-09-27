@@ -93,7 +93,6 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public abstract class Clip : IDisposable
         {
-            private static readonly HashSet<Clip> mlAudioClips = new();
 
             private readonly GCHandle gcHandle;
             private readonly uint numSamples;
@@ -102,7 +101,6 @@ namespace UnityEngine.XR.MagicLeap
 
             public Clip(MicCaptureType captureType, uint samplesLengthInSeconds, uint channels)
             {
-                mlAudioClips.Add(this);
                 gcHandle = GCHandle.Alloc(this, GCHandleType.Weak);
 
                 // get the best buffer format to use
@@ -125,8 +123,6 @@ namespace UnityEngine.XR.MagicLeap
             /// </summary>
             public void Dispose()
             {
-                mlAudioClips.Remove(this);
-
                 if (!Native.MagicLeapNativeBindings.MLHandleIsValid(captureHandle))
                     return;
 

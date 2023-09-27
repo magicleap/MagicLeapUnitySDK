@@ -167,7 +167,7 @@ namespace UnityEngine.XR.MagicLeap
         private int mainThreadId = -1;
 
         private Camera unityCamera;
-        
+
 #if UNITY_OPENXR_1_7_0_OR_NEWER
         private MagicLeapFeature mlOpenXrFeature;
 #endif
@@ -201,7 +201,11 @@ namespace UnityEngine.XR.MagicLeap
         /// <summary>
         /// Gets the MLDevice singleton instance.
         /// </summary>
-        private static MLDevice Instance => instance;
+        public static MLDevice Instance
+        {
+            get { return instance; }
+            private set { instance = value; }
+        }
 
         /// <summary>
         /// Check if the underlying Unity XR MagicLeap subsystem is initialized.

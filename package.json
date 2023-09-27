@@ -1,7 +1,7 @@
 {
     "name": "com.magicleap.unitysdk",
     "displayName": "Magic Leap SDK",
-    "version": "1.10.0",
+    "version": "1.11.0",
     "unity": "2022.2",
     "description": "Magic Leap Unity SDK",
     "keywords": [

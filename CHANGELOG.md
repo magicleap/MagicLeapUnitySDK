@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.11.0]
+
+### Features
+- Remove requirement to call MLAudioPlayback's CreateAudioBuffer method from the main thread.
+
+### Bugfixes
+- Resolved issue with controller touchpad gestures not working in App Sim.
+- `MLDevice` : Fixed null reference exception
+- Fixed an issue where Vulkan would fail to initialize if Unity's WebRTC package (`com.unity.webrtc`) is installed in the project.
+
 ## [1.10.0]
 
 ### Features
@@ -20,7 +30,10 @@
 - `HandTrackingExample`: Fixed `PoseNotFound` errors that might occur after `HandTracking` scene changes.
 - `MLGestureClassification`: Fixed errors thrown when hands not detected.
 - `MLUnityNativeLogging`: Conditionally reduced log level of snapshot errors based on build configuration.
-- `GraphicsHook`: Added cleanup logic that resets the snapshot prediction state of the input subsystem
+- `GraphicsHook`: Added cleanup logic that resets the snapshot prediction state of the input subsystem.
+- `MLCamera`: Fixed `InvalidParam` error that occur when trying to capture after application pause.
+- `CameraCaptureExample`: Fixed `NullReferenceException` when pausing example scene.
+
 ### Deprecations & Removals
 
 ### Known Issues
@@ -29,6 +42,7 @@
 
 ### Features
 - `MLDepthCamera`: Added support for switching to Short Range streaming mode and to change FPS and exposure values. 
+- `MLCamera`: Added events for notifying when the camera is paused and resumed.
 
 ### Bugfixes
 - `MLWebRTC`: Fixed camera disconnection when using `MLNativeSurface` based buffers for rendering.

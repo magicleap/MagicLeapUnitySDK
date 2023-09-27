@@ -318,6 +318,7 @@ namespace UnityEditor.XR.MagicLeap
 
         private static string GetSavedSDKPath()
         {
+
             var path = EditorPrefs.GetString(SdkPathEditorPrefsKey, "");
             if (!string.IsNullOrEmpty(path))
             {

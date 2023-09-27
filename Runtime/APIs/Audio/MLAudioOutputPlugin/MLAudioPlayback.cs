@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.XR.MagicLeap.Native;
 
 namespace UnityEngine.XR.MagicLeap
 {
@@ -12,7 +13,10 @@ namespace UnityEngine.XR.MagicLeap
             get
             {
                 if (instance == null)
+                {
                     instance = new MLAudioPlayback();
+                    MLThreadDispatch.ScheduleMain(() => instance.outputSampleRate = (uint)AudioSettings.outputSampleRate);
+                }
 
                 return instance;
             }
@@ -35,13 +39,11 @@ namespace UnityEngine.XR.MagicLeap
 
         /// <summary>
         /// Creates the audio buffer with the default cache size.
-        /// Needs to be called from the main thread.
         /// </summary>
         public static void CreateAudioBuffer() => Instance.CreateAudioBufferInternal(DefaultCacheDurationInSeconds);
 
         /// <summary>
         /// Creates the audio buffer with the specified cache size.
-        /// Needs to be called from the main thread.
         /// </summary>
         public static void CreateAudioBuffer(uint cacheDurationInSeconds) => Instance.CreateAudioBufferInternal(cacheDurationInSeconds);
 
@@ -61,7 +63,6 @@ namespace UnityEngine.XR.MagicLeap
             {
 #if UNITY_EDITOR
                 this.cacheDurationInSeconds = cacheDurationInSeconds;
-                this.outputSampleRate = (uint)AudioSettings.outputSampleRate;
                 NativeBindings.CreateAudioOutput();
                 this.bufferCreated = false;
                 this.isStarted = true;

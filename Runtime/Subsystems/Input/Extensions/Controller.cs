@@ -9,6 +9,7 @@
 // %BANNER_END%
 
 using System;
+using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
 using UnityEngine.XR.MagicLeap.Native;
@@ -175,8 +176,8 @@ namespace UnityEngine.XR.MagicLeap
                         Hand = nativeStruct.Hand;
                         TouchesPositionAndForce = new Vector3[nativeStruct.TouchesPositionAndForce.Length];
                         TriggerNormalized = nativeStruct.TriggerNormalized;
-                        ButtonStates = nativeStruct.ButtonStates;
-                        IsTouchesActive = nativeStruct.IsTouchesActive;
+                        ButtonStates = nativeStruct.ButtonStates.Select(b => b > 0).ToArray();
+                        IsTouchesActive = nativeStruct.IsTouchesActive.Select(b => b > 0).ToArray();
                         IsConnected = nativeStruct.IsConnected;
                         TouchpadGestureData = nativeStruct.TouchpadGestureData;
                         TouchpadGestureState = nativeStruct.TouchpadGestureState;
@@ -238,10 +239,10 @@ namespace UnityEngine.XR.MagicLeap
                         public float TriggerNormalized;
 
                         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.I1, SizeConst = (int)MLInputControllerButton.Count)]
-                        public bool[] ButtonStates;
+                        public byte[] ButtonStates;
 
                         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.I1, SizeConst = (int)MaxControllerTouchpadTouches)]
-                        public bool[] IsTouchesActive;
+                        public byte[] IsTouchesActive;
 
                         [MarshalAs(UnmanagedType.I1)]
                         public bool IsConnected;
