@@ -7,7 +7,7 @@
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
-#if UNITY_OPENXR_1_7_0_OR_NEWER
+#if UNITY_OPENXR_1_9_0_OR_NEWER
 using System.Collections.Generic;
 using UnityEngine.XR.MagicLeap;
 #if UNITY_EDITOR

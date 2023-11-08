@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-#if UNITY_OPENXR_1_7_0_OR_NEWER
+#if UNITY_OPENXR_1_9_0_OR_NEWER
 using UnityEngine.XR.Management;
 using UnityEngine.XR.OpenXR.Features;
 #endif
@@ -36,7 +36,7 @@ namespace UnityEngine.XR.OpenXR
 
             return new InputDevice();
         }
-#if UNITY_OPENXR_1_7_0_OR_NEWER
+#if UNITY_OPENXR_1_9_0_OR_NEWER
         internal static bool TryGetOpenXRFeature<TFeature>(out TFeature feature) where TFeature : OpenXRFeature
         {
             feature = null;
@@ -122,7 +122,7 @@ namespace UnityEngine.XR.OpenXR
             return feature != null && (feature.enabled = true) || false;
         }
 #endif // UNITY_EDITOR
-#endif // UNITY_OPENXR_1_7_0_OR_NEWER
+#endif // UNITY_OPENXR_1_9_0_OR_NEWER
     }
     
      

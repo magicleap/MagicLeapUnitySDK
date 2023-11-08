@@ -7,7 +7,7 @@
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
-#if UNITY_OPENXR_1_7_0_OR_NEWER
+#if UNITY_OPENXR_1_9_0_OR_NEWER
 using System;
 using System.Runtime.InteropServices;
 using UnityEngine.XR.MagicLeap;
@@ -19,26 +19,6 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
     {
         internal class NativeBindings : MagicLeapNativeBindings
         {
-            public enum XrHandEXT
-            {
-                Left = 1,
-                Right = 2
-            }
-            [StructLayout(LayoutKind.Sequential)]
-            public struct XrPosef
-            {
-                public Quaternion orientation;
-                public Vector3 position;
-            }
-
-            [StructLayout(LayoutKind.Sequential)]
-            public struct XrHandJointLocationEXT
-            {
-                public UInt64 locationFlags;
-                public XrPosef pose;
-                public float radius;
-            }
-
             [DllImport(MagicLeapXrProviderNativeBindings.MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern IntPtr MLOpenXRInterceptFunctions(IntPtr loaderFunc);
 
@@ -58,13 +38,19 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             public static extern void MLOpenXROnSessionDestroy(ulong session);
 
             [DllImport(MagicLeapXrProviderNativeBindings.MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
-            public static extern MLResult.Code MLOpenXRStartXRHandTracking();
+            public static extern void MLOpenXRUpdateDepthRangeValues();
 
             [DllImport(MagicLeapXrProviderNativeBindings.MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
-            public static extern unsafe MLResult.Code MLOpenXRGetXRHandTrackingJoints(XrHandEXT hand, XrHandJointLocationEXT* joints);
+            public static extern float MLOpenXRGetMinNearClippingPlane();
 
             [DllImport(MagicLeapXrProviderNativeBindings.MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
-            public static extern MLResult.Code MLOpenXRStopXRHandTracking();
+            public static extern float MLOpenXRGetRecommendedNearClippingPlane();
+
+            [DllImport(MagicLeapXrProviderNativeBindings.MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
+            public static extern float MLOpenXRGetMaxFarClippingPlane();
+
+            [DllImport(MagicLeapXrProviderNativeBindings.MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
+            public static extern float MLOpenXRGetRecommendedFarClippingPlane();
 
             [DllImport(MLSdkLoaderDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLZIPermissionsStart();
@@ -74,4 +60,4 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         }
     }
 }
-#endif //UNITY_OPENXR_1_7_0_OR_NEWER
+#endif //UNITY_OPENXR_1_9_0_OR_NEWER

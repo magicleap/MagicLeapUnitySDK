@@ -89,8 +89,12 @@ namespace UnityEngine.XR.MagicLeap
         /// </returns>
         private MLResult InternalGetFramePose(NativeBindings.CameraID cameraId, MLTime vcamTimestamp, out Matrix4x4 outTransform)
         {
+            if (!MagicLeapXrProviderNativeBindings.IsHeadTrackingAvailable())
+            {
+                outTransform = default;
+                return MLResult.Create(MLResult.Code.PoseNotFound, "HeadTracking is not available");
+            }
             MagicLeapNativeBindings.MLTransform outInternalTransform = new MagicLeapNativeBindings.MLTransform();
-
             MLResult.Code resultCode = NativeBindings.MLCVCameraGetFramePose(Handle, MagicLeapXrProviderNativeBindings.GetHeadTrackerHandle(), cameraId, vcamTimestamp.Value, ref outInternalTransform);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCVCameraGetFramePose));
             MLResult poseResult = MLResult.Create(resultCode);

@@ -111,6 +111,9 @@ namespace UnityEngine.XR.MagicLeap
 
         [DllImport(MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern ulong GetEyeTrackerHandle();
+        
+        [DllImport(MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool IsHeadTrackingAvailable();
 
         [DllImport(MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern ulong GetInputHandle();

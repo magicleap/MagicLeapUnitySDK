@@ -10,7 +10,6 @@ namespace UnitySDKPlayTests
         public void MLSegmentedDimmer_ExistsPositive()
         {
             MLSegmentedDimmer.Activate();
-            MLSegmentedDimmer.SetEnabled(true);
             Assert.IsTrue(MLSegmentedDimmer.Exists);
         }
 
@@ -18,8 +17,6 @@ namespace UnitySDKPlayTests
         public void MLSegmentedDimmer_ExistsNegative()
         {
             MLSegmentedDimmer.Activate();
-            MLSegmentedDimmer.SetEnabled(true);
-            MLSegmentedDimmer.SetEnabled(false);
             Assert.IsFalse(MLSegmentedDimmer.Exists);
         }
 

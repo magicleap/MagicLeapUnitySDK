@@ -9,14 +9,12 @@
 // %BANNER_END%
 
 using System;
-using System.Linq;
 using System.Runtime.InteropServices;
 using UnityEngine.XR.MagicLeap.Native;
-using static UnityEngine.XR.MagicLeap.MLSpace;
 
 namespace UnityEngine.XR.MagicLeap
 {
-    public partial class MLSpace : MLAutoAPISingleton<MLSpace>
+    public partial class MLSpace
     {
 
         private MLResult.Code InternalMLSpacesStart()
@@ -32,7 +30,7 @@ namespace UnityEngine.XR.MagicLeap
             if (MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLSpaceManagerCreate)))
             {
                 SpaceCallbacks callbacks = SpaceCallbacks.Create();
-                var result = NativeBindings.MLSpaceSetCallbacks(Handle, ref callbacks, System.IntPtr.Zero);
+                var result = NativeBindings.MLSpaceSetCallbacks(Handle, ref callbacks, IntPtr.Zero);
                 MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLSpaceManagerCreate));
             }
 
@@ -65,8 +63,8 @@ namespace UnityEngine.XR.MagicLeap
             if (MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLSpaceExportSpace)))
             {
                 data.Size = outData.Size;
-                data.Data = MLSpace.SpaceExportOutData.GetData(outData);
-                InternalReleaseExportSpaceData(ref outData);
+                data.Data = SpaceExportOutData.GetData(outData);
+                resultCode = InternalReleaseExportSpaceData(ref outData);
             }
 
             return resultCode;
@@ -75,10 +73,8 @@ namespace UnityEngine.XR.MagicLeap
         /// permissions com.magicleap.permission.SPACE_IMPORT_EXPORT (protection level: dangerous)
         private MLResult.Code InternalReleaseExportSpaceData(ref SpaceExportOutData data)
         {
-           
             MLResult.Code resultCode = NativeBindings.MLSpaceReleaseExportData(ref data);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLSpaceReleaseExportData));
-
             return resultCode;
         }
 
@@ -120,15 +116,14 @@ namespace UnityEngine.XR.MagicLeap
             MLResult.Code resultCode = NativeBindings.MLSpaceGetSpaceList(Handle, out filter, out list);
             if (MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLSpaceGetSpaceList)))
             {
-                spaceList = MLConvert.MarshalUnmanagedArray<Space>(list.Spaces,(int)list.SpaceCount);
-                InternalReleaseSpaceList(out list);
+                spaceList = MLConvert.MarshalUnmanagedArray<Space>(list.Spaces, (int)list.SpaceCount);
+                resultCode = InternalReleaseSpaceList(out list);
             }
             else
             {
-                spaceList = new Space[0];
+                spaceList = Array.Empty<Space>();
             }
-
-
+            
             return resultCode;
         }
 
@@ -153,16 +148,14 @@ namespace UnityEngine.XR.MagicLeap
 
         private MLResult.Code InternalGetLocalizationResult(out LocalizationResult result)
         {
-            result = new();
+            result = default;
             SpaceLocalizationResult localizationResult = SpaceLocalizationResult.Create();
             MLResult.Code resultCode = NativeBindings.MLSpaceGetLocalizationResult(Handle, out localizationResult);
             if (MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLSpaceGetLocalizationResult)))
             {
-                result.LocalizationStatus = localizationResult.LocalizationStatus;
-                result.Space = localizationResult.Space;
+                result = LocalizationResult.CreateFromSpaceLocalizationResult(localizationResult);
             }
-
-
+            
             return resultCode;
         }
 
@@ -177,9 +170,7 @@ namespace UnityEngine.XR.MagicLeap
         [AOT.MonoPInvokeCallback(typeof(MLSpaceDelegate))]
         public static void LocalizationChanged(ref SpaceLocalizationResult result, IntPtr data)
         {
-            LocalizationResult localizedResult = new LocalizationResult();
-            localizedResult.LocalizationStatus = result.LocalizationStatus;
-            localizedResult.Space = result.Space;
+            var localizedResult = LocalizationResult.CreateFromSpaceLocalizationResult(result);
 
             MLThreadDispatch.ScheduleMain(() =>
             {

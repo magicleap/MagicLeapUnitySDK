@@ -76,24 +76,31 @@ namespace UnityEngine.XR.MagicLeap
                 /// </summary>
                 public readonly MLUUIDBytes SpaceId;
 
+                /// <summary>
+                /// The quality of the local space that this anchor occupies. This value may change over time.
+                /// </summary>
+                public readonly Quality Quality;
+
                 public MLSpatialAnchor(MLAnchors.Anchor anchor)
                 {
-                    this.Version = 1;
+                    this.Version = 2;
                     this.Id = anchor.id;
                     this.Cfuid = anchor.cfuid;
                     this.ExpirationTimeStamp = anchor.ExpirationTimeStamp;
                     this.IsPersisted = anchor.IsPersisted;
                     this.SpaceId = anchor.spaceId;
+                    this.Quality = anchor.quality;
                 }
 
                 public MLSpatialAnchor(MLAnchors.Anchor anchor, ulong expirationTimeStamp)
                 {
-                    this.Version = 1;
+                    this.Version = 2;
                     this.Id = anchor.id;
                     this.Cfuid = anchor.cfuid;
                     this.ExpirationTimeStamp = expirationTimeStamp;
                     this.IsPersisted = anchor.IsPersisted;
                     this.SpaceId = anchor.spaceId;
+                    this.Quality = anchor.quality;
                 }
             };
 

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.Management;
-#if UNITY_OPENXR_1_7_0_OR_NEWER
+#if UNITY_OPENXR_1_9_0_OR_NEWER
 using UnityEngine.XR.OpenXR.Features.MagicLeapSupport;
 #endif
 
@@ -18,7 +18,7 @@ namespace UnityEngine.XR.MagicLeap
         private static MagicLeapLoader mlLoader;
 #endif
 
-#if UNITY_OPENXR_1_7_0_OR_NEWER
+#if UNITY_OPENXR_1_9_0_OR_NEWER
         private static MagicLeapFeature mlOpenXrFeature;
 #endif
 
@@ -43,7 +43,7 @@ namespace UnityEngine.XR.MagicLeap
 #if UNITY_XR_MAGICLEAP_PROVIDER
             mlLoader = XRGeneralSettings.Instance.Manager.ActiveLoaderAs<MagicLeapLoader>();
 #endif
-#if UNITY_OPENXR_1_7_0_OR_NEWER
+#if UNITY_OPENXR_1_9_0_OR_NEWER
             mlOpenXrFeature = OpenXR.OpenXRSettings.Instance.GetFeature<MagicLeapFeature>();
 #endif
         }
@@ -58,7 +58,7 @@ namespace UnityEngine.XR.MagicLeap
                 {
                     mlLoader.StartMeshSubsystem();
                 }
-#elif UNITY_OPENXR_1_7_0_OR_NEWER
+#elif UNITY_OPENXR_1_9_0_OR_NEWER
                 if (mlOpenXrFeature != null)
                 {
                     mlOpenXrFeature.StartMeshSubsystem();
@@ -83,7 +83,7 @@ namespace UnityEngine.XR.MagicLeap
                 {
                     mlLoader.StopMeshSubsystem();
                 }
-#elif UNITY_OPENXR_1_7_0_OR_NEWER
+#elif UNITY_OPENXR_1_9_0_OR_NEWER
                 if (mlOpenXrFeature != null)
                 {
                     mlOpenXrFeature.StopMeshSubsystem();

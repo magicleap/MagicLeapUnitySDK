@@ -74,6 +74,28 @@ namespace UnityEngine.XR.MagicLeap
         };
 
         /// <summary>
+        /// The quality of the local space around the anchor. 
+        /// This can change over time as the user continues to scan the space.
+        /// </summary>
+        public enum Quality
+        {
+            /// <summary>
+            /// Low quality, this anchor can be expected to move significantly.
+            /// </summary>
+            Low,
+
+            /// <summary>
+            /// Medium quality, this anchor may move slightly.
+            /// </summary>
+            Medium,
+
+            /// <summary>
+            /// High quality, this anchor is stable and suitable for digital content attachment.
+            /// </summary>
+            High,
+        }
+
+        /// <summary>
         ///  Maximum size for the name of the space in the #MLSpatialAnchorLocalizationInfo structure.
         /// </summary>
         public const uint MaxSpaceNameLength = 64;
@@ -298,6 +320,11 @@ namespace UnityEngine.XR.MagicLeap
             public string SpaceId => this.spaceId.ToString();
 
             /// <summary>
+            /// The quality of the local space that this anchor occupies. This value may change over time.
+            /// </summary>
+            public string Quality => this.quality.ToString();
+
+            /// <summary>
             /// Pose.
             /// </summary>
             public readonly Pose Pose;
@@ -329,6 +356,11 @@ namespace UnityEngine.XR.MagicLeap
             /// The cfuid of the anchor.
             /// </summary>
             internal readonly MagicLeapNativeBindings.MLCoordinateFrameUID cfuid;
+
+            /// <summary>
+            /// The quality of the local space that this anchor occupies. This value may change over time.
+            /// </summary>
+            internal readonly Quality quality;
 
             public MLResult Publish()
             {
@@ -369,6 +401,7 @@ namespace UnityEngine.XR.MagicLeap
                 MagicLeapXrProviderNativeBindings.GetUnityPose(nativeAnchor.Cfuid, out this.Pose);
                 this.ExpirationTimeStamp = nativeAnchor.ExpirationTimeStamp;
                 this.IsPersisted = nativeAnchor.IsPersisted;
+                this.quality = nativeAnchor.Quality;
             }
 
             public static bool operator ==(Anchor one, Anchor two)
@@ -397,7 +430,7 @@ namespace UnityEngine.XR.MagicLeap
                 return this.Id.GetHashCode();
             }
 
-            public override string ToString() => $"id: {Id},\nPose: {Pose},\nExpirationTimeStamp: {ExpirationTimeStamp},\nIsPersisted: {IsPersisted},\nSpaceId: {SpaceId}";
+            public override string ToString() => $"id: {Id},\nPose: {Pose}, \nQuality: {Quality}, \nExpirationTimeStamp: {ExpirationTimeStamp},\nIsPersisted: {IsPersisted},\nSpaceId: {SpaceId}";
         }
 
         /// <summary>

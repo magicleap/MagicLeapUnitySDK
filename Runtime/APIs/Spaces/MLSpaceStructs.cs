@@ -199,9 +199,26 @@ namespace UnityEngine.XR.MagicLeap
             public readonly Space Space;
 
             /// <summary>
+            /// Target space's origin relative to world origin. 
+            /// If localized this will contain the identifier of the transform of the target space's origin relative to the world origin. 
+            /// If not localized this will be null.
+            /// </summary>
+            public readonly NativeBindings.MLCoordinateFrameUID TargetSpaceOrigin;
+
+            /// <summary>
+            /// The confidence level of this localization result.
+            /// </summary>
+            public readonly LocalizationConfidence ConfidenceOfLocalization;
+
+            /// <summary>
+            /// Represents a bitmask of LocalizationErrorFlag.
+            /// </summary>
+            public readonly uint Error;
+
+            /// <summary>
             /// Initialize default values for #MLSpaceLocalizationResult.
             /// </summary>
-            public static SpaceLocalizationResult Create(uint version = 1u)
+            public static SpaceLocalizationResult Create(uint version = 3u)
             {
                 return new SpaceLocalizationResult
                 {
@@ -226,6 +243,36 @@ namespace UnityEngine.XR.MagicLeap
             /// If not localized this field should be ignored.
             /// </summary>
             public Space Space;
+
+            /// <summary>
+            /// Target space's origin relative to world origin. 
+            /// If localized this will contain the identifier of the transform of the target space's origin relative to the world origin. 
+            /// If not localized this will be null.
+            /// </summary>
+            public NativeBindings.MLCoordinateFrameUID TargetSpaceOrigin;
+
+            /// <summary>
+            /// The confidence level of this localization result.
+            /// </summary>
+            public LocalizationConfidence ConfidenceOfLocalization;
+
+            /// <summary>
+            /// Represents a bitmask of LocalizationErrorFlag.
+            /// </summary>
+            public LocalizationErrorFlag Error;
+
+            internal static LocalizationResult CreateFromSpaceLocalizationResult(SpaceLocalizationResult spaceLocalizationResult)
+            {
+                var localizedResult = new LocalizationResult
+                {
+                    ConfidenceOfLocalization = spaceLocalizationResult.ConfidenceOfLocalization, 
+                    LocalizationStatus = spaceLocalizationResult.LocalizationStatus, 
+                    Space = spaceLocalizationResult.Space, 
+                    TargetSpaceOrigin = spaceLocalizationResult.TargetSpaceOrigin,
+                    Error = (LocalizationErrorFlag) spaceLocalizationResult.Error,
+                };
+                return localizedResult;
+            }
         }
 
         /// <summary>
@@ -249,7 +296,6 @@ namespace UnityEngine.XR.MagicLeap
             /// the app such as head tracking failure, localization loss.
             /// </summary>
             public MLSpaceDelegate OnLocalizationChangedCallbacks;
-
 
             /// <summary>
             /// Initialize default values for #SpaceCallbacks.

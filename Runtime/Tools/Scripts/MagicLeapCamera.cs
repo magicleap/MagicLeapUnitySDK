@@ -1,6 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-#if UNITY_OPENXR_1_7_0_OR_NEWER
+#if UNITY_OPENXR_1_9_0_OR_NEWER
 using UnityEngine.XR.OpenXR;
 using UnityEngine.XR.OpenXR.Features.MagicLeapSupport;
 #endif
@@ -29,8 +29,6 @@ namespace UnityEngine.XR.MagicLeap
 
         private List<Transform> transforms = new List<Transform>();
         private Unity.Jobs.JobHandle jobHandle;
-
-        private bool enforceNearClip = true;
         
         [SerializeField]
         private bool enforceFarClip = false;
@@ -39,7 +37,7 @@ namespace UnityEngine.XR.MagicLeap
         [SerializeField]
         private bool protectedSurface;
 
-#if UNITY_OPENXR_1_7_0_OR_NEWER
+#if UNITY_OPENXR_1_9_0_OR_NEWER
         [SerializeField] 
         private bool vignette;
 #endif
@@ -86,6 +84,8 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         private static readonly Vector3 DEFAULT_CAMERA_SCALE = Vector3.one;
 
+        private static float systemSettingClippingPlaneVal = MLDevice.DefaultNearClipDistance;
+
         /// <summary>
         /// Getter/Setter for the stereo convergence point
         /// </summary>
@@ -121,21 +121,21 @@ namespace UnityEngine.XR.MagicLeap
             camera = GetComponent<Camera>();
             FixupCamera(fixProblemsOnStartup);
 
-#if UNITY_XR_MAGICLEAP_PROVIDER
-            MagicLeapXRRenderSettings.enforceNearClip = enforceNearClip;
-#endif
-            
-#if UNITY_OPENXR_1_7_0_OR_NEWER
+            systemSettingClippingPlaneVal = GetNearClipPlaneFromSystem();
+
             if (!Application.isEditor)
             {
+                Debug.Log($"Acquired clipping plane value from system: {systemSettingClippingPlaneVal}");
+
+#if UNITY_OPENXR_1_9_0_OR_NEWER
                 var renderFeature = OpenXRSettings.Instance.GetFeature<MagicLeapRenderingExtensionsFeature>();
                 if (renderFeature == null)
                     return;
                 renderFeature.focusDistance = camera.stereoConvergence;
                 renderFeature.useProtectedSurface = protectedSurface;
                 renderFeature.useVignetteMode = vignette;
-            }
 #endif
+            }
         }
 
         private IEnumerator Start()
@@ -164,10 +164,11 @@ namespace UnityEngine.XR.MagicLeap
 #if UNITY_XR_MAGICLEAP_PROVIDER
             MagicLeapXRRenderSettings.cameraScale = MagicLeapXRRenderUtility.GetParentScale(transform);
 #endif
+            ValidateNearClip();
             ValidateFarClip();
 
             camera.stereoConvergence = CalculateFocusDistance();
-#if UNITY_OPENXR_1_7_0_OR_NEWER
+#if UNITY_OPENXR_1_9_0_OR_NEWER
             if (!Utils.TryGetOpenXRFeature<MagicLeapRenderingExtensionsFeature>(out var renderFeature))
                 return;
             renderFeature.focusDistance = camera.stereoConvergence;
@@ -178,6 +179,25 @@ namespace UnityEngine.XR.MagicLeap
             MagicLeapXRRenderSettings.farClipDistance = camera.farClipPlane;
             MagicLeapXRRenderSettings.nearClipDistance = camera.nearClipPlane;
 #endif
+        }
+
+#if !UNITY_EDITOR
+        private void OnApplicationPause(bool pause)
+        {
+            if(!pause)
+            {
+                CheckForClipPlaneSettingChange();
+            }
+        }
+#endif
+
+        private void ValidateNearClip()
+        {
+            if(camera.nearClipPlane < systemSettingClippingPlaneVal)
+            {
+                // unity camera nearClipPlane cannot go below what is set in system settings
+                camera.nearClipPlane = systemSettingClippingPlaneVal;
+            }
         }
 
         /// <summary>
@@ -232,7 +252,7 @@ namespace UnityEngine.XR.MagicLeap
         public float ClampToClippingPlanes(float value)
         {
 #if UNITY_XR_MAGICLEAP_PROVIDER
-            return Mathf.Clamp(value, MagicLeapXRRenderSettings.minNearClipDistance, MagicLeapXRRenderSettings.maxFarClipDistance);
+            return Mathf.Clamp(value, systemSettingClippingPlaneVal, MagicLeapXRRenderSettings.maxFarClipDistance);
 #else
             return value;
 #endif
@@ -256,7 +276,7 @@ namespace UnityEngine.XR.MagicLeap
             {
                 Debug.LogWarning("[Magic Leap] The near clipping plane of the main camera is closer than " + MINIMUM_NEAR_CLIP_METERS + "m, which can cause artifacts.");
 
-                if (enforceNearClip && fixIssues)
+                if (fixIssues)
                 {
                     camera.nearClipPlane = MINIMUM_NEAR_CLIP_METERS * scale;
                 }
@@ -306,6 +326,31 @@ namespace UnityEngine.XR.MagicLeap
             }
 
             return scale;
+        }
+
+        private float GetNearClipPlaneFromSystem()
+        {
+            if (!Application.isEditor)
+            {
+                using AndroidJavaClass player = new("com.unity3d.player.UnityPlayer"), secureSettings = new("android.provider.Settings$Secure");
+                using AndroidJavaObject activity = player.GetStatic<AndroidJavaObject>("currentActivity"), resolver = activity.Call<AndroidJavaObject>("getContentResolver");
+                
+                var clipPlaneDist = secureSettings.CallStatic<float>("getFloat", resolver, "clipping_plane_distance", MLDevice.DefaultNearClipDistance);
+                // if the setting doesn't exist we'll get the default value from MLDevice in meters.
+                if (clipPlaneDist < 1f)
+                    return clipPlaneDist;
+                // Otherwise the setting returns centimeters and we need to convert.
+                return clipPlaneDist / 100f;
+            }
+
+            return MLDevice.DefaultNearClipDistance;
+        }
+
+        public void CheckForClipPlaneSettingChange()
+        {
+            systemSettingClippingPlaneVal = GetNearClipPlaneFromSystem();
+            if (!Application.isEditor)
+                Debug.Log($"Acquired clipping plane value from system: {systemSettingClippingPlaneVal}");
         }
     }
 }

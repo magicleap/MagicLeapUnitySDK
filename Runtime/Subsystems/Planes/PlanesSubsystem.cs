@@ -450,7 +450,7 @@ namespace UnityEngine.XR.MagicLeap
             }
         }
 
-#if !UNITY_OPENXR_1_7_0_OR_NEWER
+#if !UNITY_OPENXR_1_9_0_OR_NEWER
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void RegisterDescriptor()

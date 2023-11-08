@@ -214,7 +214,7 @@ namespace UnityEngine.XR.MagicLeap
                     Task.Run(() =>
                         {
                             result = NativeBindings.MLZIPermissionsRequest(permission);
-                            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLZIPermissionsIsGranted), NativeCallSuccess);
+                            MLResult.DidNativeCallSucceed(result, nameof(NativeBindings.MLZIPermissionsRequest), NativeCallSuccess);
                         }
                     );
 #endif

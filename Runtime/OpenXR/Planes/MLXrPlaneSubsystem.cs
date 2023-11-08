@@ -153,6 +153,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 
             public override void Stop()
             {
+                _currentScanState = ScanState.Stopped;
                 if (_planesTracker != MagicLeapNativeBindings.InvalidHandle)
                 {
                     NativeBindings.MLOpenXRDestroyPlaneTracker(_planesTracker);
@@ -441,7 +442,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             }
         }
 
-#if UNITY_OPENXR_1_7_0_OR_NEWER
+#if UNITY_OPENXR_1_9_0_OR_NEWER
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void RegisterDescriptor()
         {

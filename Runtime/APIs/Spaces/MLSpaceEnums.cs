@@ -8,6 +8,8 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
+using System;
+
 namespace UnityEngine.XR.MagicLeap
 {
     public partial class MLSpace
@@ -54,6 +56,77 @@ namespace UnityEngine.XR.MagicLeap
             SleepingBeforeRetry,
         }
 
+        /// <summary>
+        /// The confidence of the current localization.
+        /// </summary>
+        public enum LocalizationConfidence
+        {
+            /// <summary>
+            /// Localization confidence is very poor and should be reattempted.
+            /// </summary>
+            Poor,
 
+            /// <summary>
+            /// The confidence is low, current environmental conditions may adversely affect localization.
+            /// </summary>
+            Fair,
+
+            /// <summary>
+            /// The confidence is high, persistent content should be stable.
+            /// </summary>
+            Good,
+
+            /// <summary>
+            /// This is a very high-confidence localization, persistent content will be very stable.
+            /// </summary>
+            Excellent
+        }
+
+        /// <summary>
+        /// A set of possible reasons that a localization attempt may be unsuccessful.
+        /// </summary>
+        [Flags]
+        public enum LocalizationErrorFlag
+        {
+            /// <summary>
+            /// No error, localization was successful.
+            /// </summary>
+            None = 0,
+
+            /// <summary>
+            /// Localization failed for an unknown reason.
+            /// </summary>
+            Unknown = 1 << 0,
+
+            /// <summary>
+            /// Localization failed becuase the user is outside of the mapped area.
+            /// </summary>
+            OutOfMappedArea = 1 << 1,
+
+            /// <summary>
+            /// There are not enough features in the environment to successfully localize.
+            /// </summary>
+            LowFeatureCount = 1 << 2,
+
+            /// <summary>
+            /// Localization failed due to excessive motion.
+            /// </summary>
+            ExcessiveMotion = 1 << 3,
+
+            /// <summary>
+            /// Localization failed because the lighting levels are too low in the environment.
+            /// </summary>
+            LowLight = 1 << 4,
+
+            /// <summary>
+            /// A headpose failure caused localization to be unsuccessful.
+            /// </summary>
+            HeadposeFailure = 1 << 5,
+
+            /// <summary>
+            /// There was an internal algorithm failure that prevented localization.
+            /// </summary>
+            AlgorithmFailure = 1 << 6
+        }
     }
 }

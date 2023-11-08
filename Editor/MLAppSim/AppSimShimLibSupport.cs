@@ -16,7 +16,7 @@ using System.Linq;
 using UnityEngine.XR.MagicLeap;
 using UnityEngine.XR.Management;
 using UnityEditor.XR.Management;
-#if UNITY_OPENXR_1_7_0_OR_NEWER
+#if UNITY_OPENXR_1_9_0_OR_NEWER
 using UnityEngine.XR.OpenXR;
 #endif
 
@@ -46,7 +46,7 @@ namespace UnityEditor.XR.MagicLeap
             bool foundSupportedLoader = false;
 #if UNITY_XR_MAGICLEAP_PROVIDER
             foundSupportedLoader = settings.Manager.activeLoaders.Any(l => l is MagicLeapLoader);
-#elif UNITY_OPENXR_1_7_0_OR_NEWER
+#elif UNITY_OPENXR_1_9_0_OR_NEWER
             foundSupportedLoader = settings.Manager.activeLoaders.Any(l => l is OpenXRLoader);
 #endif
 

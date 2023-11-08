@@ -29,7 +29,7 @@ namespace UnityEngine.XR.MagicLeap
         public static implicit operator long(MLTime mltime) => mltime.Value;
         public static implicit operator MLTime(long timestamp) => new MLTime(timestamp);
 
-#if UNITY_OPENXR_1_7_0_OR_NEWER
+#if UNITY_OPENXR_1_9_0_OR_NEWER
         /// <summary>
         /// Converts a timestamp from a value captured by the system clock to an equivalent XrTime value
         /// </summary>
@@ -94,7 +94,7 @@ namespace UnityEngine.XR.MagicLeap
             {
                 Marshal.StructureToPtr(timeSpec, ptr, false);
 
-#if UNITY_OPENXR_1_7_0_OR_NEWER
+#if UNITY_OPENXR_1_9_0_OR_NEWER
                 resultCode = NativeBindings.MLOpenXRConvertTimespecTimeToXrTime(timeSpec, out long nanoseconds);
                 if (MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLOpenXRConvertTimespecTimeToXrTime)))
                 {
@@ -132,7 +132,7 @@ namespace UnityEngine.XR.MagicLeap
             MLResult.Code resultCode = MLResult.Code.UnspecifiedFailure;
             try
             {
-#if UNITY_OPENXR_1_7_0_OR_NEWER
+#if UNITY_OPENXR_1_9_0_OR_NEWER
                 var timeSpec = new TimeSpec();
                 resultCode = NativeBindings.MLOpenXRConvertXrTimeToTimespecTime(mlTime, out timeSpec);
                 if (MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLOpenXRConvertXrTimeToTimespecTime)))

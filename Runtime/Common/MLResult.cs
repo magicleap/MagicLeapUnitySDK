@@ -15,6 +15,9 @@ namespace UnityEngine.XR.MagicLeap
     using System.Runtime.InteropServices;
     using System.Threading.Tasks;
     using UnityEngine.XR.MagicLeap.Native;
+    
+    //Disabling WebRTC deprecated warning 
+    #pragma warning disable 618
 
     /// <summary>
     /// ALWAYS INHERIT FROM THIS

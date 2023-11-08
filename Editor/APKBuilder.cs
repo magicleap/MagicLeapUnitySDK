@@ -227,7 +227,7 @@ namespace UnityEditor.XR.MagicLeap
             string outDir = "Build";
             TryGetArgValue(Arg_OutDir, ref outDir);
 
-            System.IO.FileInfo buildFolder = new System.IO.FileInfo(System.IO.Path.Combine(outDir, EditorUserBuildSettings.activeBuildTarget.ToString()));
+            System.IO.FileInfo buildFolder = new System.IO.FileInfo(outDir);
             buildFolder.Directory.Create();
 
             return buildFolder;

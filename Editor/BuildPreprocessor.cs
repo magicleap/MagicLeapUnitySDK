@@ -16,7 +16,7 @@ using UnityEngine;
 using UnityEditor.XR.Management;
 using System.Linq;
 using UnityEngine.XR.MagicLeap;
-#if UNITY_OPENXR_1_7_0_OR_NEWER
+#if UNITY_OPENXR_1_9_0_OR_NEWER
 using UnityEngine.XR.OpenXR;
 #endif
 
@@ -101,7 +101,7 @@ namespace MagicLeap
 
         private bool IsOpenXRLoaderEnabled()
         {
-#if UNITY_OPENXR_1_7_0_OR_NEWER
+#if UNITY_OPENXR_1_9_0_OR_NEWER
             var settings = XRGeneralSettingsPerBuildTarget.XRGeneralSettingsForBuildTarget(BuildTargetGroup.Android);
             if (settings != null && settings.Manager != null && settings.Manager.activeLoaders.Where(l => l is OpenXRLoader).Count() > 0)
             {

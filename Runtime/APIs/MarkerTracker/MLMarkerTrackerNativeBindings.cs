@@ -68,117 +68,99 @@ namespace UnityEngine.XR.MagicLeap
         /// </returns>
         private static MarkerData[] MLMarkerTrackerGetResults()
         {
-            try
+            var scannerResults = new NativeBindings.MLMarkerTrackerResultArray(1);
+            var resultCode = NativeBindings.MLMarkerTrackerGetResult(Instance.Handle, ref scannerResults);
+
+            // get results from native api
+            if (MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMarkerTrackerGetResult)))
             {
-                var scannerResults = new NativeBindings.MLMarkerTrackerResultArray(1);
-                var resultCode = NativeBindings.MLMarkerTrackerGetResult(Instance.Handle, ref scannerResults);
-
-                // get results from native api
-                if (MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMarkerTrackerGetResult)))
+                var managedResults = new MarkerData[((int)scannerResults.Count)];
+                for (ulong i = 0; i < scannerResults.Count.ToUInt64(); i++)
                 {
-                    var managedResults = new MarkerData[((int)scannerResults.Count)];
-                    for (ulong i = 0; i < scannerResults.Count.ToUInt64(); i++)
+                    // marshal native array into native structs
+                    long address = scannerResults.Detections.ToInt64() + (Marshal.SizeOf<IntPtr>() * (int)i);
+                    NativeBindings.MLMarkerTrackerResult detectedResult = Marshal.PtrToStructure<NativeBindings.MLMarkerTrackerResult>(Marshal.ReadIntPtr(new IntPtr(address)));
+                    Pose pose = Pose.identity;
+                    if (detectedResult.IsValidPose)
                     {
-                        // marshal native array into native structs
-                        long address = scannerResults.Detections.ToInt64() + (Marshal.SizeOf<IntPtr>() * (int)i);
-                        NativeBindings.MLMarkerTrackerResult detectedResult = Marshal.PtrToStructure<NativeBindings.MLMarkerTrackerResult>(Marshal.ReadIntPtr(new IntPtr(address)));
-                        Pose pose = Pose.identity;
-                        if (detectedResult.IsValidPose)
+                        resultCode = MagicLeapXrProviderNativeBindings.GetUnityPose(detectedResult.CoordinateFrameUID, out pose);
+                        if (MLResult.IsOK(resultCode))
                         {
-                            resultCode = MagicLeapXrProviderNativeBindings.GetUnityPose(detectedResult.CoordinateFrameUID, out pose);
-                            if (MLResult.IsOK(resultCode))
-                            {
-                                // Update marker pose to be rotated 180 degrees on it's z axis to accommodate  for how the marker face is interpreted by the capi.
-                                // Without this update the marker positions will be upside down.
-                                pose = new Pose(pose.position, pose.rotation * Quaternion.AngleAxis(180, Vector3.forward));                              
-                            }
-                            else
-                                Debug.LogError($"Marker Scanner could not get pose data for coordinate frame id '{detectedResult.CoordinateFrameUID}'");
+                            // Update marker pose to be rotated 180 degrees on it's z axis to accommodate  for how the marker face is interpreted by the capi.
+                            // Without this update the marker positions will be upside down.
+                            pose = new Pose(pose.position, pose.rotation * Quaternion.AngleAxis(180, Vector3.forward));
                         }
-
-                        var decodedDataType = Marshal.PtrToStructure<NativeBindings.MLMarkerTrackerDecodedTypedData>(detectedResult.DecodedData.Data);
-                        NativeBindings.MLMarkerTrackerDecodedArucoData arucoData = default;
-                        byte[] binaryData = null;
-                        var markerType = MarkerType.None;
-                        switch (decodedDataType.Type)
-                        {
-                            case NativeBindings.DecodedDataType.Aruco:
-                                arucoData = Marshal.PtrToStructure<NativeBindings.MLMarkerTrackerDecodedArucoData>(detectedResult.DecodedData.Data);
-                                markerType = MarkerType.Aruco_April;
-                                break;
-                            case NativeBindings.DecodedDataType.QR:
-                                binaryData = MarshalBinaryData(detectedResult.DecodedData.Data);
-                                markerType = MarkerType.QR;
-                                break;
-                            case NativeBindings.DecodedDataType.EAN_13:
-                                binaryData = MarshalBinaryData(detectedResult.DecodedData.Data);
-                                markerType = MarkerType.EAN_13;
-                                break;
-                            case NativeBindings.DecodedDataType.UPC_A:
-                                binaryData = MarshalBinaryData(detectedResult.DecodedData.Data);
-                                markerType = MarkerType.UPC_A;
-                                break;
-                        }
-
-                        managedResults[i] =
-
-                            new MarkerData
-                            (
-                                markerType,
-                                arucoData,
-                                binaryData,
-                                pose,
-                                detectedResult.ReprojectionError
-                            );
-
-                    }
-                    if (scannerResults.Count.ToUInt64() > 0)
-                    {
-                        // release native memory so results can be polled again
-                        if (MLResult.DidNativeCallSucceed(NativeBindings.MLMarkerTrackerReleaseResult(ref scannerResults), nameof(NativeBindings.MLMarkerTrackerReleaseResult)))
-                            return managedResults;
                         else
-                        {
-                            MLPluginLog.Error($"MLMarkerTracker.NativeBindings.MLMarkerTrackerReleaseResult failed when trying to release the results' memory. Reason: {MLResult.CodeToString(resultCode)}");
-                            return managedResults;
-                        }
+                            Debug.LogError($"Marker Scanner could not get pose data for coordinate frame id '{detectedResult.CoordinateFrameUID}'");
                     }
+
+                    var decodedDataType = Marshal.PtrToStructure<NativeBindings.MLMarkerTrackerDecodedTypedData>(detectedResult.DecodedData.Data);
+                    NativeBindings.MLMarkerTrackerDecodedArucoData arucoData = default;
+                    byte[] binaryData = null;
+                    var markerType = MarkerType.None;
+                    switch (decodedDataType.Type)
+                    {
+                        case NativeBindings.DecodedDataType.Aruco:
+                            arucoData = Marshal.PtrToStructure<NativeBindings.MLMarkerTrackerDecodedArucoData>(detectedResult.DecodedData.Data);
+                            markerType = MarkerType.Aruco_April;
+                            break;
+                        case NativeBindings.DecodedDataType.QR:
+                            binaryData = MarshalBinaryData(detectedResult.DecodedData.Data);
+                            markerType = MarkerType.QR;
+                            break;
+                        case NativeBindings.DecodedDataType.EAN_13:
+                            binaryData = MarshalBinaryData(detectedResult.DecodedData.Data);
+                            markerType = MarkerType.EAN_13;
+                            break;
+                        case NativeBindings.DecodedDataType.UPC_A:
+                            binaryData = MarshalBinaryData(detectedResult.DecodedData.Data);
+                            markerType = MarkerType.UPC_A;
+                            break;
+                    }
+
+                    managedResults[i] =
+
+                        new MarkerData
+                        (
+                            markerType,
+                            arucoData,
+                            binaryData,
+                            pose,
+                            detectedResult.ReprojectionError
+                        );
+
+                }
+                if (scannerResults.Count.ToUInt64() > 0)
+                {
+                    // release native memory so results can be polled again
+                    if (MLResult.DidNativeCallSucceed(NativeBindings.MLMarkerTrackerReleaseResult(ref scannerResults), nameof(NativeBindings.MLMarkerTrackerReleaseResult)))
+                        return managedResults;
                     else
                     {
+                        MLPluginLog.Error($"MLMarkerTracker.NativeBindings.MLMarkerTrackerReleaseResult failed when trying to release the results' memory. Reason: {MLResult.CodeToString(resultCode)}");
                         return managedResults;
                     }
-
                 }
                 else
                 {
-                    MLPluginLog.Error($"MLMarkerTracker.MLMarkerTrackerGetResult failed to obtain a result. Reason: {resultCode}");
-                    return new MarkerData[0];
+                    return managedResults;
                 }
-            }
-            catch (EntryPointNotFoundException)
-            {
-                MLPluginLog.Error("MLMarkerTracker.MLMarkerTrackerGetResult failed. Reason: API symbols not found.");
-            }
 
-            return new MarkerData[0];
+            }
+            else
+            {
+                MLPluginLog.Error($"MLMarkerTracker.MLMarkerTrackerGetResult failed to obtain a result. Reason: {resultCode}");
+                return new MarkerData[0];
+            }
         }
 
         private static Task<MLResult> MLMarkerTrackerSettingsUpdate(TrackerSettings settings)
         {
-            try
-            {
-                var handle = Instance.Handle;
-                var nativeSettings = new NativeBindings.MLMarkerTrackerSettings(settings);
-                var resultCode = NativeBindings.MLMarkerTrackerUpdateSettings(handle, in nativeSettings);
-                MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMarkerTrackerUpdateSettings));
-                return MLResult.Create(resultCode);
-            }
-            catch (EntryPointNotFoundException)
-            {
-                string error = "MLMarkerTracker.MLMarkerTrackerUpdateSettings failed. Reason: API symbols not found.";
-                MLPluginLog.Error(error);
-                return MLResult.Create(MLResult.Code.UnspecifiedFailure, error);
-            }
+            var handle = Instance.Handle;
+            var nativeSettings = new NativeBindings.MLMarkerTrackerSettings(settings);
+            var resultCode = NativeBindings.MLMarkerTrackerUpdateSettings(handle, in nativeSettings);
+            MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLMarkerTrackerUpdateSettings));
+            return MLResult.Create(resultCode);
         }
 
         internal class NativeBindings : MagicLeapNativeBindings
@@ -521,21 +503,6 @@ namespace UnityEngine.XR.MagicLeap
                     this.QRCodeSize = settings.QRCodeSize;
                     this.TrackerProfile = settings.TrackerProfile;
                     this.CustomTrackerProfile = new MLMarkerTrackerCustomProfile(settings.CustomTrackerProfile);
-                }
-
-                /// <summary>
-                ///     Sets the native structures from the user facing properties.
-                /// </summary>
-                public MLMarkerTrackerSettings(Settings settings)
-                {
-                    this.Version = 5;
-                    this.EnableMarkerScanning = settings.EnableMarkerScanning;
-                    this.EnabledDetectorTypes = (uint)settings.MarkerTypes;
-                    this.ArucoDicitonary = settings.ArucoDicitonary;
-                    this.ArucoMarkerSize = settings.ArucoMarkerSize;
-                    this.QRCodeSize = settings.QRCodeSize;
-                    this.TrackerProfile = Profile.Default;
-                    this.CustomTrackerProfile = default;
                 }
             }
 

@@ -14,7 +14,7 @@ namespace UnitySDKPlayTests
         [Test]
         public void MLGlobalDimmer_SetValue()
         {
-#if UNITY_OPENXR_1_7_0_OR_NEWER
+#if UNITY_OPENXR_1_9_0_OR_NEWER
             result = MLGlobalDimmer.SetValue(1);
             Assert.IsTrue(result.IsOk, string.Format("SetValue failed: {0}", result.ToString()));
 #endif

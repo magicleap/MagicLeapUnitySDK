@@ -8,7 +8,7 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-#if UNITY_OPENXR_1_7_0_OR_NEWER
+#if UNITY_OPENXR_1_9_0_OR_NEWER
 using UnityEditor;
 using UnityEditor.XR.OpenXR.Features;
 
@@ -21,12 +21,8 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         SupportedBuildTargets = new [] { BuildTargetGroup.Android, BuildTargetGroup.Standalone },
         FeatureIds = new [] {
             MagicLeapFeature.featureId ,
-#if XR_HANDS
-            MagicLeapHandTrackingFeature.featureId,
-#endif
             MagicLeapRenderingExtensionsFeature.featureId,
             MagicLeapReferenceSpacesFeature.featureId,
-            MagicLeapClippingPlaneEnforcementFeature.featureId,
             MagicLeapPlanesFeature.FeatureId,
             MagicLeapUserCalibrationFeature.featureId,
         }

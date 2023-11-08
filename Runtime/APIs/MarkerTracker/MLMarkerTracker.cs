@@ -42,29 +42,35 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         private static TrackerSettings futureSettingsValue;
 
-        private static bool IsPaused { get; set; } = false;
+        private static bool isPaused { get; set; } = false;
+
+        /// <summary>
+        ///     Are markers currently being scanned?
+        /// </summary>
+        public static bool IsScanning => Instance.settings.EnableMarkerScanning;
+
+        /// <summary>
+        /// Was Marker Tracker scanning before pausing the app?
+        /// </summary>
+        private static bool wasScanning = false;
 
         /// <summary>
         ///     Instance.settings setter.
         ///     If called with the same value while a settings update operation is in progress,
         ///     nothing will happen.
         /// </summary>
-        public static async Task SetSettingsAsync(TrackerSettings value)
+        public static async Task<MLResult> SetSettingsAsync(TrackerSettings value)
         {
             if (futureSettingsValue.Equals(value))
-                return;
+                return MLResult.Create(MLResult.Code.Ok);
 
             futureSettingsValue = value;
-            var resultCode = (await MLMarkerTrackerSettingsUpdate(value)).Result;
-            if (MLResult.IsOK(resultCode))
+            var resultCode = await MLMarkerTrackerSettingsUpdate(value);
+            if (resultCode.IsOk)
                 Instance.settings = value;
+            
+            return resultCode;
         }
-
-        private static bool IsScanning => Instance.settings.EnableMarkerScanning;
-        /// <summary>
-        /// Was Marker Tracker scanning before pausing the app?
-        /// </summary>
-        private static bool WasScanning = false;
 
         private MLMarkerTracker.TrackerSettings settings = TrackerSettings.Create(true, MarkerType.All);
 
@@ -74,27 +80,27 @@ namespace UnityEngine.XR.MagicLeap
         ///     Note that enabling scanning has a performance cost until scanning is disabled using 
         ///     <c> StopScanning </c> or by setting <c> ScannerSettings.enabled </c> to <c>false</c>.
         /// </summary>
-        public static async Task StartScanningAsync(TrackerSettings? settings = null)
+        public static async Task<MLResult> StartScanningAsync(TrackerSettings? settings = null)
         {
             if (IsStarted && Instance.settings.EnableMarkerScanning == true)
-                return;
+                return MLResult.Create(MLResult.Code.Ok);
 
             settings ??= Instance.settings;
 
-            await SetSettingsAsync(TrackerSettings.Create(true, settings.Value.MarkerTypes, settings.Value.QRCodeSize, settings.Value.ArucoDicitonary, settings.Value.ArucoMarkerSize));
+            return await SetSettingsAsync(TrackerSettings.Create(true, settings.Value.MarkerTypes, settings.Value.QRCodeSize, settings.Value.ArucoDicitonary, settings.Value.ArucoMarkerSize));
         }
 
         /// <summary>
         ///     Asynchronous method to disable marker scanning if previously activated. 
         ///     Otherwise, this does nothing.
         /// </summary>
-        public async static Task StopScanningAsync()
+        public async static Task<MLResult> StopScanningAsync()
         {
             // check future settings instead of current settings because this is asynchronous
             if (!IsStarted || futureSettingsValue.EnableMarkerScanning == false)
-                return;
+                return MLResult.Create(MLResult.Code.Ok);
 
-            await SetSettingsAsync(TrackerSettings.Create(false, Instance.settings.MarkerTypes, Instance.settings.QRCodeSize, Instance.settings.ArucoDicitonary, Instance.settings.ArucoMarkerSize));
+            return await SetSettingsAsync(TrackerSettings.Create(false, Instance.settings.MarkerTypes, Instance.settings.QRCodeSize, Instance.settings.ArucoDicitonary, Instance.settings.ArucoMarkerSize));
         }
 
         protected override MLResult.Code StopAPI()
@@ -125,32 +131,28 @@ namespace UnityEngine.XR.MagicLeap
         protected override void OnApplicationPause(bool pauseStatus)
         {
             if (pauseStatus)
-            {
                 HandleApplicationPause();
-            }
             else
-            {
                 HandleApplicationUnpause();
-            }
         }
 
         private void HandleApplicationPause()
         {
             if (IsStarted)
             {
-                WasScanning = IsScanning;
+                wasScanning = IsScanning;
                 StopAPI();
-                IsPaused = true;
+                isPaused = true;
             }
         }
 
         private void HandleApplicationUnpause()
         {
-            if (IsPaused)
+            if (isPaused)
             {
                 StartAPI();
-                IsPaused = false;
-                if (WasScanning)
+                isPaused = false;
+                if (wasScanning)
                 {
                     _ = StartScanningAsync();
                 }

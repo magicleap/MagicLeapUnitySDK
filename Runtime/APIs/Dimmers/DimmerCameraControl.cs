@@ -8,7 +8,7 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-#if UNITY_OPENXR_1_7_0_OR_NEWER
+#if UNITY_OPENXR_1_9_0_OR_NEWER
 namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 {
     [RequireComponent(typeof(Camera))]

@@ -7,7 +7,7 @@
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
-#if UNITY_OPENXR_1_7_0_OR_NEWER
+#if UNITY_OPENXR_1_9_0_OR_NEWER
 using System.Collections.Generic;
 using UnityEngine.XR.ARSubsystems;
 using UnityEngine.XR.MagicLeap;
@@ -28,9 +28,8 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         Company = "Magic Leap",
         Version = "1.0.0",
         BuildTargetGroups = new []{ BuildTargetGroup.Android, BuildTargetGroup.Standalone },
-        CustomRuntimeLoaderBuildTargets = new []{ BuildTarget.Android },
         FeatureId = featureId,
-        OpenxrExtensionStrings = "XR_ML_compat XR_KHR_convert_timespec_time"
+        OpenxrExtensionStrings = "XR_ML_compat XR_KHR_convert_timespec_time XR_EXT_view_configuration_depth_range"
     )]
 #endif
     public partial class MagicLeapFeature : OpenXRFeature
@@ -40,7 +39,44 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             public int oldState;
             public int newState;
         }
-        
+
+        public enum FarClipMode : byte
+        {
+            /// <summary>
+            /// Do not restrict the Camera's far clip plane distance.
+            /// </summary>
+            None,
+
+            /// <summary>
+            /// Restrict the Camera's far clip plane distance to no more than the maximum allowed by the device.
+            /// </summary>
+            Maximum,
+
+            /// <summary>
+            /// Restrict the Camera's far clip plane to no more than the distance recommended by Magic Leap.
+            /// </summary>
+            Recommended,
+        }
+
+        public enum NearClipMode : byte
+        {
+            /// <summary>
+            /// Restrict the Camera's near clip plane to no less than the absolute minimum allowed (25cm).
+            /// </summary>
+            Minimum,
+
+            /// <summary>
+            /// Restrict the Camera's near clip plane to no less than the distance configured in the system's settings.
+            /// </summary>
+            Recommended,
+#if DISABLE_MAGICLEAP_CLIP_ENFORCEMENT
+            /// <summary>
+            /// Unsupported
+            /// </summary>
+            None,
+#endif
+        }
+
         /// <summary>
         /// The feature id string. This is used to give the feature a well known id for reference.
         /// </summary>
@@ -48,6 +84,22 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 
         [SerializeField]
         private bool enableMLAudio = false;
+
+        [SerializeField]
+        [Tooltip("Determines if the far clipping plane should be clamped, and to what maximum value.")]
+        private FarClipMode m_FarClipPolicy = FarClipMode.Recommended;
+
+        [SerializeField]
+        [Tooltip("Determines the minimum value the near clipping plane will be clamped to.")]
+        private NearClipMode m_NearClipPolicy = NearClipMode.Recommended;
+
+        public FarClipMode farClipPolicy => m_FarClipPolicy;
+        public NearClipMode nearClipPolicy => m_NearClipPolicy;
+
+        public float minNearZ => NativeBindings.MLOpenXRGetMinNearClippingPlane();
+        public float recommendedNearZ => NativeBindings.MLOpenXRGetRecommendedNearClippingPlane();
+        public float maxFarZ => NativeBindings.MLOpenXRGetMaxFarClippingPlane();
+        public float recommendedFarZ => NativeBindings.MLOpenXRGetRecommendedFarClippingPlane();
 
         public bool IsMLAudioEnabled => enableMLAudio;
 
@@ -58,23 +110,6 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         public static event OnXRSessionStateChangeDelegate OnXRSessionStateChange;
 
         private static List<xrSessionCached> xrSessionCacheList;
-
-#if UNITY_EDITOR
-        // TODO :: Get actual legal justification for requiring clipping plane enforcement.
-        protected override void GetValidationChecks(List<ValidationRule> rules, BuildTargetGroup targetGroup)
-        {
-            base.GetValidationChecks(rules, targetGroup);
-
-#if !DISABLE_MAGICLEAP_CLIP_ENFORCEMENT
-            rules.Add(new ValidationRule(this)
-            {
-                checkPredicate = ()=> Utils.IsFeatureEnabled<MagicLeapClippingPlaneEnforcementFeature>(targetGroup),
-                error = true,
-                message = $"[PLEASE VERIFY] {Utils.GetNiceTypeName<MagicLeapClippingPlaneEnforcementFeature>()} is required to enforce important safety restrictions."
-            });
-#endif
-        }
-#endif
 
         protected override IntPtr HookGetInstanceProcAddr(IntPtr func)
         {
@@ -101,6 +136,20 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             NativeBindings.MLOpenXROnSessionCreate(xrSession);
         }
 
+        protected override void OnSessionBegin(ulong xrSession)
+        {
+            base.OnSessionBegin(xrSession);
+
+            Application.onBeforeRender += EnforceClippingPlanes;
+        }
+
+        protected override void OnSessionEnd(ulong xrSession)
+        {
+            base.OnSessionEnd(xrSession);
+
+            Application.onBeforeRender -= EnforceClippingPlanes;
+        }
+
         protected override void OnSessionDestroy(ulong xrSession)
         {
             NativeBindings.MLOpenXROnSessionDestroy(xrSession);
@@ -118,6 +167,8 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                 newEvent.newState = newState;
                 xrSessionCacheList.Add(newEvent);
             }
+
+            NativeBindings.MLOpenXRUpdateDepthRangeValues();
         }
 
         protected override void OnSubsystemCreate()
@@ -155,6 +206,62 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             }
 
             xrSessionCacheList.Clear();
+        }
+
+        private void EnforceClippingPlanes() => ApplyToCamera(Camera.main);
+
+        public void ApplyFarClip(ref float zFar)
+        {
+            switch (m_FarClipPolicy)
+            {
+                case FarClipMode.Maximum:
+                    zFar = Mathf.Min(zFar, Mathf.Min(zFar, maxFarZ));
+                    break;
+                case FarClipMode.Recommended:
+                    zFar = Mathf.Min(zFar, recommendedFarZ);
+                    break;
+                case FarClipMode.None:
+                default:
+                    break;
+            }
+        }
+
+        public void ApplyNearClip(ref float zNear)
+        {
+            switch (m_NearClipPolicy)
+            {
+                // Whatever is set in the system settings menu is our new minimum, even if it is
+                // above the system recommendation
+                case NearClipMode.Minimum:
+                    zNear = Mathf.Max(zNear, minNearZ);
+                    break;
+                case NearClipMode.Recommended:
+                    zNear = Mathf.Max(zNear, recommendedNearZ);
+                    break;
+#if DISABLE_MAGICLEAP_CLIP_ENFORCEMENT
+                case NearClipMode.None:
+                default:
+                    break;
+#endif
+            }
+        }
+
+        public void ApplyToCamera(Camera camera, bool warnIfNearClipChanged = true)
+        {
+            if (!camera)
+                return;
+
+            var zFar = camera.farClipPlane;
+            var zNear = camera.nearClipPlane;
+
+            ApplyFarClip(ref zFar);
+            ApplyNearClip(ref zNear);
+
+            if (warnIfNearClipChanged && zNear > camera.nearClipPlane)
+                Debug.LogWarning($"Main Camera's nearClipPlane value is less than the minimum value for this device. Increasing to {zNear}");
+
+            camera.farClipPlane = zFar;
+            camera.nearClipPlane = zNear;
         }
     }
 }
