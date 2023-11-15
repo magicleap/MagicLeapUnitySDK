@@ -31,11 +31,6 @@
             "define": "UNITY_OPENXR_1_9_0_OR_NEWER"
         },
         {
-            "name": "com.unity.xr.hands",
-            "expression": "",
-            "define": "XR_HANDS"
-        },
-        {
             "name": "com.unity.xr.magicleap",
             "expression": "",
             "define": "UNITY_XR_MAGICLEAP_PROVIDER"

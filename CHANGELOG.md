@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.12.1]
+
+### Bugfixes
+- Fixed issue with legacy Hands subsystem causing compilation errors in MRTK projects.
+
 ## [1.12.0]
 
 ### Features
