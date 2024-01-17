@@ -1,11 +1,23 @@
+// %BANNER_BEGIN%
+// ---------------------------------------------------------------------
+// %COPYRIGHT_BEGIN%
+// Copyright (c) 2023 Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
+// %COPYRIGHT_END%
+// ---------------------------------------------------------------------
+// %BANNER_END%
+using System;
 using System.Collections.Generic;
+using UnityEngine.XR.MagicLeap;
 #if UNITY_OPENXR_1_9_0_OR_NEWER
 using UnityEngine.XR.Management;
 using UnityEngine.XR.OpenXR.Features;
+using UnityEngine.XR.OpenXR.NativeTypes;
 #endif
-
+using UnityEngine.LowLevel;
+using UnityEngine.PlayerLoop;
 #if UNITY_EDITOR
-using System;
 using UnityEditor;
 #endif
 
@@ -72,6 +84,16 @@ namespace UnityEngine.XR.OpenXR
             return subsystem != null;
         }
         
+        internal static bool DidXrCallSucceed(XrResult result, string functionName = "A native function", Predicate<XrResult> successCase = null, bool showError = true)
+        {
+            var success = successCase?.Invoke(result) ?? result == XrResult.Success;
+
+            if (!success && showError)
+                MLPluginLog.ErrorFormat($"{functionName} in the Magic Leap API failed. Reason: {result} ");
+            return success;
+        }
+        
+        
 #if UNITY_EDITOR
         internal static string GetNiceTypeName(System.Type type)
             => UnityEditor.ObjectNames.NicifyVariableName(type.Name);
@@ -123,6 +145,37 @@ namespace UnityEngine.XR.OpenXR
         }
 #endif // UNITY_EDITOR
 #endif // UNITY_OPENXR_1_9_0_OR_NEWER
+
+        internal static Type[] InstallPath = {
+            typeof(Initialization),
+            typeof(Initialization.XREarlyUpdate)
+        };
+
+        internal static bool InstallIntoPlayerLoop(ref PlayerLoopSystem topLevelPlayerLoop, PlayerLoopSystem systemToInstall, params Type[] installPath)
+        {
+            installPath ??= Array.Empty<Type>();
+
+            ref var current = ref topLevelPlayerLoop;
+            foreach (var path in installPath)
+            {
+                var idx = Array.FindIndex(current.subSystemList, s => s.type == path);
+                if (idx == -1)
+                    return false;
+                current = ref current.subSystemList[idx];
+            }
+
+            InstallSystem(ref current, systemToInstall);
+            return true;
+        }
+
+        private static void InstallSystem(ref PlayerLoopSystem parentSystem, PlayerLoopSystem targetSystem)
+        {
+            var subsystems = parentSystem.subSystemList ?? Array.Empty<PlayerLoopSystem>();
+            var length = subsystems.Length;
+            Array.Resize(ref subsystems, length + 1);
+            subsystems[length] = targetSystem;
+            parentSystem.subSystemList = subsystems;
+        }
     }
     
      

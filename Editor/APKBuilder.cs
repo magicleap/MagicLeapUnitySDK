@@ -133,6 +133,7 @@ namespace UnityEditor.XR.MagicLeap
         {
             List<string> activeScenes = new List<string>();
             EditorBuildSettingsScene[] scenes = EditorBuildSettings.scenes;
+            int index = 0;
             foreach (EditorBuildSettingsScene scene in scenes)
             {
                 if(string.IsNullOrEmpty(scene.path) || scene == null)
@@ -146,6 +147,7 @@ namespace UnityEditor.XR.MagicLeap
                     continue;
                 }
                 activeScenes.Add(scene.path);
+                index++;
             }
 
             string apkName = PlayerSettings.applicationIdentifier;

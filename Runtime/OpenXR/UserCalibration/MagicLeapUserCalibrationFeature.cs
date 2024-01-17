@@ -1,37 +1,34 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// Copyright (c) (2019-2022) Magic Leap, Inc. All Rights Reserved.
+// Copyright (c) 2023 Magic Leap, Inc. All Rights Reserved.
 // Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
 // Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
 #if UNITY_OPENXR_1_9_0_OR_NEWER
-using System.Collections.Generic;
-using UnityEngine.XR.MagicLeap;
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.XR.OpenXR.Features;
 #endif
-using NativeBindings = UnityEngine.XR.OpenXR.Features.MagicLeapSupport.MagicLeapFeature.NativeBindings;
 
 namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 {
     #if UNITY_EDITOR
-    [OpenXRFeature(UiName = "Magic Leap 2 User Calibration Support",
+    [OpenXRFeature(UiName = "Magic Leap 2 User Calibration",
         Desc = "Necessary to deploy a Magic Leap 2 compatible application with User calibration events.",
         Company = "Magic Leap",
         Version = "1.0.0",
         Priority = -1,
         BuildTargetGroups = new[] { BuildTargetGroup.Android, BuildTargetGroup.Standalone },
-        FeatureId = featureId,
+        FeatureId = FeatureId,
         OpenxrExtensionStrings = "XR_ML_user_calibration"
     )]
     #endif
     public partial class MagicLeapUserCalibrationFeature : MagicLeapOpenXRFeatureBase
     {
-        public const string featureId = "com.magicleap.openxr.feature.ml2_usercalibration";
+        public const string FeatureId = "com.magicleap.openxr.feature.ml2_usercalibration";
 
         protected override bool OnInstanceCreate(ulong xrInstance)
         {

@@ -111,7 +111,10 @@ namespace UnityEngine.XR.MagicLeap
         public delegate void OnLocalizationDelegate(LocalizationResult result);
 
         /// <summary>
-        /// Event callback fired when a space event occurs.
+        /// This callback will be invoked whenever there is an update to the localization status.
+        /// Localization events can occur when the application requests for localization via 
+        /// <see cref="RequestLocalization(ref SpaceInfo)"/> or due to other events outside the 
+        /// control of the app such as head tracking failure, localization loss.
         /// </summary>
         public static event OnLocalizationDelegate OnLocalizationEvent
         {

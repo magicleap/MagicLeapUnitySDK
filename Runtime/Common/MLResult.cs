@@ -962,7 +962,7 @@ namespace UnityEngine.XR.MagicLeap
 
         public static bool DidNativeCallSucceed(Code resultCode, string functionName = "A native function", Predicate<Code> successCase = null, bool showError = true)
         {
-            bool success = successCase != null ? successCase(resultCode) : IsOK(resultCode);
+            bool success = successCase?.Invoke(resultCode) ?? IsOK(resultCode);
 
             if (!success && showError)
                 MLPluginLog.ErrorFormat($"{functionName} in the Magic Leap API failed. Reason: {CodeToString(resultCode)} ");

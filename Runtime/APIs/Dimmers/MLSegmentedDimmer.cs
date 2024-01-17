@@ -1,7 +1,10 @@
 using System;
 using UnityEngine.Rendering;
+using UnityEngine.XR.OpenXR.Features.MagicLeapSupport;
 #if URP_14_0_0_OR_NEWER
 using UnityEngine.Rendering.Universal;
+using UnityEngine.XR.OpenXR.Features.MagicLeapSupport;
+using UnityEngine.XR.OpenXR;
 #if UNITY_XR_MAGICLEAP_PROVIDER
 using SegmentedDimmerFeature = URP.SegmentedDimmer.SegmentedDimmer;
 #endif
@@ -41,6 +44,20 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public static void Activate()
         {
+            if(MLDevice.IsOpenXRLoaderActive())
+            {
+                Debug.LogWarning($"WARNING: Using legacy MLSegmentedDimmer API with the OpenXR provider! Recommend udpating your scripts to use {nameof(MagicLeapRenderingExtensionsFeature)} from now on.");
+                var renderFeature = OpenXR.OpenXRSettings.Instance.GetFeature<MagicLeapRenderingExtensionsFeature>();
+                if(renderFeature != null)
+                {
+                    renderFeature.BlendMode = OpenXR.NativeTypes.XrEnvironmentBlendMode.AlphaBlend;
+                }
+                else
+                {
+                    Debug.LogErrorFormat($"Unable to access the Segmented Dimmer under OpenXR without the {nameof(MagicLeapRenderingExtensionsFeature)} active!");
+                }
+                return;
+            }
             MLGraphicsHooks.RequestAlphaBlendFrameRendering(true);
         }
 
@@ -50,6 +67,20 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public static void Deactivate()
         {
+            if (MLDevice.IsOpenXRLoaderActive())
+            {
+                Debug.LogWarning($"WARNING: Using legacy MLSegmentedDimmer API with the OpenXR provider! Recommend udpating your scripts to use {nameof(MagicLeapRenderingExtensionsFeature)} from now on.");
+                var renderFeature = OpenXR.OpenXRSettings.Instance.GetFeature<MagicLeapRenderingExtensionsFeature>();
+                if (renderFeature != null)
+                {
+                    renderFeature.BlendMode = OpenXR.NativeTypes.XrEnvironmentBlendMode.Additive;
+                }
+                else
+                {
+                    Debug.LogErrorFormat($"Unable to access the Segmented Dimmer under OpenXR without the {nameof(MagicLeapRenderingExtensionsFeature)} active!");
+                }
+                return;
+            }
             MLGraphicsHooks.RequestAlphaBlendFrameRendering(false);
         }
 

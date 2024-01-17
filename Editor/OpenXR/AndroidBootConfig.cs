@@ -1,3 +1,12 @@
+// %BANNER_BEGIN%
+// ---------------------------------------------------------------------
+// %COPYRIGHT_BEGIN%
+// Copyright (c) 2023 Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
+// %COPYRIGHT_END%
+// ---------------------------------------------------------------------
+// %BANNER_END%
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,11 +18,10 @@ namespace UnityEditor.XR.OpenXR.Features.MagicLeapSupport
 {
     internal class AndroidBootConfig
     {
-        private static readonly string kXrBootSettingsKey = "xr-boot-settings";
+        private static readonly string xrBootSettingsKey = "xr-boot-settings";
         Dictionary<string, string> bootConfigSettings;
 
         private BuildReport buildReport;
-        private string bootConfigPath;
 
         public AndroidBootConfig(BuildReport report)
         {
@@ -58,7 +66,7 @@ namespace UnityEditor.XR.OpenXR.Features.MagicLeapSupport
             }
 
             string buildTargetName = BuildPipeline.GetBuildTargetName(buildReport.summary.platform);
-            EditorUserBuildSettings.SetPlatformSettings(buildTargetName, kXrBootSettingsKey, sb.ToString());
+            EditorUserBuildSettings.SetPlatformSettings(buildTargetName, xrBootSettingsKey, sb.ToString());
         }
 
         private void ReadBootConfg()
@@ -66,7 +74,7 @@ namespace UnityEditor.XR.OpenXR.Features.MagicLeapSupport
             bootConfigSettings = new Dictionary<string, string>();
 
             string buildTargetName = BuildPipeline.GetBuildTargetName(buildReport.summary.platform);
-            string xrBootSettings = EditorUserBuildSettings.GetPlatformSettings(buildTargetName, kXrBootSettingsKey);
+            string xrBootSettings = EditorUserBuildSettings.GetPlatformSettings(buildTargetName, xrBootSettingsKey);
             if (!String.IsNullOrEmpty(xrBootSettings))
             {
                 // boot settings string format

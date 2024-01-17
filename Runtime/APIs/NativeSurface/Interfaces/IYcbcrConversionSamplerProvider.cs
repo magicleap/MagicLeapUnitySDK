@@ -60,6 +60,9 @@ namespace UnityEngine.XR.MagicLeap
                     && (b == other.b)
                     && (a == other.a);
             }
+
+            // satisfies the compiler since we override Equals
+            public override int GetHashCode() => base.GetHashCode();
         }
 
         [StructLayout(LayoutKind.Sequential)]

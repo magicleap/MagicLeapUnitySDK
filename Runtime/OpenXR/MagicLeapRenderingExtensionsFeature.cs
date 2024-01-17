@@ -1,4 +1,14 @@
-﻿#if UNITY_OPENXR_1_9_0_OR_NEWER
+// %BANNER_BEGIN%
+// ---------------------------------------------------------------------
+// %COPYRIGHT_BEGIN%
+// Copyright (c) 2023 Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
+// %COPYRIGHT_END%
+// ---------------------------------------------------------------------
+// %BANNER_END%
+
+#if UNITY_OPENXR_1_9_0_OR_NEWER
 using System;
 using System.Runtime.InteropServices;
 using Unity.Collections;
@@ -6,48 +16,42 @@ using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.XR.MagicLeap;
 using UnityEngine.XR.MagicLeap.Unsafe;
 using UnityEngine.XR.OpenXR.Features.MagicLeapSupport.NativeInterop;
+using UnityEngine.XR.OpenXR.NativeTypes;
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.XR.OpenXR.Features;
 #endif
 namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 {
-    using Native = MagicLeapFeature.NativeBindings;
 #if UNITY_EDITOR
-    [OpenXRFeature(UiName = "Magic Leap 2 Rendering Extenstions Support",
+    [OpenXRFeature(UiName = "Magic Leap 2 Rendering Extensions",
         Desc="Support for controlling rendering features specific to Magic Leap 2.",
         Company = "Magic Leap",
         Version = "1.0.0",
         BuildTargetGroups = new []{ BuildTargetGroup.Android, BuildTargetGroup.Standalone },
-        FeatureId = featureId,
+        FeatureId = FeatureId,
         OpenxrExtensionStrings = "XR_ML_frame_end_info " +
                                  "XR_ML_global_dimmer "
     )]
 #endif
     public unsafe class MagicLeapRenderingExtensionsFeature : MagicLeapOpenXRFeatureBase
-    {
-        public enum BlendMode
-        {
-            Additive,
-            AlphaBlend,
-        }
-        
-        public const string featureId = "com.magicleap.openxr.feature.rendering_extensions";
+    {   
+        public const string FeatureId = "com.magicleap.openxr.feature.rendering_extensions";
 
-        public float focusDistance = 0.0f;
-        public bool useProtectedSurface = false;
-        public bool useVignetteMode = false;
+        public float FocusDistance = 0.0f;
+        public bool UseProtectedSurface = false;
+        public bool UseVignetteMode = false;
 
-        public bool globalDimmerEnabled = false;
-        public float globalDimmerValue = 0.0f;
+        public bool GlobalDimmerEnabled = false;
+        public float GlobalDimmerValue = 0.0f;
 
-        public BlendMode blendMode;
+        public XrEnvironmentBlendMode BlendMode = XrEnvironmentBlendMode.AlphaBlend;
 
         [NonSerialized] 
-        private FrameEndInfo* m_FrameEndInfo;
+        private FrameEndInfo* frameEndInfo;
 
         [NonSerialized]
-        private GlobalDimmerFrameEndInfo* m_GlobalDimmerFrameInfo;
+        private GlobalDimmerFrameEndInfo* globalDimmerFrameInfo;
 
         protected override void OnSessionBegin(ulong xrSession)
         {
@@ -69,36 +73,38 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 
         private void Cleanup()
         {
-            if (m_FrameEndInfo != null)
-                UnsafeUtility.FreeTracked(m_FrameEndInfo, Allocator.Persistent);
+            if (frameEndInfo != null)
+                UnsafeUtility.FreeTracked(frameEndInfo, Allocator.Persistent);
             
-            if (m_GlobalDimmerFrameInfo != null)
-                UnsafeUtility.FreeTracked(m_GlobalDimmerFrameInfo, Allocator.Persistent);
+            if (globalDimmerFrameInfo != null)
+                UnsafeUtility.FreeTracked(globalDimmerFrameInfo, Allocator.Persistent);
 
             Application.onBeforeRender -= SynchronizeRenderState;
         }
 
         private void InitializeOpenXRState()
         {
-            m_FrameEndInfo = UnsafeUtilityEx.MallocTracked<FrameEndInfo>(Allocator.Persistent, 1);
-            *m_FrameEndInfo = FrameEndInfo.Init();
+            frameEndInfo = UnsafeUtilityEx.MallocTracked<FrameEndInfo>(Allocator.Persistent, 1);
+            *frameEndInfo = FrameEndInfo.Init();
             
-            m_GlobalDimmerFrameInfo =
+            globalDimmerFrameInfo =
                 UnsafeUtilityEx.MallocTracked<GlobalDimmerFrameEndInfo>(Allocator.Persistent, 1);
-            *m_GlobalDimmerFrameInfo = GlobalDimmerFrameEndInfo.Init();
+            *globalDimmerFrameInfo = GlobalDimmerFrameEndInfo.Init();
 
-            m_FrameEndInfo->next = m_GlobalDimmerFrameInfo;
+            frameEndInfo->Next = globalDimmerFrameInfo;
             
-            MLOpenXRInitializeEndFrameState(m_FrameEndInfo);
+            MLOpenXRInitializeEndFrameState(frameEndInfo);
         }
 
-        private NativeInterop.BlendMode ToNativeBlendMode(BlendMode blendMode)
+        private NativeInterop.BlendMode ToNativeBlendMode(XrEnvironmentBlendMode blendMode)
         {
             switch (blendMode)
             {
-                case BlendMode.Additive:
+                case XrEnvironmentBlendMode.Opaque:
+                    throw new NotSupportedException($"XrEnvironmentBlendMode.Opaque is not supported on Magic Leap 2");
+                case XrEnvironmentBlendMode.Additive:
                     return NativeInterop.BlendMode.Additive;
-                case BlendMode.AlphaBlend:
+                case XrEnvironmentBlendMode.AlphaBlend:
                     return NativeInterop.BlendMode.AlphaBlend;
                 default:
                     throw new ArgumentException(nameof(blendMode));
@@ -108,19 +114,16 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 
         private void SynchronizeRenderState()
         {
-            m_FrameEndInfo->focusDistance = focusDistance;
-            ref var flags = ref m_FrameEndInfo->flags;
-            flags = FrameInfoFlags.None;
-            if (useProtectedSurface)
-                flags &= FrameInfoFlags.Protected;
-            if (useVignetteMode)
-                flags &= FrameInfoFlags.Vignette;
+            frameEndInfo->FocusDistance = FocusDistance;
+            frameEndInfo->Flags = 
+                (UseProtectedSurface ? FrameInfoFlags.Protected : 0) | 
+                (UseVignetteMode ? FrameInfoFlags.Vignette : 0);
+            globalDimmerFrameInfo->DimmerValue = GlobalDimmerValue;
+            globalDimmerFrameInfo->Flags =
+                (GlobalDimmerEnabled) ? GlobalDimmerFlags.Enabled : GlobalDimmerFlags.Disabled;
 
-            m_GlobalDimmerFrameInfo->dimmerValue = globalDimmerValue;
-            m_GlobalDimmerFrameInfo->flags =
-                (globalDimmerEnabled) ? GlobalDimmerFlags.Enabled : GlobalDimmerFlags.Disabled;
-
-            MLOpenXRSetEnvironmentBlendMode(ToNativeBlendMode(blendMode));
+            MLOpenXRInitializeEndFrameState(frameEndInfo);
+            MLOpenXRSetEnvironmentBlendMode(ToNativeBlendMode(BlendMode));
         }
         
         [DllImport(MagicLeapXrProviderNativeBindings.MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]

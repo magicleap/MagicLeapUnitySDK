@@ -18,8 +18,9 @@ namespace MagicLeap.Core
             get; private set;
         }
         
+#pragma warning disable CS0067
         public event Action<MLWebViewTabBehavior> OnTabSelected;
-
+#pragma warning restore CS0067
         private MLWebViewTabBarBehavior tabBar;
         private MLWebViewScreenBehavior webViewScreen;
         private InputField addressBar;

@@ -15,7 +15,7 @@ namespace UnityEngine.XR.MagicLeap
     public partial class MLMarkerTracker
     {
         [Serializable]
-        public readonly struct TrackerSettings
+        public struct TrackerSettings
         {
             /// <summary>
             ///     If <c> true </c>, Marker Scanner will detect markers and track QR codes.
@@ -24,23 +24,23 @@ namespace UnityEngine.XR.MagicLeap
             ///     scanning markers. When disabled Marker Scanner will release the camera and
             ///     stop scanning markers. Internal state of the scanner will be maintained.
             /// </summary>
-            public readonly bool EnableMarkerScanning;
+            public bool EnableMarkerScanning;
 
             /// <summary>
             ///     The marker types that are enabled for this scanner. Enable markers by
             ///     combining any number of <c> MarkerType </c> flags using '|' (bitwise 'or').
             /// </summary>
-            public readonly MarkerType MarkerTypes;
+            public MarkerType MarkerTypes;
 
             /// <summary>
             ///     Aruco dictionary to use.
             /// </summary>
-            public readonly ArucoDictionaryName ArucoDicitonary;
+            public ArucoDictionaryName ArucoDicitonary;
 
             /// <summary>
             ///     Aruco marker size to use (in meters).
             /// </summary>
-            public readonly float ArucoMarkerSize;
+            public float ArucoMarkerSize;
 
             /// <summary>
             ///     The physical size of the QR code that shall be tracked (in meters). The physical size is
@@ -53,53 +53,51 @@ namespace UnityEngine.XR.MagicLeap
             ///     that to be detected reliably. Max size: Our camera needs to see the whole
             ///     marker at once. If it's too large, we won't detect it.
             /// </summary>
-            public readonly float QRCodeSize;
+            public float QRCodeSize;
 
             /// <summary>
             ///     Tracker profile to be used.
             /// </summary>
-            public readonly Profile TrackerProfile;
+            public Profile TrackerProfile;
 
             /// <summary>
             ///     The custom tracker profile to be used if the TrackerProfile member is set to Custom.
             /// </summary>
-            public readonly CustomProfile CustomTrackerProfile;
+            public CustomProfile CustomTrackerProfile;
 
             internal TrackerSettings(bool enableMarkerScanning, MarkerType markerTypes, float qRCodeSize, ArucoDictionaryName arucoDicitonary, float arucoMarkerSize, Profile profile, CustomProfile customProfile)
             {
-                this.EnableMarkerScanning = enableMarkerScanning;
-                this.ArucoDicitonary = arucoDicitonary;
-                this.ArucoMarkerSize = arucoMarkerSize;
-                this.QRCodeSize = qRCodeSize;
-                this.MarkerTypes = markerTypes;
-                this.TrackerProfile = profile;
-                this.CustomTrackerProfile = customProfile;
+                EnableMarkerScanning = enableMarkerScanning;
+                ArucoDicitonary = arucoDicitonary;
+                ArucoMarkerSize = arucoMarkerSize;
+                QRCodeSize = qRCodeSize;
+                MarkerTypes = markerTypes;
+                TrackerProfile = profile;
+                CustomTrackerProfile = customProfile;
             }
 
-            public static TrackerSettings Create(bool enableMarkerScanning = true, MarkerType markerTypes = MarkerType.All, float qRCodeSize = 0.1f, ArucoDictionaryName arucoDicitonary = ArucoDictionaryName.DICT_5X5_100, float arucoMarkerSize = 0.1f, Profile profile = Profile.Default, CustomProfile customProfile = default) =>
+            public static TrackerSettings Create(bool enableMarkerScanning = false, MarkerType markerTypes = MarkerType.None, float qRCodeSize = 0.1f, ArucoDictionaryName arucoDicitonary = ArucoDictionaryName.DICT_5X5_100, float arucoMarkerSize = 0.1f, Profile profile = Profile.Default, CustomProfile customProfile = default) =>
                 new TrackerSettings(enableMarkerScanning, markerTypes, qRCodeSize, arucoDicitonary, arucoMarkerSize, profile, customProfile);
 
             public override string ToString() => $" {this.EnableMarkerScanning}, {this.MarkerTypes}, {this.ArucoDicitonary}, {this.QRCodeSize}, {this.ArucoMarkerSize},  {this.TrackerProfile},  {this.CustomTrackerProfile}";
-
-
-
+            
             [Serializable]
-            public readonly struct CustomProfile
+            public struct CustomProfile
             {
                 /// <summary>
                 ///     A hint to the back-end the max frames per second hat should be analyzed.
                 /// </summary>
-                public readonly FPSHint FPSHint;
+                public FPSHint FPSHint;
 
                 /// <summary>
                 ///     A hint to the back-end the resolution that should be used.
                 /// </summary>
-                public readonly ResolutionHint ResolutionHint;
+                public ResolutionHint ResolutionHint;
 
                 /// <summary>
                 ///     A hint to the back-end for what cameras should be used.
                 /// </summary>
-                public readonly CameraHint CameraHint;
+                public CameraHint CameraHint;
 
                 /// <summary>
                 ///     In order to improve performance, the detectors don't always run on the full
@@ -107,30 +105,30 @@ namespace UnityEngine.XR.MagicLeap
                 ///     weren't detected before. Use this option to control how often the detector may
                 ///     detect new markers and its impact on tracking performance.
                 /// </summary>
-                public readonly FullAnalysisIntervalHint FullAnalysisIntervalHint;
+                public FullAnalysisIntervalHint FullAnalysisIntervalHint;
 
                 /// <summary>
                 ///     This option provides control over corner refinement methods and a way to
                 ///     balance detection rate, speed and pose accuracy. Always available and
                 ///     applicable for Aruco and April tags.
                 /// </summary>
-                public readonly CornerRefineMethod CornerRefineMethod;
+                public CornerRefineMethod CornerRefineMethod;
 
                 /// <summary>
                 ///     Run refinement step that uses marker edges to generate even more accurate
                 ///     corners, but slow down tracking rate overall by consuming more compute.
                 ///     Aruco/April tags only.
                 /// </summary>
-                public readonly bool UseEdgeRefinement;
+                public bool UseEdgeRefinement;
 
                 internal CustomProfile(FPSHint fpsHint, ResolutionHint resolutionHint, CameraHint cameraHint, FullAnalysisIntervalHint fullAnalysisIntervalHint, CornerRefineMethod cornerRefineMethod, bool useEdgeRefinement)
                 {
-                    this.FPSHint = fpsHint;
-                    this.ResolutionHint = resolutionHint;
-                    this.CameraHint = cameraHint;
-                    this.FullAnalysisIntervalHint = fullAnalysisIntervalHint;
-                    this.CornerRefineMethod = cornerRefineMethod;
-                    this.UseEdgeRefinement = useEdgeRefinement;
+                    FPSHint = fpsHint;
+                    ResolutionHint = resolutionHint;
+                    CameraHint = cameraHint;
+                    FullAnalysisIntervalHint = fullAnalysisIntervalHint;
+                    CornerRefineMethod = cornerRefineMethod;
+                    UseEdgeRefinement = useEdgeRefinement;
                 }
 
                 public static CustomProfile Create(FPSHint fpsHint = FPSHint.Medium, ResolutionHint resolutionHint = ResolutionHint.Low, CameraHint cameraHint = CameraHint.RGB, FullAnalysisIntervalHint fullAnalysisIntervalHint = FullAnalysisIntervalHint.Medium, CornerRefineMethod cornerRefineMethod = CornerRefineMethod.None, bool useEdgeRefinement = false) =>

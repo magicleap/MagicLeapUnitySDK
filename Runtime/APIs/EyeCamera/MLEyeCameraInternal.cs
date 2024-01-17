@@ -42,7 +42,7 @@ namespace UnityEngine.XR.MagicLeap
 
             outData = new EyeCameraData(eyeCameraData);
 
-            if (!MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLEyeCameraGetLatestCameraData)))
+            if ((resultCode == MLResult.Code.Timeout && timeoutMS == 0) || !MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLEyeCameraGetLatestCameraData)))
                 return MLResult.Create(resultCode);
 
             resultCode = NativeBindings.MLEyeCameraReleaseCameraData(Instance.Handle, ref eyeCameraData);

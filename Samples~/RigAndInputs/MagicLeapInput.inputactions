@@ -517,7 +517,7 @@
                 {
                     "name": "",
                     "id": "cf127877-5ef7-484c-9b4c-a86fc1923873",
-                    "path": "<XRController>/isTracked",
+                    "path": "<MagicLeapController>/isTracked",
                     "interactions": "",
                     "processors": "",
                     "groups": "Magic Leap 2",
@@ -528,7 +528,7 @@
                 {
                     "name": "",
                     "id": "3708fef9-50be-430a-990e-bccd04ba249a",
-                    "path": "<XRController>/deviceRotation",
+                    "path": "<MagicLeapController>/deviceRotation",
                     "interactions": "",
                     "processors": "",
                     "groups": "Magic Leap 2",
@@ -539,7 +539,7 @@
                 {
                     "name": "",
                     "id": "977183e8-1622-4bd1-afdb-aa6db23ab77e",
-                    "path": "<XRController>/devicePosition",
+                    "path": "<MagicLeapController>/devicePosition",
                     "interactions": "",
                     "processors": "",
                     "groups": "Magic Leap 2",
@@ -550,7 +550,7 @@
                 {
                     "name": "",
                     "id": "e1648f80-d831-4a40-8de2-2c1839366c36",
-                    "path": "<XRController>/trackingState",
+                    "path": "<MagicLeapController>/trackingState",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

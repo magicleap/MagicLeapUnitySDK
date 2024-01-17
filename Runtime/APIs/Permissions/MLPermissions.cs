@@ -48,7 +48,9 @@ namespace UnityEngine.XR.MagicLeap
         private readonly HashSet<string> deniedPermissions = new HashSet<string>();
         private readonly HashSet<string> dontAskAgainPermissions = new HashSet<string>();
 
+#pragma warning disable CS0414
         private bool currentlyRequestingPermission = false;
+#pragma warning restore CS0414
 
         public static MLResult CheckPermission(string permission) => MLResult.Create(Instance.CheckPermissionInternal(permission));
 

@@ -1,4 +1,4 @@
-﻿#if UNITY_OPENXR_1_9_0_OR_NEWER
+#if UNITY_OPENXR_1_9_0_OR_NEWER
 
 using System.Collections.Generic;
 using UnityEngine.XR.ARSubsystems;
@@ -15,7 +15,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
     /// Enables the Magic Leap OpenXR Loader for Android, and modifies the AndroidManifest to be compatible with ML2.
     /// </summary>
 #if UNITY_EDITOR
-    [OpenXRFeature(UiName = "Magic Leap 2 Plane Detection Support",
+    [OpenXRFeature(UiName = "Magic Leap 2 Plane Detection",
         Desc="Necessary to deploy a Magic Leap 2 compatible application with Planes detection",
         Company = "Magic Leap",
         Version = "1.0.0",
@@ -30,13 +30,20 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         public const string FeatureId = "com.magicleap.openxr.feature.ml2_planes";
         private const string PlaneExtensionName = "XR_EXT_plane_detection";
         
-        private readonly List<XRPlaneSubsystemDescriptor> _planeSubsystemDescriptors = new();
+        private readonly List<XRPlaneSubsystemDescriptor> planeSubsystemDescriptors = new();
 
         protected override bool OnInstanceCreate(ulong xrInstance)
         {
             if (OpenXRRuntime.IsExtensionEnabled(PlaneExtensionName))
             {
-                return base.OnInstanceCreate(xrInstance);
+                var instanceCreateResult = base.OnInstanceCreate(xrInstance);
+
+                if (instanceCreateResult)
+                {
+                    MLXrPlaneSubsystem.RegisterDescriptor();
+                }
+
+                return instanceCreateResult;
             }
             Debug.LogError($"{PlaneExtensionName} is not enabled. Disabling {nameof(MagicLeapPlanesFeature)}");
             return false;
@@ -45,7 +52,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         protected override void OnSubsystemCreate()
         {
             base.OnSubsystemCreate();
-            CreateSubsystem<XRPlaneSubsystemDescriptor, XRPlaneSubsystem>(_planeSubsystemDescriptors, MagicLeapXrProvider.PlanesSubsystemId);
+            CreateSubsystem<XRPlaneSubsystemDescriptor, XRPlaneSubsystem>(planeSubsystemDescriptors, MagicLeapXrProvider.PlanesSubsystemId);
         }
 
         protected override void OnSubsystemStart()

@@ -1,9 +1,38 @@
 # Changelog
 
-## [1.12.1]
+## [2.0.0]
+
+### Features
+- Replace the Magic Leap XR Plugin with the OpenXR Plugin as the direct XR provider dependency package. If you'd wish to continue using the Magic Leap XR Plugin, install it from the Package Manager, and ensure it is enabled as the sole XR provider in Project Settings/XR Plug-in Management.
+- Added `Magic Leap 2 Support` OpenXR Feature
+- Added `Magic Leap 2 Localization Maps` OpenXR Feature
+- Added `Magic Leap 2 Marker Understanding` OpenXR Feature
+- Added `Magic Leap 2 Plane Detection` OpenXR Feature
+- Added `Magic Leap 2 Reference Spaces` OpenXR Feature
+- Added `Magic Leap 2 Rendering Extensions` OpenXR Feature
+- Added `Magic Leap 2 System Notification Control` OpenXR Feature
+- Added `Magic Leap 2 User Calibration` OpenXR Feature
+- Added `Magic Leap 2 Controller Interaction Profile` for OpenXR
+- Added `ML Rig & Inputs` Sample
+- Changed `MLMarkerTracker` default settings behavior to not begin marker tracking immediately. Also set the default MarkerType to None when creating the `MLMarkerTracker.TrackerSettings` struct.
+
+### Experimental
+- Added `Magic Leap 2 Spatial Anchors` and `Magic Leap 2 Spatial Anchors Storage` OpenXR Features
 
 ### Bugfixes
+- Fixed an issue in `MLGestureClassification` where hand transform and interaction points would freeze in place when Posture type was None.
+- Added missing comments describing parameters and returns to functions in `MLSpace`.
+- Fixed issue in `MLMediaPlayerBehavior` where HLS streams would not play after resolution changes. 
+- Fixed issue in `MLMediaPlayerBehavior` where DASH streams would not display video or audio.
+- Fixed issue in `MLCamera` that resulted in crashes & artifacts when rendering YUV capture to a RenderTexture.
+- Fixed issue in `MLCamera` that resulted in crashes when waking from sleep. 
 - Fixed issue with legacy Hands subsystem causing compilation errors in MRTK projects.
+- Fixed issue with Segmented Dimmer not functioning correctly
+- Improved performance of `MLEyeCamera`
+- Fixed issue with MagicLeapCamera.cs performing expensive JNI operations every frame leading to an eventual crash in some apps.
+
+### Deprecations & Removals
+- `MLCamera`: Deprecated `MLCamera` API. Developers will need to utilize the Android SDK Camera2 API or the NDK Camera API instead.
 
 ## [1.12.0]
 
@@ -16,11 +45,8 @@
 ### Bugfixes
 - Fixed an issue where Vulkan would fail to initialize if Unity's WebRTC package (`com.unity.webrtc`) is installed in the project.
 - Fixed issue where MLMediaPlayerBehavior wasn't outputting warning logs
-- Fixed an issue in `MLGestureClassification` where hand transform and interaction points would freeze in place when Posture type was None.
-- Added missing comments describing parameters and returns to functions in `MLSpace`
 
 ### Deprecations & Removals
-- `MLCamera`: Deprecated `MLCamera` API. Developers will need to utilize the Android SDK Camera2 API or the NDK Camera API instead.
 - `MLMediaPlayer`: Deprecated `MLMedia` API and `MLMediaPlayerBehavior`. Developers needing to play video files are encouraged to upgrade their project to Unity 2022.3.10 and use the [VideoPlayer component](https://docs.unity3d.com/Manual/class-VideoPlayer.html).
 
 ## [1.11.0]
@@ -53,7 +79,7 @@
 - `CameraCaptureExample`: Fixed `NullReferenceException` when pausing example scene.
 
 ### Deprecations & Removals
-- `MLWebRTC`: Deprecated `MLWebRTC` 
+- `MLWebRTC`: Deprecated `MLWebRTC`
 
 ### Known Issues
 

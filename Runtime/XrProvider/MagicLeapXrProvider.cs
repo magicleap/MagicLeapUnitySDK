@@ -16,9 +16,6 @@ using UnityEditor;
 using UnityEngine.XR.ARSubsystems;
 using UnityEngine.XR.InteractionSubsystems;
 using UnityEngine.XR.Management;
-#if XR_HANDS
-using UnityEngine.XR.Hands;
-#endif
 
 namespace UnityEngine.XR.MagicLeap
 {
@@ -68,7 +65,7 @@ namespace UnityEngine.XR.MagicLeap
 
         public static void AddLibrarySearchPaths(List<string> librarySearchPaths, IEnumerable<XRLoader> activeLoaders)
         {
-#if UNITY_EDITOR
+#if UNITY_EDITOR && UNITY_XR_MAGICLEAP_PROVIDER
             bool isZIRunning = false;
 
             try
@@ -145,8 +142,11 @@ namespace UnityEngine.XR.MagicLeap
             // lib search paths which isnt really required when running on device. On device, we need to simply set a dummy path in the
             // xr package (because on android we don't need to dlopen() on full lib paths, all valid paths are already in LD_LIBRARY_PATH
             // env var) so that it loads the sdk loader lib enabling us to intercept ml_graphics funcs.
-            Debug.Log("Setting loading lib path in xr package");
-            MagicLeapXrProviderNativeBindings.UnityMagicLeap_SetLibraryPath("some/dummy/path");
+            try
+            {
+                MagicLeapXrProviderNativeBindings.UnityMagicLeap_SetLibraryPath("some/dummy/path");
+            }
+            catch(DllNotFoundException) { /* not found means the ML XR provider wasn't enabled. assume that means we're using OpenXR instead. */ }
 #endif
         }
 
@@ -159,7 +159,6 @@ namespace UnityEngine.XR.MagicLeap
             // of that subsytem, which will try to instantiate the perception system and try to acquire
             // snapshots and query transforms from them etc etc. And in case of any failures, it will shutdown
             // the perception system which will affect the functioning of perception apis in our own subsystems.
-
             MagicLeapSettings.Subsystems.RegisterSubsystemOverride<XRInputSubsystem>(InputSubsystemId);
             MagicLeapSettings.Subsystems.RegisterSubsystemOverride<XRMeshSubsystem>(MeshingSubsystemId);
             MagicLeapSettings.Subsystems.RegisterSubsystemOverride<XRGestureSubsystem>(GestureSubsystemId);
@@ -175,10 +174,6 @@ namespace UnityEngine.XR.MagicLeap
             // Percpetion system was shutdown without the knowledge of MagicLeapXrProvider and subsequent api calls from
             // our own subsystems fail.
             MagicLeapSettings.Subsystems.RegisterSubsystemOverride<XRRaycastSubsystem>(RaycastSubsystemId);
-
-#if XR_HANDS
-            MagicLeapSettings.Subsystems.RegisterSubsystemOverride<XRHandSubsystem>(HandSubsystemId);
-#endif
         }
 #endif
     }

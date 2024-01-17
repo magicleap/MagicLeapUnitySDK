@@ -238,7 +238,7 @@ namespace UnityEngine.XR.MagicLeap
                 }
 
                 /// <summary>
-                /// Create and initialize this native struct based on values exposed in <seealso cref="MLCamera.MLCameraCaptureConfig"/>.
+                /// Create and initialize this native struct based on values exposed in <seealso cref="MLCameraCaptureConfig"/>.
                 /// </summary>
                 /// <returns>A new instance of this struct.</returns>
                 public static MLCameraCaptureConfig Create(MLCamera.CaptureConfig config)
@@ -338,7 +338,13 @@ namespace UnityEngine.XR.MagicLeap
 
                     if (planeInfo.Data != null)
                     {
-                        Marshal.Copy(Data, planeInfo.Data, 0, planeInfo.Data.Length);
+                        planeInfo.Data = new byte[planeInfo.Stride * planeInfo.Height];
+                        if (planeInfo.PixelStride == 2) {
+                            Marshal.Copy(Data, planeInfo.Data, 0, (int)((planeInfo.Stride * (planeInfo.Height - 1)) + (planeInfo.Width * planeInfo.PixelStride) -1));
+                        } else {
+                            Marshal.Copy(Data, planeInfo.Data, 0, (int)((planeInfo.Stride * (planeInfo.Height - 1)) + (planeInfo.Width * planeInfo.PixelStride)));
+                        }
+                        planeInfo.Size = planeInfo.Stride * planeInfo.Height;
                     }
 
                     return planeInfo;

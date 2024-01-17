@@ -1,9 +1,14 @@
+using System.Linq;
+using UnityEditor.XR.Management;
 using UnityEngine;
+using UnityEngine.XR.OpenXR;
 using MagicLeapCamera = UnityEngine.XR.MagicLeap.MagicLeapCamera;
 
 namespace UnityEditor.XR.MagicLeap
 {
+#pragma warning disable CS0618 // Type or member is obsolete
     [CustomEditor(typeof(MagicLeapCamera))]
+#pragma warning restore CS0618 // Type or member is obsolete
     class MagicLeapCameraEditor : Editor
     {
         private static GUIContent stereoConvergencePointText = new GUIContent("Stereo Convergence Point", "Transform you want to be the focus point of the camera");

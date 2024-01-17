@@ -51,8 +51,9 @@ namespace UnityEngine.XR.MagicLeap
             else
             {
                 Instance.StartInternal();
-
+#if !UNITY_OPENXR_1_9_0_OR_NEWER
                 MagicLeapXrProviderNativeBindings.InputSetOnPerceptionShutdownCallback(OnPerceptionShutdown);
+#endif
             }
         }
 

@@ -105,7 +105,9 @@ namespace UnityEngine.XR.MagicLeap
         /// Callback is invoked when a preview video frame buffer is available with MLCamera.CaptureType.Preview.
         /// Not valid for MR/VR Capture since it does not have preview support.
         /// </summary>
+#pragma warning disable CS0067
         public event MLCamera.OnPreviewCaptureCompletedDelegate OnPreviewCaptureCompleted;
+#pragma warning restore CS0067
 
         /// <summary>
         /// Callback is invoked when a captured image buffer is available.

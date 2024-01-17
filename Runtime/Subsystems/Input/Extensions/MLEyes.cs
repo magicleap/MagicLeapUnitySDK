@@ -48,15 +48,39 @@ namespace UnityEngine.XR.MagicLeap
                 /// </summary>
                 public static void StartTracking()
                 {
-                    MagicLeapXrProviderNativeBindings.StartEyeTracking();
+                    if (MLDevice.IsOpenXRLoaderActive())
+                    {
+                        OpenXR.Features.MagicLeapSupport.MLEyeTracking.Start();
+                    }
+                    else
+                    {
+                        MagicLeapXrProviderNativeBindings.StartEyeTracking();
+                    }
                 }
 
                 public static void StopTracking()
                 {
-                    MagicLeapXrProviderNativeBindings.StopEyeTracking();
+                    if (MLDevice.IsOpenXRLoaderActive())
+                    {
+                        OpenXR.Features.MagicLeapSupport.MLEyeTracking.Stop();
+                    }
+                    else
+                    {
+                        MagicLeapXrProviderNativeBindings.StopEyeTracking();
+                    }
                 }
 
-                public static bool TryGetState(InputDevice eyesDevice, out State state) => NativeBindings.TryGetTrackingState(eyesDevice, out state);
+                public static bool TryGetState(InputDevice eyesDevice, out State state)
+                {
+                    if (MLDevice.IsOpenXRLoaderActive())
+                    {
+                        return OpenXR.Features.MagicLeapSupport.MLEyeTracking.TryGetState(out state);
+                    }
+                    else
+                    {
+                        return NativeBindings.TryGetTrackingState(eyesDevice, out state);
+                    }
+                }
 
                 public readonly struct State
                 {
@@ -131,6 +155,24 @@ namespace UnityEngine.XR.MagicLeap
                     public MagicLeapNativeBindings.MLCoordinateFrameUID LeftCenter;
 
                     public MagicLeapNativeBindings.MLCoordinateFrameUID RightCenter;
+
+                    public Pose GetVergencePose()
+                    {
+                        MLResult.DidNativeCallSucceed(MagicLeapXrProviderNativeBindings.GetUnityPose(Vergence, out Pose result));
+                        return result;
+                    }
+
+                    public Pose GetLeftEyeCenterPose()
+                    {
+                        MLResult.DidNativeCallSucceed(MagicLeapXrProviderNativeBindings.GetUnityPose(LeftCenter, out Pose result));
+                        return result;
+                    }
+
+                    public Pose GetRightEyeCenterPose()
+                    {
+                        MLResult.DidNativeCallSucceed(MagicLeapXrProviderNativeBindings.GetUnityPose(RightCenter, out Pose result));
+                        return result;
+                    }
                 }
 
                 public struct DeviceCenteredEyeData
@@ -144,6 +186,9 @@ namespace UnityEngine.XR.MagicLeap
 
                 public static void GetStaticData(out StaticData staticData)
                 {
+#if UNITY_OPENXR_1_9_0_OR_NEWER
+                    OpenXR.Features.MagicLeapSupport.MLEyeTracking.GetStaticData(out staticData);
+#else
                     staticData = new();
                     var eyeHandle = MagicLeapXrProviderNativeBindings.GetEyeTrackerHandle();
                     if (!MagicLeapNativeBindings.MLHandleIsValid(eyeHandle))
@@ -164,6 +209,7 @@ namespace UnityEngine.XR.MagicLeap
                     staticData.LeftCenter = data.left_center;
                     staticData.RightCenter = data.right_center;
                     return;
+#endif
                 }
 
                 public static void GetEyeDataInDeviceCoords(out DeviceCenteredEyeData deviceCenteredEyeData)

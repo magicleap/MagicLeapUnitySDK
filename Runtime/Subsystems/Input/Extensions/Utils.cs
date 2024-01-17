@@ -27,7 +27,7 @@ namespace UnityEngine.XR.MagicLeap
                 InputDevices.GetDevicesWithCharacteristics(inputDeviceCharacteristics, devices);
                 foreach (InputDevice device in devices)
                 {
-                    if (device.name.Contains("MagicLeap") && device.isValid)
+                    if (device.name.Contains("MagicLeap") || MLDevice.IsOpenXRLoaderActive() && device.isValid)
                     {
                         return device;
                     }

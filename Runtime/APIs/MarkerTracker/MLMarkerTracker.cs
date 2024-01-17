@@ -72,7 +72,7 @@ namespace UnityEngine.XR.MagicLeap
             return resultCode;
         }
 
-        private MLMarkerTracker.TrackerSettings settings = TrackerSettings.Create(true, MarkerType.All);
+        private MLMarkerTracker.TrackerSettings settings = TrackerSettings.Create(false);
 
         /// <summary>
         ///     Asynchronous utility method to enable marker scanning using the current <c> ScannerSettings </c>. 

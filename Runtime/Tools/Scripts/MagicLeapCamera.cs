@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 #if UNITY_OPENXR_1_9_0_OR_NEWER
@@ -18,6 +19,7 @@ namespace UnityEngine.XR.MagicLeap
     [AddComponentMenu("AR/Magic Leap/Magic Leap Camera")]
     [DefaultExecutionOrder(ScriptOrder)]
     [RequireComponent(typeof(Camera))]
+    [Obsolete("The MagicLeapCamera component is not recommended for use with OpenXR. It has been deprecated and will be removed in a future release.")]
     public sealed class MagicLeapCamera : MonoBehaviour
     {
         /// <summary>
@@ -131,9 +133,9 @@ namespace UnityEngine.XR.MagicLeap
                 var renderFeature = OpenXRSettings.Instance.GetFeature<MagicLeapRenderingExtensionsFeature>();
                 if (renderFeature == null)
                     return;
-                renderFeature.focusDistance = camera.stereoConvergence;
-                renderFeature.useProtectedSurface = protectedSurface;
-                renderFeature.useVignetteMode = vignette;
+                renderFeature.FocusDistance = camera.stereoConvergence;
+                renderFeature.UseProtectedSurface = protectedSurface;
+                renderFeature.UseVignetteMode = vignette;
 #endif
             }
         }
@@ -171,9 +173,9 @@ namespace UnityEngine.XR.MagicLeap
 #if UNITY_OPENXR_1_9_0_OR_NEWER
             if (!Utils.TryGetOpenXRFeature<MagicLeapRenderingExtensionsFeature>(out var renderFeature))
                 return;
-            renderFeature.focusDistance = camera.stereoConvergence;
-            renderFeature.useProtectedSurface = protectedSurface;
-            renderFeature.useVignetteMode = vignette;
+            renderFeature.FocusDistance = camera.stereoConvergence;
+            renderFeature.UseProtectedSurface = protectedSurface;
+            renderFeature.UseVignetteMode = vignette;
 #elif UNITY_XR_MAGICLEAP_PROVIDER
             MagicLeapXRRenderSettings.focusDistance = camera.stereoConvergence;
             MagicLeapXRRenderSettings.farClipDistance = camera.farClipPlane;
@@ -193,10 +195,15 @@ namespace UnityEngine.XR.MagicLeap
 
         private void ValidateNearClip()
         {
-            if(camera.nearClipPlane < systemSettingClippingPlaneVal)
+            if (camera.nearClipPlane < systemSettingClippingPlaneVal)
             {
-                // unity camera nearClipPlane cannot go below what is set in system settings
-                camera.nearClipPlane = systemSettingClippingPlaneVal;
+                // reacquire from system just in case
+                systemSettingClippingPlaneVal = GetNearClipPlaneFromSystem();
+                if (camera.nearClipPlane < systemSettingClippingPlaneVal)
+                {
+                    // unity camera nearClipPlane cannot go below what is set in system settings
+                    camera.nearClipPlane = Mathf.Max(camera.nearClipPlane, systemSettingClippingPlaneVal);
+                }
             }
         }
 
@@ -332,15 +339,20 @@ namespace UnityEngine.XR.MagicLeap
         {
             if (!Application.isEditor)
             {
-                using AndroidJavaClass player = new("com.unity3d.player.UnityPlayer"), secureSettings = new("android.provider.Settings$Secure");
-                using AndroidJavaObject activity = player.GetStatic<AndroidJavaObject>("currentActivity"), resolver = activity.Call<AndroidJavaObject>("getContentResolver");
-                
-                var clipPlaneDist = secureSettings.CallStatic<float>("getFloat", resolver, "clipping_plane_distance", MLDevice.DefaultNearClipDistance);
-                // if the setting doesn't exist we'll get the default value from MLDevice in meters.
-                if (clipPlaneDist < 1f)
-                    return clipPlaneDist;
-                // Otherwise the setting returns centimeters and we need to convert.
-                return clipPlaneDist / 100f;
+                using (var actClass = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+                {
+                    var context = actClass.GetStatic<AndroidJavaObject>("currentActivity");
+                    AndroidJavaClass systemGlobal = new AndroidJavaClass("android.provider.Settings$Secure");
+
+                    var clipPlaneDist = systemGlobal.CallStatic<float>("getFloat", context.Call<AndroidJavaObject>("getContentResolver"), "clipping_plane_distance", MLDevice.DefaultNearClipDistance);
+
+                    // if the setting doesn't exist we'll get the default value from MLDevice in meters.
+                    if (clipPlaneDist < 1f)
+                        return clipPlaneDist;
+
+                    // Otherwise the setting returns centimeters and we need to convert.
+                    return clipPlaneDist / 100f;
+                }
             }
 
             return MLDevice.DefaultNearClipDistance;

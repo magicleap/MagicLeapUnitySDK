@@ -21,52 +21,13 @@ namespace UnityEngine.XR.MagicLeap
     {
         public long Value { get; private set; }
 
-        private MLTime(long convertedNs)
+        internal MLTime(long convertedNs)
         {
             Value = convertedNs;
         }
 
         public static implicit operator long(MLTime mltime) => mltime.Value;
         public static implicit operator MLTime(long timestamp) => new MLTime(timestamp);
-
-#if UNITY_OPENXR_1_9_0_OR_NEWER
-        /// <summary>
-        /// Converts a timestamp from a value captured by the system clock to an equivalent XrTime value
-        /// </summary>
-        /// <param name="timestampNs">The system's monotonic clock timestamp represented in nanoseconds. An example might be <see cref="DateTime.Ticks"/><c>/100</c>.</param>
-        /// <param name="xrTime">The system time converted to respective XrTime.</param>
-        /// <returns></returns>
-        public static MLResult ConvertSystemTimeToXrTime(long timestampNs, out long xrTime)
-        {
-            var result = MLResult.Create(InternalConvertSystemTimeToMLTime(timestampNs, out MLTime mlTime));
-            xrTime = mlTime;
-            return result;
-        }
-
-        /// <summary>
-        /// Converts a timestamp from a value captured by the system clock to an equivalent XrTime value
-        /// </summary>
-        /// <param name="timeSpec">The system's monotonic clock timestamp represented as a C timespec.</param>
-        /// <param name="xrTime">The system time converted to respective XrTime.</param>
-        /// <returns></returns>
-        public static MLResult ConvertSystemTimeToXrTime(TimeSpec timeSpec, out long xrTime) => MLResult.Create(NativeBindings.MLOpenXRConvertTimespecTimeToXrTime(timeSpec, out xrTime));
-
-        /// <summary>
-        /// Converts a timestamp provided by OpenXR to the equivalent monotonic system clock value. 
-        /// </summary>
-        /// <param name="xrTime">An <c>XrTime</c> value, such as provided by another API, measured in nanoseconds.</param>
-        /// <param name="timestampNs">Converted equivalent timestamp, calculated using <c>clock_gettime()</c> with <c>CLOCK_MONOTONIC</c>.</param>
-        /// <returns></returns>
-        public static MLResult ConvertXrTimeToSystemTime(long xrTime, out long timestampNs) => MLResult.Create(InternalConvertMLTimeToSystemTime((MLTime)xrTime, out timestampNs));
-
-        /// <summary>
-        /// Converts a timestamp provided by OpenXR to the equivalent monotonic system clock value. 
-        /// </summary>
-        /// <param name="xrTime">An <c>XrTime</c> value, such as provided by another API, measured in nanoseconds.</param>
-        /// <param name="timeSpec">Converted equivalent timestamp, calculated using <c>clock_gettime()</c> with <c>CLOCK_MONOTONIC</c>.</param>
-        /// <returns></returns>
-        public static MLResult ConvertXrTimeToSystemTime(long xrTime, out TimeSpec timeSpec) => MLResult.Create(NativeBindings.MLOpenXRConvertXrTimeToTimespecTime(xrTime, out timeSpec));
-#endif
 
         /// <summary>
         /// Converts timestamps from system time to MLTime. System time is equivalent to the system's
@@ -94,17 +55,6 @@ namespace UnityEngine.XR.MagicLeap
             {
                 Marshal.StructureToPtr(timeSpec, ptr, false);
 
-#if UNITY_OPENXR_1_9_0_OR_NEWER
-                resultCode = NativeBindings.MLOpenXRConvertTimespecTimeToXrTime(timeSpec, out long nanoseconds);
-                if (MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLOpenXRConvertTimespecTimeToXrTime)))
-                {
-                    mlTime = new MLTime(nanoseconds);
-                }
-                else
-                {
-                    mlTime = new MLTime(0);
-                }
-#else
                 resultCode = NativeBindings.MLTimeConvertSystemTimeToMLTime(ptr, out long nanoseconds);
                 if (MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLTimeConvertSystemTimeToMLTime)))
                 {
@@ -114,7 +64,6 @@ namespace UnityEngine.XR.MagicLeap
                 {
                     mlTime = new MLTime(0);
                 }
-#endif
             }
             finally
             {
@@ -132,18 +81,6 @@ namespace UnityEngine.XR.MagicLeap
             MLResult.Code resultCode = MLResult.Code.UnspecifiedFailure;
             try
             {
-#if UNITY_OPENXR_1_9_0_OR_NEWER
-                var timeSpec = new TimeSpec();
-                resultCode = NativeBindings.MLOpenXRConvertXrTimeToTimespecTime(mlTime, out timeSpec);
-                if (MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLOpenXRConvertXrTimeToTimespecTime)))
-                {
-                    timestampNs = (timeSpec.Seconds * 1000 * 1000 * 1000) + timeSpec.Nanoseconds;
-                }
-                else
-                {
-                    timestampNs = (long)mlTime;
-                }
-#else
                 resultCode = NativeBindings.MLTimeConvertMLTimeToSystemTime(mlTime.Value, timeSpecPtr);
                 if (MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLTimeConvertMLTimeToSystemTime)))
                 {
@@ -154,7 +91,6 @@ namespace UnityEngine.XR.MagicLeap
                 {
                     timestampNs = 0;
                 }
-#endif
             }
             finally
             {

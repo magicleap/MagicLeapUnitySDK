@@ -8,6 +8,9 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
+using UnityEngine.XR.OpenXR.Features.MagicLeapSupport;
+using UnityEngine.XR.OpenXR;
+
 namespace UnityEngine.XR.MagicLeap
 {
     public static partial class MLGlobalDimmer
@@ -27,6 +30,22 @@ namespace UnityEngine.XR.MagicLeap
         /// <param name="enabled">Enable or disable the global dimmer.</param>
         public static MLResult SetValue(float dimmerValue, bool enabled = true)
         {
+            if(MLDevice.IsOpenXRLoaderActive())
+            {
+                Debug.LogWarning($"WARNING: Using legacy MLGLobalDimmer API with the OpenXR provider! Recommend udpating your scripts to use {nameof(MagicLeapRenderingExtensionsFeature)} from now on.");
+                var renderFeature = OpenXRSettings.Instance.GetFeature<MagicLeapRenderingExtensionsFeature>();
+                if(renderFeature != null)
+                {
+                    renderFeature.GlobalDimmerEnabled = enabled;
+                    renderFeature.GlobalDimmerValue = dimmerValue;
+                    return MLResult.Create(MLResult.Code.Ok);
+                }
+                else
+                {
+                    Debug.LogErrorFormat($"Unable to access the Global Dimmer under OpenXR without the {nameof(MagicLeapRenderingExtensionsFeature)} active!");
+                    return MLResult.Create(MLResult.Code.NotImplemented);
+                }
+            }
             float clampedValue = Mathf.Clamp(dimmerValue, 0.0f, 1.0f);
             NativeBindings.UnityMagicLeap_RenderingSetGlobalDimmerValue(clampedValue);
             return MLResult.Create(MLResult.Code.Ok);

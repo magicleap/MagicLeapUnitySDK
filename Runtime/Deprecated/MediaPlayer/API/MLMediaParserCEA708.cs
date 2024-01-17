@@ -25,7 +25,6 @@ namespace UnityEngine.XR.MagicLeap
         public partial class ParserCEA708
         {
             public const string Mime = "text/cea-708";
-            private int selectedTrackID = -1;
             private string subtitleText = string.Empty;
             private string[] cea708Strings = new string[2];
             private int cea708WindowID = -1;

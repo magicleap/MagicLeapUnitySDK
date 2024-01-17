@@ -124,6 +124,10 @@ namespace UnityEngine.XR.MagicLeap
                 /// <returns>A string describing the gestures's properties.</returns>
                 public override string ToString()
                 {
+                    if(MLDevice.IsOpenXRLoaderActive())
+                    {
+                        return "[Gestures currently unsupported under OpenXR!]";
+                    }
                     return string.Format(
                         "Touchpad Gesture:\n\tgestureId: {0}\n\tgestureState: {1}\n\tcontrollerId: {2}\n\tangle: {3}\n\tdirection: {4}\n\tdistance: {5}\\n\tpositionAndForce: {6}\n\tradius: {7}\n\tspeed: {8}\n\ttype: {9}",
                         id, state, controllerId, angle, direction, distance, positionAndForce, radius, speed, type);

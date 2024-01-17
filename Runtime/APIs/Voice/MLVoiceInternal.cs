@@ -19,8 +19,6 @@ namespace UnityEngine.XR.MagicLeap
     /// </summary>
     public partial class MLVoice
     {
-        private bool isProcessing = false;
-
         private bool isEnabled()
         {
             bool enableCheck = false;
@@ -61,10 +59,6 @@ namespace UnityEngine.XR.MagicLeap
                 {
                     MLPluginLog.Error("MLVoice during pause failed to MLVoiceIntentStopProcessing: " + result);
                 }
-                else
-                {
-                    isProcessing = false;
-                }
             }
             else
             {
@@ -78,10 +72,6 @@ namespace UnityEngine.XR.MagicLeap
                 if (!MLResult.DidNativeCallSucceed(result, nameof(MLVoice.NativeBindings.MLVoiceIntentStartProcessing)))
                 {
                     MLPluginLog.Error("MLVoice during resume failed to MLVoiceIntentStartProcessing: " + result);
-                }
-                else
-                {
-                    isProcessing = true;
                 }
             }
         }

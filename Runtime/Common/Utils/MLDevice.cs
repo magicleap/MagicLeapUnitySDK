@@ -463,22 +463,22 @@ namespace UnityEngine.XR.MagicLeap
 #if UNITY_XR_MAGICLEAP_PROVIDER
             if (!Application.isEditor)
             {
-                using var player = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
-                using var secureSettings = new AndroidJavaClass("android.provider.Settings$Secure");
-                using var activity = player.GetStatic<AndroidJavaObject>("currentActivity");
-                using var resolver = activity.Call<AndroidJavaObject>("getContentResolver");
-
-                var setting = secureSettings.CallStatic<float>("getFloat", resolver, "clipping_plane_distance", 0f);
-                if (setting != 0f)
+                using (var actClass = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
                 {
-                    // if we got something other than 0 that means the setting is available and we should disable the cumbersome enforcement in the XR plugin
-                    Rendering.RenderingSettings.enforceNearClip = false;
-                    Debug.Log("System setting clipping_plane_distance found, disabling Unity XR enforcement.");
-                }
-                else
-                {
-                    Rendering.RenderingSettings.enforceNearClip = true;
-                    Debug.LogWarning("System setting clipping_plane_distance could not be found. Unity XR will enforce constant value.");
+                    var context = actClass.GetStatic<AndroidJavaObject>("currentActivity");
+                    AndroidJavaClass systemGlobal = new AndroidJavaClass("android.provider.Settings$Secure");
+                    var setting = systemGlobal.CallStatic<float>("getFloat", context.Call<AndroidJavaObject>("getContentResolver"), "clipping_plane_distance", 0f);
+                    if (setting != 0f)
+                    {
+                        // if we got something other than 0 that means the setting is available and we should disable the cumbersome enforcement in the XR plugin
+                        Rendering.RenderingSettings.enforceNearClip = false;
+                        Debug.Log("System setting clipping_plane_distance found, disabling Unity XR enforcement.");
+                    }
+                    else
+                    {
+                        Rendering.RenderingSettings.enforceNearClip = true;
+                        Debug.LogWarning("System setting clipping_plane_distance could not be found. Unity XR will enforce constant value.");
+                    }
                 }
             }
 #endif

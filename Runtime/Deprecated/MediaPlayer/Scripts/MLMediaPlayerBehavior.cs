@@ -58,7 +58,9 @@ namespace MagicLeap.Core
         public event Action OnReset;
         public event Action OnCompletion;
         public event Action<float> OnBufferingUpdate;
+#pragma warning disable CS0067
         public event Action<MLMedia.Player.Info> OnInfo;
+#pragma warning restore CS0067
         public event Action OnSeekComplete;
         public event Action<MLMedia.Player.Track> OnTrackFound;
         public event Action<MLMedia.Player.Track> OnTrackSelected;
@@ -87,7 +89,6 @@ namespace MagicLeap.Core
                         throw new Exception($"Media Player initialization result with error {result}.");
 
                     _mediaPlayer = mediaPlayer;
-
                     _mediaPlayer.OnPrepared += HandleOnPrepare;
                     _mediaPlayer.OnVideoSizeChanged += HandleOnVideoSizeChanged;
                     _mediaPlayer.OnPlay += HandleOnPlay;
@@ -192,6 +193,9 @@ namespace MagicLeap.Core
                     {
                         result = mlPlayer.SetSourceURI(source);
                         hasSetSourceURI = true;
+                        // For certain streams e.g. dash, need to set surface before we prepare
+                        // width x height will become correct after play begins
+                        HandleOnVideoSizeChanged(MediaPlayer, 1, 1);
                     }
                 }
             }
@@ -274,14 +278,13 @@ namespace MagicLeap.Core
             TryApplyVideoRenderMaterial(videoRenderMaterial);
             TryApplyStereoMode();
 
-            if (mediaPlayerTexture == null)
+            if (mediaPlayerTexture == null || (mediaPlayerTexture.width != width || mediaPlayerTexture.height != height))
                 CreateTexture(width, height);
             else
                 SetRendererTexture(mediaPlayerTexture);
 
             float aspectRatio = width / (float)height;
             transform.localScale = new Vector3(transform.localScale.y * aspectRatio, transform.localScale.y, 1);
-
             OnVideoRendererInitialized?.Invoke(MediaPlayer.VideoRenderer);
         }
 

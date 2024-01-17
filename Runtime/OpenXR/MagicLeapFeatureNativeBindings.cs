@@ -1,12 +1,13 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// Copyright (c) (2019-2022) Magic Leap, Inc. All Rights Reserved.
+// Copyright (c) 2023 Magic Leap, Inc. All Rights Reserved.
 // Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
 // Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
+
 #if UNITY_OPENXR_1_9_0_OR_NEWER
 using System;
 using System.Runtime.InteropServices;
@@ -52,11 +53,11 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             [DllImport(MagicLeapXrProviderNativeBindings.MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern float MLOpenXRGetRecommendedFarClippingPlane();
 
-            [DllImport(MLSdkLoaderDll, CallingConvention = CallingConvention.Cdecl)]
-            public static extern MLResult.Code MLZIPermissionsStart();
+            [DllImport(MagicLeapXrProviderNativeBindings.MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
+            public static extern MLResult.Code MLOpenXRConvertTimespecTimeToXrTime(TimeSpec timespec, out long mlXrTime);
 
-            [DllImport(MLSdkLoaderDll, CallingConvention = CallingConvention.Cdecl)]
-            public static extern MLResult.Code MLZIPermissionsStop();
+            [DllImport(MagicLeapXrProviderNativeBindings.MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
+            public static extern MLResult.Code MLOpenXRConvertXrTimeToTimespecTime(long mlXrTime, out TimeSpec timeSpec);
         }
     }
 }

@@ -20,11 +20,27 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         FeatureSetId = "com.magicleap.openxr.featuregroup",
         SupportedBuildTargets = new [] { BuildTargetGroup.Android, BuildTargetGroup.Standalone },
         FeatureIds = new [] {
-            MagicLeapFeature.featureId ,
-            MagicLeapRenderingExtensionsFeature.featureId,
-            MagicLeapReferenceSpacesFeature.featureId,
+            MagicLeapFeature.FeatureId ,
+            MagicLeapRenderingExtensionsFeature.FeatureId,
+            MagicLeapReferenceSpacesFeature.FeatureId,
             MagicLeapPlanesFeature.FeatureId,
-            MagicLeapUserCalibrationFeature.featureId,
+            MagicLeapUserCalibrationFeature.FeatureId,
+            MagicLeapSystemNotificationsFeature.FeatureId,
+            MagicLeapMarkerUnderstandingFeature.FeatureId,
+            MagicLeapLocalizationMapFeature.FeatureId,
+            MagicLeapSpatialAnchorsFeature.FeatureId
+        },
+        RequiredFeatureIds = new[] {
+            MagicLeapFeature.FeatureId
+        },
+        DefaultFeatureIds = new[] {
+            MagicLeapRenderingExtensionsFeature.FeatureId,
+            MagicLeapReferenceSpacesFeature.FeatureId,
+            MagicLeapPlanesFeature.FeatureId,
+            MagicLeapUserCalibrationFeature.FeatureId,
+            MagicLeapSystemNotificationsFeature.FeatureId,
+            MagicLeapMarkerUnderstandingFeature.FeatureId,
+            MagicLeapLocalizationMapFeature.FeatureId
         }
     )]
     public class MagicLeapFeatureGroup

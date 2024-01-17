@@ -61,7 +61,7 @@ namespace MagicLeap
                 if (editorProjectData.EnableColorSpaceWarning)
                 {
                     int option = EditorUtility.DisplayDialogComplex("Invalid Color Space",
-                        "PlayerSettings.colorSpace is set to Gamma for Relish which is not recommended for that platform.",
+                        "PlayerSettings.colorSpace is set to Gamma which is not recommended for Magic Leap 2.",
                         "Switch to Linear Space",
                         "Ignore and continue always",
                         "Ignore and continue"

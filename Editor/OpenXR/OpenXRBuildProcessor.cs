@@ -1,10 +1,21 @@
+// %BANNER_BEGIN%
+// ---------------------------------------------------------------------
+// %COPYRIGHT_BEGIN%
+// Copyright (c) 2023 Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
+// %COPYRIGHT_END%
+// ---------------------------------------------------------------------
+// %BANNER_END%
+#if UNITY_OPENXR_1_9_0_OR_NEWER
 using System;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using UnityEditor.Build.Reporting;
 using UnityEditor.XR.MagicLeap;
-
-#if UNITY_OPENXR_1_9_0_OR_NEWER
+using UnityEditor.XR.Management;
+using UnityEngine.XR.OpenXR;
 using UnityEngine.XR.OpenXR.Features.MagicLeapSupport;
 
 namespace UnityEditor.XR.OpenXR.Features.MagicLeapSupport
@@ -15,12 +26,11 @@ namespace UnityEditor.XR.OpenXR.Features.MagicLeapSupport
 
         public override Type featureType => typeof(MagicLeapFeature);
 
-        private static readonly string kHaveAndroidWindowSupportBootSettingsKey = "android-device-have-window-support";
-        private static readonly string kUseNullDisplayManagerBootSettingsKey = "android-device-use-null-display-manager";
-        private static readonly string kAndroidAudioUseMLAudio = "android-audio-use-MLAudio";
-        private static readonly string kVulkanForceDisableETCSupport = "vulkan-force-disable-ETC-support";
-        private static readonly string kVulkanForceDisableASTCSupport = "vulkan-force-disable-ASTC-support";
-        private static readonly string kVulkanDisablePreTransform = "vulkan-disable-pre-transform";
+        private static readonly string haveAndroidWindowSupportBootSettingsKey = "android-device-have-window-support";
+        private static readonly string useNullDisplayManagerBootSettingsKey = "android-device-use-null-display-manager";
+        private static readonly string vulkanForceDisableETCSupport = "vulkan-force-disable-ETC-support";
+        private static readonly string vulkanForceDisableASTCSupport = "vulkan-force-disable-ASTC-support";
+        private static readonly string vulkanDisablePreTransform = "vulkan-disable-pre-transform";
 
         protected override void OnPreprocessBuildExt(BuildReport report)
         {
@@ -28,29 +38,19 @@ namespace UnityEditor.XR.OpenXR.Features.MagicLeapSupport
 
             if (report.summary.platform == BuildTarget.Android)
             {
-                bootConfig.SetValueForKey(kHaveAndroidWindowSupportBootSettingsKey, "1", true);
-                bootConfig.SetValueForKey(kUseNullDisplayManagerBootSettingsKey, "0", true);
-                bootConfig.SetValueForKey(kVulkanForceDisableETCSupport, "1", true);
-                bootConfig.SetValueForKey(kVulkanForceDisableASTCSupport, "1", true);
-                bootConfig.SetValueForKey(kVulkanDisablePreTransform, "1", true);
-                MagicLeapFeature magicLeapFeature = FeatureHelpers.GetFeatureWithIdForBuildTarget(BuildTargetGroup.Android, MagicLeapFeature.featureId) as MagicLeapFeature;
-                if (magicLeapFeature != null)
-                {
-                    bootConfig.SetValueForKey(kAndroidAudioUseMLAudio, magicLeapFeature.IsMLAudioEnabled ? "1" : "0" , true);
-                }
-                else
-                {
-                    bootConfig.SetValueForKey(kAndroidAudioUseMLAudio, "0", true);
-                }
+                bootConfig.SetValueForKey(haveAndroidWindowSupportBootSettingsKey, "1", true);
+                bootConfig.SetValueForKey(useNullDisplayManagerBootSettingsKey, "0", true);
+                bootConfig.SetValueForKey(vulkanForceDisableETCSupport, "1", true);
+                bootConfig.SetValueForKey(vulkanForceDisableASTCSupport, "1", true);
+                bootConfig.SetValueForKey(vulkanDisablePreTransform, "1", true);
             }
             else
             {
-                bootConfig.ClearEntryForKey(kHaveAndroidWindowSupportBootSettingsKey);
-                bootConfig.ClearEntryForKey(kUseNullDisplayManagerBootSettingsKey);
-                bootConfig.ClearEntryForKey(kVulkanForceDisableETCSupport);
-                bootConfig.ClearEntryForKey(kVulkanForceDisableASTCSupport);
-                bootConfig.ClearEntryForKey(kVulkanDisablePreTransform);
-                bootConfig.ClearEntryForKey(kAndroidAudioUseMLAudio);
+                bootConfig.ClearEntryForKey(haveAndroidWindowSupportBootSettingsKey);
+                bootConfig.ClearEntryForKey(useNullDisplayManagerBootSettingsKey);
+                bootConfig.ClearEntryForKey(vulkanForceDisableETCSupport);
+                bootConfig.ClearEntryForKey(vulkanForceDisableASTCSupport);
+                bootConfig.ClearEntryForKey(vulkanDisablePreTransform);
             }
 
             bootConfig.WriteBootConfig();
@@ -58,33 +58,19 @@ namespace UnityEditor.XR.OpenXR.Features.MagicLeapSupport
 
         protected override void OnPostGenerateGradleAndroidProjectExt(string path)
         {
+            // don't bother if the OpenXR loader isn't actually enabled for the build
+            if (!IsOpenXRLoaderEnabled())
+                return;
+
             string manifestPath = Path.Combine(path, "src", "main", "AndroidManifest.xml");
             AndroidManifestXml manifest = new AndroidManifestXml(manifestPath);
 
-            manifest.AddPermission("org.khronos.openxr.permission.OPENXR");
             manifest.AddPermission("org.khronos.openxr.permission.OPENXR_SYSTEM");
-            AddOpenXRRuntimeBrokerInfo(manifest);
             AddOpenXRImmersiveHmdIntent(manifest);
             manifest.Save();
         }
 
         protected override void OnPostprocessBuildExt(BuildReport report) { }
-
-        private void AddOpenXRRuntimeBrokerInfo(AndroidManifestXml manifest)
-        {
-            const string queryElem = "queries";
-            const string providerElem = "provider";
-            const string providerAttrib = "org.khronos.openxr.runtime_broker;org.khronos.openxr.system_runtime_broker";
-
-            // Get all child nodes that match the tag and see if value already exists
-            XmlNode queriesNode = manifest.ManifestElement.SelectSingleNode(queryElem);
-            if (queriesNode == null)
-            {
-                queriesNode = manifest.ManifestElement.AppendChild(manifest.CreateElement(queryElem));
-            }
-
-            manifest.UpdateOrCreateAttribute(queriesNode as XmlElement, providerElem, "authorities", providerAttrib);
-        }
 
         private void AddOpenXRImmersiveHmdIntent(AndroidManifestXml manifest)
         {
@@ -93,6 +79,12 @@ namespace UnityEditor.XR.OpenXR.Features.MagicLeapSupport
                     "category",
                     "name",
                     "org.khronos.openxr.intent.category.IMMERSIVE_HMD");
+        }
+
+        private bool IsOpenXRLoaderEnabled()
+        {
+            var settings = XRGeneralSettingsPerBuildTarget.XRGeneralSettingsForBuildTarget(BuildTargetGroup.Android);
+            return settings.Manager.activeLoaders.Any(l => l is OpenXRLoader);
         }
     }
 }

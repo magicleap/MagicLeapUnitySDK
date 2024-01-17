@@ -41,18 +41,36 @@ namespace UnityEngine.XR.MagicLeap
                 /// <summary>
                 /// Starts a buzz pattern.
                 /// </summary>
-                public static MLResult StartBuzz(ushort startHz, ushort endHz, ushort durationMs, byte amplitude) => Buzz.Create(startHz, endHz, durationMs, amplitude).StartHaptics();
+                public static MLResult StartBuzz(ushort startHz, ushort endHz, uint durationMs, byte amplitude)
+                {
+                    if(MLDevice.IsOpenXRLoaderActive())
+                    {
+                        return OpenXR.Features.MagicLeapSupport.MLInput.StartBuzz(startHz, endHz, durationMs, amplitude);
+                    }
+                    return Buzz.Create(startHz, endHz, durationMs, amplitude).StartHaptics();
+                }
 
                 /// <summary>
                 /// Starts a predefined pattern.
                 /// </summary>
-                public static MLResult StartPreDefined(PreDefined.Type type) => PreDefined.Create(type).StartHaptics();
+                public static MLResult StartPreDefined(PreDefined.Type type)
+                {
+                    if(MLDevice.IsOpenXRLoaderActive())
+                    {
+                        return OpenXR.Features.MagicLeapSupport.MLInput.StartPredefined((OpenXR.Features.MagicLeapSupport.MLInput.PreDefinedPatternType)type);
+                    }
+                    return PreDefined.Create(type).StartHaptics();
+                }
 
                 /// <summary>
                 /// Stops playing the current haptic pattern.
                 /// </summary>
                 public static MLResult Stop()
                 {
+                    if(MLDevice.IsOpenXRLoaderActive())
+                    {
+                        return OpenXR.Features.MagicLeapSupport.MLInput.Stop();
+                    }
                     var resultCode = MagicLeapXrProviderNativeBindings.StopHaptics();
                     return MLResult.Create(resultCode);
                 }
@@ -70,7 +88,7 @@ namespace UnityEngine.XR.MagicLeap
                 /// </summary>
                 public readonly struct Buzz : IHapticsCommand
                 {
-                    public static Buzz Create(ushort startHz, ushort endHz, ushort durationMs, byte amplitude) => new Buzz(startHz, endHz, durationMs, amplitude);
+                    public static Buzz Create(ushort startHz, ushort endHz, uint durationMs, byte amplitude) => new Buzz(startHz, endHz, durationMs, amplitude);
 
                     public MLResult StartHaptics()
                     {
@@ -84,7 +102,7 @@ namespace UnityEngine.XR.MagicLeap
                         return MLResult.Create(resultCode);
                     }
 
-                    private Buzz(ushort startHz, ushort endHz, ushort durationMs, byte amplitude)
+                    private Buzz(ushort startHz, ushort endHz, uint durationMs, byte amplitude)
                     {
                         StartHz = startHz;
                         EndHz = endHz;
@@ -171,6 +189,11 @@ namespace UnityEngine.XR.MagicLeap
 
                     public MLResult StartHaptics()
                     {
+                        if(MLDevice.IsOpenXRLoaderActive())
+                        {
+                            return OpenXR.Features.MagicLeapSupport.MLInput.StartCustomPattern(customHaptics);
+                        }
+
                         var nativeCommandStruct = new NativeBindings.MLInputCustomHapticsInfo(customHaptics);
                         IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(nativeCommandStruct));
                         Marshal.StructureToPtr(nativeCommandStruct, ptr, false);

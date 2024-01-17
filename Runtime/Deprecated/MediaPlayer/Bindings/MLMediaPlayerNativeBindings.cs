@@ -506,7 +506,7 @@ namespace UnityEngine.XR.MagicLeap
                     {
                         return new MLMediaPlayerEventCallbacksEx()
                         {
-                            version = 1,
+                            version = 2,
                             OnBufferingUpdate = NativeBindings.OnBufferingUpdate,
                             OnCompletion = NativeBindings.OnCompletion,
                             OnError = NativeBindings.OnError,

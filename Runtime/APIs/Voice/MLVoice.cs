@@ -232,10 +232,7 @@ namespace UnityEngine.XR.MagicLeap
             {
                 MLPluginLog.Error("MLVoice failed to StartProcessing: " + result);
             }
-            else
-            {
-                Instance.isProcessing = true;
-            }
+
             return result;
         }
 
@@ -275,10 +272,7 @@ namespace UnityEngine.XR.MagicLeap
             {
                 MLPluginLog.Error("MLVoice failed to StartProcessing: " + result);
             }
-            else
-            {
-                Instance.isProcessing = true;
-            }
+
             return result;
         }
 
@@ -307,10 +301,6 @@ namespace UnityEngine.XR.MagicLeap
             if (!MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLVoiceIntentStopProcessing)))
             {
                 MLPluginLog.Error("MLVoice.Stop failed to MLVoiceIntentStopProcessing: " + result);
-            }
-            else
-            {
-                Instance.isProcessing = false;
             }
 
             return MLResult.Create(resultCode);
