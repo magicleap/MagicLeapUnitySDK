@@ -150,8 +150,29 @@ namespace UnityEngine.XR.MagicLeap
                 [Obsolete]
                 public static bool TryGetState(InputDevice headDevice, out State headTrackingState) => NativeBindings.TryGetState(headDevice, out headTrackingState);
 
-                public static bool TryGetStateEx(InputDevice headDevice, out StateEx headTrackingState) => NativeBindings.TryGetStateEx(headDevice, out headTrackingState);
-                public static bool TryGetMapEvents(InputDevice headDevice, out MapEvents mapEvents) => NativeBindings.TryGetMapEvents(headDevice, out mapEvents);
+                public static bool TryGetStateEx(InputDevice headDevice, out StateEx headTrackingState)
+                {
+                    if(MLDevice.IsOpenXRLoaderActive())
+                    {
+                        return OpenXR.Features.MagicLeapSupport.MLHeadTracking.TryGetStateEx(out headTrackingState);
+                    }
+                    else
+                    {
+                        return NativeBindings.TryGetStateEx(headDevice, out headTrackingState);
+                    }
+                }
+                public static bool TryGetMapEvents(InputDevice headDevice, out MapEvents mapEvents) 
+                {
+                    if (MLDevice.IsOpenXRLoaderActive())
+                    {
+                        return OpenXR.Features.MagicLeapSupport.MLHeadTracking.TryGetMapEvents(out mapEvents);
+                    }
+                    else
+                    {
+                        return NativeBindings.TryGetMapEvents(headDevice, out mapEvents);
+                    }
+                
+                }
 
                 private static bool gotData = false;
                 private static NativeBindings.MLHeadTrackingStaticData data;
@@ -233,7 +254,7 @@ namespace UnityEngine.XR.MagicLeap
                     /// </summary>
                     public readonly TrackingErrorFlag Error;
 
-                    internal StateEx(NativeBindings.StateEx nativeState)
+                    internal StateEx(NativeBindings.MLHeadTrackingStateEx nativeState)
                     {
                         this.Status = nativeState.Status;
                         this.Confidence = nativeState.Confidence;
@@ -251,7 +272,7 @@ namespace UnityEngine.XR.MagicLeap
                     [Obsolete]
                     private static byte[] allocatedHeadTrackingStateData = new byte[Marshal.SizeOf<NativeBindings.State>()];
 
-                    private static byte[] allocatedHeadTrackingStateExData = new byte[Marshal.SizeOf<NativeBindings.StateEx>()];
+                    private static byte[] allocatedHeadTrackingStateExData = new byte[Marshal.SizeOf<NativeBindings.MLHeadTrackingStateEx>()];
                     private static byte[] allocatedHeadTrackingMapEventsData = new byte[sizeof(MapEvents)];
 
                     [Obsolete]
@@ -290,7 +311,7 @@ namespace UnityEngine.XR.MagicLeap
                         {
                             IntPtr ptr = Marshal.AllocHGlobal(allocatedHeadTrackingStateExData.Length);
                             Marshal.Copy(allocatedHeadTrackingStateExData, 0, ptr, allocatedHeadTrackingStateExData.Length);
-                            var nativeState = Marshal.PtrToStructure<NativeBindings.StateEx>(ptr);
+                            var nativeState = Marshal.PtrToStructure<NativeBindings.MLHeadTrackingStateEx>(ptr);
                             Marshal.FreeHGlobal(ptr);
                             state = new MLHeadTracking.StateEx(nativeState);
                             return true;
@@ -359,7 +380,7 @@ namespace UnityEngine.XR.MagicLeap
                     /// Head Tracking system.
                     /// </summary>
                     [StructLayout(LayoutKind.Sequential)]
-                    public readonly struct StateEx
+                    public readonly struct MLHeadTrackingStateEx
                     {
                         /// <summary>
                         /// Version of this structure.

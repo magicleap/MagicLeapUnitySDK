@@ -28,7 +28,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         Desc="Support for controlling rendering features specific to Magic Leap 2.",
         Company = "Magic Leap",
         Version = "1.0.0",
-        BuildTargetGroups = new []{ BuildTargetGroup.Android, BuildTargetGroup.Standalone },
+        BuildTargetGroups = new []{ BuildTargetGroup.Android },
         FeatureId = FeatureId,
         OpenxrExtensionStrings = "XR_ML_frame_end_info " +
                                  "XR_ML_global_dimmer "

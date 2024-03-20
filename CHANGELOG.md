@@ -1,5 +1,36 @@
 # Changelog
 
+## [2.1.0]
+
+### Features
+- Update OpenXR Plugin dependency to `1.10.0`.
+- Added `Magic Leap 2 Facial Expressions` OpenXR Feature.
+- Added `Magic Leap 2 Environmental Meshing` OpenXR feature.
+- Added `Magic Leap 2 Spatial Anchors` OpenXR Feature
+- Added `Magic Leap 2 Spatial Anchors Storage` OpenXR Feature
+- Added `MagicLeap.Android.Permissions`, a new and improved Permissions API.
+- Included an AprilTagSettings struct to the `Magic Leap 2 Marker Understanding` OpenXR Feature
+
+### Experimental
+- Added `AndroidCamera` APIs for performing basic YUV and JPEG Camera capture.
+
+### Bugfixes
+- Fixed issue where JPEG screen capture with `MLCamera` was not displaying an image.
+- Fixed legacy `MLPlanes` subsystem not being initialized when using Magic Leap XR Provider.
+- Added project validation rules to check for Player Settings required by Magic Leap 2.
+- Fixed `MLCVCamera` being unable to query Headpose from the MLSDK when the OpenXR PRovider is active.
+- Fixed `MLMarkerTracker` issue where detected `AprilTag` markers are flipped. 
+
+### Deprecations & Removals
+- Removed Preferences>External Tools>Magic Leap.
+- Marked `MLPermissions` Obsolete. Use `MagicLeap.Android.Permissions` instead.
+
+### Known Issues
+- `MLAnchors` API does not work when the `Magic Leap 2 Spatial Anchors` or `Magic Leap 2 Spatial Anchors Storage` OpenXR Features are enabled.
+
+### Misc.
+- Renamed the ML Rig & Inputs Sample input actions asset as well as the old `MagicLeapInputs` asset to make it clear what the differences are. 
+
 ## [2.0.0]
 
 ### Features

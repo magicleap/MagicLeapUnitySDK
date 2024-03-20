@@ -495,7 +495,7 @@ namespace UnityEngine.XR.MagicLeap
                 /// </summary>
                 public MLMarkerTrackerSettings(TrackerSettings settings)
                 {
-                    this.Version = 5;
+                    this.Version = 6;
                     this.EnableMarkerScanning = settings.EnableMarkerScanning;
                     this.EnabledDetectorTypes = (uint)settings.MarkerTypes;
                     this.ArucoDicitonary = settings.ArucoDicitonary;

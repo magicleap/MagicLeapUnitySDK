@@ -14,14 +14,76 @@ using System.Linq;
 
 #if UNITY_EDITOR
 using UnityEditor;
-using UnityEditor.XR.OpenXR.Features;
 #endif
 
 namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 {
     public abstract class MagicLeapOpenXRFeatureBase : OpenXRFeature
     {
-        protected virtual IEnumerable<Type> dependsOn => Enumerable.Empty<Type>();
+        protected virtual string GetFeatureId()
+        {
+            return "";
+        }
+        
+        protected override IntPtr HookGetInstanceProcAddr(IntPtr func)
+        {
+            var featureId = GetFeatureId();
+            if (string.IsNullOrEmpty(featureId))
+            {
+                return base.HookGetInstanceProcAddr(func);
+            }
+            return MagicLeapFeature.NativeBindings.MLOpenXRInterceptFunctionsForFeature(featureId, func);
+        }
+
+        protected override bool OnInstanceCreate(ulong xrInstance)
+        {
+            var result = base.OnInstanceCreate(xrInstance);
+            if (!result)
+            {
+                return false;
+            }
+
+            var featureId = GetFeatureId();
+            if (string.IsNullOrEmpty(featureId))
+            {
+                return true;
+            }
+            MagicLeapFeature.NativeBindings.MLOpenXROnFeatureInstanceCreate(featureId, xrInstance, xrGetInstanceProcAddr);
+            return true;
+        }
+
+        protected override void OnInstanceDestroy(ulong xrInstance)
+        {
+            base.OnInstanceDestroy(xrInstance);
+            var featureId = GetFeatureId();
+            if (string.IsNullOrEmpty(featureId))
+            {
+                return;
+            }
+            MagicLeapFeature.NativeBindings.MLOpenXRFeatureOnInstanceDestroy(featureId, xrInstance);
+        }
+
+        protected override void OnSessionCreate(ulong xrSession)
+        {
+            base.OnSessionCreate(xrSession);
+            var featureId = GetFeatureId();
+            if (string.IsNullOrEmpty(featureId))
+            {
+                return;
+            }
+            MagicLeapFeature.NativeBindings.MLOpenXROnFeatureSessionCreate(featureId, xrSession);
+        }
+        
+        protected override void OnAppSpaceChange(ulong xrSpace)
+        {
+            base.OnAppSpaceChange(xrSpace);
+            var featureId = GetFeatureId();
+            if (string.IsNullOrEmpty(featureId))
+            {
+                return;
+            }
+            MagicLeapFeature.NativeBindings.MLOpenXROnFeatureAppSpaceChange(featureId, xrSpace);
+        }
         
         protected void CheckEnabledExtension(string extensionName, bool required = false)
         {
@@ -32,6 +94,15 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                 throw new Exception($"Required OpenXR extension '{extensionName}' was not enabled!");
             
             Debug.LogWarning($"OpenXR extension '{extensionName}' was not enabled!");
+        }
+        
+        protected virtual IEnumerable<Type> dependsOn => Enumerable.Empty<Type>();
+
+        public bool GetUnityPose(ulong space, out Pose pose)
+        {
+            pose = default;
+            var featureId = GetFeatureId();
+            return !string.IsNullOrEmpty(featureId) && MagicLeapFeature.NativeBindings.MLOpenXRGetUnityPoseForFeature(featureId, space, out pose);
         }
 
 #if UNITY_EDITOR

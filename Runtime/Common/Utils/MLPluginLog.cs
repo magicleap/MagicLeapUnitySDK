@@ -8,6 +8,9 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
+using System;
+using System.Diagnostics;
+
 namespace UnityEngine.XR.MagicLeap
 {
     /// <summary>
@@ -40,6 +43,36 @@ namespace UnityEngine.XR.MagicLeap
             /// Print all MLPlugin logs.
             /// </summary>
             Verbose,
+        }
+
+        internal abstract class ScopedLog : IDisposable
+        {
+            private string m_ScopeName;
+            private bool m_ShowStackTrace;
+
+            protected string scopeName => m_ScopeName;
+
+            protected ScopedLog(string scopeName, bool showStackTrace = false)
+            {
+                m_ScopeName = scopeName;
+                Log("Enter");
+            }
+
+            public void Dispose()
+            {
+                Log("Exit");
+            }
+
+            protected virtual string FormatLogMessage(string message) => $"[{scopeName}]: {message}";
+
+            protected virtual void LogInternal(string message, LogType logType = LogType.Log)
+            {
+                UnityEngine.Debug.LogFormat(logType, m_ShowStackTrace ? LogOption.None : LogOption.NoStacktrace, null, FormatLogMessage(message));
+            }
+
+            [Conditional("DEVELOPMENT_BUILD")]
+            public void Log(string message, LogType logType = LogType.Log)
+                => LogInternal(message, logType);
         }
 
         /// <summary>

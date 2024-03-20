@@ -1,0 +1,93 @@
+[
+    {
+        "name": "android.permission.CAMERA",
+        "description": "Permission to use device camera(s).",
+        "level": "dangerous",
+        "min_api_level": 20
+    },
+    {
+        "name": "android.permission.RECORD_AUDIO",
+        "description": "Permission to use device microphone to record audio.",
+        "level": "dangerous",
+        "min_api_level": 20
+    },
+    {
+        "name": "com.magicleap.permission.EYE_TRACKING",
+        "description": "Permission to obtain eye tracking data.",
+        "level": "dangerous",
+        "min_api_level": 9
+    },
+    {
+        "name": "com.magicleap.permission.PUPIL_SIZE",
+        "description": "Permission to obtain eye pupil size data.",
+        "level": "dangerous",
+        "min_api_level": 20
+    },
+    {
+        "name": "com.magicleap.permission.SPATIAL_ANCHOR",
+        "description": "Permission to obtain spatial anchor(s) data.",
+        "level": "normal",
+        "min_api_level": 20
+    },
+    {
+        "name": "com.magicleap.permission.HAND_TRACKING",
+        "description": "Permission to obtain hand tracking data.",
+        "level": "normal",
+        "min_api_level": 20
+    },
+    {
+        "name": "com.magicleap.permission.WEBVIEW",
+        "description": "Permission to enable WebView access.",
+        "level": "normal",
+        "min_api_level": 20
+    },
+    {
+        "name": "com.magicleap.permission.MARKER_TRACKING",
+        "description": "Permission to obtain marker tracking data.",
+        "level": "normal",
+        "min_api_level": 20
+    },
+    {
+        "name": "com.magicleap.permission.VOICE_INPUT",
+        "description": "Permission to obtain voice input data.",
+        "level": "dangerous",
+        "min_api_level": 20
+    },
+    {
+        "name": "com.magicleap.permission.SPATIAL_MAPPING",
+        "description": "Permission to obtain following spatial data: planes data, meshing data.",
+        "level": "dangerous",
+        "min_api_level": 20
+    },
+    {
+        "name": "com.magicleap.permission.DEPTH_CAMERA",
+        "description": "Permission to use depth camera.",
+        "level": "dangerous",
+        "min_api_level": 23
+    },
+    {
+        "name": "com.magicleap.permission.EYE_CAMERA",
+        "description": "Permission to use eye cameras.",
+        "level": "dangerous",
+        "min_api_level": 26
+    },
+    {
+        "name": "com.magicleap.permission.SPACE_MANAGER",
+        "description": "Permission to use Magic Leap Space manager.",
+        "level": "normal",
+        "min_api_level": 26
+    },
+    {
+        "name": "com.magicleap.permission.SPACE_IMPORT_EXPORT",
+        "description": "Permission to export and import Magic Leap Spaces.",
+        "level": "dangerous",
+        "min_api_level": 26
+    },
+    {
+        "name": "com.magicleap.permission.FACIAL_EXPRESSION",
+        "description": "Permission to obtain facial expression data.",
+        "level": "dangerous",
+        "min_api_level": 29
+    }
+
+]

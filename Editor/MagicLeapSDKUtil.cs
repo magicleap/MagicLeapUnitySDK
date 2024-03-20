@@ -19,11 +19,7 @@ namespace UnityEditor.XR.MagicLeap
     {
         private const string kManifestPath = ".metadata/sdk.manifest";
         private const string kMagicLeapSDKRoot = "MagicLeapSDKRoot";
-#if UNITY_2022_2_OR_NEWER
         private const UnityEditor.BuildTarget kBuildTarget = BuildTarget.Android;
-#else
-        private const UnityEditor.BuildTarget kBuildTarget = BuildTarget.Relish;
-#endif
         private static uint minApiLevel = 0;
 
         [Serializable]
@@ -42,9 +38,10 @@ namespace UnityEditor.XR.MagicLeap
         {
             get
             {
-                if (string.IsNullOrEmpty(SdkPath))
+                var path = SdkPath;
+                if (string.IsNullOrEmpty(path))
                     return false;
-                return File.Exists(Path.Combine(SdkPath, kManifestPath));
+                return Directory.Exists(path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar));
             }
         }
 
@@ -69,20 +66,12 @@ namespace UnityEditor.XR.MagicLeap
         }
 
         /// <summary>
-        /// MLSDK path for the relish target.
+        /// MLSDK path for the android target.
         /// </summary>
         public static string SdkPath
         {
             get { return GetSDKPath(kBuildTarget); }
             set { SetSDKPath(kBuildTarget, value); }
-        }
-
-        public static string AppSimRuntimePath => MagicLeapEditorPreferences.ZeroIterationRuntimePath;
-        public static bool SearchingForZI => MagicLeapEditorPreferences.RunningLabdriver;
-        public static event Action<string> OnZeroIterationPathChanged
-        {
-            add { MagicLeapEditorPreferences.ZIRuntimePathChangeEvt += value; }
-            remove { MagicLeapEditorPreferences.ZIRuntimePathChangeEvt -= value; }
         }
 
         /// <summary>
@@ -105,7 +94,7 @@ namespace UnityEditor.XR.MagicLeap
         /// <summary>
         /// Get the MLSDK path for the given build target platform.
         /// </summary>
-        /// <param name="target">Relish is the only valid target for now.</param>
+        /// <param name="target">Android is the only valid target for now.</param>
         /// <returns></returns>
         private static string GetSDKPath(BuildTarget target)
         {

@@ -1,9 +1,9 @@
 {
     "name": "com.magicleap.unitysdk",
     "displayName": "Magic Leap SDK",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "unity": "2022.2",
-    "description": "Magic Leap Unity SDK",
+    "description": "Provides implementations of Magic Leap OpenXR extension APIs and XR subsystems for building and running on the Magic Leap 2.",
     "keywords": [
         "magicleap",
         "ar",
@@ -13,12 +13,13 @@
         "xreditorsubsystem"
     ],
     "dependencies": {
-        "com.unity.xr.openxr": "1.9.1",
+        "com.unity.xr.openxr": "1.10.0",
         "com.unity.xr.arfoundation": "5.0.0-pre.12",
         "com.unity.xr.interaction.toolkit": "2.1.0-pre.1",
         "com.unity.inputsystem": "1.3.0",
         "com.unity.modules.androidjni": "1.0.0",
-        "com.unity.xr.interactionsubsystems": "2.0.0"
+        "com.unity.xr.interactionsubsystems": "2.0.0",
+        "com.unity.collections": "2.2.1"
     },
     "author": {
         "name": "Magic Leap",
@@ -26,9 +27,9 @@
     },
     "samples": [
         {
-            "displayName": "ML Rig & Inputs",
-            "description": "Contains a ready-made ML Rig prefab for your XR Origin and device tracking, as well as a sample InputActionsAsset with  ML Controller Actions.",
-            "path": "Samples~/RigAndInputs"
+            "displayName": "ML Rig & OpenXR Input",
+            "description": "These sample assets are designed for use with OpenXR. Contains an ML Rig prefab with XROrigin and TrackedPoseDrivers for the HMD and Controller, as well as a sample InputActions asset with ML Controller Actions bound to OpenXR action paths.",
+            "path": "Samples~/Rig&Inputs"
         }
     ]
 }

@@ -450,9 +450,10 @@ namespace UnityEngine.XR.MagicLeap
             }
         }
 
-#if !UNITY_OPENXR_1_9_0_OR_NEWER
 
+#if UNITY_XR_MAGICLEAP_PROVIDER
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+#endif
         static void RegisterDescriptor()
         {
             XRPlaneSubsystemDescriptor.Create(new XRPlaneSubsystemDescriptor.Cinfo
@@ -466,7 +467,6 @@ namespace UnityEngine.XR.MagicLeap
                 supportsClassification = true
             });
         }
-#endif
 
         internal class NativeBindings : MagicLeapNativeBindings
         {

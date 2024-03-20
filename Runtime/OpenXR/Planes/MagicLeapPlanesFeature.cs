@@ -15,7 +15,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
     /// Enables the Magic Leap OpenXR Loader for Android, and modifies the AndroidManifest to be compatible with ML2.
     /// </summary>
 #if UNITY_EDITOR
-    [OpenXRFeature(UiName = "Magic Leap 2 Plane Detection",
+    [OpenXRFeature(UiName = "Magic Leap 2 Planes Subsystem",
         Desc="Necessary to deploy a Magic Leap 2 compatible application with Planes detection",
         Company = "Magic Leap",
         Version = "1.0.0",
@@ -31,6 +31,8 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         private const string PlaneExtensionName = "XR_EXT_plane_detection";
         
         private readonly List<XRPlaneSubsystemDescriptor> planeSubsystemDescriptors = new();
+
+        protected override string GetFeatureId() => FeatureId;
 
         protected override bool OnInstanceCreate(ulong xrInstance)
         {

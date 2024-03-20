@@ -19,7 +19,7 @@ namespace UnityEngine.XR.MagicLeap
 #endif
 
 #if UNITY_OPENXR_1_9_0_OR_NEWER
-        private static MagicLeapFeature mlOpenXrFeature;
+        private static MagicLeapMeshingFeature mlOpenXrFeature;
 #endif
 
         public static IEnumerator WaitUntilInited()
@@ -44,7 +44,7 @@ namespace UnityEngine.XR.MagicLeap
             mlLoader = XRGeneralSettings.Instance.Manager.ActiveLoaderAs<MagicLeapLoader>();
 #endif
 #if UNITY_OPENXR_1_9_0_OR_NEWER
-            mlOpenXrFeature = OpenXR.OpenXRSettings.Instance.GetFeature<MagicLeapFeature>();
+            mlOpenXrFeature = OpenXR.OpenXRSettings.Instance.GetFeature<MagicLeapMeshingFeature>();
 #endif
         }
 
@@ -61,7 +61,7 @@ namespace UnityEngine.XR.MagicLeap
 #elif UNITY_OPENXR_1_9_0_OR_NEWER
                 if (mlOpenXrFeature != null)
                 {
-                    mlOpenXrFeature.StartMeshSubsystem();
+                    mlOpenXrFeature.StartSubsystemForMLMeshing();
                 }
 #endif
             }
@@ -86,7 +86,7 @@ namespace UnityEngine.XR.MagicLeap
 #elif UNITY_OPENXR_1_9_0_OR_NEWER
                 if (mlOpenXrFeature != null)
                 {
-                    mlOpenXrFeature.StopMeshSubsystem();
+                    mlOpenXrFeature.StopSubsystemForMLMeshing();
                 }
 #endif
             }

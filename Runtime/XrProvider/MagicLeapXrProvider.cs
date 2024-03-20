@@ -23,6 +23,7 @@ namespace UnityEngine.XR.MagicLeap
     {
         public const string InputSubsystemId = "MagicLeapXr-Input";
         public const string MeshingSubsystemId = "MagicLeapXr-Meshing";
+        public const string PointCloudSubsystemId = "MagicLeapXr-PointCloud";
         public const string GestureSubsystemId = "MagicLeapXr-Gesture";
         public const string SessionSubsystemId = "MagicLeapXr-Session";
         public const string PlanesSubsystemId = "MagicLeapXr-Planes";

@@ -21,7 +21,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         Company = "Magic Leap",
         Version = "1.0.0",
         Priority = -1,
-        BuildTargetGroups = new[] { BuildTargetGroup.Android, BuildTargetGroup.Standalone },
+        BuildTargetGroups = new[] { BuildTargetGroup.Android },
         FeatureId = FeatureId,
         OpenxrExtensionStrings = "XR_ML_user_calibration"
     )]
@@ -41,6 +41,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             return base.OnInstanceCreate(xrInstance);
         }
 
+        protected override string GetFeatureId() => FeatureId;
         public enum HeadsetFitStatus
         {
             Unknown = 0,

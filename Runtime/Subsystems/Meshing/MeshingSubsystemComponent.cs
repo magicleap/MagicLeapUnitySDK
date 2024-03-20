@@ -560,7 +560,6 @@ namespace UnityEngine.XR.MagicLeap
             
         }
 
-
         IEnumerator Init()
         {
             yield return StartCoroutine(MeshingSubsystemLifecycle.WaitUntilInited());
@@ -585,6 +584,7 @@ namespace UnityEngine.XR.MagicLeap
             UpdateBatchSize();
 
             StartSubsystem();
+
         }
 
         void StartSubsystem()

@@ -89,13 +89,14 @@ namespace UnityEngine.XR.MagicLeap
         /// </returns>
         private MLResult InternalGetFramePose(NativeBindings.CameraID cameraId, MLTime vcamTimestamp, out Matrix4x4 outTransform)
         {
-            if (!MagicLeapXrProviderNativeBindings.IsHeadTrackingAvailable())
+            if ((MLDevice.IsMagicLeapLoaderActive() && !MagicLeapXrProviderNativeBindings.IsHeadTrackingAvailable()) ||
+                    (MLDevice.IsOpenXRLoaderActive() && !OpenXR.Features.MagicLeapSupport.MLHeadTracking.IsAvailable()))
             {
                 outTransform = default;
                 return MLResult.Create(MLResult.Code.PoseNotFound, "HeadTracking is not available");
             }
             MagicLeapNativeBindings.MLTransform outInternalTransform = new MagicLeapNativeBindings.MLTransform();
-            MLResult.Code resultCode = NativeBindings.MLCVCameraGetFramePose(Handle, MagicLeapXrProviderNativeBindings.GetHeadTrackerHandle(), cameraId, vcamTimestamp.Value, ref outInternalTransform);
+            MLResult.Code resultCode = NativeBindings.MLCVCameraGetFramePose(Handle, GetHeadTrackerHandle(), cameraId, vcamTimestamp.Value, ref outInternalTransform);
             MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLCVCameraGetFramePose));
             MLResult poseResult = MLResult.Create(resultCode);
             if (!poseResult.IsOk)
@@ -109,6 +110,14 @@ namespace UnityEngine.XR.MagicLeap
             }
 
             return poseResult;
+        }
+
+        private ulong GetHeadTrackerHandle()
+        {
+            if (MLDevice.IsMagicLeapLoaderActive())
+                return MagicLeapXrProviderNativeBindings.GetHeadTrackerHandle();
+            else
+                return OpenXR.Features.MagicLeapSupport.MLHeadTracking.Handle;
         }
 
         protected override void OnApplicationPause(bool pauseStatus)

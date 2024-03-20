@@ -9,18 +9,18 @@
 // %BANNER_END%
 
 #if UNITY_OPENXR_1_9_0_OR_NEWER
-using UnityEditor;
-using UnityEditor.XR.OpenXR.Features;
+using UnityEngine.XR.OpenXR.Features.MagicLeapSupport;
 
-namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
+namespace UnityEditor.XR.OpenXR.Features.MagicLeapSupport
 {
     [OpenXRFeatureSet(
         UiName = "Magic Leap",
-        Description = "All Magic Leap OpenXR Features",
+        Description = "Features supported by the Magic Leap 2 platform.",
         FeatureSetId = "com.magicleap.openxr.featuregroup",
-        SupportedBuildTargets = new [] { BuildTargetGroup.Android, BuildTargetGroup.Standalone },
-        FeatureIds = new [] {
-            MagicLeapFeature.FeatureId ,
+        SupportedBuildTargets = new [] { BuildTargetGroup.Android },
+        FeatureIds = new[] {
+            MagicLeapFeature.FeatureId,
+            MagicLeapControllerProfile.FeatureId,
             MagicLeapRenderingExtensionsFeature.FeatureId,
             MagicLeapReferenceSpacesFeature.FeatureId,
             MagicLeapPlanesFeature.FeatureId,
@@ -28,22 +28,60 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             MagicLeapSystemNotificationsFeature.FeatureId,
             MagicLeapMarkerUnderstandingFeature.FeatureId,
             MagicLeapLocalizationMapFeature.FeatureId,
-            MagicLeapSpatialAnchorsFeature.FeatureId
-        },
-        RequiredFeatureIds = new[] {
-            MagicLeapFeature.FeatureId
+            MagicLeapSpatialAnchorsFeature.FeatureId,
+            MagicLeapSpatialAnchorsStorageFeature.FeatureId,
+            MagicLeapFacialExpressionFeature.FeatureId,
+            MagicLeapMeshingFeature.FeatureId
         },
         DefaultFeatureIds = new[] {
+            MagicLeapFeature.FeatureId,
+            MagicLeapControllerProfile.FeatureId,
             MagicLeapRenderingExtensionsFeature.FeatureId,
             MagicLeapReferenceSpacesFeature.FeatureId,
             MagicLeapPlanesFeature.FeatureId,
             MagicLeapUserCalibrationFeature.FeatureId,
             MagicLeapSystemNotificationsFeature.FeatureId,
             MagicLeapMarkerUnderstandingFeature.FeatureId,
-            MagicLeapLocalizationMapFeature.FeatureId
+            MagicLeapLocalizationMapFeature.FeatureId,
+            MagicLeapSpatialAnchorsFeature.FeatureId,
+            MagicLeapSpatialAnchorsStorageFeature.FeatureId,
+            MagicLeapFacialExpressionFeature.FeatureId,
+            MagicLeapMeshingFeature.FeatureId
         }
     )]
-    public class MagicLeapFeatureGroup
-    { }
+    public class MagicLeapFeatureGroup { }
+
+#if UNITY_EDITOR_WIN
+    [OpenXRFeatureSet(
+        UiName = "Magic Leap AppSim",
+        Description = "All features supported by the Magic Leap 2 platform.",
+        FeatureSetId = "com.magicleap.openxr.featuregroup.appsim",
+        SupportedBuildTargets = new[] { BuildTargetGroup.Standalone },
+        FeatureIds = new[] {
+            MagicLeapFeature.FeatureId,
+            MagicLeapControllerProfile.FeatureId,
+            MagicLeapRenderingExtensionsFeature.FeatureId,
+            MagicLeapReferenceSpacesFeature.FeatureId,
+            MagicLeapPlanesFeature.FeatureId,
+            MagicLeapUserCalibrationFeature.FeatureId,
+            MagicLeapSystemNotificationsFeature.FeatureId,
+            MagicLeapMarkerUnderstandingFeature.FeatureId,
+            MagicLeapLocalizationMapFeature.FeatureId,
+            MagicLeapSpatialAnchorsFeature.FeatureId,
+            MagicLeapSpatialAnchorsStorageFeature.FeatureId,
+            MagicLeapFacialExpressionFeature.FeatureId,
+            MagicLeapMeshingFeature.FeatureId
+        },
+        DefaultFeatureIds = new[] {
+            MagicLeapFeature.FeatureId,
+            MagicLeapControllerProfile.FeatureId,
+            MagicLeapPlanesFeature.FeatureId,
+            MagicLeapMarkerUnderstandingFeature.FeatureId,
+            MagicLeapSpatialAnchorsFeature.FeatureId,
+            MagicLeapMeshingFeature.FeatureId
+        }
+    )]
+#endif
+    public class MagicLeapFeatureAppSimGroup { }
 }
 #endif

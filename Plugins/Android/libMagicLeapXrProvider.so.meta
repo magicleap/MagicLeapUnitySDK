@@ -20,7 +20,6 @@ PluginImporter:
         Exclude Editor: 1
         Exclude Linux64: 1
         Exclude OSXUniversal: 1
-        Exclude Relish: 0
         Exclude Win: 1
         Exclude Win64: 1
   - first:
@@ -42,12 +41,6 @@ PluginImporter:
         CPU: AnyCPU
         DefaultValueInitialized: true
         OS: AnyOS
-  - first:
-      Relish: Relish
-    second:
-      enabled: 1
-      settings:
-        CPU: X86_64
   - first:
       Standalone: Linux64
     second:

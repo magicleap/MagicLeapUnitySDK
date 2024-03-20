@@ -14,9 +14,10 @@ using UnityEngine;
 
 namespace UnityEditor.XR.MagicLeap
 {
-    public class PermissionSettingsLoader
+    internal class PermissionSettingsLoader
     {
-        private string FilePath => Path.Combine(MagicLeapSDKUtil.SdkPath, "data", "ml_permissions.json");
+        private const string manifestFileName = "ml_permissions.json";
+        public string ManifestFilePath => Path.Combine("Packages/com.magicleap.unitysdk/Editor/SettingsProviders/Permissions/data~", manifestFileName);
         internal PermissionsListJson settingJson { get; private set; }
 
         public PermissionSettingsLoader() => Initialize();
@@ -25,7 +26,7 @@ namespace UnityEditor.XR.MagicLeap
         {
             try
             {
-                var json = File.ReadAllText(FilePath, Encoding.UTF8);
+                var json = File.ReadAllText(ManifestFilePath, Encoding.UTF8);
 
                 settingJson = JsonUtility.FromJson<PermissionsListJson>($"{{\"Settings\":{json}}}");
             }

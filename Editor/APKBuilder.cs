@@ -15,13 +15,6 @@ namespace UnityEditor.XR.MagicLeap
         private static readonly string Arg_ForceSDKPathFromEnvVar = "--force_sdk_path_from_env_var";
         private static readonly string Arg_AppVersionCodeValue = "--version-code";
 
-#if !UNITY_2022_2_OR_NEWER
-        private static readonly Dictionary<BuildTarget, BuildTargetGroup> BuildTargetToGroup = new Dictionary<BuildTarget, BuildTargetGroup>()
-        {
-            { BuildTarget.Relish, BuildTargetGroup.Relish }
-        };
-#endif
-
         private bool didSetSDKPathFromEnvVar = false;
 
         private class BuildSettingsCache
@@ -71,14 +64,7 @@ namespace UnityEditor.XR.MagicLeap
             {
                 throw new System.Exception("You must be on the Android Build Target to use APKBuilder.");
             }
-#else
-            if (!BuildTargetToGroup.ContainsKey(EditorUserBuildSettings.activeBuildTarget))
-            {
-                throw new System.Exception($"Unsupported build target {EditorUserBuildSettings.activeBuildTarget} for APKBuilder. Only Relish build target is supported.");
-            }
 #endif
-
-            SetupSDKPaths(System.Array.IndexOf(System.Environment.GetCommandLineArgs(), Arg_ForceSDKPathFromEnvVar) != -1);
 
             BuildSettingsCache buildSettingsCache = new BuildSettingsCache();
 
@@ -250,43 +236,6 @@ namespace UnityEditor.XR.MagicLeap
             }
 
             return false;
-        }
-
-        /// <summary>
-        /// Magic Leap SDK is required during the build process to include the
-        /// correct permissions in AndroidManifest.xml.
-        /// </summary>
-        /// <param name="bForceSetFromEnvVar"></param>
-        private void SetupSDKPaths(bool bForceSetFromEnvVar)
-        {
-            bool didSetFromEnvVar = false;
-            if (bForceSetFromEnvVar || !MagicLeapSDKUtil.SdkAvailable)
-            {
-                string relishSDKPath = System.Environment.GetEnvironmentVariable("RELISHSDK_UNITY");
-                if (string.IsNullOrEmpty(relishSDKPath))
-                {
-                    Debug.LogWarning("No SDK path found for Relish in editor preferences or RELISHSDK_UNITY environment variable. Build will probably fail OR Magic Leap permissions will not be included in AndroidManifest.xml.");
-                }
-                else
-                {
-                    if (bForceSetFromEnvVar)
-                    {
-                        Debug.LogFormat("{0} was passed as cmd line arg. Force setting Relish SDK Path to {1} from env vars.", Arg_ForceSDKPathFromEnvVar, relishSDKPath);
-                    }
-                    else
-                    {
-                        Debug.LogFormat("No SDK path set for Relish in editor preferences. Using {0} from env vars.", relishSDKPath);
-                    }
-                    MagicLeapSDKUtil.SdkPath = relishSDKPath;
-                    didSetFromEnvVar = true;
-                }
-            }
-            else
-            {
-                Debug.LogFormat("Relish SDK found in editor preferences at {0}", MagicLeapSDKUtil.SdkPath);
-            }
-
-            this.didSetSDKPathFromEnvVar = didSetFromEnvVar;
         }
 
         [Serializable]

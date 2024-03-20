@@ -338,13 +338,22 @@ namespace UnityEngine.XR.MagicLeap
 
                     if (planeInfo.Data != null)
                     {
-                        planeInfo.Data = new byte[planeInfo.Stride * planeInfo.Height];
-                        if (planeInfo.PixelStride == 2) {
-                            Marshal.Copy(Data, planeInfo.Data, 0, (int)((planeInfo.Stride * (planeInfo.Height - 1)) + (planeInfo.Width * planeInfo.PixelStride) -1));
-                        } else {
-                            Marshal.Copy(Data, planeInfo.Data, 0, (int)((planeInfo.Stride * (planeInfo.Height - 1)) + (planeInfo.Width * planeInfo.PixelStride)));
+                        uint width = planeInfo.Stride == 0 ? planeInfo.Width : planeInfo.Stride;
+
+                        planeInfo.Data = new byte[width * planeInfo.Height];
+                        if (planeInfo.PixelStride == 2)
+                        {
+                            Marshal.Copy(Data, planeInfo.Data, 0, (int)((width * (planeInfo.Height - 1)) + (planeInfo.Width * planeInfo.PixelStride) - 1));
                         }
-                        planeInfo.Size = planeInfo.Stride * planeInfo.Height;
+                        else
+                        {
+                            Marshal.Copy(Data, planeInfo.Data, 0, (int)((width * (planeInfo.Height - 1)) + (planeInfo.Width * planeInfo.PixelStride)));
+                        }
+
+                        if (planeInfo.Stride != 0)
+                        {
+                            planeInfo.Size = planeInfo.Stride * planeInfo.Height;
+                        }
                     }
 
                     return planeInfo;

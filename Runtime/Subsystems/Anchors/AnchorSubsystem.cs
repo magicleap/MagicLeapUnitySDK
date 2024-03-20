@@ -181,7 +181,9 @@ namespace UnityEngine.XR.MagicLeap
             }
         }
 
+#if UNITY_XR_MAGICLEAP_PROVIDER
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+#endif
         static void RegisterDescriptor()
         {
             XRAnchorSubsystemDescriptor.Create(new XRAnchorSubsystemDescriptor.Cinfo

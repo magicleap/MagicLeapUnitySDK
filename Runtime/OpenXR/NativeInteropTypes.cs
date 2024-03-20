@@ -11,6 +11,7 @@
 #if UNITY_OPENXR_1_9_0_OR_NEWER
 using System;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport.NativeInterop
 {
@@ -110,17 +111,17 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport.NativeInterop
 
         public override string ToString()
         {
-            string idString = string.Empty;
+            StringBuilder idString = new StringBuilder(20);
 
             for (int i = 0; i < 16; i++)
             {
-                idString += string.Format("{0:x2}", this.Data[i]);
+                idString.AppendFormat("{0:x2}", this.Data[i]);
             }
 
             foreach (int i in hyphenIndices)
-                idString = idString.Insert(i, "-");
+                idString.Insert(i, "-");
 
-            return idString;
+            return idString.ToString();
         }
 
         internal XrUUID(string id)

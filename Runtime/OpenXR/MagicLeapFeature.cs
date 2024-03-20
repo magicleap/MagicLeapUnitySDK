@@ -12,10 +12,8 @@ using System.Collections.Generic;
 using UnityEngine.XR.ARSubsystems;
 using UnityEngine.XR.MagicLeap;
 using System;
-using UnityEngine.InputSystem.Layouts;
-using UnityEngine.InputSystem.XR;
 using UnityEngine.LowLevel;
-using UnityEngine.PlayerLoop;
+using MagicLeap;
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.XR.OpenXR.Features;
@@ -33,7 +31,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         Version = "1.0.0",
         BuildTargetGroups = new []{ BuildTargetGroup.Android, BuildTargetGroup.Standalone },
         FeatureId = FeatureId,
-        OpenxrExtensionStrings = "XR_ML_compat XR_KHR_convert_timespec_time XR_EXT_view_configuration_depth_range"
+        OpenxrExtensionStrings = "XR_ML_compat XR_KHR_convert_timespec_time XR_EXT_view_configuration_depth_range XR_ML_view_configuration_depth_range_change"
     )]
 #endif
     public partial class MagicLeapFeature : OpenXRFeature
@@ -77,7 +75,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             Recommended,
 #if DISABLE_MAGICLEAP_CLIP_ENFORCEMENT
             /// <summary>
-            /// Unsupported
+            /// Do not restrict the Camera's near clip plane distance. 
             /// </summary>
             None,
 #endif
@@ -110,6 +108,10 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         public float MaxFarZ => NativeBindings.MLOpenXRGetMaxFarClippingPlane();
         public float RecommendedFarZ => NativeBindings.MLOpenXRGetRecommendedFarClippingPlane();
 
+        //This is used when DISABLE_MAGICLEAP_CLIP_ENFORCEMENT flag is toggled, for use with NearClipMode.None
+        // Unity doesn't like its camera nearClip going below 0.01 and will lock up if it does. 
+        private const float minimumNearClip = 0.01f;
+
         private static List<XRMeshSubsystemDescriptor> meshSubsysDesc = new List<XRMeshSubsystemDescriptor>();
         private static List<XRSessionSubsystemDescriptor> sessionSubsysDesc = new List<XRSessionSubsystemDescriptor>();
 
@@ -137,19 +139,22 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         {
             NativeBindings.MLOpenXROnSessionCreate(xrSession);
 
-            if (perceptionSnapshots)
+            if (!Application.isEditor)
             {
-                var update = new PlayerLoopSystem()
+                if (perceptionSnapshots)
                 {
-                    subSystemList = Array.Empty<PlayerLoopSystem>(),
-                    updateDelegate = PerformMLPerceptionSnapshot,
-                    type = typeof(MLPerceptionSnapshotUpdate)
-                };
-                var playerLoop = LowLevel.PlayerLoop.GetCurrentPlayerLoop();
-                if (!Utils.InstallIntoPlayerLoop(ref playerLoop, update, Utils.InstallPath))
-                    Debug.LogError("Unable to install snapshotting Update delegate into player loop!");
-                else
-                    LowLevel.PlayerLoop.SetPlayerLoop(playerLoop);
+                    var update = new PlayerLoopSystem()
+                    {
+                        subSystemList = Array.Empty<PlayerLoopSystem>(),
+                        updateDelegate = PerformMLPerceptionSnapshot,
+                        type = typeof(MLPerceptionSnapshotUpdate)
+                    };
+                    var playerLoop = LowLevel.PlayerLoop.GetCurrentPlayerLoop();
+                    if (!PlayerLoopUtil.InstallIntoPlayerLoop(ref playerLoop, update, PlayerLoopUtil.InstallPath))
+                        Debug.LogError("Unable to install snapshotting Update delegate into player loop!");
+                    else
+                        LowLevel.PlayerLoop.SetPlayerLoop(playerLoop);
+                }
             }
         }
 
@@ -157,14 +162,20 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         {
             base.OnSessionBegin(xrSession);
 
-            Application.onBeforeRender += EnforceClippingPlanes;
+            if (!Application.isEditor)
+            {
+                Application.onBeforeRender += EnforceClippingPlanes;
+            }
         }
 
         protected override void OnSessionEnd(ulong xrSession)
         {
             base.OnSessionEnd(xrSession);
 
-            Application.onBeforeRender -= EnforceClippingPlanes;
+            if (!Application.isEditor)
+            {
+                Application.onBeforeRender -= EnforceClippingPlanes;
+            }
         }
 
         protected override void OnSessionDestroy(ulong xrSession)
@@ -174,37 +185,26 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 
         protected override void OnSessionStateChange(int oldState, int newState)
         {
-            NativeBindings.MLOpenXRUpdateDepthRangeValues();
+            NativeBindings.MLHandleSessionStateChange(oldState, newState);
         }
 
         protected override void OnSubsystemCreate()
         {
             base.OnSubsystemCreate();
             
-            CreateSubsystem<XRMeshSubsystemDescriptor, XRMeshSubsystem>(meshSubsysDesc, MagicLeapXrProvider.MeshingSubsystemId);
             CreateSubsystem<XRSessionSubsystemDescriptor, XRSessionSubsystem>(sessionSubsysDesc, MagicLeapXrProvider.SessionSubsystemId);
         }
         
         protected override void OnSubsystemDestroy()
         {
             base.OnSubsystemDestroy();
-            DestroySubsystem<XRMeshSubsystem>();
+
             DestroySubsystem<XRSessionSubsystem>();
-        }
-
-        public void StartMeshSubsystem()
-        {
-            StartSubsystem<XRMeshSubsystem>();
-        }
-
-        public void StopMeshSubsystem()
-        {
-            StopSubsystem<XRMeshSubsystem>();
         }
 
 		private void PerformMLPerceptionSnapshot()
         {
-            if (!perceptionSnapshots)
+            if (!perceptionSnapshots || Application.isEditor)
                 return;
 
             var result = MLResult.Code.Ok;
@@ -223,7 +223,13 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 
         private void EnforceClippingPlanes() => ApplyToCamera(Camera.main);
 
-        public void ApplyFarClip(ref float zFar)
+        public void SetNearClipPolicy(NearClipMode mode)
+        {
+            nearClipPolicy = mode;
+            EnforceClippingPlanes();
+        }
+
+        private void ApplyFarClip(ref float zFar)
         {
             switch (farClipPolicy)
             {
@@ -244,7 +250,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             switch (nearClipPolicy)
             {
                 // Whatever is set in the system settings menu is our new minimum, even if it is
-                // above the system recommendation
+                // above the system recommendation.
                 case NearClipMode.Minimum:
                     zNear = Mathf.Max(zNear, MinNearZ);
                     break;
@@ -253,9 +259,11 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                     break;
 #if DISABLE_MAGICLEAP_CLIP_ENFORCEMENT
                 case NearClipMode.None:
-                default:
+                    zNear = minimumNearClip;
                     break;
 #endif
+                default:
+                    break;
             }
         }
 
@@ -269,7 +277,6 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 
             ApplyFarClip(ref zFar);
             ApplyNearClip(ref zNear);
-
             if (warnIfNearClipChanged && zNear > camera.nearClipPlane)
                 Debug.LogWarning($"Main Camera's nearClipPlane value is less than the minimum value for this device. Increasing to {zNear}");
 
