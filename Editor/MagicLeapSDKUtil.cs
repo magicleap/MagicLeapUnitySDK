@@ -79,23 +79,9 @@ namespace UnityEditor.XR.MagicLeap
         /// </summary>
         public static Version SdkVersion => new Version(JsonUtility.FromJson<SDKManifest>(File.ReadAllText(Path.Combine(SdkPath, kManifestPath))).version);
 
-        public static void DeleteSDKPathFromEditorPrefs(BuildTarget target)
-        {
-            if (target == BuildTarget.Android)
-            {
-                EditorPrefs.DeleteKey(kMagicLeapSDKRoot);
-            }
-            else
-            {
-                EditorPrefs.DeleteKey(target.ToString() + "SDKRoot");
-            }
-        }
-
         /// <summary>
-        /// Get the MLSDK path for the given build target platform.
+        /// Get the MLSDK path based on provided command-line argument or environment variable.
         /// </summary>
-        /// <param name="target">Android is the only valid target for now.</param>
-        /// <returns></returns>
         private static string GetSDKPath(BuildTarget target)
         {
             if (target == BuildTarget.Android)
@@ -103,11 +89,19 @@ namespace UnityEditor.XR.MagicLeap
                 string path = GetMLSDKCmdLineArg();
                 if (string.IsNullOrEmpty(path))
                 {
-                    path = EditorPrefs.GetString(kMagicLeapSDKRoot, null);
+                    path = SessionState.GetString(kMagicLeapSDKRoot, null);
+                    if (string.IsNullOrEmpty(path))
+                    {
+                        // We now only ever need the MLSDK path when running some TestRunner tests and this is generally only
+                        // done in CI by passing a "-mlsdk" argument to the Unity command line. Therefore the call to GetMLSDKCmdLineArg()
+                        // above should be enough to take care of this. In the rare event someone is trying to run the tests locally in the editor,
+                        // this makes the assumption it's a developer with the common "MLSDK" environment variable set on their dev environment
+                        path = Environment.GetEnvironmentVariable("MLSDK");
+                    }
                 }
                 return path;                
             }
-            string targetPath = EditorPrefs.GetString(target.ToString() + "SDKRoot");
+            string targetPath = SessionState.GetString(target.ToString() + "SDKRoot", kMagicLeapSDKRoot);
             if (string.IsNullOrEmpty(targetPath))
             {
                 Debug.LogWarningFormat("MagicLeapSDKUtil couldn't determine SDK path for BuildTarget {0}.", target.ToString());
@@ -132,11 +126,11 @@ namespace UnityEditor.XR.MagicLeap
         {
             if (target == BuildTarget.Android)
             {
-                EditorPrefs.SetString(kMagicLeapSDKRoot, path);
+                SessionState.SetString(kMagicLeapSDKRoot, path);
             }
             else
             {
-                EditorPrefs.SetString(target.ToString() + "SDKRoot", path);
+                SessionState.SetString(target.ToString() + "SDKRoot", path);
             }
         }
     }

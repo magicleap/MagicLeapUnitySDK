@@ -105,6 +105,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             private List<XRAnchor> updatedAnchors = new List<XRAnchor>();
             private List<TrackableId> deletedAnchors = new List<TrackableId>();
 
+
             public MagicLeapProvider()
             {
             }
@@ -249,7 +250,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             public override bool TryRemoveAnchor(TrackableId trackableId)
             {
                 bool anchorFound = false;
-                int foundIndex = 0;
+                int foundIndex = 0; 
                 for (int i = 0; i < currentAnchors.Count; i++)
                 {
                     if (currentAnchors[i].AnchorObject.trackableId == trackableId)
@@ -266,7 +267,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 
                     unsafe
                     {
-                        ulong anchorId = currentAnchors[foundIndex].AnchorId;
+                        var anchorId = currentAnchors[foundIndex].AnchorId;
                         var resultCode = MagicLeapSpatialAnchorsFeature.NativeBindings.MLOpenXRDeleteLocalSpatialAnchor(&anchorId);
                         deleteResult = Utils.DidXrCallSucceed(resultCode, nameof(MagicLeapSpatialAnchorsFeature.NativeBindings.MLOpenXRCreateSpatialAnchor));
                     }
@@ -329,11 +330,10 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 
             public Pose GetAnchorPoseFromID(ulong anchorId)
             {
-                Pose returnedPose = new Pose();
                 unsafe
                 {
+                    Pose returnedPose = default;
                     MagicLeapSpatialAnchorsFeature.NativeBindings.MLOpenXRGetSpatialAnchorPose(&anchorId, &returnedPose);
-
                     return returnedPose;
                 }
             }

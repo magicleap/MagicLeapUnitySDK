@@ -500,6 +500,9 @@ namespace MagicLeap.Android.NDK.NativeWindow
         public static bool IsSupported(Description description)
             => AHardwareBuffer_isSupported(ref description) == 1;
 
+        public override string ToString()
+            => $"0x{value.ToInt64():X}";
+
         public static bool TryAllocate(Description description, out AHardwareBuffer buffer)
             => AHardwareBuffer_allocate(ref description, out buffer) == 0;
 

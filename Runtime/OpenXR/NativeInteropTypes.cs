@@ -28,6 +28,16 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport.NativeInterop
         Protected = 1 << 0,
         Vignette = 1 << 1,
     }
+
+    public sealed class XrTime
+    {
+        public long Value { get; private set; }
+        internal XrTime(long val) { Value = val; }
+
+        public static implicit operator long(XrTime xrTime) => xrTime.Value;
+        public static implicit operator XrTime(long val) => new(val);
+        public override string ToString() => Value.ToString();
+    }
     
     // By default, [StructLayout(LayoutKind.Sequential)] is applied to structs
     internal unsafe struct FrameEndInfo
@@ -129,7 +139,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport.NativeInterop
             id = id.Replace("-", string.Empty);
             fixed (byte* b = this.Data)
             {
-                StringToByteArray(id, b);
+               StringToByteArray(id, b);
             }
         }
 

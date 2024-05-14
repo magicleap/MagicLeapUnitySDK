@@ -9,6 +9,8 @@
 // %BANNER_END%
 
 using System;
+using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.Android;
 
 namespace MagicLeap.Android
@@ -20,7 +22,14 @@ namespace MagicLeap.Android
             Action<string> onPermissionDenied = null,
             Action<string> onPermissionDeniedDontAskAgain = null)
         {
-            RequestPermissions(new string[] { permission }, onPermissionGranted, onPermissionDenied, onPermissionDeniedDontAskAgain);
+            if (Application.isEditor)
+            {
+                onPermissionGranted?.Invoke(permission);
+            }
+            else
+            {
+                RequestPermissions(new string[] { permission }, onPermissionGranted, onPermissionDenied, onPermissionDeniedDontAskAgain);
+            }
         }
 
         public static void RequestPermissions(string[] permissions,
@@ -28,13 +37,31 @@ namespace MagicLeap.Android
             Action<string> onPermissionDenied = null,
             Action<string> onPermissionDeniedDontAskAgain = null)
         {
+            var permissionsToCheck = new List<string>();
+            foreach (string permission in permissions)
+            {
+                if (CheckPermission(permission))
+                {
+                    onPermissionGranted?.Invoke(permission);
+                }
+                else
+                {
+                    permissionsToCheck.Add(permission);
+                }
+            }
+
+            if (Application.isEditor || permissionsToCheck.Count == 0)
+            {
+                return;
+            }
+
             var callbacks = new PermissionCallbacks();
             callbacks.PermissionGranted += onPermissionGranted;
             callbacks.PermissionDenied += onPermissionDenied;
             callbacks.PermissionDeniedAndDontAskAgain += onPermissionDeniedDontAskAgain;
-            Permission.RequestUserPermissions(permissions, callbacks);
+            Permission.RequestUserPermissions(permissionsToCheck.ToArray(), callbacks);
         }
 
-        public static bool CheckPermission(string permission) => Permission.HasUserAuthorizedPermission(permission);
+        public static bool CheckPermission(string permission) => Application.isEditor || Permission.HasUserAuthorizedPermission(permission);
     }
 }

@@ -1,7 +1,7 @@
 {
     "name": "com.magicleap.unitysdk",
     "displayName": "Magic Leap SDK",
-    "version": "2.1.0",
+    "version": "2.2.0",
     "unity": "2022.2",
     "description": "Provides implementations of Magic Leap OpenXR extension APIs and XR subsystems for building and running on the Magic Leap 2.",
     "keywords": [

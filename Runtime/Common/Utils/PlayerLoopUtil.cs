@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.LowLevel;
 using UnityEngine.PlayerLoop;
@@ -36,6 +37,24 @@ namespace MagicLeap
             Array.Resize(ref subsystems, length + 1);
             subsystems[length] = targetSystem;
             parentSystem.subSystemList = subsystems;
+        }
+        
+        internal static void RemoveFromPlayerLoop(ref PlayerLoopSystem playerLoop, PlayerLoopSystem systemToRemove, params Type[] installPath)
+        {
+            installPath ??= Array.Empty<Type>();
+            ref var current = ref playerLoop;
+            foreach (var path in installPath)
+            {
+                var idx = Array.FindIndex(current.subSystemList, s => s.type == path);
+                if (idx == -1)
+                    return;
+                current = ref current.subSystemList[idx];
+            }
+
+            var subsystems = current.subSystemList ?? Array.Empty<PlayerLoopSystem>();
+            var subsystemList = subsystems.ToList();
+            subsystemList.RemoveAll((targetSystem) => targetSystem.type == systemToRemove.type);
+            current.subSystemList = subsystemList.ToArray();
         }
     }
 }

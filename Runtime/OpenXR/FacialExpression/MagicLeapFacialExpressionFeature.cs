@@ -7,11 +7,6 @@
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
-#if UNITY_OPENXR_1_9_0_OR_NEWER
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine.XR.MagicLeap;
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.XR.OpenXR.Features;
@@ -33,9 +28,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
     public partial class MagicLeapFacialExpressionFeature : MagicLeapOpenXRFeatureBase
     {
         public const string FeatureId = "com.magicleap.openxr.feature.ml2_facialexpression";
-
-        protected override string GetFeatureId() => FeatureId;
-
+        
         protected override bool OnInstanceCreate(ulong xrInstance)
         {
             if (!OpenXRRuntime.IsExtensionEnabled("XR_ML_facial_expression"))
@@ -44,8 +37,18 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                 return false;
             }
 
-            return base.OnInstanceCreate(xrInstance);
+            var instanceCreateResult = base.OnInstanceCreate(xrInstance);
+            if (!instanceCreateResult)
+            {
+                return false;
+            }
+            nativeFunctions = CreateNativeFunctions<MagicLeapFacialExpressionNativeFunctions>();
+            return true;
+        }
+
+        protected override void OnSessionDestroy(ulong xrSession)
+        {
+            DestroyClient();
         }
     }
 }
-#endif

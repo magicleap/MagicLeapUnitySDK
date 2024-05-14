@@ -1,5 +1,3 @@
-#if UNITY_OPENXR_1_9_0_OR_NEWER
-
 namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 {
     public partial class MagicLeapMarkerUnderstandingFeature
@@ -324,15 +322,13 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         public struct MarkerData
         {
             /// <summary>
-            ///     The reprojection error of this QR code detection in degrees.
-            ///
-            ///     The reprojection error is only useful when tracking QR codes. A high
-            ///     reprojection error means that the estimated pose of the QR code doesn't match
-            ///     well with the 2D detection on the processed video frame and thus the pose might
-            ///     be inaccurate. The error is given in degrees, signifying by how much either
-            ///     camera or QR code would have to be moved or rotated to create a perfect
-            ///     reprojection. The further away your QR code is, the smaller this reprojection
-            ///     error will be for the same displacement error of the code.
+            /// <para>The reprojection error is only useful when tracking <see cref="MarkerType.QR"/> codes. A high
+            /// reprojection error means that the estimated pose of the QR code doesn't match
+            /// well with the 2D detection on the processed video frame and thus the pose might
+            /// be inaccurate. The error is given in degrees, signifying by how much either
+            /// camera or QR code would have to be moved or rotated to create a perfect
+            /// reprojection. The further away your QR code is, the smaller this reprojection
+            /// error will be for the same displacement error of the code.</para>
             /// </summary>
             public float ReprojectionErrorMeters;
 
@@ -342,23 +338,23 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             public float MarkerLength;
 
             /// <summary>
-            /// The number data retreived from the marker. Does not apply to QR or Code128.
+            /// The number data retrieved from the marker. Only applies to <see cref="MarkerType.Aruco"/> and <see cref="MarkerType.AprilTag"/>.
             /// </summary>
-            public ulong MarkerNumber;
+            public ulong? MarkerNumber;
 
             /// <summary>
-            /// The string data obtained from the marker. Only applies to QR and Code128.
+            /// The string data obtained from the marker. Only applies to <see cref="MarkerType.QR"/>, <see cref="MarkerType.Code128"/>, <see cref="MarkerType.EAN13"/>, and <see cref="MarkerType.UPCA"/>.
             /// </summary>
             public string MarkerString;
 
             /// <summary>
-            /// The position and rotation data of the marker. Only applies to Aruco, AprilTag, and QR.
+            /// The position and rotation data of the marker. Only applies to <see cref="MarkerType.Aruco"/>, <see cref="MarkerType.AprilTag"/>, and <see cref="MarkerType.QR"/>.
             /// </summary>
-            public Pose MarkerPose;
+            public Pose? MarkerPose;
         }
-
+        
         /// <summary>
-        //  All of the settings associated with the marker tracker.
+        /// All of the settings associated with the marker tracker.
         /// </summary>
         public struct MarkerDetectorSettings
         {
@@ -495,4 +491,3 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         }        
     }
 }
-#endif

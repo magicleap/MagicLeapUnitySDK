@@ -48,6 +48,9 @@ namespace OpenXR.PointCloud
         {
             private MagicLeapMeshingFeature.FrameMeshInfo currentFrameInfo;
 
+            private IntPtr previousMeshIds = IntPtr.Zero;
+            private int previousMeshCount;
+
             public override void Start()
             {
                 base.Start();
@@ -58,6 +61,7 @@ namespace OpenXR.PointCloud
             {
                 base.Stop();
                 MagicLeapOpenXRPointCloudNativeBindings.MLOpenXRStopPointCloudDetection();
+                MagicLeapOpenXRPointCloudNativeBindings.MLOpenXRGetCurrentMeshes(ref previousMeshIds, out previousMeshCount);
             }
 
 
@@ -65,16 +69,24 @@ namespace OpenXR.PointCloud
             {
                 unsafe
                 {
+                    //If previous Ids exists, then we have to add that as removed
+                    if (previousMeshIds != IntPtr.Zero && previousMeshCount > 0)
+                    {
+                        var previousIds = (TrackableId*)previousMeshIds;
+                        var previousRemovedIds = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<TrackableId>(previousIds, previousMeshCount, Allocator.None);
+                        var previousResult =  new TrackableChanges<XRPointCloud>(null, 0, null, 0, previousRemovedIds.GetUnsafePtr(), previousMeshCount, defaultPointCloud, sizeof(XRPointCloud), allocator);
+                        previousMeshIds = IntPtr.Zero;
+                        return previousResult;
+                    }
                     //Fetch frame info
                     MagicLeapXrMeshingNativeBindings.MLOpenXRGetCurrentFrameMeshData(out currentFrameInfo);
 
                     var addedIds = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<TrackableId>(currentFrameInfo.addedIds, (int)currentFrameInfo.addedCount, Allocator.None);
                     var updatedIds = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<TrackableId>(currentFrameInfo.updatedIds, (int)currentFrameInfo.updatedCount, Allocator.None);
                     var removedIds = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<TrackableId>(currentFrameInfo.removedIds, (int)currentFrameInfo.removedCount, Allocator.None);
-
-
-                    var addedPointClouds = new NativeList<XRPointCloud>((int)currentFrameInfo.addedCount, Allocator.TempJob);
-                    var updatedPointClouds = new NativeList<XRPointCloud>((int)currentFrameInfo.updatedCount, Allocator.TempJob);
+                    
+                    using var addedPointClouds = new NativeList<XRPointCloud>((int)currentFrameInfo.addedCount, Allocator.TempJob);
+                    using var updatedPointClouds = new NativeList<XRPointCloud>((int)currentFrameInfo.updatedCount, Allocator.TempJob);
 
                     new XRPointCloudCreationJob
                     {

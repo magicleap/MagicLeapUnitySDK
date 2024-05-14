@@ -7,15 +7,15 @@
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
-#if UNITY_OPENXR_1_9_0_OR_NEWER
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine.XR.OpenXR.Features.MagicLeapSupport.MagicLeapLocalizationMapNativeTypes;
 using UnityEngine.XR.OpenXR.NativeTypes;
 using UnityEngine.XR.OpenXR.Features.MagicLeapSupport.NativeInterop;
+using UnityEngine.XR.OpenXR.Features.MagicLeapSupport.MagicLeapOpenXRFeatureNativeTypes;
+using UnityEngine.XR.ARSubsystems;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -24,8 +24,6 @@ using UnityEditor.XR.OpenXR.Features;
 
 namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 {
-    using static MagicLeapLocalizationMapFeature.NativeBindings;
-
 #if UNITY_EDITOR
     [OpenXRFeature(UiName = "Magic Leap 2 Localization Maps",
         Desc = "Import/Export and manage localization maps.",
@@ -36,192 +34,180 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         OpenxrExtensionStrings = ExtensionName
     )]
 #endif // UNITY_EDITOR
-    public partial class MagicLeapLocalizationMapFeature : MagicLeapOpenXRFeatureBase
+    public partial class MagicLeapLocalizationMapFeature : MagicLeapOpenXRFeatureWithEvents<MagicLeapLocalizationMapFeature>
     {
         public const string FeatureId = "com.magicleap.openxr.feature.ml2_localizationmap";
         public const string ExtensionName = "XR_ML_localization_map";
-        const uint LocalizationMapNameSize = 64;
-
-        #region Callbacks
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        internal delegate void OnEventDataLocalizationChangedCallback(ref XrEventDataLocalizationChangedML eventData);
-
-        public delegate void OnLocalizationMapChangedDelegate(LocalizationEventData data);
-        private static event OnLocalizationMapChangedDelegate OnLocalizationChanged = delegate { };
-        public static event OnLocalizationMapChangedDelegate OnLocalizationChangedEvent
-        {
-            add => OnLocalizationChanged += value;
-            remove => OnLocalizationChanged -= value;
-        }
-        #endregion
         
-        #region Enums
-        public enum LocalizationMapState
-        {
-            NotLocalized,
-            Localized,
-            LocalizationPending,
-            SleepingBeforeRetry,
-        }
+        private MagicLeapLocalizationMapNativeFunctions nativeFunctions;
 
-        public enum LocalizationMapType
-        {
-            OnDevice = 0,
-            Cloud = 1,
-        }
-
-        public enum LocalizationMapConfidence
-        {
-            Poor = 0,
-            Fair = 1,
-            Good = 2,
-            Excellent = 3
-        }
-
-        public enum LocalizationMapErrorFlags
-        {
-            UnknownBit = 1,
-            OutOfMappedAreaBit = 2,
-            LowFeatureCountBit = 4,
-            ExcessiveMotionBit = 8,
-            LowLightBit = 16,
-            HeadposeBit = 32
-        }
-        #endregion
-
-        #region Structs
-        public struct LocalizationMap
-        {
-            public string Name;
-
-            public string MapUUID;
-
-            public LocalizationMapType MapType;
-
-            internal LocalizationMap(XrLocalizationMapML map)
-            {
-                Name = XrLocalizationMapML.GetName(map);
-                MapUUID = XrLocalizationMapML.GetMapUuid(map);
-                MapType = map.MapType;
-            }
-        }
-
-        public struct LocalizationEventData
-        {
-            public LocalizationMapState State;
-
-            public LocalizationMap Map;
-
-            public LocalizationMapConfidence Confidence;
-
-            public LocalizationMapErrorFlags[] Errors;
-
-            internal LocalizationEventData(XrEventDataLocalizationChangedML data)
-            {
-                State = (LocalizationMapState)data.State;
-                Confidence = (LocalizationMapConfidence)data.Confidence;
-                Map = new LocalizationMap(data.Map);
-                var errors = new List<LocalizationMapErrorFlags>();
-                foreach (LocalizationMapErrorFlags flag in Enum.GetValues(typeof(LocalizationMapErrorFlags)))
-                {
-                    if ((data.ErrorFlags & (ulong)flag) != 0)
-                        errors.Add(flag);
-                }
-                Errors = errors.ToArray();
-            }
-        }
-        #endregion
-
-        #region Methods
+        private XrEventDataLocalizationChanged localizationEventData;
+        
+        public static event Action<LocalizationEventData> OnLocalizationChangedEvent;
+        
         protected override bool OnInstanceCreate(ulong xrInstance)
         {
             if (OpenXRRuntime.IsExtensionEnabled(ExtensionName))
             {
-                return base.OnInstanceCreate(xrInstance);
+                var result = base.OnInstanceCreate(xrInstance);
+                if (result)
+                {
+                    nativeFunctions = MagicLeapNativeFunctionsBase.Create<MagicLeapLocalizationMapNativeFunctions>(InstanceProcAddr, XRInstance);
+                }
+                return result;
             }
             Debug.LogError($"{ExtensionName} is not enabled. Disabling {nameof(MagicLeapLocalizationMapFeature)}");
             return false;
         }
 
-        protected override string GetFeatureId() => FeatureId;
+        internal override void OnPollEvent(IntPtr eventBuffer)
+        {
+            base.OnPollEvent(eventBuffer);
+            unsafe
+            {
+                var eventData = (XrEventBuffer*)eventBuffer;
+                if (eventData->Type != (ulong)XrLocalizationMapStructTypes.XrTypeEventDataLocalizationChanged)
+                {
+                    return;
+                }
 
+                fixed (XrEventDataLocalizationChanged* target = &localizationEventData)
+                {
+                    UnsafeUtility.MemCpy(target, eventBuffer.ToPointer(), sizeof(XrEventDataLocalizationChanged));
+                }
+                OnLocalizationChangedEvent?.Invoke(new LocalizationEventData(localizationEventData));
+            }
+        }
         public XrResult EnableLocalizationEvents(bool enableEvents)
         {
-            return MLOpenXREnableLocalizationEvents(enableEvents);
+            unsafe
+            {
+                var localizationEnableInfo = new XrLocalizationEnableEventsInfo()
+                {
+                    Type = XrLocalizationMapStructTypes.XrTypeLocalizationEnableEventsInfo,
+                    Enabled = (enableEvents) ? 1U : 0
+                };
+                return nativeFunctions.XrEnableLocalizationEvents(XRSession, in localizationEnableInfo);
+            }
         }
 
         public XrResult GetLocalizationMapsList(out LocalizationMap[] maps)
         {
-            NativeArray<XrLocalizationMapML> nativeArray = new();
             maps = null;
             unsafe
             {
-                var resultCode = MLOpenXRQueryLocalizationMaps(0, out uint mapCount, (XrLocalizationMapML*)nativeArray.GetUnsafePtr());
+                var baseHeader = new XrLocalizationMapQueryInfoBaseHeader();
+                var baseHeaderAddr = &baseHeader;
+                var resultCode = nativeFunctions.XrQueryLocalizationMaps(XRSession, in baseHeaderAddr, 0, out var mapCount, null);
                 if (resultCode != XrResult.Success)
-                    return resultCode;
-
-                nativeArray = new NativeArray<XrLocalizationMapML>((int)mapCount, Allocator.Temp);
-                for (int i = 0; i < nativeArray.Length; i++)
                 {
-                    nativeArray[i] = XrLocalizationMapML.Create();
-                }
-                resultCode = MLOpenXRQueryLocalizationMaps(mapCount, out mapCount, (XrLocalizationMapML*)nativeArray.GetUnsafePtr());
-                if (resultCode != XrResult.Success)
                     return resultCode;
+                }
+
+                var nativeArray = new NativeArray<XrLocalizationMap>((int)mapCount, Allocator.Temp);
+                var defaultLocalizationMap = new XrLocalizationMap
+                {
+                    Type = XrLocalizationMapStructTypes.XrTypeLocalizationMap,
+                };
+                NativeCopyUtility.FillArrayWithValue(nativeArray, defaultLocalizationMap);
+                resultCode = nativeFunctions.XrQueryLocalizationMaps(XRSession, in baseHeaderAddr, mapCount, out mapCount, (XrLocalizationMap*) nativeArray.GetUnsafePtr());
+                if (resultCode != XrResult.Success)
+                {
+                    return resultCode;
+                }
+                maps = nativeArray.Select(element => new LocalizationMap(element)).ToArray();
             }
-            maps = nativeArray.Select(element => new LocalizationMap(element)).ToArray();
             return XrResult.Success;
         }
 
         public XrResult RequestMapLocalization(string mapId)
         {
-            XrUUID xrUuid = new XrUUID(mapId);
-            return MLOpenXRRequestMapLocalization(xrUuid);
+            var xrUuid = new XrUUID(mapId);
+            unsafe
+            {
+                var requestInfo = new XrMapLocalizationRequestInfo
+                {
+                    Type = XrLocalizationMapStructTypes.XrTypeMapLocalizationRequestInfo,
+                    MapUUID = xrUuid
+                };
+                var xrResult = nativeFunctions.XrRequestMapLocalization(XRSession, in requestInfo);
+                Utils.DidXrCallSucceed(xrResult, nameof(nativeFunctions.XrRequestMapLocalization));
+                return xrResult;
+            }
         }
+        
+        [Obsolete("ExportLocalizatioMap will be deprecated. Use ExportLocalizationMap instead.")]
+        public XrResult ExportLocalizatioMap(string mapId, out byte[] mapData) => ExportLocalizationMap(mapId, out mapData);
 
-        public XrResult ExportLocalizatioMap(string mapId, out byte[] mapData)
+        public XrResult ExportLocalizationMap(string mapId, out byte[] mapData)
         {
             // create map handle
-            ulong mapHandle;
             mapData = Array.Empty<byte> ();
-            XrUUID mapUuid = new XrUUID(mapId);
-            var resultCode = MLOpenXRCreateExportedLocalizationMap(in mapUuid, out mapHandle);
+            var mapUuid = new XrUUID(mapId);
 
-            // Create exported map data
-            uint mapDataSize = 0;
-            resultCode = MLOpenXRGetExportedLocalizationMapData(mapHandle, mapDataSize, out mapDataSize, mapData);
-
-            if (mapDataSize > 0)
+            unsafe
             {
-                mapData = new byte[mapDataSize];
-                MLOpenXRGetExportedLocalizationMapData(mapHandle, mapDataSize, out mapDataSize, mapData);
+                var resultCode = nativeFunctions.XrCreateExportedLocalizationMap(XRSession, in mapUuid, out var mapHandle);
+                if (!Utils.DidXrCallSucceed(resultCode, nameof(nativeFunctions.XrCreateExportedLocalizationMap)))
+                {
+                    return resultCode;
+                }
+                // Create exported map data
+                uint mapDataSize = 0;
+                resultCode = nativeFunctions.XrGetExportedLocalizationMapData(mapHandle, mapDataSize, out mapDataSize, null);
 
+                if (mapDataSize <= 0)
+                {
+                    return resultCode;
+                }
+
+                var nativeMapData = new NativeArray<byte>((int)mapDataSize, Allocator.Temp);
+                resultCode = nativeFunctions.XrGetExportedLocalizationMapData(mapHandle, mapDataSize, out mapDataSize, (byte*)nativeMapData.GetUnsafePtr());
+                if (!Utils.DidXrCallSucceed(resultCode, nameof(nativeFunctions.XrGetExportedLocalizationMapData)))
+                {
+                    return resultCode;
+                }
+
+                mapData = nativeMapData.ToArray();
                 // destroy map handle
-                resultCode = MLOpenXRDestroyExportedLocalizationMap(mapHandle);
+                resultCode = nativeFunctions.XrDestroyExportedLocalizationMap(mapHandle);
+                Utils.DidXrCallSucceed(resultCode, nameof(nativeFunctions.XrDestroyExportedLocalizationMap));
+                return resultCode;
             }
-            return resultCode;
         }
 
         public XrResult ImportLocalizationMap(byte[] mapData, out string mapId)
         {
-            var requestInfo = new XrLocalizationMapImportInfoML(mapData);
-            var resultCode = MLOpenXRImportLocalizationMap(ref requestInfo, out XrUUID xrUUID);
-            mapId = xrUUID.ToString();
-            return resultCode;
+            unsafe
+            {
+                mapId = default;
+                var mapDataArray = new NativeArray<byte>(mapData, Allocator.Temp);
+                var importInfo = new XrLocalizationMapImportInfo
+                {
+                    Type = XrLocalizationMapStructTypes.XrTypeLocalizationMapImportInfo,
+                    Size = (uint)mapDataArray.Length,
+                    Data = (byte*)mapDataArray.GetUnsafePtr(),
+                };
+                var resultCode = nativeFunctions.XrImportLocalizationMap(XRSession, in importInfo, out var mapUUID);
+                if (!Utils.DidXrCallSucceed(resultCode, nameof(nativeFunctions.XrImportLocalizationMap)))
+                {
+                    return resultCode;
+                }
+
+                mapId = mapUUID.ToString();
+                return resultCode;
+            }
         }
 
         public bool GetLatestLocalizationMapData(out LocalizationEventData data)
         {
-            data = new();
-            XrEventDataLocalizationChangedML localizationData;
-            localizationData.Map = XrLocalizationMapML.Create();
-
-            var resultCode = MLOpenXRGetLocalizationMapData(out localizationData);
-            if (resultCode == true)
-                data = new LocalizationEventData(localizationData);
-            return resultCode;
+            data = new LocalizationEventData();
+            if (localizationEventData.Type != XrLocalizationMapStructTypes.XrTypeEventDataLocalizationChanged)
+            {
+                return false;
+            }
+            data = new LocalizationEventData(localizationEventData);
+            return true;
         }
-        #endregion
     }
 }
-#endif // UNITY_OPENXR_1_9_0_OR_NEWER

@@ -31,7 +31,8 @@ namespace UnityEditor.XR.OpenXR.Features.MagicLeapSupport
             MagicLeapSpatialAnchorsFeature.FeatureId,
             MagicLeapSpatialAnchorsStorageFeature.FeatureId,
             MagicLeapFacialExpressionFeature.FeatureId,
-            MagicLeapMeshingFeature.FeatureId
+            MagicLeapMeshingFeature.FeatureId,
+            MagicLeapLightEstimationFeature.FeatureId
         },
         DefaultFeatureIds = new[] {
             MagicLeapFeature.FeatureId,
@@ -46,7 +47,8 @@ namespace UnityEditor.XR.OpenXR.Features.MagicLeapSupport
             MagicLeapSpatialAnchorsFeature.FeatureId,
             MagicLeapSpatialAnchorsStorageFeature.FeatureId,
             MagicLeapFacialExpressionFeature.FeatureId,
-            MagicLeapMeshingFeature.FeatureId
+            MagicLeapMeshingFeature.FeatureId,
+            MagicLeapLightEstimationFeature.FeatureId
         }
     )]
     public class MagicLeapFeatureGroup { }
@@ -70,7 +72,8 @@ namespace UnityEditor.XR.OpenXR.Features.MagicLeapSupport
             MagicLeapSpatialAnchorsFeature.FeatureId,
             MagicLeapSpatialAnchorsStorageFeature.FeatureId,
             MagicLeapFacialExpressionFeature.FeatureId,
-            MagicLeapMeshingFeature.FeatureId
+            MagicLeapMeshingFeature.FeatureId, 
+            MagicLeapLightEstimationFeature.FeatureId
         },
         DefaultFeatureIds = new[] {
             MagicLeapFeature.FeatureId,
@@ -78,7 +81,8 @@ namespace UnityEditor.XR.OpenXR.Features.MagicLeapSupport
             MagicLeapPlanesFeature.FeatureId,
             MagicLeapMarkerUnderstandingFeature.FeatureId,
             MagicLeapSpatialAnchorsFeature.FeatureId,
-            MagicLeapMeshingFeature.FeatureId
+            MagicLeapMeshingFeature.FeatureId,
+            MagicLeapLightEstimationFeature.FeatureId
         }
     )]
 #endif

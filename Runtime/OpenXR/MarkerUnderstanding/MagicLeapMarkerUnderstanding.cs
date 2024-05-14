@@ -1,29 +1,26 @@
-#if UNITY_OPENXR_1_9_0_OR_NEWER
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
-using UnityEngine.XR.MagicLeap;
-
-using NativeBindings = UnityEngine.XR.OpenXR.Features.MagicLeapSupport.MagicLeapUserCalibrationFeature.NativeBindings;
+using System.Threading.Tasks;
 
 namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 {
     public partial class MagicLeapMarkerUnderstandingFeature
     {
-        private List<MarkerDetector> markerDetectors = new();
+        private readonly List<MarkerDetector> markerDetectors = new();
 
         /// <summary>
         /// The active marker detectors tracked by the marker understanding feature.
         /// </summary>
         /// <returns>A readonly list of the active marker detectors.</returns>
         public IReadOnlyList<MarkerDetector> MarkerDetectors => markerDetectors;
+
+        private MagicLeapMarkerUnderstandingNativeFunctions nativeFunctions;
         
         /// <summary>
         /// Creates a marker detector with predefined settings.
         /// </summary>
         /// <param name="settings">The marker detector settings to be associated with the marker detector to be created.</param>
-        /// <returns>The marker detector that has been created. Returns null if the number of active marker detectors is at the limit.</returns>
+        /// <returns>The marker detector that has been created. Returns null if the number of active marker detectors is at the limit or an error occurred.</returns>
         public MarkerDetector CreateMarkerDetector(MarkerDetectorSettings settings)
         {
             if (markerDetectors.Count >= MarkerDetectorsLimit)
@@ -32,7 +29,12 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                 return null;
             }
 
-            MarkerDetector markerDetector = new MarkerDetector(settings);
+            var markerDetector = new MarkerDetector(settings, nativeFunctions, this);
+            if(markerDetector.Status == MarkerDetectorStatus.Error)
+            {
+                Debug.LogError($"Failed to create Marker Detector");
+                return null;
+            }
 
             markerDetectors.Add(markerDetector);
 
@@ -49,7 +51,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         /// <returns>The newly created marker detector that replaced the old one. This returns null if the specified marker detector is not tracked.</returns>
         public void ModifyMarkerDetector(MarkerDetectorSettings settings, ref MarkerDetector markerDetector)
         {
-            int index = markerDetectors.IndexOf(markerDetector, 0);
+            var index = markerDetectors.IndexOf(markerDetector, 0);
 
             if (index == -1)
             {
@@ -59,7 +61,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 
             DestroyMarkerDetector(markerDetector);          
 
-            markerDetector = new MarkerDetector(settings);
+            markerDetector = new MarkerDetector(settings, nativeFunctions, this);
             markerDetector.UpdateData();
 
             markerDetectors.Insert(index, markerDetector);
@@ -70,7 +72,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         /// </summary>
         public void UpdateMarkerDetectors()
         {
-            foreach(MarkerDetector markerDetector in markerDetectors)
+            foreach (var markerDetector in markerDetectors)
             {
                 markerDetector.UpdateData();
             }
@@ -91,13 +93,17 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         /// </summary>
         public void DestroyAllMarkerDetectors()
         {
-            foreach(MarkerDetector markerDetector in markerDetectors)
-            {
-                markerDetector.Destroy();
-            }
-
+            var markerTrackers = markerDetectors.ToList();
             markerDetectors.Clear();
+            Task.Run(() =>
+            {
+                foreach (var markerDetector in markerTrackers)
+                {
+                    markerDetector.Destroy();
+                }
+            });
         }
+        
+        
     }
 }
-#endif

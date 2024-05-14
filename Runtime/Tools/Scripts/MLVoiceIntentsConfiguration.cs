@@ -122,17 +122,21 @@ public class MLVoiceIntentsConfiguration : ScriptableObject
     /// VoiceCommandsToAdd will automatically be added to this in the proper format. Can also manually add to this list if
     /// it is not desired to do this through the editor inspector. This list follows the current structure of the JSONData
     /// and is subject to change.
+    /// 
+    /// Max Voice Intents Supported: 100
     /// </summary>
     public List<JSONData> AllVoiceIntents;
 
     [Header("App Specific Voice Commands")]
-    [Tooltip("Any word followed by a ? will be optional as will any phrase within [ ]. Values are allowed to use | as an OR. Anything after the pipe will be considered a seperate expression. To just use an OR between two words in an expression surround them with ( ). This can also be used for Slots. To indicate use of a slot, put the slot name within { }.")]
+    [Tooltip("Any word followed by a ? will be optional as will any phrase within [ ]. Values are allowed to use | as an OR. Anything after the pipe will be considered a seperate expression. To just use an OR between two words in an expression surround them with ( ). This can also be used for Slots. To indicate use of a slot, put the slot name within { }. Max Voice Intents Supported: 100")]
     /// <summary>
     /// The simplified list of Voice Command data to be filled out in the inspector or manually added to. A unique name field will be created
     /// based on the Unique Id provided.
     /// 
     /// If GetJSONString or GetValues is called, this data will be altered to fit the current proper layout the API needs to function correctly
     /// and will be added to AllVoiceIntents, then this list will be cleared as these commands will no longer need to be added.
+    /// 
+    /// Max Voice Intents Supported: 100
     /// </summary>
     public List<CustomVoiceIntents> VoiceCommandsToAdd;
 

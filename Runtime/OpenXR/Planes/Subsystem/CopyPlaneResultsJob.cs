@@ -10,43 +10,46 @@
 
 using System;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine.XR.ARSubsystems;
 
 namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 {
+    using static MagicLeapPlanesNativeTypes;
+    using MagicLeapPlanesTypes;
     public partial class MLXrPlaneSubsystem
     {
         internal unsafe struct CopyPlaneResultsJob : IJobParallelFor
         {
-            private static readonly Quaternion magicLeapToUnityRotation = Quaternion.AngleAxis(-90f, Vector3.right);
+            private static readonly Quaternion MagicLeapToUnityRotation = Quaternion.AngleAxis(-90f, Vector3.right);
 
             [ReadOnly] public NativeArray<TrackableId> PlaneTrackableIds;
 
-            [ReadOnly] public XrTypes.MLXrPlaneDetectorLocation* PlanesIn;
+            [ReadOnly, NativeDisableUnsafePtrRestriction] public XrPlaneDetectorLocation* PlanesIn;
 
             [WriteOnly] public NativeArray<BoundedPlane> PlanesOut;
 
-            private PlaneAlignment ToUnityAlignment(XrTypes.MLXrPlaneDetectorOrientation flag)
+            private PlaneAlignment ToUnityAlignment(XrPlaneDetectorOrientation flag)
             {
                 return flag switch
                 {
-                    XrTypes.MLXrPlaneDetectorOrientation.Vertical => PlaneAlignment.Vertical,
-                    XrTypes.MLXrPlaneDetectorOrientation.HorizontalUpward => PlaneAlignment.HorizontalUp,
-                    XrTypes.MLXrPlaneDetectorOrientation.HorizontalDownward => PlaneAlignment.HorizontalDown,
-                    XrTypes.MLXrPlaneDetectorOrientation.Arbitrary => PlaneAlignment.NotAxisAligned,
+                    XrPlaneDetectorOrientation.Vertical => PlaneAlignment.Vertical,
+                    XrPlaneDetectorOrientation.HorizontalUpward => PlaneAlignment.HorizontalUp,
+                    XrPlaneDetectorOrientation.HorizontalDownward => PlaneAlignment.HorizontalDown,
+                    XrPlaneDetectorOrientation.Arbitrary => PlaneAlignment.NotAxisAligned,
                     _ => PlaneAlignment.None
                 };
             }
 
-            private static PlaneClassification ToUnityClassification(XrTypes.MLXrPlaneDetectorSemanticType semanticType)
+            private static PlaneClassification ToUnityClassification(XrPlaneDetectorSemanticTypes semanticType)
             {
                 var result = semanticType switch
                 {
-                    XrTypes.MLXrPlaneDetectorSemanticType.Ceiling => PlaneClassification.Ceiling,
-                    XrTypes.MLXrPlaneDetectorSemanticType.Floor => PlaneClassification.Floor,
-                    XrTypes.MLXrPlaneDetectorSemanticType.Wall => PlaneClassification.Wall,
-                    XrTypes.MLXrPlaneDetectorSemanticType.Platform => PlaneClassification.Table,
+                    XrPlaneDetectorSemanticTypes.Ceiling => PlaneClassification.Ceiling,
+                    XrPlaneDetectorSemanticTypes.Floor => PlaneClassification.Floor,
+                    XrPlaneDetectorSemanticTypes.Wall => PlaneClassification.Wall, 
+                    XrPlaneDetectorSemanticTypes.Platform => PlaneClassification.Table,
                     _ => PlaneClassification.None
                 };
                 return result;
@@ -57,13 +60,13 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                 var plane = PlanesIn[index];
 
                 var planePose = plane.Pose;
-                var position = planePose.position;
-                var rotation = planePose.rotation * magicLeapToUnityRotation;
+                var position = planePose.Position;
+                var rotation = planePose.Rotation * MagicLeapToUnityRotation;
 
                 PlanesOut[index] = new BoundedPlane(PlaneTrackableIds[index], // trackableId
                     TrackableId.invalidId, // subsumedBy
-                    new Pose(position, rotation), Vector3.zero, // center
-                    new Vector2(plane.Extents.x, plane.Extents.y), // size
+                    new Pose(position.ConvertBetweenUnityOpenXr(), rotation.ConvertBetweenUnityOpenXr()), Vector3.zero, // center
+                    plane.Extents, // size
                     ToUnityAlignment(plane.Orientation), // alignment
                     TrackingState.Tracking, // tracking state
                     IntPtr.Zero, // native pointer

@@ -1,4 +1,4 @@
-﻿// %BANNER_BEGIN%
+// %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
 // Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
@@ -105,10 +105,7 @@ namespace MagicLeap.Android.NDK.Camera
                 ACameraMetadata_free(this);
         }
 
-        public NativeArray<Metadata.Tags> GetAllMetadataTags()
-            => GetAllMetadataTagsUntyped().Reinterpret<Metadata.Tags>();
-
-        public unsafe NativeArray<uint> GetAllMetadataTagsUntyped()
+        public unsafe NativeArray<uint> GetAllMetadataTags()
         {
             uint* data = null;
             int length = 0;
@@ -126,7 +123,6 @@ namespace MagicLeap.Android.NDK.Camera
 
         public bool TryGetConstEntry(Metadata.Tags tag, out Entry.ReadOnly outEntry)
         {
-            outEntry = default;
             var result = ACameraMetadata_getConstEntry(this, (uint)tag, out outEntry);
             result.CheckReturnValueAndThrow();
             return result == CameraStatus.Ok;

@@ -1,10 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-#if UNITY_OPENXR_1_9_0_OR_NEWER
 using UnityEngine.XR.OpenXR;
 using UnityEngine.XR.OpenXR.Features.MagicLeapSupport;
-#endif
 #if UNITY_XR_MAGICLEAP_PROVIDER
 using MagicLeapXRRenderSettings = UnityEngine.XR.MagicLeap.Rendering.RenderingSettings;
 using MagicLeapXRRenderUtility = UnityEngine.XR.MagicLeap.Rendering.RenderingUtility;
@@ -16,7 +14,6 @@ namespace UnityEngine.XR.MagicLeap
     /// MonoBehaviour class representing the Magic Leap camera
     /// </summary>
     [ExecuteInEditMode]
-    [AddComponentMenu("AR/Magic Leap/Magic Leap Camera")]
     [DefaultExecutionOrder(ScriptOrder)]
     [RequireComponent(typeof(Camera))]
     [Obsolete("The MagicLeapCamera component is not recommended for use with OpenXR. It has been deprecated and will be removed in a future release.")]
@@ -39,10 +36,8 @@ namespace UnityEngine.XR.MagicLeap
         [SerializeField]
         private bool protectedSurface;
 
-#if UNITY_OPENXR_1_9_0_OR_NEWER
         [SerializeField] 
         private bool vignette;
-#endif
 
         /// <summary>
         /// Correct any issues with the camera on startup
@@ -129,14 +124,15 @@ namespace UnityEngine.XR.MagicLeap
             {
                 Debug.Log($"Acquired clipping plane value from system: {systemSettingClippingPlaneVal}");
 
-#if UNITY_OPENXR_1_9_0_OR_NEWER
-                var renderFeature = OpenXRSettings.Instance.GetFeature<MagicLeapRenderingExtensionsFeature>();
-                if (renderFeature == null)
-                    return;
-                renderFeature.FocusDistance = camera.stereoConvergence;
-                renderFeature.UseProtectedSurface = protectedSurface;
-                renderFeature.UseVignetteMode = vignette;
-#endif
+                if (MLDevice.IsOpenXRLoaderActive())
+                {
+                    var renderFeature = OpenXRSettings.Instance.GetFeature<MagicLeapRenderingExtensionsFeature>();
+                    if (renderFeature == null)
+                        return;
+                    renderFeature.FocusDistance = camera.stereoConvergence;
+                    renderFeature.UseProtectedSurface = protectedSurface;
+                    renderFeature.UseVignetteMode = vignette;
+                }
             }
         }
 
@@ -163,24 +159,32 @@ namespace UnityEngine.XR.MagicLeap
                 return;
             }
 
+            if (MLDevice.IsMagicLeapLoaderActive())
+            {
 #if UNITY_XR_MAGICLEAP_PROVIDER
-            MagicLeapXRRenderSettings.cameraScale = MagicLeapXRRenderUtility.GetParentScale(transform);
+                MagicLeapXRRenderSettings.cameraScale = MagicLeapXRRenderUtility.GetParentScale(transform);
 #endif
+            }
             ValidateNearClip();
             ValidateFarClip();
 
             camera.stereoConvergence = CalculateFocusDistance();
-#if UNITY_OPENXR_1_9_0_OR_NEWER
-            if (!Utils.TryGetOpenXRFeature<MagicLeapRenderingExtensionsFeature>(out var renderFeature))
-                return;
-            renderFeature.FocusDistance = camera.stereoConvergence;
-            renderFeature.UseProtectedSurface = protectedSurface;
-            renderFeature.UseVignetteMode = vignette;
-#elif UNITY_XR_MAGICLEAP_PROVIDER
-            MagicLeapXRRenderSettings.focusDistance = camera.stereoConvergence;
-            MagicLeapXRRenderSettings.farClipDistance = camera.farClipPlane;
-            MagicLeapXRRenderSettings.nearClipDistance = camera.nearClipPlane;
+            if (MLDevice.IsOpenXRLoaderActive())
+            {
+                if (!Utils.TryGetOpenXRFeature<MagicLeapRenderingExtensionsFeature>(out var renderFeature))
+                    return;
+                renderFeature.FocusDistance = camera.stereoConvergence;
+                renderFeature.UseProtectedSurface = protectedSurface;
+                renderFeature.UseVignetteMode = vignette;
+            }
+            else if (MLDevice.IsMagicLeapLoaderActive())
+            {
+#if UNITY_XR_MAGICLEAP_PROVIDER
+                MagicLeapXRRenderSettings.focusDistance = camera.stereoConvergence;
+                MagicLeapXRRenderSettings.farClipDistance = camera.farClipPlane;
+                MagicLeapXRRenderSettings.nearClipDistance = camera.nearClipPlane;
 #endif
+            }
         }
 
 #if !UNITY_EDITOR
@@ -212,17 +216,21 @@ namespace UnityEngine.XR.MagicLeap
         /// </summary>
         public void ValidateFarClip()
         {
-#if UNITY_XR_MAGICLEAP_PROVIDER
-            var farClip = camera.farClipPlane;
-            var max = MagicLeapXRRenderSettings.maxFarClipDistance;
-            if (farClip > max)
+            if (MLDevice.IsMagicLeapLoaderActive())
             {
-                if (enforceFarClip)
+                var farClip = camera.farClipPlane;
+                float max = 100f;
+#if UNITY_XR_MAGICLEAP_PROVIDER
+                max = MagicLeapXRRenderSettings.maxFarClipDistance;
+#endif
+                if (farClip > max)
                 {
-                    camera.farClipPlane = max;
+                    if (enforceFarClip)
+                    {
+                        camera.farClipPlane = max;
+                    }
                 }
             }
-#endif
         }
 
         private float CalculateFocusDistance()
@@ -258,11 +266,13 @@ namespace UnityEngine.XR.MagicLeap
         /// <returns>Clamped value</returns>
         public float ClampToClippingPlanes(float value)
         {
+            return Mathf.Clamp(value, systemSettingClippingPlaneVal,
 #if UNITY_XR_MAGICLEAP_PROVIDER
-            return Mathf.Clamp(value, systemSettingClippingPlaneVal, MagicLeapXRRenderSettings.maxFarClipDistance);
+                MagicLeapXRRenderSettings.maxFarClipDistance
 #else
-            return value;
+                value
 #endif
+                );
         }
 
         private void FixupCamera(bool fixIssues)

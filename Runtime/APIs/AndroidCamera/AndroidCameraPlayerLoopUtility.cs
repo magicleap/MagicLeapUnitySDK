@@ -1,4 +1,6 @@
 ﻿
+using UnityEngine;
+
 namespace MagicLeap.Android
 {
     using System;
@@ -33,18 +35,41 @@ namespace MagicLeap.Android
             }
         }
 
-        private static Type[] _InstallPath = {
-            typeof(Initialization),
-            typeof(Initialization.XREarlyUpdate)
-        };
+        // NB: a return value of `null` indicates the system is not installed in the playerloop,
+        // while an empty array indicates it's a toplevel system in the playerloop.
+        internal static Type[] GetInstallPathForSystem(in PlayerLoopSystem topLevelPlayerLoop, Type targetSystem)
+        {
+            var path = new List<Type>();
+            return SearchPlayerLoopRecursive(topLevelPlayerLoop, targetSystem, path)
+                ? path.ToArray()
+                : null;
+        }
 
+        private static bool SearchPlayerLoopRecursive(in PlayerLoopSystem parent, Type targetSystem,
+            List<Type> systemPath)
+        {
+            var subsystems = parent.subSystemList ?? Array.Empty<PlayerLoopSystem>();
 
+            foreach (var currentSystem in subsystems)
+            {
+                if (currentSystem.type == targetSystem)
+                {
+                    systemPath.Insert(0, targetSystem);
+                    return true;
+                }
+
+                if (!SearchPlayerLoopRecursive(currentSystem, targetSystem, systemPath))
+                    continue;
+                systemPath.Insert(0, currentSystem.type);
+                return true;
+            }
+
+            return false;
+        }
 
         internal static IDisposable LazyRegisterPlayerLoopUpdateInternal<T>(ref List<T> list, T obj, Type updateType,
-            PlayerLoopSystem.UpdateFunction updateFunction, params Type[] installPath) where T : class
+            PlayerLoopSystem.UpdateFunction updateFunction, Type parentSystem, int index = -1) where T : class
         {
-            if (installPath == null || installPath.Length == 0)
-                installPath = _InstallPath;
             if (list == null)
             {
                 list = new List<T>();
@@ -55,7 +80,8 @@ namespace MagicLeap.Android
                     updateDelegate = updateFunction,
                 };
                 var playerLoop = PlayerLoop.GetCurrentPlayerLoop();
-                if (!InstallIntoPlayerLoop(ref playerLoop, updateSystem, installPath))
+
+                if (!InstallIntoPlayerLoopAtIndex(ref playerLoop, updateSystem, parentSystem, index))
                     throw new Exception("unable to install update system into player loop!");
                 PlayerLoop.SetPlayerLoop(playerLoop);
             }
@@ -63,9 +89,16 @@ namespace MagicLeap.Android
             return new UpdateSubscription<T>(list, obj);
         }
 
-        private static bool InstallIntoPlayerLoop(ref PlayerLoopSystem topLevelPlayerLoop, PlayerLoopSystem systemToInstall, params Type[] installPath)
+        internal static bool InstallIntoPlayerLoopAtIndex(ref PlayerLoopSystem topLevelPlayerLoop,
+            PlayerLoopSystem systemToInstall, Type parentSystem, int index = -1)
         {
-            installPath ??= Array.Empty<Type>();
+            if (parentSystem == null)
+                throw new ArgumentNullException(nameof(parentSystem));
+
+            var installPath = GetInstallPathForSystem(topLevelPlayerLoop, parentSystem);
+            if (installPath == null)
+                throw new Exception(
+                    $"'{parentSystem.Name}' doesn't appear to be installed in the current player loop");
 
             ref var current = ref topLevelPlayerLoop;
             foreach (var path in installPath)
@@ -76,17 +109,48 @@ namespace MagicLeap.Android
                 current = ref current.subSystemList[idx];
             }
 
-            InstallSystem(ref current, systemToInstall);
+            InstallSystemAtIndex(ref current, systemToInstall, index);
             return true;
         }
 
-        private static void InstallSystem(ref PlayerLoopSystem parentSystem, PlayerLoopSystem targetSystem)
+        private static void InstallSystemAtIndex(ref PlayerLoopSystem parentSystem, PlayerLoopSystem targetSystem,
+            int installIndex = -1)
         {
             var subsystems = parentSystem.subSystemList ?? Array.Empty<PlayerLoopSystem>();
-            var length = subsystems.Length;
-            Array.Resize(ref subsystems, length + 1);
-            subsystems[length] = targetSystem;
+            ArrayUtility.ResizeAndInsert(ref subsystems, targetSystem, installIndex);
             parentSystem.subSystemList = subsystems;
+        }
+    }
+
+    internal static class ArrayUtility
+    {
+        public static void ResizeAndInsert<T>(ref T[] array, T element, int index)
+        {
+            if (array == null)
+                throw new ArgumentNullException(nameof(array));
+            var oldLength = array.Length;
+            var newLength = oldLength + 1;
+            var resolvedIndex = index < 0 ? newLength + index : index;
+            if (resolvedIndex < 0 || resolvedIndex >= newLength)
+                throw new ArgumentOutOfRangeException(nameof(index), $"argument '{nameof(index)}' resolved to {resolvedIndex}, which must be within 0 and {oldLength}, inclusive");
+            Array.Resize(ref array, newLength);
+            var inserted = false;
+            var i = oldLength;
+            while (!inserted)
+            {
+                if (i == resolvedIndex)
+                {
+                    array[i] = element;
+                    inserted = true;
+                }
+                else
+                {
+                    // move items forward one spot to make room for new element.
+                    array[i] = array[i - 1];
+                }
+
+                --i;
+            }
         }
     }
 }

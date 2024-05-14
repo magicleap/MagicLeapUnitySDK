@@ -1,4 +1,4 @@
-﻿
+
 namespace MagicLeap.Android
 {
     using System;

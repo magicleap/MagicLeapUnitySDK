@@ -7,7 +7,6 @@
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
-#if UNITY_OPENXR_1_9_0_OR_NEWER
 
 using System;
 using Unity.Collections;
@@ -16,6 +15,7 @@ using UnityEngine.XR.ARSubsystems;
 
 namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 {
+    using static MagicLeapPlanesNativeTypes;
     public partial class MLXrPlaneSubsystem
     {
         /// <summary>
@@ -171,11 +171,10 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             }
 
 
-            internal NativeArray<XrTypes.MLXrPlaneDetectorPolygonBuffer> Holes;
-            internal XrTypes.MLXrPlaneDetectorPolygonBuffer Polygon;
+            internal NativeArray<XrPlaneDetectorPolygonBuffer> Holes;
+            internal XrPlaneDetectorPolygonBuffer Polygon;
             internal Pose PlanePose;
             internal TrackableId Id;
         }
     }
 }
-#endif

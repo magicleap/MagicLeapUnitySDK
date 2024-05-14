@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using OpenXR.PointCloud;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.XR.ARSubsystems;
@@ -91,10 +90,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         /// </summary>
         public float MeshDensity
         {
-            set
-            {
-                MagicLeapXrMeshingNativeBindings.MLOpenXRSetMeshDensity(value);
-            }
+            set => MagicLeapXrMeshingNativeBindings.MLOpenXRSetMeshDensity(value);
         }
 
         protected override string GetFeatureId()
@@ -104,14 +100,16 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 
         protected override bool OnInstanceCreate(ulong xrInstance)
         {
-            var exts = MeshingExtensionName.Split(' ');
-            foreach (var ext in exts)
+            var extensions = MeshingExtensionName.Split(' ');
+            foreach (var extension in extensions)
             {
-                if (!OpenXRRuntime.IsExtensionEnabled(ext))
+                if (OpenXRRuntime.IsExtensionEnabled(extension))
                 {
-                    Debug.LogError($"{ext} is not enabled. Disabling {nameof(MagicLeapMeshingFeature)}");
-                    return false;
+                    continue;
                 }
+                
+                Debug.LogError($"{extension} is not enabled. Disabling {nameof(MagicLeapMeshingFeature)}");
+                return false;
             }
 
             return base.OnInstanceCreate(xrInstance);
@@ -169,19 +167,19 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             {
                 return;
             }
-            if (mode == MeshingMode.PointCloud && currentMode == MeshingMode.Triangles)
-            {
-                StopSubsystem<XRMeshSubsystem>();
-                StartSubsystem<XRPointCloudSubsystem>();
-            }
-
-            if (mode == MeshingMode.Triangles && currentMode == MeshingMode.PointCloud)
-            {
-                StopSubsystem<XRPointCloudSubsystem>();
-                StartSubsystem<XRMeshSubsystem>();
-            }
             currentMode = mode;
             MagicLeapXrMeshingNativeBindings.MLOpenXRSetMeshRenderMode(currentMode);
+            StopSubsystem<XRMeshSubsystem>();
+            StopSubsystem<XRPointCloudSubsystem>();
+            if (currentMode == MeshingMode.Triangles)
+            {
+                StartSubsystem<XRMeshSubsystem>();
+            }
+
+            if (currentMode == MeshingMode.PointCloud)
+            {
+                StartSubsystem<XRPointCloudSubsystem>();
+            }
         }
 
         public void SetMeshQueryBounds(Vector3 position, Vector3 scale, Quaternion rotation)

@@ -14,6 +14,7 @@ namespace UnityEditor.XR.MagicLeap
         private static readonly string Arg_CheckProLicense = "--check-pro-license";
         private static readonly string Arg_ForceSDKPathFromEnvVar = "--force_sdk_path_from_env_var";
         private static readonly string Arg_AppVersionCodeValue = "--version-code";
+        private static readonly string Arg_EnableFPSlogging = "--log-fps";
 
         private bool didSetSDKPathFromEnvVar = false;
 
@@ -47,14 +48,6 @@ namespace UnityEditor.XR.MagicLeap
         {
             APKBuilder apkBuilder = new APKBuilder();
             apkBuilder.Build();
-        }
-
-        ~APKBuilder()
-        {
-            if (this.didSetSDKPathFromEnvVar)
-            {
-                MagicLeapSDKUtil.DeleteSDKPathFromEditorPrefs(EditorUserBuildSettings.activeBuildTarget);
-            }
         }
 
         private void Build()
@@ -117,6 +110,7 @@ namespace UnityEditor.XR.MagicLeap
 
         private void BuildAllScenes()
         {
+            string[] scriptingDefineCache = null;
             List<string> activeScenes = new List<string>();
             EditorBuildSettingsScene[] scenes = EditorBuildSettings.scenes;
             int index = 0;
@@ -141,6 +135,12 @@ namespace UnityEditor.XR.MagicLeap
             {
                 apkName = $"{apkName}-dev";
             }
+            if (IsArgSet(Arg_EnableFPSlogging))
+            {
+                PlayerSettings.GetScriptingDefineSymbols(UnityEditor.Build.NamedBuildTarget.Android, out scriptingDefineCache);
+                var updatedDefines = new List<string>(scriptingDefineCache) { "ENABLE_FPS_LOGGING" };
+                PlayerSettings.SetScriptingDefineSymbols(UnityEditor.Build.NamedBuildTarget.Android, updatedDefines.ToArray());
+            }
 
             BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions();
             buildPlayerOptions.target = EditorUserBuildSettings.activeBuildTarget;
@@ -150,6 +150,10 @@ namespace UnityEditor.XR.MagicLeap
             buildPlayerOptions.locationPathName = System.IO.Path.Combine(GetBuildFolder().FullName, $"{apkName}.apk");
 
             UnityEditor.Build.Reporting.BuildReport report = UnityEditor.BuildPipeline.BuildPlayer(buildPlayerOptions);
+            if (IsArgSet(Arg_EnableFPSlogging) && scriptingDefineCache != null)
+            {
+                PlayerSettings.SetScriptingDefineSymbols(UnityEditor.Build.NamedBuildTarget.Android, scriptingDefineCache);
+            }
             if (report.summary.result == UnityEditor.Build.Reporting.BuildResult.Failed)
             {
                 throw new System.Exception($"Building {PlayerSettings.applicationIdentifier} failed.");

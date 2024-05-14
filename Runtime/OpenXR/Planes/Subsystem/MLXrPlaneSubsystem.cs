@@ -7,8 +7,6 @@
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
-#if UNITY_OPENXR_1_9_0_OR_NEWER
-
 using MagicLeap.Android;
 using System;
 using System.Collections.Generic;
@@ -23,6 +21,8 @@ using UnityEngine.XR.MagicLeap.Native;
 
 namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 {
+    using static MagicLeapPlanesNativeTypes;
+    using MagicLeapPlanesTypes;
     /// <summary>
     ///     The Magic Leap implementation of the <c>XRPlaneSubsystem</c>. Do not create this directly.
     ///     Use <c>PlanesSubsystemDescriptor.Create()</c> instead.
@@ -30,18 +30,18 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
     [Preserve]
     public sealed partial class MLXrPlaneSubsystem : XRPlaneSubsystem
     {
-        private static PlanesQuery query;
+        private static PlanesQuery QueryInternal;
         public static PlanesQuery Query
         {
-            get => query;
+            get => QueryInternal;
             set
             {
-                querySet = true;
-                query = value;
+                QuerySet = true;
+                QueryInternal = value;
             }
         }
 
-        private static bool querySet { get; set; }
+        private static bool QuerySet { get; set; }
 
         public struct PlanesQuery
         {
@@ -77,7 +77,22 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             public float MinPlaneArea;
         }
 
-        private const ulong planeTrackableIdSalt = 0xf52b75076e45ad88;
+        private static bool SessionFocusedInternal = false;
+
+        /// <summary>
+        ///     Set with the OnSessionStateChange in the MagicLeapPlanesFeature. Delays plane detection 
+        ///     until the session is in the focused state.
+        /// </summary>
+        public static bool SessionFocused
+        {
+            get => SessionFocusedInternal;
+            set
+            {
+                SessionFocusedInternal = value;
+            }
+        }
+
+        private const ulong PlaneTrackableIdSalt = 0xf52b75076e45ad88;
 
         private class MagicLeapProvider : Provider
         {
@@ -93,11 +108,14 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             private MLPlanesQueryFlags requestedPlaneDetectionModeInternal;
             private ScanState currentScanState = ScanState.Stopped;
 
-            private PlanesQuery defaultPlanesQuery
+            private MagicLeapPlanesNativeFunctions nativeFunctions;
+            private MagicLeapPlanesFeature planesFeature;
+
+            private PlanesQuery DefaultPlanesQuery
             {
                 get
                 {
-                    if (querySet)
+                    if (QuerySet)
                     {
                         return Query;
                     }
@@ -128,29 +146,39 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             
             private bool CreateClient()
             {
-                if (planesTracker != MagicLeapNativeBindings.InvalidHandle)
+                unsafe
                 {
+                    if (planesTracker != MagicLeapNativeBindings.InvalidHandle)
+                    {
+                        return true;
+                    }
+
+                    if (!Permissions.CheckPermission(MLPermission.SpatialMapping))
+                    {
+                        return false;
+                    }
+
+                    var createInfo = new XrPlaneDetectorCreateInfo
+                    {
+                        Type = XrPlaneStructTypes.PlaneDetectorCreateInfo,
+                        Flags = XrPlaneDetectorFlags.XrPlaneDetectorEnableContourBit
+                    };
+
+                    var result = nativeFunctions.XrCreatePlaneDetector(planesFeature.XRSession, in createInfo, out planesTracker);
+                    if (!Utils.DidXrCallSucceed(result, nameof(nativeFunctions.XrCreatePlaneDetector)))
+                    {
+                        return false;
+                    }
+                    boundariesTable.Clear();
                     return true;
                 }
-
-                if (!Permissions.CheckPermission(MLPermission.SpatialMapping))
-                {
-                    return false;
-                }
-
-                var result = NativeBindings.MLOpenXRCreatePlaneTracker(out planesTracker);
-                if (!Utils.DidXrCallSucceed(result, nameof(NativeBindings.MLOpenXRCreatePlaneTracker)))
-                {
-                    return false;
-                }
-                
-                boundariesTable.Clear();
-                return true;
             }
 
             public override void Start()
             {
                 SubsystemFeatures.SetFeatureRequested(Feature.PlaneTracking, true);
+                planesFeature = OpenXRSettings.Instance.GetFeature<MagicLeapPlanesFeature>();
+                nativeFunctions = planesFeature.PlanesNativeFunctions;
             }
 
             public override void Stop()
@@ -158,9 +186,12 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                 currentScanState = ScanState.Stopped;
                 if (planesTracker != MagicLeapNativeBindings.InvalidHandle)
                 {
-                    NativeBindings.MLOpenXRDestroyPlaneTracker(planesTracker);
-                    planesTracker = MagicLeapNativeBindings.InvalidHandle;
-                    boundariesTable.Clear();
+                    unsafe
+                    {
+                        nativeFunctions.XrDestroyPlaneDetector(planesTracker);
+                        planesTracker = MagicLeapNativeBindings.InvalidHandle;
+                        boundariesTable.Clear();
+                    }
                 }
                 
                 SubsystemFeatures.SetFeatureRequested(Feature.PlaneTracking, false);
@@ -177,7 +208,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                     return default;
                 }
 
-                return !boundariesTable.TryGetValue(trackableId, out var planeBoundary) ? default : planeBoundary;
+                return boundariesTable.GetValueOrDefault(trackableId);
             }
 
             public override void GetBoundary(TrackableId trackableId, Allocator allocator, ref NativeArray<Vector2> convexHullOut)
@@ -212,10 +243,13 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             {
                 if (planesTracker == MagicLeapNativeBindings.InvalidHandle)
                 {
-                    if (!CreateClient())
-                    {
-                        return default;
-                    }
+                    CreateClient();
+                    return default;
+                }
+
+                if(!SessionFocusedInternal)
+                {
+                    return default;
                 }
                 
                 if (currentScanState == ScanState.Stopped)
@@ -229,55 +263,71 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                     return default;
                 }
                 
+                
                 //Check the state to make sure we are done scanning
-                var stateResult = NativeBindings.MLGetPlaneDetectionState(planesTracker, out var scanState);
-                if (!Utils.DidXrCallSucceed(stateResult, nameof(NativeBindings.MLGetPlaneDetectionState)))
+                var stateResult = nativeFunctions.XrGetPlaneDetectionState(planesTracker, out var scanState);
+                if (!Utils.DidXrCallSucceed(stateResult, nameof(nativeFunctions.XrGetPlaneDetectionState)))
                 {
                     return default;
                 }
                 switch (scanState)
                 {
-                    case XrTypes.MLXrPlaneDetectionState.Done:
+                    case XrPlaneDetectionState.Done:
                         break;
-                    case XrTypes.MLXrPlaneDetectionState.Pending:
-                    case XrTypes.MLXrPlaneDetectionState.None:
+                    case XrPlaneDetectionState.Pending:
+                    case XrPlaneDetectionState.None:
                         return default;
-                    case XrTypes.MLXrPlaneDetectionState.Error:
-                    case XrTypes.MLXrPlaneDetectionState.Fatal:
+                    case XrPlaneDetectionState.Error:
+                    case XrPlaneDetectionState.Fatal:
                     default:
                         currentScanState = ScanState.Stopped;
-                        string message = $"[MLXrPlaneSubsystem] Plane detection state: {scanState.ToString().ToUpper()}";
-                        if (Application.isEditor)
-                        {
-                            Debug.LogWarning(message);
-                            return default;
-                        }
-                        else
+                        var message = $"[MLXrPlaneSubsystem] Plane detection state: {scanState.ToString().ToUpper()}";
+                        if (!Application.isEditor)
                         {
                             throw new ApplicationException(message);
                         }
+
+                        Debug.LogWarning(message);
+                        return default;
+
                 }
                 
 
                 //Successfully scanned, so get the results
                 //Get the plane results first
-                var location = new XrTypes.MLXrPlaneDetectorLocations();
-                var result = NativeBindings.MLGetPlaneDetections(planesTracker, out location);
-                if (!Utils.DidXrCallSucceed(result, nameof(NativeBindings.MLGetPlaneDetections)))
+                var location = new XrPlaneDetectorLocations()
+                {
+                    Type = XrPlaneStructTypes.PlaneDetectorLocations
+                };
+
+                var getInfo = new XrPlaneDetectorGetInfo
+                {
+                    Type = XrPlaneStructTypes.PlaneDetectorGetInfo,
+                    Space = planesFeature.XRSpace,
+                    Time = planesFeature.NextPredictedDisplayTime
+                };
+
+                var result = nativeFunctions.XrGetPlaneDetections(planesTracker, in getInfo, out location);
+                if (!Utils.DidXrCallSucceed(result, nameof(nativeFunctions.XrGetPlaneDetections)))
                 {
                     currentScanState = ScanState.Stopped;
                     return default;
                 }
-                var planeTrackableIds = new NativeArray<TrackableId>((int)location.PlaneLocationCountOutput, Allocator.Temp);
+                var planeTrackableIds = new NativeArray<TrackableId>((int)location.PlaneLocationCountOutput, Allocator.TempJob);
                 if (location.PlaneLocationCountOutput > 0)
                 {
                     //Now we have the count so we can assign the locations
-                    location.PlaneLocations = (XrTypes.MLXrPlaneDetectorLocation*)new NativeArray<XrTypes.MLXrPlaneDetectorLocation>((int)location.PlaneLocationCountOutput, Allocator.Temp).GetUnsafePtr();
+                    var locationArray = new NativeArray<XrPlaneDetectorLocation>((int)location.PlaneLocationCountOutput, Allocator.Temp);
+                    location.PlaneLocations = (XrPlaneDetectorLocation*)locationArray.GetUnsafePtr();
+                    NativeCopyUtility.FillArrayWithValue(locationArray, new XrPlaneDetectorLocation
+                    {
+                        Type = XrPlaneStructTypes.PlaneDetectorLocation,
+                    });
                     location.PlaneLocationCapacityInput = location.PlaneLocationCountOutput;
-                    
-                    result = NativeBindings.MLGetPlaneDetections(planesTracker, out location);
 
-                    if (!Utils.DidXrCallSucceed(result, nameof(NativeBindings.MLGetPlaneDetections)))
+                    result = nativeFunctions.XrGetPlaneDetections(planesTracker, in getInfo, out location);
+
+                    if (!Utils.DidXrCallSucceed(result, nameof(nativeFunctions.XrGetPlaneDetections)))
                     {
                         currentScanState = ScanState.Stopped;
                         return default;
@@ -291,9 +341,13 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                         var planeLocation = location.PlaneLocations[i];
                         var planeBoundary = new PlaneBoundary();
                         //Get polygon
-                        var polygonBuffer = new XrTypes.MLXrPlaneDetectorPolygonBuffer();
-                        result = NativeBindings.MLGetPlanePolygonBuffer(planesTracker, planeLocation.PlaneId, 0, out polygonBuffer);
-                        if (!Utils.DidXrCallSucceed(result, nameof(NativeBindings.MLGetPlanePolygonBuffer)))
+                        var polygonBuffer = new XrPlaneDetectorPolygonBuffer()
+                        {
+                            Type = XrPlaneStructTypes.PlaneDetectorPolygonBuffer,
+                        };
+                        
+                        result = nativeFunctions.XrGetPlanePolygonBuffer(planesTracker, planeLocation.PlaneId, 0, out polygonBuffer);
+                        if (!Utils.DidXrCallSucceed(result, nameof(nativeFunctions.XrGetPlanePolygonBuffer)))
                         {
                             currentScanState = ScanState.Stopped;
                             return default;
@@ -302,9 +356,9 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                         polygonBuffer.Vertices = (Vector2*)new NativeArray<Vector2>((int)polygonBuffer.VertexCountOutput, Allocator.Temp).GetUnsafePtr();
                         polygonBuffer.VertexCapacityInput = polygonBuffer.VertexCountOutput;
 
-                        result = NativeBindings.MLGetPlanePolygonBuffer(planesTracker, planeLocation.PlaneId, 0, out polygonBuffer);
+                        result = nativeFunctions.XrGetPlanePolygonBuffer(planesTracker, planeLocation.PlaneId, 0, out polygonBuffer);
 
-                        if (!Utils.DidXrCallSucceed(result, $"{nameof(NativeBindings.MLGetPlanePolygonBuffer)} Querying Length"))
+                        if (!Utils.DidXrCallSucceed(result, $"{nameof(nativeFunctions.XrGetPlanePolygonBuffer)} Querying Length"))
                         {
                             currentScanState = ScanState.Stopped;
                             return default;
@@ -312,33 +366,37 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                         planeBoundary.Polygon = polygonBuffer;
                         if (planeLocation.PolygonBufferCount > 0)
                         {
-                            var holeBuffers = new List<XrTypes.MLXrPlaneDetectorPolygonBuffer>();
+                            var holeBuffers = new List<XrPlaneDetectorPolygonBuffer>();
                             for (uint holeIndex = 1; holeIndex < planeLocation.PolygonBufferCount; holeIndex++)
                             {
-                                var holeBuffer = new XrTypes.MLXrPlaneDetectorPolygonBuffer();
-                                result = NativeBindings.MLGetPlanePolygonBuffer(planesTracker, planeLocation.PlaneId, holeIndex, out holeBuffer);
-                                if (!Utils.DidXrCallSucceed(result, $"{nameof(NativeBindings.MLGetPlanePolygonBuffer)} Querying Holes Length"))
+                                var holeBuffer = new XrPlaneDetectorPolygonBuffer()
+                                {
+                                    Type = XrPlaneStructTypes.PlaneDetectorPolygonBuffer
+                                };
+                                
+                                result = nativeFunctions.XrGetPlanePolygonBuffer(planesTracker, planeLocation.PlaneId, holeIndex, out holeBuffer);
+                                if (!Utils.DidXrCallSucceed(result, $"{nameof(nativeFunctions.XrGetPlanePolygonBuffer)} Querying Holes Length"))
                                 {
                                     return default;
                                 }
                                 holeBuffer.Vertices = (Vector2*)new NativeArray<Vector2>((int)holeBuffer.VertexCountOutput, Allocator.Temp).GetUnsafePtr();
                                 holeBuffer.VertexCapacityInput = holeBuffer.VertexCountOutput;
-                                result = NativeBindings.MLGetPlanePolygonBuffer(planesTracker, planeLocation.PlaneId, holeIndex, out holeBuffer);
-                                if (!Utils.DidXrCallSucceed(result, $"{nameof(NativeBindings.MLGetPlanePolygonBuffer)} Getting Holes"))
+                                result = nativeFunctions.XrGetPlanePolygonBuffer(planesTracker, planeLocation.PlaneId, holeIndex, out holeBuffer);
+                                if (!Utils.DidXrCallSucceed(result, $"{nameof(nativeFunctions.XrGetPlanePolygonBuffer)} Getting Holes"))
                                 {
                                     return default;
                                 }
                                 holeBuffers.Add(holeBuffer);
                             }
 
-                            planeBoundary.Holes = new NativeArray<XrTypes.MLXrPlaneDetectorPolygonBuffer>(holeBuffers.ToArray(), Allocator.Temp);
+                            planeBoundary.Holes = new NativeArray<XrPlaneDetectorPolygonBuffer>(holeBuffers.ToArray(), Allocator.Temp);
                         }
                         
                         if (!planeCountTable.TryGetValue(planeLocation.PlaneId, out var count))
                         {
                             count = 0;
                         }
-                        var trackableId = new TrackableId(planeLocation.PlaneId, planeTrackableIdSalt + count);
+                        var trackableId = new TrackableId(planeLocation.PlaneId, PlaneTrackableIdSalt + count);
                         planeCountTable[planeLocation.PlaneId] = ++count;
                         boundariesTable[trackableId] = planeBoundary;
                         planeTrackableIds[i] = trackableId;
@@ -407,37 +465,40 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 
             private unsafe void BeginNewQuery()
             {
-                maxResults = querySet switch
+                maxResults = QuerySet switch
                 {
                     // We hit the max, so increase for next time
                     false when maxResults == lastNumResults => maxResults * 3 / 2,
-                    true => defaultPlanesQuery.MaxResults,
+                    true => DefaultPlanesQuery.MaxResults,
                     _ => maxResults
                 };
 
-                defaultPlanesQuery.Flags.ToMLXrOrientationsAndSemanticTypes(out var orientationValues, out var semanticValues);
+                DefaultPlanesQuery.Flags.ToMLXrOrientationsAndSemanticTypes(out var orientationValues, out var semanticValues);
 
-                var orientationsArray = new NativeArray<XrTypes.MLXrPlaneDetectorOrientation>(orientationValues.Count, Allocator.Temp);
+                var orientationsArray = new NativeArray<XrPlaneDetectorOrientation>(orientationValues.Count, Allocator.Temp);
                 orientationsArray.CopyFrom(orientationValues.ToArray());
 
-                var semanticArray = new NativeArray<XrTypes.MLXrPlaneDetectorSemanticType>(semanticValues.Count, Allocator.Temp);
+                var semanticArray = new NativeArray<XrPlaneDetectorSemanticTypes>(semanticValues.Count, Allocator.Temp);
                 semanticArray.CopyFrom(semanticValues.ToArray());
                 
-                var beginInfo = new XrTypes.MLXrPlaneDetectorBeginInfo
+                var beginInfo = new XrPlaneDetectorBeginInfo
                 {
+                    Type = XrPlaneStructTypes.PlaneDetectorBeginInfo,
+                    Space = planesFeature.XRSpace,
+                    Time = planesFeature.NextPredictedDisplayTime,
                     OrientationCount = (uint)orientationsArray.Length,
-                    Orientations = (XrTypes.MLXrPlaneDetectorOrientation*)orientationsArray.GetUnsafePtr(),
-                    SemanticTypeCount = (uint)semanticArray.Length,
-                    SemanticTypes = (XrTypes.MLXrPlaneDetectorSemanticType*)semanticArray.GetUnsafePtr(),
+                    Orientations = (XrPlaneDetectorOrientation*)orientationsArray.GetUnsafePtr(),
+                    SemanticTypesCount = (uint)semanticArray.Length,
+                    SemanticTypes = (XrPlaneDetectorSemanticTypes*)semanticArray.GetUnsafePtr(),
                     MaxPlanes = maxResults,
-                    MinArea = defaultPlanesQuery.MinPlaneArea,
-                    BoundingBoxPose = new Pose { position = defaultPlanesQuery.BoundsCenter, rotation = defaultPlanesQuery.BoundsRotation },
-                    BoundingBoxExtents = defaultPlanesQuery.BoundsExtents
+                    MinArea = DefaultPlanesQuery.MinPlaneArea,
+                    BoundingBoxPose = new XrPose { Position = DefaultPlanesQuery.BoundsCenter.ConvertBetweenUnityOpenXr(), Rotation = DefaultPlanesQuery.BoundsRotation.ConvertBetweenUnityOpenXr() },
+                    BoundingBoxExtents = DefaultPlanesQuery.BoundsExtents,
                 };
 
-                var result = NativeBindings.MLBeginPlaneDetection(planesTracker, in beginInfo);
+                var result = nativeFunctions.XrBeginPlaneDetection(planesTracker, in beginInfo);
 
-                if (!Utils.DidXrCallSucceed(result, nameof(NativeBindings.MLBeginPlaneDetection)))
+                if (!Utils.DidXrCallSucceed(result, nameof(nativeFunctions.XrBeginPlaneDetection)))
                 {
                     return;
                 }
@@ -463,12 +524,14 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                 subsystemTypeOverride = typeof(MLXrPlaneSubsystem),
                 supportsVerticalPlaneDetection = true,
                 supportsArbitraryPlaneDetection = true,
+#if UNITY_EDITOR
+                supportsBoundaryVertices = false,
+#else
                 supportsBoundaryVertices = true,
+#endif
                 supportsClassification = true
             });
         }
 
     }
 }
-
-#endif

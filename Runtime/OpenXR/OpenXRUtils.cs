@@ -15,8 +15,6 @@ using UnityEngine.XR.Management;
 using UnityEngine.XR.OpenXR.Features;
 using UnityEngine.XR.OpenXR.NativeTypes;
 #endif
-using UnityEngine.LowLevel;
-using UnityEngine.PlayerLoop;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -86,7 +84,14 @@ namespace UnityEngine.XR.OpenXR
             SystemNotificationPermissionDeniedML = -1000473000,
             SystemNotificationIncompatibleSKUML = -1000473001,
             WorldMeshDetectorPermissionDeniedML = -1000474000,
-            WorldMeshDetectorSpaceNotLocatableML = -1000474001
+            WorldMeshDetectorSpaceNotLocatableML = -1000474001,
+            PixelSensorPermissionDeniedML = -1000475000,
+            PixelSensorNotSupportedML = -1000475001,
+            PixelSensorNotAvailableML = 1000475002,
+            PixelSensorCapabilityNotSupportedML = 1000475003,
+            PixelSensorSpaceNotSupportedML = 1000475004,
+            LightEstimationPermissionDeniedML = -1000481000,
+            LightEstimationRGBSensorNotAvailableML = -1000481001
         }
         /// <summary>
         /// Finds an appropriate Magic Leap Controller registered through OpenXR which is properly named and is valid.
@@ -161,6 +166,16 @@ namespace UnityEngine.XR.OpenXR
                 MLPluginLog.ErrorFormat($"{functionName} in the Magic Leap API failed. Reason: {logResult} ");
             }
             return success;
+        }
+        
+        internal static Vector3 ConvertBetweenUnityOpenXr(this Vector3 input)
+        {
+            return new Vector3(input.x, input.y, -input.z);
+        }
+
+        internal static Quaternion ConvertBetweenUnityOpenXr(this Quaternion quaternion)
+        {
+            return new Quaternion(-quaternion.x, -quaternion.y, quaternion.z, quaternion.w);
         }
         
         

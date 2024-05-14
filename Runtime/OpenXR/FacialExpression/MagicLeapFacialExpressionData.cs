@@ -1,7 +1,4 @@
-#if UNITY_OPENXR_1_9_0_OR_NEWER
-
 using System;
-
 namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 {
     public partial class MagicLeapFacialExpressionFeature
@@ -65,7 +62,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         [Flags]
         public enum BlendShapePropertiesFlags
         {
-            None = 0 << 0,
+            None = 0,
             ValidBit = 1 << 0,
             TrackedBit = 1 << 1
         }
@@ -92,4 +89,3 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         }
     }
 }
-#endif

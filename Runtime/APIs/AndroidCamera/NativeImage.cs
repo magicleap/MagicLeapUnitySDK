@@ -8,6 +8,8 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
+using UnityEngine;
+
 namespace MagicLeap.Android
 {
     using System;
@@ -376,6 +378,8 @@ namespace MagicLeap.Android
                 numPlanes = image.NumberOfPlanes,
                 isLocked = 0,
             });
+
+            UnityEngine.Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, $"using AHardwareBuffer at {backend->buffer}");
 
             backend->buffer.Acquire();
 

@@ -7,8 +7,6 @@
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
-#if UNITY_OPENXR_1_9_0_OR_NEWER
-
 using System;
 using System.Collections.Generic;
 using Unity.Collections;
@@ -21,31 +19,31 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         internal static class ConvexHullGenerator
         {
             // Get a single static reference to AngleComparer to avoid additional GC allocs
-            private static readonly Comparison<Vector2> polarAngleComparer = AngleComparer;
+            private static readonly Comparison<Vector2> PolarAngleComparer = AngleComparer;
 
             // Used by AngleComparer
-            private static Vector2 pivot;
+            private static Vector2 Pivot;
 
             // Reusable List to avoid additional GC alloc
-            private static readonly List<Vector2> points = new();
+            private static readonly List<Vector2> Points = new();
 
             /// <summary>
             ///     Used to sort a collection of points by the polar angle
-            ///     made with <see cref="pivot" /> against the +x axis.
+            ///     made with <see cref="Pivot" /> against the +x axis.
             /// </summary>
             /// <param name="lhs">The first point to compare.</param>
             /// <param name="rhs">The second point to compare.</param>
             /// <returns>
             ///     -1 if the vector from
-            ///     <see cref="pivot" /> to <paramref name="lhs" /> makes a larger
-            ///     angle against the +x axis than <see cref="pivot" /> to <paramref name="rhs" />,
+            ///     <see cref="Pivot" /> to <paramref name="lhs" /> makes a larger
+            ///     angle against the +x axis than <see cref="Pivot" /> to <paramref name="rhs" />,
             ///     +1 if the angle is smaller, and 0 if they are equal.
             /// </returns>
             private static int AngleComparer(Vector2 lhs, Vector2 rhs)
             {
                 // Compute the angle against the pivot
-                var u = lhs - pivot;
-                var v = rhs - pivot;
+                var u = lhs - Pivot;
+                var v = rhs - Pivot;
                 var cross = u.x * v.y - u.y * v.x;
 
                 // cross > 0 => lhs is more to the right than rhs
@@ -91,23 +89,23 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                     }
                 }
 
-                pivot = newPoints[pivotIndex];
+                Pivot = newPoints[pivotIndex];
 
                 // Step 2: Copy all points except the pivot into a List
-                points.Clear();
+                Points.Clear();
                 for (var i = 0; i < pivotIndex; ++i)
-                    points.Add(newPoints[i]);
+                    Points.Add(newPoints[i]);
                 for (var i = pivotIndex + 1; i < newPoints.Length; ++i)
-                    points.Add(newPoints[i]);
+                    Points.Add(newPoints[i]);
 
                 // Step 3: Sort points by polar angle with the pivot
-                points.Sort(polarAngleComparer);
+                Points.Sort(PolarAngleComparer);
 
                 // Step 4: Compute the hull
                 var length = 0;
                 var hull = new NativeArray<Vector2>(newPoints.Length, allocator);
-                hull[length++] = pivot;
-                foreach (var point in points)
+                hull[length++] = Pivot;
+                foreach (var point in Points)
                 {
                     while (length > 1 && !ClockwiseTurn(hull[length - 2], hull[length - 1], point))
                     {
@@ -187,4 +185,3 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         }
     }
 }
-#endif

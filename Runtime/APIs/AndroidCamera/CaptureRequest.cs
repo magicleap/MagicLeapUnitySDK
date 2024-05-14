@@ -1,9 +1,10 @@
-﻿namespace MagicLeap.Android
+namespace MagicLeap.Android
 {
     using System;
     using System.Runtime.InteropServices;
     using Unity.Jobs;
     using NDK.Camera;
+    using Unity.Collections;
 
     public sealed class CaptureRequest : IDisposable
     {
@@ -47,6 +48,90 @@
         public void Dispose()
         {
             Dispose(true);
+        }
+
+        /// <summary>
+        /// Set a metadata value for the capture request in the form of one or more <c>bytes</c>.
+        /// </summary>
+        /// <param name="tag">Enumeration for the metadata tag, e.g. a member of <see cref="NDK.Camera.Metadata.Tags"/> or <see cref="MagicLeapCameras.MetadataTags"/></param>
+        /// <param name="values">Array containing all of the desired values to assign to the metadata tag. The correct number of values depends on the metadata tag.</param>
+        /// <returns></returns>
+        public bool TrySetMetadata(uint tag, byte[] values)
+        {
+            var data = new NativeArray<byte>(values.Length, Allocator.Temp);
+            for (int i = 0; i < values.Length; i++)
+                data[i] = values[i];
+            return nativeRequest.TrySetMetadataEntry(tag, data);
+        }
+
+        /// <summary>
+        /// Set a metadata value for the capture request in the form of one or more <c>ints</c>.
+        /// </summary>
+        /// <param name="tag">Enumeration for the metadata tag, e.g. a member of <see cref="NDK.Camera.Metadata.Tags"/> or <see cref="MagicLeapCameras.MetadataTags"/></param>
+        /// <param name="values">Array containing all of the desired values to assign to the metadata tag. The correct number of values depends on the metadata tag.</param>
+        /// <returns></returns>
+        public bool TrySetMetadata(uint tag, int[] values)
+        {
+            var data = new NativeArray<int>(values.Length, Allocator.Temp);
+            for (int i = 0; i < values.Length; i++)
+                data[i] = values[i];
+            return nativeRequest.TrySetMetadataEntry(tag, data);
+        }
+
+        /// <summary>
+        /// Set a metadata value for the capture request in the form of one or more <c>longs</c>.
+        /// </summary>
+        /// <param name="tag">Enumeration for the metadata tag, e.g. a member of <see cref="NDK.Camera.Metadata.Tags"/> or <see cref="MagicLeapCameras.MetadataTags"/></param>
+        /// <param name="values">Array containing all of the desired values to assign to the metadata tag. The correct number of values depends on the metadata tag.</param>
+        /// <returns></returns>
+        public bool TrySetMetadata(uint tag, long[] values)
+        {
+            var data = new NativeArray<long>(values.Length, Allocator.Temp);
+            for (int i = 0; i < values.Length; i++)
+                data[i] = values[i];
+            return nativeRequest.TrySetMetadataEntry(tag, data);
+        }
+
+        /// <summary>
+        /// Set a metadata value for the capture request in the form of one or more <c>doubles</c>.
+        /// </summary>
+        /// <param name="tag">Enumeration for the metadata tag, e.g. a member of <see cref="NDK.Camera.Metadata.Tags"/> or <see cref="MagicLeapCameras.MetadataTags"/></param>
+        /// <param name="values">Array containing all of the desired values to assign to the metadata tag. The correct number of values depends on the metadata tag.</param>
+        /// <returns></returns>
+        public bool TrySetMetadata(uint tag, double[] values)
+        {
+            var data = new NativeArray<double>(values.Length, Allocator.Temp);
+            for (int i = 0; i < values.Length; i++)
+                data[i] = values[i];
+            return nativeRequest.TrySetMetadataEntry(tag, data);
+        }
+
+        /// <summary>
+        /// Set a metadata value for the capture request in the form of one or more <c>floats</c>.
+        /// </summary>
+        /// <param name="tag">Enumeration for the metadata tag, e.g. a member of <see cref="NDK.Camera.Metadata.Tags"/> or <see cref="MagicLeapCameras.MetadataTags"/></param>
+        /// <param name="values">Array containing all of the desired values to assign to the metadata tag. The correct number of values depends on the metadata tag.</param>
+        /// <returns></returns>
+        public bool TrySetMetadata(uint tag, float[] values)
+        {
+            var data = new NativeArray<float>(values.Length, Allocator.Temp);
+            for (int i = 0; i < values.Length; i++)
+                data[i] = values[i];
+            return nativeRequest.TrySetMetadataEntry(tag, data);
+        }
+
+        /// <summary>
+        /// Set a metadata value for the capture request in the form of one or more <see cref="ACameraMetadata.Rational"/>.
+        /// </summary>
+        /// <param name="tag">Enumeration for the metadata tag, e.g. a member of <see cref="NDK.Camera.Metadata.Tags"/> or <see cref="MagicLeapCameras.MetadataTags"/></param>
+        /// <param name="values">Array containing all of the desired values to assign to the metadata tag. The correct number of values depends on the metadata tag.</param>
+        /// <returns></returns>
+        public bool TrySetMetadata(uint tag, ACameraMetadata.Rational[] values)
+        {
+            var data = new NativeArray<ACameraMetadata.Rational>(values.Length, Allocator.Temp);
+            for (int i = 0; i < values.Length; i++)
+                data[i] = values[i];
+            return nativeRequest.TrySetMetadataEntry(tag, data);
         }
 
         private void Dispose(bool disposing)

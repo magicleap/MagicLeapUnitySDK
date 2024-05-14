@@ -1,0 +1,11 @@
+.title
+{
+    font-size: 20px;
+    -unity-font-style: bold;
+    padding-left: 10px;
+
+}
+.property-list
+{
+    padding-left: 30px;
+}

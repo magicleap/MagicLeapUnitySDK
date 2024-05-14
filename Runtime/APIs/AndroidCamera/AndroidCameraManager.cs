@@ -1,4 +1,4 @@
-﻿// %BANNER_BEGIN%
+// %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
 // Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
@@ -104,8 +104,7 @@ namespace MagicLeap.Android
             return false;
         }
 
-        public static bool TryGetAvailableStreamConfigurations(string cameraId, Allocator allocator,
-            out NativeArray<StreamConfiguration> outConfigs)
+        public static bool TryGetAvailableStreamConfigurations(string cameraId, out NativeArray<StreamConfiguration> outConfigs)
         {
             outConfigs = default;
 
@@ -125,8 +124,7 @@ namespace MagicLeap.Android
                 }
             }
 
-            outConfigs = new NativeArray<StreamConfiguration>(outputConfigCount, allocator,
-                NativeArrayOptions.UninitializedMemory);
+            outConfigs = new NativeArray<StreamConfiguration>(outputConfigCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
             int lastIdx = 0;
 
             unsafe
@@ -223,13 +221,6 @@ namespace MagicLeap.Android
             if (refCount == 0)
                 s_Manager.Dispose();
         }
-    }
-
-    public static class MagicLeapCameras
-    {
-        public const string MainCamera = "0";
-        public const string CVCamera = "1";
-        public const string MixedRealityCamera = "3";
     }
 
     internal sealed class AndroidCameraLog : MLPluginLog.ScopedLog

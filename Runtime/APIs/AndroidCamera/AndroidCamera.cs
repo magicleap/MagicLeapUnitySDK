@@ -1,4 +1,4 @@
-﻿// %BANNER_BEGIN%
+// %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
 // Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
@@ -8,7 +8,10 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
+using System.Runtime.CompilerServices;
+using System.Threading;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
 
 namespace MagicLeap.Android
 {
@@ -23,10 +26,27 @@ namespace MagicLeap.Android
 
     using NDK.Camera;
     using NDK.Media;
+    using MagicLeap.Android.NDK.Camera.Metadata;
 
     public sealed unsafe class AndroidCamera : IDisposable
     {
         struct AndroidCameraUpdate {}
+
+        public enum CaptureFormat
+        {
+            [InspectorName("YUV")]
+            YUV_420_888 = MediaFormat.Yuv_420_888,
+
+            [InspectorName("JPEG")]
+            JPEG = MediaFormat.Jpeg
+        }
+
+        public enum CaptureFrameRate
+        {
+            _15 = 15,
+            _30 = 30,
+            _60 = 60
+        }
 
         private static List<AndroidCamera> camerasToUpdate = null;
 
@@ -38,7 +58,126 @@ namespace MagicLeap.Android
 
         internal static IDisposable RegisterCameraForUpdate(AndroidCamera camera)
             => AndroidCameraPlayerLoopUtility.LazyRegisterPlayerLoopUpdateInternal(ref camerasToUpdate, camera, typeof(AndroidCameraUpdate),
-                UpdateCameras);
+                UpdateCameras, typeof(Initialization.XREarlyUpdate));
+
+        private struct CameraPerformanceTracker
+        {
+            // This is basically just a simple ringbuffer.
+            // We use a power of two as the buffer size,
+            // since that allows us to use (buffer_size - 1)
+            // as a bitmask for the index (lastSample).
+            // This also works if/when lastSample
+            // overflows and wraps, as we mask out
+            // the sign bit with SAMPLE_MASK, so
+            // we can guarantee that (<index> & SAMPLE_MASK)
+            // will never be negative, regardless of the
+            // actual value of <index>.
+            const int NUM_SAMPLES = 64;
+            const int SAMPLE_MASK = NUM_SAMPLES - 1;
+            private fixed long timestampSamples[NUM_SAMPLES];
+            private int lastSample;
+            private int locked;
+
+            public bool HasSufficientSamples
+                => lastSample > SAMPLE_MASK;
+
+            public static CameraPerformanceTracker Create()
+            {
+                var tracker = new CameraPerformanceTracker();
+                tracker.lastSample = -1;
+                tracker.locked = 0;
+
+                return tracker;
+            }
+
+            public void AddSample(long timestamp)
+            {
+                Lock();
+                AddSampleInternal(timestamp);
+                Unlock();
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal void AddSampleInternal(long timestamp)
+                => timestampSamples[++lastSample & SAMPLE_MASK] = timestamp;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal void Lock()
+            {
+                int backoff = 1;
+                // (for reference below)
+                // locked == 0 means "unlocked"
+                // locked == 1 means "locked"
+                //
+                // if 'locked' is currently 0, we want to set it to 1 to indicate we're locking
+                // the data. if it's not 0, it means some other thread has already locked the data
+                // and we need to wait.
+                // .CompareExchange() allows us to combine the read, compare, and (assuming the
+                // compare returns true) the write as a single operation from the perspective of all
+                // other threads on the system.
+                // So here, we're testing 'locked' to see if it's currently 0, and IFF that comparison
+                // succeeds, set it to 1.
+                // Additionally, .CompareExchange() returns the current value of 'locked', so
+                // by checking it in a while() loop (like we do below), we can block *this thread*
+                // from moving forward until the *other thread* has completed it work, and set
+                // 'locked' back to 0.
+                while (Interlocked.CompareExchange(ref locked, 1, 0) == 1)
+                {
+                    // There shouldn't be significant contention here, as there are only two
+                    // threads updating the array, but the exponential backoff is here as a
+                    // safety valve to prevent either thread from hammering the cpu with
+                    // atomic operations. We also want to minimize the risk of either thread
+                    // getting put to sleep (ie, forced to yield its timeslice and/or worse,
+                    // getting kicked out of the kernel's runqueue), so .SpinWait() here feels
+                    // like an acceptable tradeoff between latency and overall efficiency.
+                    Thread.SpinWait(backoff);
+                    backoff <<= 1;
+                }
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal void Unlock()
+                => locked = 0; // loads and stores of pointer-width or less are atomic in .net by default.
+
+            public long ReadSample(int age)
+            {
+                Lock();
+                var result = ReadSampleInternal(lastSample, age);
+                Unlock();
+                return result;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal long ReadSampleInternal(int start, int age)
+                => timestampSamples[(start - age) & SAMPLE_MASK];
+
+            public int ReadSamples(NativeArray<long> array)
+            {
+                if (!array.IsCreated)
+                    throw new ArgumentNullException(nameof(array));
+
+                if (array.Length > NUM_SAMPLES)
+                    throw new Exception($"size of array exceeds maximum number of samples");
+
+                if (lastSample < 0)
+                    return 0;
+
+                Lock();
+                var start = lastSample;
+                int i;
+                for (i = 0; i < array.Length; ++i)
+                {
+                    var sample = ReadSampleInternal(start, i);
+                    if (sample == 0)
+                        break;
+                    array[i] = sample;
+                }
+
+                Unlock();
+
+                return i;
+            }
+        }
 
         private struct UnsafeCameraState
         {
@@ -49,12 +188,16 @@ namespace MagicLeap.Android
             public ACaptureSessionOutputContainer captureSessionOutputContainer;
             public AImageReader imageReader;
             public NativeRingBuffer ringBuffer;
+            public NativeRingBuffer ringBufferForTimestamps;
+            public CameraPerformanceTracker tracker;
             public IntPtr activeRequestObject;
 
             public void Dispose()
             {
                 if (ringBuffer.IsCreated)
                     ringBuffer.Dispose();
+                if (ringBufferForTimestamps.IsCreated)
+                    ringBufferForTimestamps.Dispose();
                 cameraDevice.Dispose();
                 imageReader.Dispose();
             }
@@ -106,6 +249,7 @@ namespace MagicLeap.Android
                 throw new Exception("failed to create camera capture session");
 
             cameraState->ringBuffer = new NativeRingBuffer(64, Allocator.Persistent);
+            cameraState->ringBufferForTimestamps = new NativeRingBuffer(64, Allocator.Persistent);
 
             captureCallbacks = ACameraCaptureSession.CaptureCallbacks.Create(OnCaptureStarted, captureCompleted: OnCaptureCompleted, context: new IntPtr(cameraState));
 
@@ -155,6 +299,10 @@ namespace MagicLeap.Android
             if (reqObj == IntPtr.Zero)
                 return;
 
+            using (var writer = camera->ringBufferForTimestamps.AsNonblockingWriter())
+                if (writer.TryWrite(timestampInNS))
+                    writer.FinishWrite();
+
             camera->activeRequestObject = reqObj;
         }
 
@@ -181,7 +329,7 @@ namespace MagicLeap.Android
             // to the image reader.
             using (img)
             {
-                var unsafeImage = AHardwareBufferImageBackend.Create(img, Allocator.TempJob);
+                var unsafeImage = AHardwareBufferImageBackend.Create(img, Allocator.Persistent);
                 nci = new NativeImage(unsafeImage, camera->activeRequestObject);
             }
             // var unsafeImage = AImageBackend.Create(img, Allocator.TempJob);
@@ -197,8 +345,8 @@ namespace MagicLeap.Android
             writer.Dispose();
         }
 
-        public CaptureRequest CreateCaptureRequest(RequestTemplate template,
-            CaptureRequest.OnFrameAvailable onFrameAvailable, IntPtr context = default)
+        public CaptureRequest CreateCaptureRequest(MagicLeapCameras.VideoCaptureMode captureMode, CaptureRequest.OnFrameAvailable onFrameAvailable, 
+            RequestTemplate template = RequestTemplate.Preview, IntPtr context = default)
         {
             if (cameraState == null)
                 throw new NullReferenceException();
@@ -211,6 +359,11 @@ namespace MagicLeap.Android
 
             return new CaptureRequest(this, requestPtr, onFrameAvailable, context);
         }
+
+        public int GetTimestamps(NativeArray<long> timestampArray)
+            => cameraState->tracker.HasSufficientSamples
+                ? cameraState->tracker.ReadSamples(timestampArray)
+                : 0;
 
         public bool TryStopRepeatingRequest()
             => cameraState->cameraCaptureSession.TryStopRepeating();
@@ -265,23 +418,47 @@ namespace MagicLeap.Android
             return array;
         }
 
-        private void ReadAndProcessFrame()
+        private void HandleImage(NativeImage image, bool isLatest)
         {
-            var reader = cameraState->ringBuffer.AsNonblockingReader();
-
-            var didRead = reader.TryRead(out NativeImage nci);
-            if (didRead)
-                reader.FinishRead();
-            reader.Dispose();
-
-            if (!didRead)
+            if (!image.IsCreated)
                 return;
 
-            var jobHandle = CaptureRequest.TryGetFromIntPtr(nci.RequestHandle, out var request)
-                ? request.ProcessNewFrame(nci)
-                : new JobHandle();
+            var shouldProcess = isLatest;
+            if (shouldProcess)
+            {
+                if (CaptureRequest.TryGetFromIntPtr(image.RequestHandle, out var request))
+                    image.Dispose(request.ProcessNewFrame(image));
+                else
+                    Debug.LogFormat(LogType.Warning, LogOption.NoStacktrace, null, "HandleImage failed: was supposed to process image, but couldn't extract capture request");
+                return;
+            }
 
-            nci.Dispose(jobHandle);
+            image.Dispose();
+        }
+
+        private void ReadAndProcessFrame()
+        {
+            using (var reader = cameraState->ringBufferForTimestamps.AsNonblockingReader())
+            {
+                bool didRead = false;
+                while (reader.TryRead(out long timestamp))
+                {
+                    cameraState->tracker.AddSample(timestamp);
+
+                    didRead = true;
+                }
+                if (didRead)
+                    reader.FinishRead();
+            }
+
+            NativeImage nci = default, nciPrev = default;
+            using (var reader = cameraState->ringBuffer.AsNonblockingReader())
+            {
+                if (reader.TryRead(out nci))
+                    reader.FinishRead();
+            }
+
+            HandleImage(nci, true);
         }
 
         [MonoPInvokeCallback(typeof(Action<IntPtr, ACameraCaptureSession>))]

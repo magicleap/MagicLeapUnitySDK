@@ -14,6 +14,7 @@ using UnityEngine.XR.ARSubsystems;
 
 namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 {
+    using MagicLeapPlanesTypes;
     public partial class MLXrPlaneSubsystem
     {
         [Flags]
@@ -105,47 +106,47 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             return outFlags;
         }
 
-        public static void ToMLXrOrientationsAndSemanticTypes(this MLXrPlaneSubsystem.MLPlanesQueryFlags flags, out IList<MLXrPlaneSubsystem.XrTypes.MLXrPlaneDetectorOrientation> orientations, out IList<MLXrPlaneSubsystem.XrTypes.MLXrPlaneDetectorSemanticType> semanticTypes)
+        internal static void ToMLXrOrientationsAndSemanticTypes(this MLXrPlaneSubsystem.MLPlanesQueryFlags flags, out IList<XrPlaneDetectorOrientation> orientations, out IList<XrPlaneDetectorSemanticTypes> semanticTypes)
         {
-            orientations = new List<MLXrPlaneSubsystem.XrTypes.MLXrPlaneDetectorOrientation>();
-            semanticTypes = new List<MLXrPlaneSubsystem.XrTypes.MLXrPlaneDetectorSemanticType>();
+            orientations = new List<XrPlaneDetectorOrientation>();
+            semanticTypes = new List<XrPlaneDetectorSemanticTypes>();
 
             if ((flags & MLXrPlaneSubsystem.MLPlanesQueryFlags.Horizontal) != 0)
             {
-                orientations.Add(MLXrPlaneSubsystem.XrTypes.MLXrPlaneDetectorOrientation.HorizontalDownward);
-                orientations.Add(MLXrPlaneSubsystem.XrTypes.MLXrPlaneDetectorOrientation.HorizontalUpward);
+                orientations.Add(XrPlaneDetectorOrientation.HorizontalDownward);
+                orientations.Add(XrPlaneDetectorOrientation.HorizontalUpward);
             }
 
             if ((flags & MLXrPlaneSubsystem.MLPlanesQueryFlags.Arbitrary) != 0)
             {
-                orientations.Add(MLXrPlaneSubsystem.XrTypes.MLXrPlaneDetectorOrientation.Arbitrary);
+                orientations.Add(XrPlaneDetectorOrientation.Arbitrary);
             }
 
             if ((flags & MLXrPlaneSubsystem.MLPlanesQueryFlags.Vertical) != 0)
             {
-                orientations.Add(MLXrPlaneSubsystem.XrTypes.MLXrPlaneDetectorOrientation.Vertical);
+                orientations.Add(XrPlaneDetectorOrientation.Vertical);
             }
 
             //Semantic types
 
             if ((flags & MLXrPlaneSubsystem.MLPlanesQueryFlags.SemanticCeiling) != 0)
             {
-                semanticTypes.Add(MLXrPlaneSubsystem.XrTypes.MLXrPlaneDetectorSemanticType.Ceiling);
+                semanticTypes.Add(XrPlaneDetectorSemanticTypes.Ceiling);
             }
 
             if ((flags & MLXrPlaneSubsystem.MLPlanesQueryFlags.SemanticFloor) != 0)
             {
-                semanticTypes.Add(MLXrPlaneSubsystem.XrTypes.MLXrPlaneDetectorSemanticType.Floor);
+                semanticTypes.Add(XrPlaneDetectorSemanticTypes.Floor);
             }
 
             if ((flags & MLXrPlaneSubsystem.MLPlanesQueryFlags.SemanticPlatform) != 0)
             {
-                semanticTypes.Add(MLXrPlaneSubsystem.XrTypes.MLXrPlaneDetectorSemanticType.Platform);
+                semanticTypes.Add(XrPlaneDetectorSemanticTypes.Platform);
             }
 
             if ((flags & MLXrPlaneSubsystem.MLPlanesQueryFlags.SemanticWall) != 0)
             {
-                semanticTypes.Add(MLXrPlaneSubsystem.XrTypes.MLXrPlaneDetectorSemanticType.Wall);
+                semanticTypes.Add(XrPlaneDetectorSemanticTypes.Wall);
             }
         }
     }

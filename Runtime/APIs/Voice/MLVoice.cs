@@ -198,6 +198,8 @@ namespace UnityEngine.XR.MagicLeap
 
         /// <summary>
         /// Configures Settings sent, Sets the callbacks for voice intent events, and starts processing.
+        /// 
+        /// Max Voice Intents Supported: 100
         /// </summary>
         /// <param name="voiceConfiguration">MLVoiceIntentsConfiguration scriptable object that contains the App Intents data.
         /// Memory of this variable is managed by user.
@@ -241,6 +243,8 @@ namespace UnityEngine.XR.MagicLeap
         /// 
         /// When providing a string instead of the MLVoiceIntentsConfiguration Scriptable Object no
         /// validation is done to confirm proper format.
+        /// 
+        /// Max Voice Intents Supported: 100
         /// </summary>
         /// <param name="JSONString">The JSON file with the voice intents data in the proper format.
         /// </param>

@@ -7,11 +7,6 @@
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
-#if UNITY_OPENXR_1_9_0_OR_NEWER
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine.XR.MagicLeap;
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.XR.OpenXR.Features;
@@ -42,15 +37,20 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                 return false;
             }
 
-            return base.OnInstanceCreate(xrInstance);
+            var instanceCreateResult = base.OnInstanceCreate(xrInstance);
+            if (!instanceCreateResult)
+            {
+                return false;
+            }
+
+            nativeFunctions = CreateNativeFunctions<MagicLeapMarkerUnderstandingNativeFunctions>();
+            return true;
         }
 
-        protected override string GetFeatureId() => FeatureId;
-
-        protected override void OnSessionCreate(ulong xrSession)
+        protected override void OnSessionEnd(ulong xrSession)
         {
-            base.OnSessionCreate(xrSession);
+            base.OnSessionEnd(xrSession);
+            DestroyAllMarkerDetectors();
         }
     }
 }
-#endif

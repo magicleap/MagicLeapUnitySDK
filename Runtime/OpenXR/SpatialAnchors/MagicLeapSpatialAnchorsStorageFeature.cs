@@ -25,7 +25,7 @@ using Unity.Collections.LowLevel.Unsafe;
 namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 {
     using global::MagicLeap;
-    using UnityEngine.LowLevel;
+    using LowLevel;
 
 #if UNITY_EDITOR
     [OpenXRFeature(UiName = "Magic Leap 2 Spatial Anchors Storage",
@@ -40,33 +40,23 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
     public partial class MagicLeapSpatialAnchorsStorageFeature : MagicLeapOpenXRFeatureBase
     {
         public const string FeatureId = "com.magicleap.openxr.feature.ml2_spatialanchorstorage";
-        public const string ExtensionName = "XR_ML_spatial_anchors_storage XR_EXT_future";
+        private const string ExtensionName = "XR_ML_spatial_anchors_storage XR_EXT_future XR_KHR_locate_spaces";
+        public event Action<ulong, string> OnPublishComplete;
+        public event Action<List<string>> OnQueryComplete;
+        public event Action<List<string>> OnDeletedComplete;
+        public event Action<List<string>> OnUpdateExpirationCompleted;
+        public event Action<Pose, ulong, string, XrResult>  OnCreationCompleteFromStorage;
 
-        public delegate void OnPublishCompleteEvent(ulong anchorId, string anchorMapPositionId);
-        public event OnPublishCompleteEvent OnPublishComplete;
+        private MagicLeapSpatialAnchorsFeature anchorsFeature;
 
-        public delegate void OnQueryCompleteEvent(List<string> anchorMapPositionId);
-        public event OnQueryCompleteEvent OnQueryComplete;
+        private int pendingPublishRequests;
+        private int pendingQueries;
+        private int pendingDeleteRequests;
+        private int pendingUpdateRequests;
+        private int pendingStorageAnchors;
 
-        public delegate void OnDeletedCompleteEvent(List<string> anchorMapPositionId);
-        public event OnDeletedCompleteEvent OnDeletedComplete;
-
-        public delegate void OnUpdateExpirationCompleteEvent(List<string> anchorMapPositionId);
-        public event OnUpdateExpirationCompleteEvent OnUpdateExpirationCompleted;
-
-        public delegate void OnCreationCompleteFromStorageEvent(Pose pose, ulong anchorId, string anchorStorageId, XrResult result);
-        public event OnCreationCompleteFromStorageEvent OnCreationCompleteFromStorage;
-
-        private MagicLeapSpatialAnchorsFeature anchorsFeature = null;
-
-        private int pendingPublishRequests = 0;
-        private int pendingQueries = 0;
-        private int pendingDeleteRequests = 0;
-        private int pendingUpdateRequests = 0;
-        private int pendingStorageAnchors = 0;
-
-        private bool startedSpatialAnchorStorage = false;
-
+        private bool startedSpatialAnchorStorage;
+        
         private struct AnchorsStorageUpdateType
         { }
 
@@ -81,7 +71,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                     return false;
                 }
             }
-
+            
             var updateSystem = new PlayerLoopSystem
             {
                 subSystemList = Array.Empty<PlayerLoopSystem>(),
@@ -97,14 +87,14 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             return base.OnInstanceCreate(xrInstance);
         }
 
-        public bool CreateSpatialAnchorsFromStorage(List<String> AnchorMapPositionIds)
+        public bool CreateSpatialAnchorsFromStorage(List<string> anchorMapPositionIds)
         {
             if (!startedSpatialAnchorStorage)
             {
                 return false;
             }
 
-            if (AnchorMapPositionIds.Count == 0)
+            if (anchorMapPositionIds.Count == 0)
             {
                 Debug.LogError("CreateSpatialAnchors sent an empty list of AnchorMapPositionIds.");
                 return false;
@@ -123,24 +113,24 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 
             unsafe
             {
-                NativeArray<XrUUID> anchorUuidsToCreate = new NativeArray<XrUUID>(AnchorMapPositionIds.Count, Allocator.Temp);
+                NativeArray<XrUUID> anchorUuidsToCreate = new NativeArray<XrUUID>(anchorMapPositionIds.Count, Allocator.Temp);
 
                 for (int i = 0; i < anchorUuidsToCreate.Length; ++i)
                 {
-                    anchorUuidsToCreate[i] = new XrUUID(AnchorMapPositionIds[i]);
+                    anchorUuidsToCreate[i] = new XrUUID(anchorMapPositionIds[i]);
                 }
 
                 var resultCode = NativeBindings.MLOpenXRCreateSpatialAnchors((NativeInterop.XrUUID *)anchorUuidsToCreate.GetUnsafePtr(), anchorUuidsToCreate.Length);
-                bool xrCallSucceded = Utils.DidXrCallSucceed(resultCode, nameof(NativeBindings.MLOpenXRCreateSpatialAnchors));
+                bool xrCallSucceeded = Utils.DidXrCallSucceed(resultCode, nameof(NativeBindings.MLOpenXRCreateSpatialAnchors));
 
-                if (!xrCallSucceded)
+                if (!xrCallSucceeded)
                 {
                     Debug.LogError("CreateSpatialAnchors failed to send request to create anchors from AnchorMapPositionId list.");
                 }
 
-                pendingStorageAnchors += AnchorMapPositionIds.Count;
+                pendingStorageAnchors += anchorMapPositionIds.Count;
 
-                return xrCallSucceded;
+                return xrCallSucceeded;
             }
         }
 
@@ -157,31 +147,31 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             }
 
             var resultCode = NativeBindings.MLOpenXRQuerySpatialAnchorsStorage(position, radius);
-            bool xrCallSucceded = Utils.DidXrCallSucceed(resultCode, nameof(NativeBindings.MLOpenXRQuerySpatialAnchorsStorage));
+            bool xrCallSucceeded = Utils.DidXrCallSucceed(resultCode, nameof(NativeBindings.MLOpenXRQuerySpatialAnchorsStorage));
 
-            if (!xrCallSucceded)
+            if (!xrCallSucceeded)
             {
                 Debug.LogError("QueryStoredSpatialAnchors failed to send request to query for AnchorMapPositionId list around a specific position.");
             }
 
             pendingQueries++;
 
-            return xrCallSucceded;
+            return xrCallSucceeded;
         }
 
         /// <summary>
         /// Publish local anchors to Spatial Anchor Storage using the MagicLeap Anchor Id.
         /// </summary>
-        /// <param name="AnchorIds">The list of AnchorIds to publish. These were assigned in the OnCreationComplete event in MagicLeapSpatialAnchorsFeature.</param>
+        /// <param name="anchorIds">The list of AnchorIds to publish. These were assigned in the OnCreationComplete event in MagicLeapSpatialAnchorsFeature.</param>
         /// <param name="expiration">The time in seconds since epoch after which these anchors may: expire. Use 0 for permanent anchors. The system may retain them longer.</param>
-        public bool PublishSpatialAnchorsToStorage(List<ulong> AnchorIds, ulong expiration)
+        public bool PublishSpatialAnchorsToStorage(List<ulong> anchorIds, ulong expiration)
         {
             if (!startedSpatialAnchorStorage)
             {
                 return false;
             }
 
-            if (AnchorIds.Count == 0)
+            if (anchorIds.Count == 0)
             {
                 Debug.LogError("PublishSpatialAnchorsToStorage sent an empty list of AnchorIds.");
                 return false;
@@ -189,28 +179,28 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 
             unsafe
             {
-                using NativeArray<ulong> anchorsToPublish = new NativeArray<ulong>(AnchorIds.ToArray(), Allocator.Temp);
+                using NativeArray<ulong> anchorsToPublish = new NativeArray<ulong>(anchorIds.ToArray(), Allocator.Temp);
 
-                var resultCode = NativeBindings.MLOpenXRPublishSpatialAnchors((ulong*)anchorsToPublish.GetUnsafePtr(), AnchorIds.Count, expiration);
-                bool xrCallSucceded = Utils.DidXrCallSucceed(resultCode, nameof(NativeBindings.MLOpenXRCreateSpatialAnchors));
+                var resultCode = NativeBindings.MLOpenXRPublishSpatialAnchors((ulong*)anchorsToPublish.GetUnsafePtr(), anchorIds.Count, expiration);
+                bool xrCallSucceeded = Utils.DidXrCallSucceed(resultCode, nameof(NativeBindings.MLOpenXRCreateSpatialAnchors));
 
-                if (!xrCallSucceded)
+                if (!xrCallSucceeded)
                 {
                     Debug.LogError("PublishSpatialAnchorsToStorage failed to send request to publish anchors from AnchorId list.");
                 }
 
-                pendingPublishRequests += AnchorIds.Count;
+                pendingPublishRequests += anchorIds.Count;
 
-                return xrCallSucceded;
+                return xrCallSucceeded;
             }
         }
 
         /// <summary>
         /// Publish local anchors to Spatial Anchor Storage using ARAnchors. Will return false if XRAnchorSubsystem is not loaded.
         /// </summary>
-        /// <param name="Anchors">The list of ARAnchors to publish. TrackingState must be Tracking to be valid for publish. Will be ignored if not.</param>
+        /// <param name="anchors">The list of ARAnchors to publish. TrackingState must be Tracking to be valid for publish. Will be ignored if not.</param>
         /// <param name="expiration">The time in seconds since epoch after which these anchors may: expire. Use 0 for permanent anchors. The system may retain them longer.</param>
-        public bool PublishSpatialAnchorsToStorage(List<ARAnchor> Anchors, ulong expiration)
+        public bool PublishSpatialAnchorsToStorage(List<ARAnchor> anchors, ulong expiration)
         {
             if (!startedSpatialAnchorStorage)
             {
@@ -226,7 +216,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 
             List<ulong> anchorIds = new List<ulong>();
 
-            foreach (ARAnchor anchor in Anchors)
+            foreach (ARAnchor anchor in anchors)
             {
                 if(anchor.trackingState != TrackingState.Tracking)
                 {
@@ -250,15 +240,15 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         /// <summary>
         /// Delete published anchors from Spatial Anchor Storage.
         /// </summary>
-        /// <param name="AnchorMapPositionIds">The list of AnchorMapPositionIds to Delete. These were assigned in the OnPublishComplete event in MagicLeapSpatialAnchorsStorageFeature.</param>
-        public bool DeleteStoredSpatialAnchor(List<string> AnchorMapPositionIds)
+        /// <param name="anchorMapPositionIds">The list of AnchorMapPositionIds to Delete. These were assigned in the OnPublishComplete event in MagicLeapSpatialAnchorsStorageFeature.</param>
+        public bool DeleteStoredSpatialAnchor(List<string> anchorMapPositionIds)
         {
             if (!startedSpatialAnchorStorage)
             {
                 return false;
             }
 
-            if (AnchorMapPositionIds.Count == 0)
+            if (anchorMapPositionIds.Count == 0)
             {
                 Debug.LogError("DeleteStoredSpatialAnchor sent an empty list of AnchorMapPositionIds.");
                 return false;
@@ -266,65 +256,73 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 
             unsafe
             {
-                NativeArray<XrUUID> anchorUuidsToDelete = new NativeArray<XrUUID>(AnchorMapPositionIds.Count, Allocator.Temp);
+                NativeArray<XrUUID> anchorUuidsToDelete = new NativeArray<XrUUID>(anchorMapPositionIds.Count, Allocator.Temp);
 
                 for (int i = 0; i < anchorUuidsToDelete.Length; ++i)
                 {
-                    anchorUuidsToDelete[i] = new XrUUID(AnchorMapPositionIds[i]);
+                    anchorUuidsToDelete[i] = new XrUUID(anchorMapPositionIds[i]);
                 }
 
                 var resultCode = NativeBindings.MLOpenXRDeleteSpatialAnchors((NativeInterop.XrUUID*)anchorUuidsToDelete.GetUnsafePtr(), anchorUuidsToDelete.Length);
-                bool xrCallSucceded = Utils.DidXrCallSucceed(resultCode, nameof(NativeBindings.MLOpenXRCreateSpatialAnchors));
+                bool xrCallSucceeded = Utils.DidXrCallSucceed(resultCode, nameof(NativeBindings.MLOpenXRCreateSpatialAnchors));
 
-                if (!xrCallSucceded)
+                if (!xrCallSucceeded)
                 {
                     Debug.LogError("CreateSpatialAnchors failed to send request to create anchors from AnchorMapPositionId list.");
                 }
 
-                pendingDeleteRequests += AnchorMapPositionIds.Count;
+                pendingDeleteRequests += anchorMapPositionIds.Count;
 
-                return xrCallSucceded;
+                return xrCallSucceeded;
             }
         }
 
         /// <summary>
-        /// Update the exiration time for published anchors in Spatial Anchor Storage.
+        /// Update the expiration time for published anchors in Spatial Anchor Storage.
         /// </summary>
-        /// <param name="AnchorMapPositionIds">The list of AnchorMapPositionIds to Delete. These were assigned in the OnPublishComplete event in MagicLeapSpatialAnchorsStorageFeature.</param>
+        /// <param name="anchorMapPositionIds">The list of AnchorMapPositionIds to Delete. These were assigned in the OnPublishComplete event in MagicLeapSpatialAnchorsStorageFeature.</param>
         /// <param name="expiration">The time in seconds since epoch after which these anchors may: expire. The system may retain them longer.</param>
-        public bool UpdateExpirationonStoredSpatialAnchor(List<string> AnchorMapPositionIds, ulong expiration)
+        [Obsolete("UpdateExpirationonStoredSpatialAnchor will be deprecated. Use UpdateExpirationForStoredSpatialAnchor.")]
+        public bool UpdateExpirationonStoredSpatialAnchor(List<string> anchorMapPositionIds, ulong expiration) => UpdateExpirationForStoredSpatialAnchor(anchorMapPositionIds, expiration);
+
+        /// <summary>
+        /// Update the expiration time for published anchors in Spatial Anchor Storage.
+        /// </summary>
+        /// <param name="anchorMapPositionIds">The list of AnchorMapPositionIds to Delete. These were assigned in the OnPublishComplete event in MagicLeapSpatialAnchorsStorageFeature.</param>
+        /// <param name="expiration">The time in seconds since epoch after which these anchors may: expire. The system may retain them longer.</param>
+        public bool UpdateExpirationForStoredSpatialAnchor(List<string> anchorMapPositionIds, ulong expiration)
         {
             if (!startedSpatialAnchorStorage)
             {
                 return false;
             }
 
-            if (AnchorMapPositionIds.Count == 0)
+            if (anchorMapPositionIds.Count == 0)
             {
-                Debug.LogError("UpdateExpirationonStoredSpatialAnchor sent an empty list of AnchorMapPositionIds.");
+                Debug.LogError($"{nameof(UpdateExpirationForStoredSpatialAnchor)} sent an empty list of AnchorMapPositionIds.");
                 return false;
             }
 
             unsafe
             {
-                NativeArray<XrUUID> anchorUuidsToUpdate = new NativeArray<XrUUID>(AnchorMapPositionIds.Count, Allocator.Temp);
+                NativeArray<XrUUID> anchorUuidsToUpdate = new NativeArray<XrUUID>(anchorMapPositionIds.Count, Allocator.Temp);
 
                 for (int i = 0; i < anchorUuidsToUpdate.Length; ++i)
                 {
-                    anchorUuidsToUpdate[i] = new XrUUID(AnchorMapPositionIds[i]);
+                    anchorUuidsToUpdate[i] = new XrUUID(anchorMapPositionIds[i]);
                 }
 
-                var resultCode = NativeBindings.MLOpenXRUpdateSpatialAnchorsExpiration((XrUUID*)anchorUuidsToUpdate.GetUnsafePtr(), AnchorMapPositionIds.Count, expiration);
-                bool xrCallSucceded = Utils.DidXrCallSucceed(resultCode, nameof(NativeBindings.MLOpenXRUpdateSpatialAnchorsExpiration));
+                var resultCode = NativeBindings.MLOpenXRUpdateSpatialAnchorsExpiration((XrUUID*)anchorUuidsToUpdate.GetUnsafePtr(), anchorMapPositionIds.Count, expiration);
+                bool xrCallSucceeded = Utils.DidXrCallSucceed(resultCode, nameof(NativeBindings.MLOpenXRUpdateSpatialAnchorsExpiration));
 
-                if (!xrCallSucceded)
+                if (!xrCallSucceeded)
                 {
-                    Debug.LogError("UpdateExpirationonStoredSpatialAnchor failed to send request to update anchors expiration from AnchorMapPositionId list.");
+                    Debug.LogError($"{nameof(UpdateExpirationForStoredSpatialAnchor)} failed to send request to update anchors expiration from AnchorMapPositionId list.");
                 }
 
-                pendingUpdateRequests += AnchorMapPositionIds.Count;
+                pendingUpdateRequests += anchorMapPositionIds.Count;
 
-                return xrCallSucceded;
+                return xrCallSucceeded;
             }
         }
 
@@ -363,8 +361,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                             foreach (MLXrAnchorSubsystem.AnchorCompletionStatus status in finalComplete)
                             {
                                 pendingStorageAnchors--;
-
-                                OnCreationCompleteFromStorage.Invoke(status.Pose, status.Id, status.AnchorStorageId.ToString(), status.Result);
+                                OnCreationCompleteFromStorage?.Invoke(status.Pose, status.Id, status.AnchorStorageId.ToString(), status.Result);
                             }
 
                             if (pendingStorageAnchors < 0)
@@ -397,7 +394,8 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 
                             for (int i = 0; i < completedLength; i++)
                             {
-                                OnPublishComplete.Invoke(finalCompleteIds[i], finalCompleteUuids[i].ToString());
+                                OnPublishComplete?.Invoke(finalCompleteIds[i], finalCompleteUuids[i].ToString());
+
                                 pendingPublishRequests--;
                             }
                         }
@@ -433,7 +431,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                                 returnedUuids.Add(uuid.ToString());
                             }
 
-                            OnQueryComplete.Invoke(returnedUuids);
+                            OnQueryComplete?.Invoke(returnedUuids);
 
                             pendingQueries--;
                         }
@@ -470,7 +468,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                                 pendingDeleteRequests--;
                             }
 
-                            OnDeletedComplete.Invoke(returnedDeletedUuids);
+                            OnDeletedComplete?.Invoke(returnedDeletedUuids);
                         }
                     }
                 }
@@ -503,7 +501,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                                 returnedUpdatedUuids.Add(uuid.ToString());
                             }
 
-                            OnUpdateExpirationCompleted.Invoke(returnedUpdatedUuids);
+                            OnUpdateExpirationCompleted?.Invoke(returnedUpdatedUuids);
 
                             pendingUpdateRequests--;
                         }
@@ -517,7 +515,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             }
         }
 
-        protected override void OnInstanceDestroy(ulong xrInstance)
+        protected override void OnSessionDestroy(ulong xrSession)
         {
             if (startedSpatialAnchorStorage)
             {

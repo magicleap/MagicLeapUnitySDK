@@ -1,10 +1,14 @@
-#if UNITY_OPENXR_1_9_0_OR_NEWER
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Text;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine.XR.OpenXR.Features.MagicLeapSupport.MagicLeapOpenXRFeatureNativeTypes;
+using UnityEngine.XR.OpenXR.NativeTypes;
 
 namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 {
+    using MarkerUnderstandingNativeTypes;
     public partial class MagicLeapMarkerUnderstandingFeature
     {
         /// <summary>
@@ -14,13 +18,13 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         {
             private ulong handle;
             private MarkerData[] data;
-            private ulong[] markers;            
-            private Dictionary<ulong, ulong> markerSpaces;
+            private List<ulong> markers;            
+            private readonly Dictionary<ulong, ulong> markerSpaces;
 
             /// <summary>
             /// The current settings associated with the marker detector.
             /// </summary>
-            public MarkerDetectorSettings Settings { get; private set; }
+            public MarkerDetectorSettings Settings { get; }
 
             /// <summary>
             /// The current status of the readiness of the marker detector.
@@ -31,25 +35,104 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             /// The data retrieved from the marker detector.
             /// </summary>
             /// <returns>A readonly collection of data retrieved from the marker detector.</returns>
-            public IReadOnlyList<MarkerData> Data => Array.AsReadOnly<MarkerData>(data);
+            public IReadOnlyList<MarkerData> Data => Array.AsReadOnly(data);
 
             private bool activeSnapshot;
-            
+
+            private MagicLeapMarkerUnderstandingNativeFunctions NativeFunctions
+            {
+                get;
+            }
+
+            private MagicLeapMarkerUnderstandingFeature MarkerUnderstandingFeature
+            {
+                get;
+            }
+
             /// <summary>
             /// Creates a marker detector based on specific settings and initializes the data values.
             /// </summary>
             /// <param name="settings">The marker detector settings to be associated with the marker detector to be created.</param>
-            internal MarkerDetector(MarkerDetectorSettings settings)
+            /// <param name="nativeFunctions">The native OpenXR function pointers</param>
+            /// <param name="markerUnderstandingFeature">The MagicLeapMarkerUnderstandingFeature reference</param>
+            internal MarkerDetector(MarkerDetectorSettings settings, MagicLeapMarkerUnderstandingNativeFunctions nativeFunctions, MagicLeapMarkerUnderstandingFeature markerUnderstandingFeature)
             {
-                var resultCode = NativeBindings.MLCreateMarkerDetector(settings, out handle);
-                Utils.DidXrCallSucceed(resultCode, nameof(NativeBindings.MLCreateMarkerDetector));
+                NativeFunctions = nativeFunctions;
+                MarkerUnderstandingFeature = markerUnderstandingFeature;
+                Settings = settings;
+                var resultCode = CreateMarkerDetectorInternal();
+                var success = Utils.DidXrCallSucceed(resultCode, nameof(NativeFunctions.XrCreateMarkerDetector));
 
                 Settings = settings;
-                Status = MarkerDetectorStatus.Pending;
+                Status = success? MarkerDetectorStatus.Pending : MarkerDetectorStatus.Error;
 
                 data = Array.Empty<MarkerData>();
-                markers = Array.Empty<ulong>();
+                markers = new List<ulong>();
                 markerSpaces = new();
+            }
+
+            private unsafe XrResult CreateMarkerDetectorInternal()
+            {
+                var infoContainer = XrMarkerDetectorInfoContainer.Create();
+
+                infoContainer.CreateInfo.MarkerType = (XrMarkerType)Settings.MarkerType;
+                infoContainer.CreateInfo.Profile = (XrMarkerDetectorProfile)Settings.MarkerDetectorProfile;
+
+                ref var createInfo = ref infoContainer.CreateInfo;
+                ref var arucoInfo = ref infoContainer.ArucoInfo;
+                ref var aprilInfo = ref infoContainer.AprilTagInfo;
+                ref var customInfo = ref infoContainer.CustomInfo;
+                ref var sizeInfo = ref infoContainer.SizeInfo;
+
+                var markerType = createInfo.MarkerType;
+
+                var chainStart = &infoContainer.CreateInfo.Next;
+                var currentChain = chainStart;
+
+                if (createInfo.Profile == XrMarkerDetectorProfile.Custom)
+                {
+                    customInfo.ConvertCustomProfile(Settings.CustomProfileSettings);
+                    *currentChain = new IntPtr(&infoContainer.CustomInfo);
+                    currentChain = &infoContainer.CustomInfo.Next;
+                }
+
+                var shouldAppendSizeInfo = false;
+                var length = 0f;
+
+                if (markerType == XrMarkerType.Aruco)
+                {
+                    arucoInfo.ArucoDict = (XrMarkerArucoDict)Settings.ArucoSettings.ArucoType;
+                    shouldAppendSizeInfo = !Settings.ArucoSettings.EstimateArucoLength;
+                    length = Settings.ArucoSettings.ArucoLength;
+                    *currentChain = new IntPtr(&infoContainer.ArucoInfo);
+                    currentChain = &infoContainer.ArucoInfo.Next;
+                }
+
+                if (markerType == XrMarkerType.AprilTag)
+                {
+                    aprilInfo.AprilTagType = (XrAprilTagType)Settings.AprilTagSettings.AprilTagType;
+                    shouldAppendSizeInfo = !Settings.AprilTagSettings.EstimateAprilTagLength;
+                    length = Settings.AprilTagSettings.AprilTagLength;
+
+                    *currentChain = new IntPtr(&infoContainer.AprilTagInfo);
+                    currentChain = &infoContainer.AprilTagInfo.Next;
+                }
+
+                if (markerType == XrMarkerType.QR)
+                {
+                    shouldAppendSizeInfo = !Settings.QRSettings.EstimateQRLength;
+                    length = Settings.QRSettings.QRLength;
+                }
+
+                if (shouldAppendSizeInfo)
+                {
+                    sizeInfo.MarkerLength = length;
+                    *currentChain = new IntPtr(&infoContainer.SizeInfo);
+                }
+
+                var xrResult = NativeFunctions.XrCreateMarkerDetector(MarkerUnderstandingFeature.XRSession, in infoContainer.CreateInfo, out handle);
+                Utils.DidXrCallSucceed(xrResult, nameof(NativeFunctions.XrCreateMarkerDetector));
+                return xrResult;
             }
 
             /// <summary>
@@ -69,13 +152,13 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             /// <summary>
             /// Destroys this marker detector and clears the associated data.
             /// </summary>
-            internal void Destroy()
+            internal unsafe void Destroy()
             {
-                var resultCode = NativeBindings.MLDestroyMarkerDetector(handle);
-                Utils.DidXrCallSucceed(resultCode, nameof(NativeBindings.MLDestroyMarkerDetector));
+                var resultCode = NativeFunctions.XrDestroyMarkerDetector(handle);
+                Utils.DidXrCallSucceed(resultCode, nameof(NativeFunctions.XrDestroyMarkerDetector));
 
                 data = Array.Empty<MarkerData>();
-                markers = Array.Empty<ulong>();
+                markers = new List<ulong>();
                 markerSpaces.Clear();
             }
 
@@ -83,17 +166,21 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             /// Takes a snapshot of the active marker detector and gets the current status of it.
             /// </summary>
             /// <returns>The status of the marker detector, as either Pending, Ready, or Error.</returns>
-            private MarkerDetectorStatus GetMarkerDetectorState()
+            private unsafe MarkerDetectorStatus GetMarkerDetectorState()
             {
                 if (!activeSnapshot)
                 {
                     SnapshotMarkerDetector();
-                    activeSnapshot = true;
                 }
+
+                var xrMarkerState = new XrMarkerDetectorState
+                {
+                    Type = XrMarkerUnderstandingStructTypes.XrTypeMarkerDetectorState,
+                };
                 
-                var resultCode = NativeBindings.MLGetMarkerDetectorState(handle, out MarkerDetectorStatus status);
-                Utils.DidXrCallSucceed(resultCode, nameof(NativeBindings.MLGetMarkerDetectorState));
-                return status;
+                var resultCode = NativeFunctions.XrGetMarkerDetectorState(handle, out xrMarkerState);
+                Utils.DidXrCallSucceed(resultCode, nameof(NativeFunctions.XrGetMarkerDetectorState));
+                return (MarkerDetectorStatus)xrMarkerState.Status;
             }
 
             /// <summary>
@@ -104,32 +191,67 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             {
                 GetMarkers();
 
-                MarkerData[] markersData = markers?.Select(GetMarkerData).ToArray();
+                var markersData = new MarkerData[markers.Count];
+                for (var i = 0; i < markers.Count; ++i)
+                {
+                    markersData[i] = GetMarkerData(markers[i]);
+                }
 
-                return markersData ?? Array.Empty<MarkerData>();
+                if (markers.Count == 0)
+                {
+                    // clear cached data
+                    markerSpaces.Clear();
+                }
+                return markersData;
             }
 
-            private void SnapshotMarkerDetector()
+            private unsafe void SnapshotMarkerDetector()
             {
-                var resultCode = NativeBindings.MLSnapshotMarkerDetector(handle);
-                Utils.DidXrCallSucceed(resultCode, nameof(NativeBindings.MLSnapshotMarkerDetector));
+                var snapshotInfo = new XrMarkerDetectorSnapshotInfo
+                {
+                    Type = XrMarkerUnderstandingStructTypes.XrTypeMarkerDetectorSnapshotInfo,
+                };
+                var resultCode = NativeFunctions.XrSnapshotMarkerDetector(handle, ref snapshotInfo);
+                if (Utils.DidXrCallSucceed(resultCode, nameof(NativeFunctions.XrSnapshotMarkerDetector)))
+                {
+                    activeSnapshot = true;
+                }
             }
 
-            private void GetMarkers()
+            private unsafe void GetMarkers()
             {
+                markers.Clear();
+                
                 // call first time to get marker count
-                var resultCode = NativeBindings.MLGetMarkers(handle, out uint markerCount, null);
-                Utils.DidXrCallSucceed(resultCode, nameof(NativeBindings.MLGetMarkers));
+                var resultCode = NativeFunctions.XrGetMarkers(handle, 0, out var markerCount, null);
 
-                markers = new ulong[(int)markerCount];
-
+                if (!Utils.DidXrCallSucceed(resultCode, nameof(NativeFunctions.XrGetMarkers)))
+                {
+                    return;
+                }
+                
+                
                 // call second time to get markers
-                resultCode = NativeBindings.MLGetMarkers(handle, out markerCount, markers);
-                Utils.DidXrCallSucceed(resultCode, nameof(NativeBindings.MLGetMarkers));
+                var markersArray = new NativeArray<ulong>((int)markerCount, Allocator.Temp);
+                resultCode = NativeFunctions.XrGetMarkers(handle, markerCount, out markerCount, (ulong*)markersArray.GetUnsafePtr());
+                foreach (var marker in markersArray)
+                {
+                    if (marker == 0)
+                    {                            
+                        continue;
+                    }
+                    markers.Add(marker);
+                }
+                Utils.DidXrCallSucceed(resultCode, nameof(NativeFunctions.XrGetMarkers));
             }
 
             private MarkerData GetMarkerData(ulong marker)
             {
+                if (marker == 0)
+                {
+                    return default;
+                }
+
                 MarkerData markerData;
 
                 markerData.MarkerLength = GetMarkerLength(marker);
@@ -137,7 +259,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                 if (Settings.MarkerType == MarkerType.QR || Settings.MarkerType == MarkerType.Code128 || Settings.MarkerType == MarkerType.EAN13 || Settings.MarkerType == MarkerType.UPCA)
                 {
                     markerData.ReprojectionErrorMeters = 0;
-                    markerData.MarkerNumber = 0;
+                    markerData.MarkerNumber = null;
                     markerData.MarkerString = GetMarkerString(marker);
                 }
                 else
@@ -153,61 +275,78 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                 }
                 else
                 {
-                    markerData.MarkerPose = default;
+                    markerData.MarkerPose = null;
                 }
 
                 return markerData;
             }
 
-            private float GetMarkerReprojectionError(ulong marker)
+            private unsafe float GetMarkerReprojectionError(ulong marker)
             {
-                var resultCode = NativeBindings.MLGetMarkerReprojectionError(handle, marker, out float reprojectionErrorMeters);
-                Utils.DidXrCallSucceed(resultCode, nameof(NativeBindings.MLGetMarkerReprojectionError));
-                return reprojectionErrorMeters;
+                var resultCode = NativeFunctions.XrGetMarkerReprojectionError(handle, marker, out var reprojectionError);
+                Utils.DidXrCallSucceed(resultCode, nameof(NativeFunctions.XrGetMarkerReprojectionError));
+                return reprojectionError;
             }
 
-            private float GetMarkerLength(ulong marker)
+            private unsafe float GetMarkerLength(ulong marker)
             {
-                var resultCode = NativeBindings.MLGetMarkerLength(handle, marker, out float meters);
-                Utils.DidXrCallSucceed(resultCode, nameof(NativeBindings.MLGetMarkerLength));
+                var resultCode = NativeFunctions.XrGetMarkerLength(handle, marker, out var meters);
+                Utils.DidXrCallSucceed(resultCode, nameof(NativeFunctions.XrGetMarkerLength));
                 return meters;
             }
 
-            private ulong GetMarkerNumber(ulong marker)
+            private unsafe ulong GetMarkerNumber(ulong marker)
             {
-                var resultCode = NativeBindings.MLGetMarkerNumber(handle, marker, out ulong number);
-                Utils.DidXrCallSucceed(resultCode, nameof(NativeBindings.MLGetMarkerNumber));
+                var resultCode = NativeFunctions.XrGetMarkerNumber(handle, marker, out var number);
+                Utils.DidXrCallSucceed(resultCode, nameof(NativeFunctions.XrGetMarkerNumber));
                 return number;
             }
 
-            private string GetMarkerString(ulong marker)
+            private unsafe string GetMarkerString(ulong marker)
             {
-                uint bufferSize = 100;
-                char[] buffer = new char[bufferSize];
+                var resultCode = NativeFunctions.XrGetMarkerString(handle, marker, 0, out var markerLength, null);
+                if (!Utils.DidXrCallSucceed(resultCode, nameof(NativeFunctions.XrGetMarkerString)))
+                {
+                    return "";
+                }
 
-                var resultCode = NativeBindings.MLGetMarkerString(handle, marker, bufferSize, buffer);
-                Utils.DidXrCallSucceed(resultCode, nameof(NativeBindings.MLGetMarkerString));
+                var byteArray = new NativeArray<byte>((int)markerLength, Allocator.Temp);
+                resultCode = NativeFunctions.XrGetMarkerString(handle, marker, markerLength, out markerLength, (byte*) byteArray.GetUnsafePtr());
+                if (!Utils.DidXrCallSucceed(resultCode, nameof(NativeFunctions.XrGetMarkerString)))
+                {
+                    return "";
+                }
 
-                return new string(buffer);
+                var result = Encoding.UTF8.GetString((byte*)byteArray.GetUnsafePtr(), (int)markerLength).Trim('\0');
+                return result;
             }
 
-            private Pose CreateMarkerSpace(ulong marker)
+            private unsafe Pose CreateMarkerSpace(ulong marker)
             {
                 Pose pose = default;
 
                 // a marker space is not created if one already exists for that marker
-                if (markerSpaces.TryGetValue(marker, out ulong space))
+                if (markerSpaces.TryGetValue(marker, out var space))
                 {
-                    MagicLeapFeature.NativeBindings.MLOpenXRGetUnityPoseForFeature(FeatureId, space, out  pose);
+                    pose = NativeFunctions.GetUnityPose(space, MarkerUnderstandingFeature.XRSpace, MarkerUnderstandingFeature.NextPredictedDisplayTime);
                     return pose;
                 }
-                var resultCode = NativeBindings.MLCreateMarkerSpace(handle, marker, out var xrSpace);
-                Utils.DidXrCallSucceed(resultCode, nameof(NativeBindings.MLCreateMarkerSpace));
 
-                markerSpaces.Add(marker, xrSpace);
+                var markerCreateSpaceInfo = new XrMarkerSpaceCreateInfo
+                {
+                    Type = XrMarkerUnderstandingStructTypes.XrTypeMarkerSpaceCreateInfo,
+                    MarkerDetector = handle,
+                    Marker = marker,
+                    PoseInMarkerSpace = XrPose.GetFromPose(new Pose(Vector3.zero, Quaternion.identity))
+                };
+
+                var resultCode = NativeFunctions.XrCreateMarkerSpace(MarkerUnderstandingFeature.XRSession, in markerCreateSpaceInfo, out var xrSpace);
+                if (Utils.DidXrCallSucceed(resultCode, nameof(NativeFunctions.XrCreateMarkerSpace)))
+                {
+                    markerSpaces.Add(marker, xrSpace);
+                }
                 return pose;
             }
         }
     }
 }
-#endif

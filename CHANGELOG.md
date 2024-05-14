@@ -1,5 +1,20 @@
 # Changelog
 
+## [2.2.0]
+
+### Features
+- Added `Magic Leap 2 Light Estimation` OpenXR Feature.
+- Added `.GetTimestamps()` method to `AndroidCamera` API to allow users to determine/validate capture rate.
+- Added `Magic Leap 2 Pixel Sensor` OpenXR Feature
+
+### Bugfixes
+- Fixed code paths in MagicLeapCamera script to better support legacy Magic Leap XR Plugin workflow.
+- Resolved issue where sometimes Marker Detectors would receive `MarkerInvalidML` errors.
+- Fixed issue where the `Permissions` section of Magic Leap's Project Settings would fail to render and mention a missing MLSDK. 
+- Resolved unnecessary warnings from AR Foundation about missing Camera and Raycast subsystems.
+- Fixed issue where `MarkerData.MarkerString` was limited to 100 characters.
+- Made DestroyClient method in `Magic Leap 2 Facial Expressions` OpenXR Feature get called automatically to prevent error if done manually in OnDestroy.
+
 ## [2.1.0]
 
 ### Features
@@ -19,17 +34,26 @@
 - Fixed legacy `MLPlanes` subsystem not being initialized when using Magic Leap XR Provider.
 - Added project validation rules to check for Player Settings required by Magic Leap 2.
 - Fixed `MLCVCamera` being unable to query Headpose from the MLSDK when the OpenXR PRovider is active.
-- Fixed `MLMarkerTracker` issue where detected `AprilTag` markers are flipped. 
+- Fixed `MLMarkerTracker` issue where detected `AprilTag` markers are flipped.
 
 ### Deprecations & Removals
 - Removed Preferences>External Tools>Magic Leap.
 - Marked `MLPermissions` Obsolete. Use `MagicLeap.Android.Permissions` instead.
+- Marked `MagicLeapLocalizationMapFeature.ExportLocalizatioMap` obsolete. Use `MagicLeapLocalizationMapFeature.ExportLocalizationMap` instead.
+- Marked `MagicLeapUserCalibrationFeature.HeadsetFitStatus.status` obsolete. Use `MagicLeapUserCalibrationFeature.HeadsetFitStatus.Status` instead.
+- Marked `MagicLeapUserCalibrationFeature.HeadsetFitStatus.time` obsolete. Use `MagicLeapUserCalibrationFeature.HeadsetFitStatus.Time` instead.
+- Marked `MagicLeapUserCalibrationFeature.EyeCalibrationData.status` obsolete. Use `MagicLeapUserCalibrationFeature.EyeCalibrationData.Status` instead.
+- Marked `MLXrPlaneSubsystem.XrTypes.MLXrPlaneDetectorOrientation` obsolete. Use `MagicLeapPlanesTypes.XrPlaneDetectorOrientation` instead.
+- Marked `MLXrPlaneSubsystem.XrTypes.MLXrPlaneDetectorSemanticType` obsolete. Use `MagicLeapPlanesTypes.XrPlaneDetectorSemanticTypes` instead.
+- Marked `MagicLeapSpatialAnchorsStorageFeature.UpdateExpirationonStoredSpatialAnchor` Obsolete. Use `MagicLeapSpatialAnchorsStorageFeature.UpdateExpirationForStoredSpatialAnchor` instead.
+- Marked `MagicLeapFeature.ConvertTimestampToXrTime` obsolete. Use `MagicLeapFeature.ConvertSystemTimeToXrTime` instead.
+- Marked `MagicLeapFeature.ConvertXrTimeToTimestamp` obsolete. Use `MagicLeapFeature.ConvertXrTimeToSystemTime` instead.
 
 ### Known Issues
 - `MLAnchors` API does not work when the `Magic Leap 2 Spatial Anchors` or `Magic Leap 2 Spatial Anchors Storage` OpenXR Features are enabled.
 
 ### Misc.
-- Renamed the ML Rig & Inputs Sample input actions asset as well as the old `MagicLeapInputs` asset to make it clear what the differences are. 
+- Renamed the ML Rig & Inputs Sample input actions asset as well as the old `MagicLeapInputs` asset to make it clear what the differences are.
 
 ## [2.0.0]
 
@@ -53,10 +77,10 @@
 ### Bugfixes
 - Fixed an issue in `MLGestureClassification` where hand transform and interaction points would freeze in place when Posture type was None.
 - Added missing comments describing parameters and returns to functions in `MLSpace`.
-- Fixed issue in `MLMediaPlayerBehavior` where HLS streams would not play after resolution changes. 
+- Fixed issue in `MLMediaPlayerBehavior` where HLS streams would not play after resolution changes.
 - Fixed issue in `MLMediaPlayerBehavior` where DASH streams would not display video or audio.
 - Fixed issue in `MLCamera` that resulted in crashes & artifacts when rendering YUV capture to a RenderTexture.
-- Fixed issue in `MLCamera` that resulted in crashes when waking from sleep. 
+- Fixed issue in `MLCamera` that resulted in crashes when waking from sleep.
 - Fixed issue with legacy Hands subsystem causing compilation errors in MRTK projects.
 - Fixed issue with Segmented Dimmer not functioning correctly
 - Improved performance of `MLEyeCamera`

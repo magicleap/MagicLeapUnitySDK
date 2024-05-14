@@ -28,6 +28,7 @@ namespace UnityEditor.XR.OpenXR.Features.MagicLeapSupport
 
         private static readonly string haveAndroidWindowSupportBootSettingsKey = "android-device-have-window-support";
         private static readonly string useNullDisplayManagerBootSettingsKey = "android-device-use-null-display-manager";
+        private static readonly string androidAudioUseMLAudio = "android-audio-use-MLAudio";
         private static readonly string vulkanForceDisableETCSupport = "vulkan-force-disable-ETC-support";
         private static readonly string vulkanForceDisableASTCSupport = "vulkan-force-disable-ASTC-support";
         private static readonly string vulkanDisablePreTransform = "vulkan-disable-pre-transform";
@@ -43,6 +44,7 @@ namespace UnityEditor.XR.OpenXR.Features.MagicLeapSupport
                 bootConfig.SetValueForKey(vulkanForceDisableETCSupport, "1", true);
                 bootConfig.SetValueForKey(vulkanForceDisableASTCSupport, "1", true);
                 bootConfig.SetValueForKey(vulkanDisablePreTransform, "1", true);
+                bootConfig.SetValueForKey(androidAudioUseMLAudio, MagicLeapProjectSettings.Instance.EnableMLAudio? "1" : "0", true);
             }
             else
             {
@@ -51,6 +53,7 @@ namespace UnityEditor.XR.OpenXR.Features.MagicLeapSupport
                 bootConfig.ClearEntryForKey(vulkanForceDisableETCSupport);
                 bootConfig.ClearEntryForKey(vulkanForceDisableASTCSupport);
                 bootConfig.ClearEntryForKey(vulkanDisablePreTransform);
+                bootConfig.ClearEntryForKey(androidAudioUseMLAudio);
             }
 
             bootConfig.WriteBootConfig();

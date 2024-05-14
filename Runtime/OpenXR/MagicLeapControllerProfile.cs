@@ -7,15 +7,6 @@
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
-
-#if UNITY_OPENXR_1_9_0_OR_NEWER
-using System.Collections.Generic;
-using UnityEngine.InputSystem.Layouts;
-using UnityEngine.InputSystem.Controls;
-using UnityEngine.InputSystem.XR;
-using UnityEngine.Scripting;
-using UnityEngine.XR.OpenXR.Input;
-
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -25,6 +16,15 @@ using PoseControl = UnityEngine.InputSystem.XR.PoseControl;
 #else
 using PoseControl = UnityEngine.XR.OpenXR.Input.PoseControl;
 #endif
+
+using System.Collections.Generic;
+using UnityEngine.InputSystem.Layouts;
+using UnityEngine.InputSystem.Controls;
+using UnityEngine.InputSystem.XR;
+using UnityEngine.Scripting;
+using UnityEngine.XR.OpenXR.Input;
+using UnityEngine.XR.ARSubsystems;
+using UnityEngine.XR.MagicLeap;
 
 namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 {
@@ -480,6 +480,45 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 
             AddActionMap(actionMap);
         }
+
+        #region Raycast subsystem
+        private static List<XRRaycastSubsystemDescriptor> subsystemDescriptors = new List<XRRaycastSubsystemDescriptor>();
+
+        protected override void OnSubsystemCreate()
+        {
+            CreateSubsystem<XRRaycastSubsystemDescriptor, XRRaycastSubsystem>(subsystemDescriptors, RaycastSubsystem.Id);
+        }
+
+        protected override void OnSubsystemDestroy()
+        {
+            DestroySubsystem<XRRaycastSubsystem>();
+        }
+
+        // We don't actually need a Raycast Subsystem with OpenXR; however, because we use AR Foundation, the XRRayInteractor component
+        // on our XR Origin rig's Controller object will instantiate an ARRaycastManager, which in turn will log an annoying warning if it can't find a corresponding subsytem.
+        // By creating an instance of this subsystem, we can avoid those warnings. Note that this implementation doesn't actually do anything!
+        private class RaycastSubsystem : XRRaycastSubsystem
+        {
+            public const string Id = "MagicLeap-Raycast";
+            public override TrackableChanges<XRRaycast> GetChanges(Unity.Collections.Allocator allocator) => default;
+
+            private class MagicLeapProvider : Provider { }
+
+            [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+            private static void RegisterDescriptor()
+            {
+                XRRaycastSubsystemDescriptor.RegisterDescriptor(new XRRaycastSubsystemDescriptor.Cinfo
+                {
+                    id = RaycastSubsystem.Id,
+                    providerType = typeof(MagicLeapProvider),
+                    subsystemTypeOverride = typeof(RaycastSubsystem),
+                    supportsTrackedRaycasts = false,
+                    supportsViewportBasedRaycast = false,
+                    supportsWorldBasedRaycast = false,
+                    supportedTrackableTypes = TrackableType.None
+                });
+            }
+        }
+        #endregion
     }
 }
-#endif

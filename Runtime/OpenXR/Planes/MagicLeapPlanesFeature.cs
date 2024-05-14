@@ -1,8 +1,7 @@
-#if UNITY_OPENXR_1_9_0_OR_NEWER
-
 using System.Collections.Generic;
 using UnityEngine.XR.ARSubsystems;
 using UnityEngine.XR.MagicLeap;
+using UnityEngine.XR.OpenXR.NativeTypes;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -31,20 +30,20 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         private const string PlaneExtensionName = "XR_EXT_plane_detection";
         
         private readonly List<XRPlaneSubsystemDescriptor> planeSubsystemDescriptors = new();
-
-        protected override string GetFeatureId() => FeatureId;
+        
+        internal MagicLeapPlanesNativeFunctions PlanesNativeFunctions;
 
         protected override bool OnInstanceCreate(ulong xrInstance)
         {
             if (OpenXRRuntime.IsExtensionEnabled(PlaneExtensionName))
             {
                 var instanceCreateResult = base.OnInstanceCreate(xrInstance);
-
                 if (instanceCreateResult)
                 {
                     MLXrPlaneSubsystem.RegisterDescriptor();
                 }
 
+                PlanesNativeFunctions = CreateNativeFunctions<MagicLeapPlanesNativeFunctions>();
                 return instanceCreateResult;
             }
             Debug.LogError($"{PlaneExtensionName} is not enabled. Disabling {nameof(MagicLeapPlanesFeature)}");
@@ -74,6 +73,10 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             base.OnSubsystemDestroy();
             DestroySubsystem<XRPlaneSubsystem>();
         }
+
+        protected override void OnSessionStateChange(int oldState, int newState)
+        {
+            MLXrPlaneSubsystem.SessionFocused = ((XrSessionState)newState == XrSessionState.Focused);
+        }
     }
 }
-#endif

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace UnityEngine.XR.MagicLeap.Unsafe
 {
@@ -12,6 +13,22 @@ namespace UnityEngine.XR.MagicLeap.Unsafe
             var ptr = Malloc<T>(allocator);
             *ptr = initialValue;
             return ptr;
+        }
+
+        public static T[] GetManagedArray<T>(IntPtr buffer, int length) where T : unmanaged
+        {
+            return GetManagedArray((T*)buffer, length);
+        }
+        
+
+        public static T[] GetManagedArray<T>(T* buffer, int length) where T: unmanaged
+        {
+            var result = new T[length];
+            for (int i = 0; i < length; i++)
+            {
+                result[i] = buffer[i];
+            }
+            return result;
         }
 
         public static T* CallocTracked<T>(Allocator allocator, T initialValue = default, int callstacksToSkip = 1)

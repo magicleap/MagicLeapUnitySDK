@@ -7,7 +7,8 @@
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
-#if UNITY_OPENXR_1_9_0_OR_NEWER
+using System;
+using UnityEngine.XR.OpenXR.Features.MagicLeapSupport.MagicLeapOpenXRSystemNotificationNativeTypes;
 using UnityEngine.XR.OpenXR.NativeTypes;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -16,6 +17,7 @@ using UnityEditor.XR.OpenXR.Features;
 
 namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 {
+    using MagicLeapSystemInfoNativeTypes;
 #if UNITY_EDITOR
     [OpenXRFeature(UiName = "Magic Leap 2 System Notification Control",
         Desc = "Enable/Disable the suppression of system notifications.",
@@ -26,42 +28,95 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         OpenxrExtensionStrings = ExtensionName
     )]
 #endif // UNITY_EDITOR
-    public partial class MagicLeapSystemNotificationsFeature : MagicLeapOpenXRFeatureBase
+    public class MagicLeapSystemNotificationsFeature : MagicLeapOpenXRFeatureBase
     {
         public const string FeatureId = "com.magicleap.openxr.feature.ml2_systemnotification";
-        public const string ExtensionName = "XR_ML_system_notifications";
+        private const string ExtensionName = "XR_ML_system_notifications";
+
+        private MagicLeapSystemNotificationNativeFunctions systemNotificationNativeFunctions;
+        private MagicLeapSystemInfoNativeFunctions systemInfoNativeFunctions;
+        private ulong systemId;
 
         protected override bool OnInstanceCreate(ulong xrInstance)
         {
             if (OpenXRRuntime.IsExtensionEnabled(ExtensionName))
             {
-                return base.OnInstanceCreate(xrInstance);
+                var instanceResult = base.OnInstanceCreate(xrInstance);
+                if (instanceResult)
+                {
+                    systemNotificationNativeFunctions = CreateNativeFunctions<MagicLeapSystemNotificationNativeFunctions>();
+                    systemInfoNativeFunctions = CreateNativeFunctions<MagicLeapSystemInfoNativeFunctions>();
+                    return true;
+                }
             }
             Debug.LogError($"{ExtensionName} is not enabled. Disabling {nameof(MagicLeapSystemNotificationsFeature)}");
             return false;
         }
-
-        protected override string GetFeatureId() => FeatureId;
-
+        
         public XrResult SuppressSystemNotifications(bool suppressNotifications)
         {
-            if (!IsSystemoNotificationSpported())
+            unsafe
             {
-                Debug.LogError("Cannot suppress notifications. Either SKU is not medical or System Notification feature not enabled.");
-                return XrResult.RuntimeFailure;
+                if (!IsSystemNotificationSupported())
+                {
+                    Debug.LogError("Cannot suppress notifications. Either SKU is not medical or System Notification feature not enabled.");
+                    return XrResult.RuntimeFailure;
+                }
+
+                var enableInfo = new XrSystemNotificationSetInfo
+                {
+                    Type = XrSystemNotificationStructTypes.XrTypeSystemNotificationsSetInfo,
+                    Next = default,
+                    SuppressNotifications = suppressNotifications ? 1 : 0U
+                };
+            
+                var xrResult = systemNotificationNativeFunctions.XrSetSystemNotifications(XRInstance, in enableInfo);
+                Utils.DidXrCallSucceed(xrResult, nameof(systemNotificationNativeFunctions.XrSetSystemNotifications));
+                return xrResult;
             }
-            return NativeBindings.MLOpenXRSuppressSystemNotifications(suppressNotifications);
         }
 
         private XrResult GetSystemNotificationProperties(out ulong flags)
         {
-            return NativeBindings.MLOpenXRGetSystemNotificationsProperties(out flags);
+            flags = 0;
+            unsafe
+            {
+                if (systemId == default)
+                {
+                    var systemResult = systemInfoNativeFunctions.GetSystemId(out systemId);
+                    if (!Utils.DidXrCallSucceed(systemResult, nameof(systemInfoNativeFunctions.XrGetSystem)))
+                    {
+                        return systemResult;
+                    }
+                }
+                var systemProperties = new XrSystemProperties
+                {
+                    Type = XrSystemInfoTypes.XrTypeSystemProperties,
+                };
+
+                var systemNotificationProperties = new XrSystemNotificationProperties
+                {
+                    Type = XrSystemNotificationStructTypes.XrTypeSystemNotificationsProperties,
+                };
+                systemProperties.Next = new IntPtr(&systemNotificationProperties);
+                var xrResult = systemInfoNativeFunctions.XrGetSystemProperties(XRInstance, systemId, out systemProperties);
+                if(!Utils.DidXrCallSucceed(xrResult, nameof(systemInfoNativeFunctions.XrGetSystemProperties)))
+                {
+                    return xrResult;
+                }
+                flags = (ulong)systemNotificationProperties.SupportedFeatures;
+                return xrResult;
+            }
         }
 
-        private bool IsSystemoNotificationSpported()
+        private bool IsSystemNotificationSupported()
         {
-            return NativeBindings.MLOpenXRIsSystemoNotificationSpported();
+            var result = GetSystemNotificationProperties(out var flags);
+            if (!Utils.DidXrCallSucceed(result, nameof(GetSystemNotificationProperties)))
+            {
+                return false;
+            }
+            return (flags & (ulong)XrSystemNotificationsCapabilityFlags.XrSystemNotificationCapabilitySuppression) > 0;
         }
     }
 }
-#endif // UNITY_OPENXR_1_9_0_OR_NEWER

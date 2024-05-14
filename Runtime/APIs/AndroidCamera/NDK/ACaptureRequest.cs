@@ -1,4 +1,4 @@
-﻿// %BANNER_BEGIN%
+// %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
 // Copyright (c) (2018-2022) Magic Leap, Inc. All Rights Reserved.
@@ -123,7 +123,7 @@ namespace MagicLeap.Android.NDK.Camera
             return result == CameraStatus.Ok;
         }
 
-        public bool TryGetAllTags(Allocator allocator, out NativeArray<Metadata.Tags> tags)
+        public bool TryGetAllTags(Allocator allocator, out NativeArray<uint> tags)
         {
             this.CheckNullAndThrow();
             if (allocator <= Allocator.None)
@@ -152,8 +152,7 @@ namespace MagicLeap.Android.NDK.Camera
                 return false;
             }
 
-            tags = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<uint>(tagBuffer, numTags, allocator)
-                .Reinterpret<Metadata.Tags>();
+            tags = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<uint>(tagBuffer, numTags, allocator);
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref tags, UnsafeUtilityEx.CreateAtomicSafetyHandleForAllocator(allocator));
@@ -161,75 +160,75 @@ namespace MagicLeap.Android.NDK.Camera
             return true;
         }
 
-        public bool TryGetMetadata(Metadata.Tags tag, out ACameraMetadata.Entry.ReadOnly outEntry)
+        public bool TryGetMetadata(uint tag, out ACameraMetadata.Entry.ReadOnly outEntry)
         {
             this.CheckNullAndThrow();
-            var result = ACaptureRequest_getConstEntry(this, (uint)tag, out outEntry);
+            var result = ACaptureRequest_getConstEntry(this, tag, out outEntry);
             result.CheckReturnValueAndThrow();
             return result == CameraStatus.Ok;
         }
 
-        public bool TrySetMetadataEntry(Metadata.Tags tag, NativeArray<byte> data)
+        public bool TrySetMetadataEntry(uint tag, NativeArray<byte> data)
         {
             this.CheckNullAndThrow();
             CheckValidArrayAndThrow(data);
 
-            var result = ACaptureRequest_setEntry_u8(this, (uint)tag, (uint)data.Length,
+            var result = ACaptureRequest_setEntry_u8(this, tag, (uint)data.Length,
                 (byte*)data.GetUnsafeReadOnlyPtr());
             result.CheckReturnValueAndThrow();
             return result == CameraStatus.Ok;
         }
 
-        public bool TrySetMetadataEntry(Metadata.Tags tag, NativeArray<int> data)
+        public bool TrySetMetadataEntry(uint tag, NativeArray<int> data)
         {
             this.CheckNullAndThrow();
             CheckValidArrayAndThrow(data);
 
-            var result = ACaptureRequest_setEntry_i32(this, (uint)tag, (uint)data.Length,
+            var result = ACaptureRequest_setEntry_i32(this, tag, (uint)data.Length,
                 (int*)data.GetUnsafeReadOnlyPtr());
             result.CheckReturnValueAndThrow();
             return result == CameraStatus.Ok;
         }
 
-        public bool TrySetMetadataEntry(Metadata.Tags tag, NativeArray<long> data)
+        public bool TrySetMetadataEntry(uint tag, NativeArray<long> data)
         {
             this.CheckNullAndThrow();
             CheckValidArrayAndThrow(data);
 
-            var result = ACaptureRequest_setEntry_i64(this, (uint)tag, (uint)data.Length,
+            var result = ACaptureRequest_setEntry_i64(this, tag, (uint)data.Length,
                 (long*)data.GetUnsafeReadOnlyPtr());
             result.CheckReturnValueAndThrow();
             return result == CameraStatus.Ok;
         }
 
-        public bool TrySetMetadataEntry(Metadata.Tags tag, NativeArray<float> data)
+        public bool TrySetMetadataEntry(uint tag, NativeArray<float> data)
         {
             this.CheckNullAndThrow();
             CheckValidArrayAndThrow(data);
 
-            var result = ACaptureRequest_setEntry_float(this, (uint)tag, (uint)data.Length,
+            var result = ACaptureRequest_setEntry_float(this, tag, (uint)data.Length,
                 (float*)data.GetUnsafeReadOnlyPtr());
             result.CheckReturnValueAndThrow();
             return result == CameraStatus.Ok;
         }
 
-        public bool TrySetMetadataEntry(Metadata.Tags tag, NativeArray<double> data)
+        public bool TrySetMetadataEntry(uint tag, NativeArray<double> data)
         {
             this.CheckNullAndThrow();
             CheckValidArrayAndThrow(data);
 
-            var result = ACaptureRequest_setEntry_double(this, (uint)tag, (uint)data.Length,
+            var result = ACaptureRequest_setEntry_double(this, tag, (uint)data.Length,
                 (double*)data.GetUnsafeReadOnlyPtr());
             result.CheckReturnValueAndThrow();
             return result == CameraStatus.Ok;
         }
 
-        public bool TrySetMetadataEntry(Metadata.Tags tag, NativeArray<ACameraMetadata.Rational> data)
+        public bool TrySetMetadataEntry(uint tag, NativeArray<ACameraMetadata.Rational> data)
         {
             this.CheckNullAndThrow();
             CheckValidArrayAndThrow(data);
 
-            var result = ACaptureRequest_setEntry_rational(this, (uint)tag, (uint)data.Length,
+            var result = ACaptureRequest_setEntry_rational(this, tag, (uint)data.Length,
                 (ACameraMetadata.Rational*)data.GetUnsafeReadOnlyPtr());
             result.CheckReturnValueAndThrow();
             return result == CameraStatus.Ok;

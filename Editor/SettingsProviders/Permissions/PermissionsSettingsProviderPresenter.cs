@@ -18,11 +18,6 @@ namespace UnityEditor.XR.MagicLeap
 {
     internal class PermissionsSettingsProviderPresenter : SettingsProvider
     {
-        internal const string missingMLSDKPathText = "Unity Editor is missing Magic Leap SDK. To fix that go to: " +
-            "'Preferences...' > 'External tools' > 'Magic Leap' and set the Magic Leap SDK path. " +
-            "Then click the 'Synchronize' button below to update the permissions list " +
-            "against the Magic Leap C SDK specified in the editor preferences.";
-
         private const string PathToUss =
             @"Packages\com.magicleap.unitysdk\Editor\SettingsProviders\Permissions\SettingsProviderStyle.uss";
 
@@ -32,8 +27,6 @@ namespace UnityEditor.XR.MagicLeap
         private const string missingManifestText = "AndroidManifest.xml not found. If you want to add or remove permissions from this page, " +
             "you should first create a template AndroidManifest.xml under Assets/Plugins/Android. Go to Player Settings -> Android -> Publishing " +
             "Settings and enable \"Custom Main Manifest\" to automatically generate the template.";
-
-        private readonly string MinimumApiLevelEditorPrefKey = "MagicLeap.Permissions.MinimumAPILevelDropdownValue_" + PlayerSettings.applicationIdentifier;
 
         private VisualElement root;
         private VisualElement scrollView;
@@ -75,37 +68,34 @@ namespace UnityEditor.XR.MagicLeap
 
             rootElement.styleSheets.Add(AssetDatabase.LoadAssetAtPath<StyleSheet>(PathToUss));
             root = rootElement;
-            if (MagicLeapSDKUtil.SdkAvailable)
+            PermissionSettingsLoader permissionSettingsLoader = new PermissionSettingsLoader();
+
+            PermissionJson[] jsonEntries = permissionSettingsLoader.settingJson.Settings;
+
+            permissions = PermissionParser.ParsePermissionsFromArray(jsonEntries);
+
+            savedMinimumApiLevelChoice = $"API Level {MagicLeapProjectSettings.Instance.PermissionsMinApiLevel}";
+
+            var groups = new Dictionary<string, List<Permission>>();
+            foreach (var permission in permissions)
             {
-                PermissionSettingsLoader permissionSettingsLoader = new PermissionSettingsLoader();
-
-                PermissionJson[] jsonEntries = permissionSettingsLoader.settingJson.Settings;
-
-                permissions = PermissionParser.ParsePermissionsFromArray(jsonEntries);
-
-                savedMinimumApiLevelChoice = EditorPrefs.GetString(MinimumApiLevelEditorPrefKey, "API Level 20");
-
-                var groups = new Dictionary<string, List<Permission>>();
-                foreach (var permission in permissions)
+                var name = permission.Level.ToString();
+                if (!groups.ContainsKey(name))
                 {
-                    var name = permission.Level.ToString();
-                    if (!groups.ContainsKey(name))
-                    {
-                        groups[name] = new List<Permission>();
-                    }
-                    groups[name].Add(permission);
+                    groups[name] = new List<Permission>();
                 }
-
-                var groupList = new List<PermissionGroup>();
-                foreach (var group in groups)
-                {
-                    var permissionGroup = new PermissionGroup();
-                    permissionGroup.Name = group.Key;
-                    permissionGroup.Permissions = group.Value.ToArray();
-                    groupList.Add(permissionGroup);
-                }
-                permissionGroups = groupList.ToArray();
+                groups[name].Add(permission);
             }
+
+            var groupList = new List<PermissionGroup>();
+            foreach (var group in groups)
+            {
+                var permissionGroup = new PermissionGroup();
+                permissionGroup.Name = group.Key;
+                permissionGroup.Permissions = group.Value.ToArray();
+                groupList.Add(permissionGroup);
+            }
+            permissionGroups = groupList.ToArray();
 
             RenderView();
         }
@@ -131,14 +121,7 @@ namespace UnityEditor.XR.MagicLeap
 
             RenderInstructions();
 
-            if (MagicLeapSDKUtil.SdkAvailable)
-            {
-                RenderFields();
-            }
-            else
-            {
-                RenderSdkInfoBox();
-            }
+            RenderFields();
         }
 
         private void RenderLabel()
@@ -164,14 +147,6 @@ namespace UnityEditor.XR.MagicLeap
             }
             instructions.AddToClassList("settings-help-box");
             root.Add(instructions);
-        }
-
-        private void RenderSdkInfoBox()
-        {
-            HelpBox hlpbx = new HelpBox(missingMLSDKPathText, HelpBoxMessageType.Error);
-            hlpbx.AddToClassList("settings-help-box");
-
-            root.Add(hlpbx);
         }
 
         private void RenderFields()
@@ -209,7 +184,11 @@ namespace UnityEditor.XR.MagicLeap
         {
             savedMinimumApiLevelChoice = evt.newValue;
             minimumApiLevelChosen = apiLevelDropdownChoices[ApiLevelDropdown.choices.IndexOf(savedMinimumApiLevelChoice)];
-            EditorPrefs.SetString(MinimumApiLevelEditorPrefKey, savedMinimumApiLevelChoice);
+            // always of the form "API Level #" so the split array will have 3 elements
+            if (int.TryParse(savedMinimumApiLevelChoice.Split(' ')[2], out int apiLevel))
+            {
+                MagicLeapProjectSettings.Instance.PermissionsMinApiLevel = apiLevel;
+            }
             RenderView();
         }
 
