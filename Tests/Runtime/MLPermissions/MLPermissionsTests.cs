@@ -1,3 +1,6 @@
+// Disabling deprecated warning for the internal project
+#pragma warning disable 618
+
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;

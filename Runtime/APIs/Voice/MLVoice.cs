@@ -8,6 +8,9 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
+// Disabling deprecated warning for the internal project
+#pragma warning disable 618
+
 namespace UnityEngine.XR.MagicLeap
 {
     using UnityEngine;
@@ -188,6 +191,7 @@ namespace UnityEngine.XR.MagicLeap
 
         protected override MLResult.Code StopAPI()
         {
+            Stop();
             var result = MLVoice.NativeBindings.MLVoiceIntentDestroy(this.Handle);
             if (MLResult.IsOK(result))
             {
@@ -293,18 +297,22 @@ namespace UnityEngine.XR.MagicLeap
         /// </returns>
         public static MLResult Stop()
         {
-            MLResult result = MLResult.Create(Instance.SetCallbacks(true));
-
-            if (!MLResult.IsOK(result.Result))
+            MLResult.Code resultCode = MLResult.Code.Ok;
+            if (Instance.Handle != Native.MagicLeapNativeBindings.InvalidHandle)
             {
-                MLPluginLog.Error("MLVoice.Stop failed to unregister MLVoiceIntentSetCallbacks: " + result);
-            }
+                MLResult result = MLResult.Create(Instance.SetCallbacks(true));
 
-            var resultCode = NativeBindings.MLVoiceIntentStopProcessing(Instance.Handle);
+                if (!MLResult.IsOK(result.Result))
+                {
+                    MLPluginLog.Error("MLVoice.Stop failed to unregister MLVoiceIntentSetCallbacks: " + result);
+                }
 
-            if (!MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLVoiceIntentStopProcessing)))
-            {
-                MLPluginLog.Error("MLVoice.Stop failed to MLVoiceIntentStopProcessing: " + result);
+                resultCode = NativeBindings.MLVoiceIntentStopProcessing(Instance.Handle);
+
+                if (!MLResult.DidNativeCallSucceed(resultCode, nameof(NativeBindings.MLVoiceIntentStopProcessing)))
+                {
+                    MLPluginLog.Error("MLVoice.Stop failed to MLVoiceIntentStopProcessing: " + result);
+                }
             }
 
             return MLResult.Create(resultCode);

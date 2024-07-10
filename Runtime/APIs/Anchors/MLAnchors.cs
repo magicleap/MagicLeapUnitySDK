@@ -8,6 +8,9 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
+// Disabling deprecated warning for the internal project
+#pragma warning disable 618
+
 namespace UnityEngine.XR.MagicLeap
 {
     using System;
@@ -282,20 +285,20 @@ namespace UnityEngine.XR.MagicLeap
             public static MLResult Create(Pose pose, long expirationSeconds, out Anchor anchor)
             {
                 anchor = new Anchor();
-                
+
                 if (expirationSeconds < 0)
                     return MLResult.Create(MLResult.Code.InvalidParam,
                         "The expirationSeconds parameter was a negative number and should be positive or 0.");
-                
+
                 double unixTimestamp = 0;
                 if (expirationSeconds > 0)
                 {
                     var maxExpirationSeconds = (long)DateTime.MaxValue.Subtract(DateTime.UtcNow).TotalSeconds;
                     var clampedExpirationSeconds = Math.Clamp(expirationSeconds, 0, maxExpirationSeconds);
-                    
+
                     unixTimestamp = (DateTime.UtcNow.AddSeconds(clampedExpirationSeconds)).Subtract(DateTime.UnixEpoch).TotalSeconds;
                 }
-                
+
                 var createInfo = new NativeBindings.MLSpatialAnchorCreateInfo(pose, (ulong)unixTimestamp);
                 var resultCode = MLAnchors.Instance.CreateAnchor(createInfo, out NativeBindings.MLSpatialAnchor nativeAnchor);
                 anchor = new Anchor(nativeAnchor);
@@ -373,16 +376,16 @@ namespace UnityEngine.XR.MagicLeap
                 if (newExpirationTimeStamp < 0)
                     return MLResult.Create(MLResult.Code.InvalidParam,
                         "The expirationSeconds parameter was a negative number and should be positive or 0.");
-                
+
                 double unixTimestamp = 0;
                 if (newExpirationTimeStamp > 0)
                 {
                     var maxExpirationSeconds = (long)DateTime.MaxValue.Subtract(DateTime.UtcNow).TotalSeconds;
                     var clampedExpirationSeconds = Math.Clamp(newExpirationTimeStamp, 0, maxExpirationSeconds);
-                    
+
                     unixTimestamp = (DateTime.UtcNow.AddSeconds(clampedExpirationSeconds)).Subtract(DateTime.UnixEpoch).TotalSeconds;
                 }
-                
+
                 var resultCode = MLAnchors.Instance.UpdateAnchor(this, (ulong)unixTimestamp);
                 return MLResult.Create(resultCode);
             }
@@ -488,7 +491,7 @@ namespace UnityEngine.XR.MagicLeap
                 MagicLeapNativeBindings.MLCoordinateFrameUID cfuid = nativeInfo.TargetSpaceOrigin;
                 MagicLeapNativeBindings.MLPerceptionGetSnapshot(ref snapshot);
                 MagicLeapNativeBindings.MLSnapshotGetTransform(snapshot, ref cfuid, ref transform);
-                
+
                 this.SpaceOrigin.position = transform.Position.ToVector3();
                 this.SpaceOrigin.rotation = MLConvert.ToUnity(transform.Rotation);
 

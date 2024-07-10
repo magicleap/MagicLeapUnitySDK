@@ -7,12 +7,14 @@
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
+
 using System;
 using System.Collections.Generic;
 using Unity.Collections;
+using UnityEngine;
 using UnityEngine.XR.MagicLeap;
 
-namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
+namespace MagicLeap.OpenXR.Subsystems
 {
     public partial class MLXrPlaneSubsystem
     {
@@ -29,14 +31,14 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 
             /// <summary>
             ///     Used to sort a collection of points by the polar angle
-            ///     made with <see cref="Pivot" /> against the +x axis.
+            ///     made with <see cref="Pivot" /> against the +X axis.
             /// </summary>
             /// <param name="lhs">The first point to compare.</param>
             /// <param name="rhs">The second point to compare.</param>
             /// <returns>
             ///     -1 if the vector from
             ///     <see cref="Pivot" /> to <paramref name="lhs" /> makes a larger
-            ///     angle against the +x axis than <see cref="Pivot" /> to <paramref name="rhs" />,
+            ///     angle against the +X axis than <see cref="Pivot" /> to <paramref name="rhs" />,
             ///     +1 if the angle is smaller, and 0 if they are equal.
             /// </returns>
             private static int AngleComparer(Vector2 lhs, Vector2 rhs)

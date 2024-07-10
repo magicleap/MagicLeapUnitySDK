@@ -1,24 +1,26 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// Copyright (c) 2023 Magic Leap, Inc. All Rights Reserved.
+// Copyright (c) (2024) Magic Leap, Inc. All Rights Reserved.
 // Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
 // Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
+
 using System;
+using MagicLeap.OpenXR.NativeDelegates;
+using UnityEngine;
+using UnityEngine.XR.OpenXR;
+using UnityEngine.XR.OpenXR.NativeTypes;
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.XR.OpenXR.Features;
 #endif
 
-namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
+namespace MagicLeap.OpenXR.Features.UserCalibration
 {
-    using MagicLeapUserCalibrationNativeTypes;
-    using MagicLeapOpenXRFeatureNativeTypes;
-    
-    #if UNITY_EDITOR
+#if UNITY_EDITOR
     [OpenXRFeature(UiName = "Magic Leap 2 User Calibration",
         Desc = "Necessary to deploy a Magic Leap 2 compatible application with User calibration events.",
         Company = "Magic Leap",
@@ -28,16 +30,16 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         FeatureId = FeatureId,
         OpenxrExtensionStrings = "XR_ML_user_calibration"
     )]
-    #endif
-    public class MagicLeapUserCalibrationFeature : MagicLeapOpenXRFeatureWithEvents<MagicLeapUserCalibrationFeature>
+#endif
+    public class MagicLeapUserCalibrationFeature : MagicLeapOpenXRFeatureWithInterception<MagicLeapUserCalibrationFeature>
     {
         public const string FeatureId = "com.magicleap.openxr.feature.ml2_usercalibration";
         
-        private MagicLeapUserCalibrationNativeFunctions nativeFunctions;
+        private UserCalibrationNativeFunctions nativeFunctions;
 
         private XrEventDataHeadsetFitChanged headsetFit;
         private XrEventDataEyeCalibrationChanged eyeCalibration;
-        
+
         public enum HeadsetFitStatus
         {
             Unknown = 0,
@@ -54,6 +56,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             Fine,
         }
 
+#pragma warning disable 618
         public struct HeadsetFitData
         {
             [Obsolete("HeadsetFitData.status will be deprecated. Use Status instead")]
@@ -85,7 +88,8 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                 set => status = value;
             }
         }
-        
+#pragma warning restore 618
+
         protected override bool OnInstanceCreate(ulong xrInstance)
         {
             if (!OpenXRRuntime.IsExtensionEnabled("XR_ML_user_calibration"))
@@ -100,31 +104,42 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                 return false;
             }
 
-            nativeFunctions = CreateNativeFunctions<MagicLeapUserCalibrationNativeFunctions>();
+            nativeFunctions = CreateNativeFunctions<UserCalibrationNativeFunctions>();
             return true;
         }
 
-        internal override void OnPollEvent(IntPtr eventBuffer)
+        protected override void MarkFunctionsToIntercept()
         {
-            base.OnPollEvent(eventBuffer);
+            InterceptPollEvent = true;
+        }
+
+        internal override XrResult OnPollEvent(ulong instance, IntPtr eventBuffer, XrPollEvent origPollEvent)
+        {
+            var result = base.OnPollEvent(instance, eventBuffer, origPollEvent);
+            if (result != XrResult.Success)
+            {
+                return result;
+            }
             unsafe
             {
-                var eventBufferPtr = (XrEventBuffer*)eventBuffer;
+                var eventBufferPtr = (XrEventDataBuffer*)eventBuffer;
                 switch (eventBufferPtr->Type)
                 {
                     case (ulong)XrUserCalibrationStructTypes.EventDataHeadsetFitChanged:
-                    {
-                        headsetFit = *(XrEventDataHeadsetFitChanged*)eventBuffer;
-                        break;
-                    }
+                        {
+                            headsetFit = *(XrEventDataHeadsetFitChanged*)eventBuffer;
+                            break;
+                        }
 
                     case (ulong)XrUserCalibrationStructTypes.EventDataEyeCalibrationChanged:
-                    {
-                        eyeCalibration = *(XrEventDataEyeCalibrationChanged*)eventBuffer;
-                        break;
-                    }
+                        {
+                            eyeCalibration = *(XrEventDataEyeCalibrationChanged*)eventBuffer;
+                            break;
+                        }
                 }
             }
+
+            return result;
         }
 
         public bool EnableUserCalibrationEvents(bool enable)
@@ -136,7 +151,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                     Type = XrUserCalibrationStructTypes.UserCalibrationEnableEventsInfo,
                     Enabled = enable ? 1U : 0,
                 };
-                var xrResult = nativeFunctions.XrEnableUserCalibrationEvents(XRInstance, in calibrationEventInfo);
+                var xrResult = nativeFunctions.XrEnableUserCalibrationEvents(AppInstance, in calibrationEventInfo);
                 return Utils.DidXrCallSucceed(xrResult, nameof(nativeFunctions.XrEnableUserCalibrationEvents));
             }
         }
@@ -148,14 +163,14 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             {
                 return false;
             }
-            
+
             data.Status = (HeadsetFitStatus)headsetFit.Status;
             data.Time = headsetFit.Time;
             return true;
         }
 
         public bool GetLastEyeCalibration(out EyeCalibrationData data)
-        { 
+        {
             data = default;
             if (eyeCalibration.Type != XrUserCalibrationStructTypes.EventDataEyeCalibrationChanged)
             {

@@ -8,6 +8,8 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
+using MagicLeap.OpenXR.LegacySupport;
+
 namespace UnityEngine.XR.MagicLeap
 {
     using System;
@@ -90,7 +92,7 @@ namespace UnityEngine.XR.MagicLeap
         private MLResult InternalGetFramePose(NativeBindings.CameraID cameraId, MLTime vcamTimestamp, out Matrix4x4 outTransform)
         {
             if ((MLDevice.IsMagicLeapLoaderActive() && !MagicLeapXrProviderNativeBindings.IsHeadTrackingAvailable()) ||
-                    (MLDevice.IsOpenXRLoaderActive() && !OpenXR.Features.MagicLeapSupport.MLHeadTracking.IsAvailable()))
+                    (MLDevice.IsOpenXRLoaderActive() && !MLHeadTracking.IsAvailable()))
             {
                 outTransform = default;
                 return MLResult.Create(MLResult.Code.PoseNotFound, "HeadTracking is not available");
@@ -117,7 +119,7 @@ namespace UnityEngine.XR.MagicLeap
             if (MLDevice.IsMagicLeapLoaderActive())
                 return MagicLeapXrProviderNativeBindings.GetHeadTrackerHandle();
             else
-                return OpenXR.Features.MagicLeapSupport.MLHeadTracking.Handle;
+                return MLHeadTracking.Handle;
         }
 
         protected override void OnApplicationPause(bool pauseStatus)

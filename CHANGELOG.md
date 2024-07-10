@@ -1,11 +1,44 @@
 # Changelog
 
+## [2.3.0]
+
+### Features
+- Update OpenXR Plugin dependency to `1.11.0`.
+- Added `GetMapOrigin()` method to `MagicLeapLocalizationMapFeature` to allow users to get the pose of the map's origin.
+- Added `GetPixelSensorFromXrPath()` to MagicLeapPixelSensorFeature to get a `PixelSensorId` based on an XrPath string.
+- Added `Magic Leap 2 Secondary View Support` OpenXR Feature.
+- Migrated the `XR_ML_view_configuration_depth_range_change` extension into its own separate OpenXR Feature as the extension is experimental.
+
+### Improvements
+- Updated Magic Leap Feature sets to visually distinguish in the UI between experimental and non-experimental OpenXR extensions. 
+- Reorganized classes and types into new `MagicLeap.OpenXR` namespaces, separating Magic Leap code from `UnityEngine` and `UnityEditor` code. See `Deprecation & Removals` note below.
+- Adjusted `MagicLeapSpatialAnchorsStorageFeature` to work with the `XRAnchorSubsystem` automatically and no longer depends on manual adding and deleting. All code that currently does this should be adjusted and it is encouraged to use the built in `ARAnchorManager.anchorsChanged` event.
+- Added `CaptureTime` to `PixelSensorFrame` to get the capture time of the corresponding frame for `MagicLeapPixelSensorFeature`.
+
+### Bugfixes
+- `MagicLeapSpatialAnchorStorageFeature.OnQueryComplete` will now be invoked when 0 anchors are found for a query.
+- Fixed issue where a DllNotFoundException would prevent an application from launching if the `Magic Leap XR Plugin` package is installed but its XR Provider is not enabled.
+- Fixed issue of potentially corrupted Cubemap for `MagicLeapLightEstimationFeature.GetEstimateCubemap`
+
+### Deprecations & Removals
+- All `OpenXRFeature` classes inside the `UnityEngine.XR.OpenXR.Features.MagicLeapSupport` namespace have been marked Obsolete, as they have been relocated to new `MagicLeap` namespaces. Updating existing code to use this release of the Magic Leap SDK will create compiler errors in the console for any references to these classes. Manual changes will be required due to how OpenXR Settings data is serialized by the Editor. 
+- Deprecated `MagicLeapMeshingFeature.GetMeshIds(out TrackableId[])`. Use `MagicLeapMeshingFeature.GetMeshIds(out MeshId[])` instead.
+- Deprecated `MagicLeapMeshingFeature.GetMeshData(in TrackableId,...)`. Use `MagicLeapMeshingFeature.GetMeshData(in MeshId,...)` instead.
+- Deprecated `MLXrAnchorSubsystem.GetAnchorPoseFromID`. Use `MLXrAnchorSubsystem.GetAnchorPoseFromId` instead.
+- Deprecated `MagicLeapSpatialAnchorsStorageFeature.DeleteStoredSpatialAnchor`. Use `MagicLeapSpatialAnchorsStorageFeature.DeleteStoredSpatialAnchors` instead.
+- Temporarily Removing `MagicLeap.OpenXR.Features.LightEstimation.EstimateData.HarmonicsCoefficients` until fully implemented.
+
+### Misc.
+- Increased minimum Unity version to `2022.3` to be in line with the oldest LTS supported for Magic Leap by Unity.
+- Updated LICENSE
+
 ## [2.2.0]
 
 ### Features
 - Added `Magic Leap 2 Light Estimation` OpenXR Feature.
 - Added `.GetTimestamps()` method to `AndroidCamera` API to allow users to determine/validate capture rate.
 - Added `Magic Leap 2 Pixel Sensor` OpenXR Feature
+- Added new `MagicLeapController.cs` example script to the `ML Rig & Inputs` package sample.
 
 ### Bugfixes
 - Fixed code paths in MagicLeapCamera script to better support legacy Magic Leap XR Plugin workflow.

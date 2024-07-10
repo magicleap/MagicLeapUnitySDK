@@ -1,3 +1,6 @@
+// Disabling deprecated warning for the internal project
+#pragma warning disable 618
+
 using NUnit.Framework;
 using System;
 using System.Collections;
@@ -17,7 +20,7 @@ namespace UnitySDKPlayTests
         {
             Assert.IsTrue(CheckAnchorsPermissions());
 
-            MLAnchors.Anchor.Create(new Pose(new Vector3(0,0,0), Quaternion.identity), 300, out anchor);
+            MLAnchors.Anchor.Create(new Pose(new Vector3(0, 0, 0), Quaternion.identity), 300, out anchor);
             Assert.IsFalse(string.IsNullOrEmpty(anchor.Id));
             Assert.IsTrue(anchor.Pose.position == Vector3.zero);
 
@@ -62,7 +65,7 @@ namespace UnitySDKPlayTests
             Assert.IsTrue(CheckAnchorsPermissions());
 
             Assert.IsTrue(MLAnchors.IsStarted);
-        
+
         }
         private bool CheckAnchorsPermissions()
         {

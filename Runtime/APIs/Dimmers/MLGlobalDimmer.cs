@@ -8,7 +8,7 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-using UnityEngine.XR.OpenXR.Features.MagicLeapSupport;
+using MagicLeap.OpenXR.Features;
 using UnityEngine.XR.OpenXR;
 
 namespace UnityEngine.XR.MagicLeap

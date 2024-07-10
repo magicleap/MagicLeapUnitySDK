@@ -1,20 +1,18 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// Copyright (c) 2023 Magic Leap, Inc. All Rights Reserved.
+// Copyright (c) (2023-2024) Magic Leap, Inc. All Rights Reserved.
 // Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
 // Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
-using UnityEngine;
 
-namespace UnityEditor.XR.OpenXR.Features.MagicLeapSupport
+namespace MagicLeap
 {
     internal class AndroidBootConfig
     {
@@ -75,7 +73,7 @@ namespace UnityEditor.XR.OpenXR.Features.MagicLeapSupport
 
             string buildTargetName = BuildPipeline.GetBuildTargetName(buildReport.summary.platform);
             string xrBootSettings = EditorUserBuildSettings.GetPlatformSettings(buildTargetName, xrBootSettingsKey);
-            if (!String.IsNullOrEmpty(xrBootSettings))
+            if (!string.IsNullOrEmpty(xrBootSettings))
             {
                 // boot settings string format
                 // <boot setting>:<value>[;<boot setting>:<value>]*

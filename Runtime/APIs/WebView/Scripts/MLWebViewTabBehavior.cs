@@ -1,3 +1,6 @@
+// Disabling deprecated warning for the internal project
+#pragma warning disable 618
+
 using System;
 using System.Runtime.InteropServices;
 using UnityEngine;
@@ -17,7 +20,7 @@ namespace MagicLeap.Core
         {
             get; private set;
         }
-        
+
 #pragma warning disable CS0067
         public event Action<MLWebViewTabBehavior> OnTabSelected;
 #pragma warning restore CS0067

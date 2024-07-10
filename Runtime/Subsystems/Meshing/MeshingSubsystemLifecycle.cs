@@ -1,9 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using MagicLeap.OpenXR.Features.Meshing;
 using UnityEngine;
 using UnityEngine.XR.Management;
 #if UNITY_OPENXR_1_9_0_OR_NEWER
-using UnityEngine.XR.OpenXR.Features.MagicLeapSupport;
 #endif
 
 namespace UnityEngine.XR.MagicLeap

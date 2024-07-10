@@ -8,6 +8,9 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
+// Disabling deprecated warning for the internal project
+#pragma warning disable 618
+
 using System;
 using System.Runtime.InteropServices;
 using UnityEngine.XR.MagicLeap.Native;
@@ -133,7 +136,7 @@ namespace UnityEngine.XR.MagicLeap
         /// Get the latest eye data from the Facial Expression system.
         /// </summary>
         public static MLResult.Code GetEyeData(out EyeData data) => Instance.InternalGetEyeData(out data);
-        
+
         #region InternalMethods
         /// <summary>
         /// Creates Facial Expression system client.

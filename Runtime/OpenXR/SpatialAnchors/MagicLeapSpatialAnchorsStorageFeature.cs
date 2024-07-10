@@ -1,32 +1,35 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// Copyright (c) (2019-2022) Magic Leap, Inc. All Rights Reserved.
+// Copyright (c) (2024) Magic Leap, Inc. All Rights Reserved.
 // Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
 // Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
-#if UNITY_OPENXR_1_9_0_OR_NEWER
 using System;
-#if UNITY_EDITOR
-using UnityEditor;
-using UnityEditor.XR.OpenXR.Features;
-#endif // UNITY_EDITOR
 using System.Collections.Generic;
+using System.Linq;
+using MagicLeap.OpenXR.Constants;
+using MagicLeap.OpenXR.Futures;
+using MagicLeap.OpenXR.Spaces;
+using MagicLeap.OpenXR.Subsystems;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine;
+using UnityEngine.LowLevel;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
 using UnityEngine.XR.Management;
-using UnityEngine.XR.OpenXR.Features.MagicLeapSupport.NativeInterop;
+using UnityEngine.XR.OpenXR;
 using UnityEngine.XR.OpenXR.NativeTypes;
-using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
+#if UNITY_EDITOR
+using UnityEditor;
+using UnityEditor.XR.OpenXR.Features;
+#endif
 
-namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
+namespace MagicLeap.OpenXR.Features.SpatialAnchors
 {
-    using global::MagicLeap;
-    using LowLevel;
-
 #if UNITY_EDITOR
     [OpenXRFeature(UiName = "Magic Leap 2 Spatial Anchors Storage",
         Desc = "Expand Spatial Anchors to allow to Publish, Delete, and update on Localized Maps.",
@@ -37,26 +40,71 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         OpenxrExtensionStrings = ExtensionName
     )]
 #endif // UNITY_EDITOR
-    public partial class MagicLeapSpatialAnchorsStorageFeature : MagicLeapOpenXRFeatureBase
+    public class MagicLeapSpatialAnchorsStorageFeature : MagicLeapOpenXRFeatureBase
     {
         public const string FeatureId = "com.magicleap.openxr.feature.ml2_spatialanchorstorage";
         private const string ExtensionName = "XR_ML_spatial_anchors_storage XR_EXT_future XR_KHR_locate_spaces";
+
+        /// <summary>
+        /// Receive an ulong AnchorId and a string anchorMapPositionId for the published anchor.
+        /// </summary>
         public event Action<ulong, string> OnPublishComplete;
+        /// <summary>
+        /// Receive a list of string anchorMapPositionIds of anchors returned from the Query of the Localized Map.
+        /// </summary>
         public event Action<List<string>> OnQueryComplete;
+        /// <summary>
+        /// Receive a list of string anchorMapPositionIds of anchors that have been deleted from the Localized Map.
+        /// </summary>
         public event Action<List<string>> OnDeletedComplete;
+        /// <summary>
+        /// Receive a list of string anchorMapPositionIds of anchors that have had their expiration updated on the Localized Map.
+        /// </summary>
         public event Action<List<string>> OnUpdateExpirationCompleted;
+        /// <summary>
+        /// Receive the created anchor's Pose, the anchor's ulong AnchorId, the anchor's string anchorMapPositionId for the localized Map, and the XResult of the request to create the anchor.
+        /// </summary>
         public event Action<Pose, ulong, string, XrResult>  OnCreationCompleteFromStorage;
 
         private MagicLeapSpatialAnchorsFeature anchorsFeature;
 
-        private int pendingPublishRequests;
-        private int pendingQueries;
-        private int pendingDeleteRequests;
-        private int pendingUpdateRequests;
-        private int pendingStorageAnchors;
-
         private bool startedSpatialAnchorStorage;
-        
+
+        private MagicLeapSpatialAnchorsStorageNativeFunctions spatialAnchorsStorageNativeFunctions;
+        private SpacesNativeFunctions locateSpacesNativeFunctions;
+
+        private MLXrAnchorSubsystem activeSubsystem;
+
+        private ulong storageHandle;
+
+        private struct AnchorsStorageData
+        {
+            internal int Count;
+            internal List<string> Uuid;
+        }
+
+        private struct AnchorsStoragePendingPublish
+        {
+            internal int Count;
+            internal List<ulong> AnchorIds;
+        }
+
+        private readonly HashSet<ulong> pendingStorageAnchors = new HashSet<ulong>();
+        private readonly Dictionary<ulong, AnchorsStorageData> pendingStorageAnchorsData = new Dictionary<ulong, AnchorsStorageData>();
+
+        private readonly HashSet<ulong> pendingPublishRequests = new HashSet<ulong>();
+        private readonly Dictionary<ulong, AnchorsStoragePendingPublish> pendingStorageAnchorsPublishData = new Dictionary<ulong, AnchorsStoragePendingPublish>();
+
+        private readonly HashSet<ulong> pendingQueries = new HashSet<ulong>();
+
+        private readonly HashSet<ulong> pendingDeleteRequests = new HashSet<ulong>();
+        private readonly Dictionary<ulong, AnchorsStorageData> pendingStorageAnchorsDeleteData = new Dictionary<ulong, AnchorsStorageData>();
+
+        private readonly HashSet<ulong> pendingUpdateRequests = new HashSet<ulong>();
+        private readonly Dictionary<ulong, AnchorsStorageData> pendingStorageAnchorsUpdateData = new Dictionary<ulong, AnchorsStorageData>();
+
+        protected override bool UsesExperimentalExtensions => true;
+
         private struct AnchorsStorageUpdateType
         { }
 
@@ -84,7 +132,12 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 
             PlayerLoop.SetPlayerLoop(playerLoop);
 
-            return base.OnInstanceCreate(xrInstance);
+            bool instanceCreateResult = base.OnInstanceCreate(xrInstance);
+
+            spatialAnchorsStorageNativeFunctions = CreateNativeFunctions<MagicLeapSpatialAnchorsStorageNativeFunctions>();
+            locateSpacesNativeFunctions = CreateNativeFunctions<SpacesNativeFunctions>();
+
+            return instanceCreateResult;
         }
 
         public bool CreateSpatialAnchorsFromStorage(List<string> anchorMapPositionIds)
@@ -107,7 +160,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 
             if (!anchorsFeature.enabled)
             {
-                Debug.LogError("CreateSpatialAnchors requires an active MagicLeapSpatialAnchorsFeature OpenXRfeature.");
+                Debug.LogError("CreateSpatialAnchors requires an active MagicLeapSpatialAnchorsFeature OpenXRFeature.");
                 return false;
             }
 
@@ -120,17 +173,37 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                     anchorUuidsToCreate[i] = new XrUUID(anchorMapPositionIds[i]);
                 }
 
-                var resultCode = NativeBindings.MLOpenXRCreateSpatialAnchors((NativeInterop.XrUUID *)anchorUuidsToCreate.GetUnsafePtr(), anchorUuidsToCreate.Length);
-                bool xrCallSucceeded = Utils.DidXrCallSucceed(resultCode, nameof(NativeBindings.MLOpenXRCreateSpatialAnchors));
+                var createInfo = new XrSpatialAnchorsCreateInfoFromUuids
+                {
+                    Type = XrSpatialAnchorsStorageStructTypes.XrTypeSpatialAnchorsCreateInfoFromUUIDs,
+                    Storage = storageHandle,
+                    UuidCount = (uint)anchorMapPositionIds.Count,
+                    Uuids = (XrUUID*)anchorUuidsToCreate.GetUnsafePtr()
+                };
 
-                if (!xrCallSucceeded)
+                var baseHeader = (XrSpatialAnchorsCreateInfoBaseHeader*)(&createInfo);
+
+                XrResult resultCode = anchorsFeature.SpatialAnchorsNativeFunctions.XrCreateSpatialAnchorsAsync(AppSession, baseHeader, out ulong pendingFuture);
+                bool result = Utils.DidXrCallSucceed(resultCode, nameof(anchorsFeature.SpatialAnchorsNativeFunctions.XrCreateSpatialAnchorsAsync));
+
+                if(!result)
                 {
                     Debug.LogError("CreateSpatialAnchors failed to send request to create anchors from AnchorMapPositionId list.");
                 }
+                else
+                {
+                    pendingStorageAnchors.Add(pendingFuture);
 
-                pendingStorageAnchors += anchorMapPositionIds.Count;
+                    var savedPendingData = new AnchorsStorageData
+                    {
+                        Count = anchorMapPositionIds.Count,
+                        Uuid = anchorMapPositionIds
+                    };
 
-                return xrCallSucceeded;
+                    pendingStorageAnchorsData.Add(pendingFuture, savedPendingData);
+                }
+
+                return result;
             }
         }
 
@@ -146,17 +219,33 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                 return false;
             }
 
-            var resultCode = NativeBindings.MLOpenXRQuerySpatialAnchorsStorage(position, radius);
-            bool xrCallSucceeded = Utils.DidXrCallSucceed(resultCode, nameof(NativeBindings.MLOpenXRQuerySpatialAnchorsStorage));
-
-            if (!xrCallSucceeded)
+            unsafe
             {
-                Debug.LogError("QueryStoredSpatialAnchors failed to send request to query for AnchorMapPositionId list around a specific position.");
+                var queryInfo = new XrSpatialAnchorsQueryInfoRadius
+                {
+                    Type = XrSpatialAnchorsStorageStructTypes.XrTypeSpatialAnchorsQueryInfoRadius,
+                    Center = position.InvertZ(),
+                    Radius = radius,
+                    Time = NextPredictedDisplayTime,
+                    BaseSpace = AppSpace
+                };
+
+                var baseHeader = (XrSpatialAnchorsQueryInfoBaseHeader*)(&queryInfo);
+
+                XrResult resultCode = spatialAnchorsStorageNativeFunctions.XrQuerySpatialAnchorsAsync(storageHandle, baseHeader, out ulong pendingFuture);
+                bool result = Utils.DidXrCallSucceed(resultCode, nameof(spatialAnchorsStorageNativeFunctions.XrQuerySpatialAnchorsAsync));
+
+                if (!result)
+                {
+                    Debug.LogError("CreateSpatialAnchors failed to send request to create anchors from AnchorMapPositionId list.");
+                }
+                else
+                {
+                    pendingQueries.Add(pendingFuture);
+                }
+
+                return result;
             }
-
-            pendingQueries++;
-
-            return xrCallSucceeded;
         }
 
         /// <summary>
@@ -181,17 +270,34 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             {
                 using NativeArray<ulong> anchorsToPublish = new NativeArray<ulong>(anchorIds.ToArray(), Allocator.Temp);
 
-                var resultCode = NativeBindings.MLOpenXRPublishSpatialAnchors((ulong*)anchorsToPublish.GetUnsafePtr(), anchorIds.Count, expiration);
-                bool xrCallSucceeded = Utils.DidXrCallSucceed(resultCode, nameof(NativeBindings.MLOpenXRCreateSpatialAnchors));
+                var publishInfo = new XrSpatialAnchorsPublishInfo
+                {
+                    Type = XrSpatialAnchorsStorageStructTypes.XrTypeSpatialAnchorsPublishInfo,
+                    AnchorCount = (uint)anchorIds.Count,
+                    Anchors = (ulong*)anchorsToPublish.GetUnsafePtr(),
+                    Expiration = expiration
+                };
 
-                if (!xrCallSucceeded)
+                XrResult resultCode = spatialAnchorsStorageNativeFunctions.XrPublishSpatialAnchorsAsync(storageHandle, &publishInfo, out ulong pendingFuture);
+                bool result = Utils.DidXrCallSucceed(resultCode, nameof(anchorsFeature.SpatialAnchorsNativeFunctions.XrCreateSpatialAnchorsAsync));
+
+                if (!result)
                 {
                     Debug.LogError("PublishSpatialAnchorsToStorage failed to send request to publish anchors from AnchorId list.");
+                    return false;
                 }
 
-                pendingPublishRequests += anchorIds.Count;
+                pendingPublishRequests.Add(pendingFuture);
 
-                return xrCallSucceeded;
+                var savedPendingData = new AnchorsStoragePendingPublish
+                {
+                    Count = anchorIds.Count,
+                    AnchorIds = anchorIds
+                };
+
+                pendingStorageAnchorsPublishData.Add(pendingFuture, savedPendingData);
+
+                return true;
             }
         }
 
@@ -207,12 +313,10 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                 return false;
             }
 
-            if (XRGeneralSettings.Instance == null) return false;
-            if (XRGeneralSettings.Instance.Manager == null) return false;
-            var activeLoader = XRGeneralSettings.Instance.Manager.activeLoader;
-            if (activeLoader == null) return false;
-            var anchorSubsystem = activeLoader.GetLoadedSubsystem<XRAnchorSubsystem>() as MLXrAnchorSubsystem;
-            if (anchorSubsystem == null) return false;
+            if(activeSubsystem == null)
+            {
+                return false;
+            }
 
             List<ulong> anchorIds = new List<ulong>();
 
@@ -223,25 +327,31 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                     continue;
                 }
 
-                ulong anchorid = anchorSubsystem.GetAnchorId(anchor);
+                ulong anchorid = activeSubsystem.GetAnchorId(anchor);
                 if (anchorid != 0u)
                 {
                     anchorIds.Add(anchorid);
                 }
                 else
                 {
-                    Debug.LogWarning("PublishSpatialAnchorsToStorage is unable to locate an ID for " + anchor.trackableId + " and will be exclud it from the list to publish.");
+                    Debug.LogWarning($"PublishSpatialAnchorsToStorage is unable to locate an ID for {anchor.trackableId} and it will be excluded from the list to publish.");
                 }
             }
 
             return PublishSpatialAnchorsToStorage(anchorIds, expiration);
         }
 
+        [Obsolete("DeleteStoredSpatialAnchor is obsolete. Use DeleteStoredSpatialAnchors instead.", false)]
+        public bool DeleteStoredSpatialAnchor(List<string> anchorMapPositionIds)
+        {
+            return DeleteStoredSpatialAnchors(anchorMapPositionIds);
+        }
+
         /// <summary>
         /// Delete published anchors from Spatial Anchor Storage.
         /// </summary>
         /// <param name="anchorMapPositionIds">The list of AnchorMapPositionIds to Delete. These were assigned in the OnPublishComplete event in MagicLeapSpatialAnchorsStorageFeature.</param>
-        public bool DeleteStoredSpatialAnchor(List<string> anchorMapPositionIds)
+        public bool DeleteStoredSpatialAnchors(List<string> anchorMapPositionIds)
         {
             if (!startedSpatialAnchorStorage)
             {
@@ -263,18 +373,69 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                     anchorUuidsToDelete[i] = new XrUUID(anchorMapPositionIds[i]);
                 }
 
-                var resultCode = NativeBindings.MLOpenXRDeleteSpatialAnchors((NativeInterop.XrUUID*)anchorUuidsToDelete.GetUnsafePtr(), anchorUuidsToDelete.Length);
-                bool xrCallSucceeded = Utils.DidXrCallSucceed(resultCode, nameof(NativeBindings.MLOpenXRCreateSpatialAnchors));
+                var deleteInfo = new XrSpatialAnchorsDeleteInfo
+                {
+                    Type = XrSpatialAnchorsStorageStructTypes.XrTypeSpatialAnchorsDeleteInfo,
+                    UuidCount = (uint)anchorMapPositionIds.Count,
+                    Uuids = (XrUUID*)anchorUuidsToDelete.GetUnsafePtr()
+                };
 
-                if (!xrCallSucceeded)
+                XrResult resultCode = spatialAnchorsStorageNativeFunctions.XrDeleteSpatialAnchorsAsync(storageHandle, &deleteInfo, out ulong pendingFuture);
+                bool result = Utils.DidXrCallSucceed(resultCode, nameof(spatialAnchorsStorageNativeFunctions.XrDeleteSpatialAnchorsAsync));
+
+                if(!result)
                 {
                     Debug.LogError("CreateSpatialAnchors failed to send request to create anchors from AnchorMapPositionId list.");
+                    return false;
+                }
+                
+                pendingDeleteRequests.Add(pendingFuture);
+
+                var savedDeleteData = new AnchorsStorageData
+                {
+                    Count = anchorMapPositionIds.Count,
+                    Uuid = anchorMapPositionIds
+                };
+
+                pendingStorageAnchorsDeleteData.Add(pendingFuture, savedDeleteData);
+                
+                return true;
+            }
+        }
+
+        public bool DeleteStoredSpatialAnchors(List<ARAnchor> anchors)
+        {
+            if (!startedSpatialAnchorStorage)
+            {
+                return false;
+            }
+
+            if (activeSubsystem == null)
+            {
+                return false;
+            }
+
+            List<string> anchorMapPositionIds = new List<string>();
+
+            foreach (ARAnchor anchor in anchors)
+            {
+                if (anchor.trackingState != TrackingState.Tracking)
+                {
+                    continue;
                 }
 
-                pendingDeleteRequests += anchorMapPositionIds.Count;
-
-                return xrCallSucceeded;
+                string anchorMapPositionId = activeSubsystem.GetAnchorMapPositionId(anchor);
+                if (!String.IsNullOrEmpty(anchorMapPositionId))
+                {
+                    anchorMapPositionIds.Add(anchorMapPositionId);
+                }
+                else
+                {
+                    Debug.LogWarning($"DeleteStoredSpatialAnchor is unable to locate an AnchorMapPositionId for {anchor.trackableId} and it will be excluded from the list of anchors to be deleted.");
+                }
             }
+
+            return DeleteStoredSpatialAnchors(anchorMapPositionIds);
         }
 
         /// <summary>
@@ -312,205 +473,439 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                     anchorUuidsToUpdate[i] = new XrUUID(anchorMapPositionIds[i]);
                 }
 
-                var resultCode = NativeBindings.MLOpenXRUpdateSpatialAnchorsExpiration((XrUUID*)anchorUuidsToUpdate.GetUnsafePtr(), anchorMapPositionIds.Count, expiration);
-                bool xrCallSucceeded = Utils.DidXrCallSucceed(resultCode, nameof(NativeBindings.MLOpenXRUpdateSpatialAnchorsExpiration));
+                var updateInfo = new XrSpatialAnchorsUpdateExpirationInfo
+                {
+                    Type = XrSpatialAnchorsStorageStructTypes.XrTypeSpatialAnchorsUpdateExpirationInfo,
+                    UuidCount = (uint)anchorMapPositionIds.Count,
+                    Uuids = (XrUUID*)anchorUuidsToUpdate.GetUnsafePtr(),
+                    Expiration = expiration
+                };
 
-                if (!xrCallSucceeded)
+                XrResult resultCode = spatialAnchorsStorageNativeFunctions.XrUpdateSpatialAnchorsExpirationAsync(storageHandle, &updateInfo, out ulong pendingFuture);
+                bool result = Utils.DidXrCallSucceed(resultCode, nameof(spatialAnchorsStorageNativeFunctions.XrUpdateSpatialAnchorsExpirationAsync));
+
+                if (!result)
                 {
                     Debug.LogError($"{nameof(UpdateExpirationForStoredSpatialAnchor)} failed to send request to update anchors expiration from AnchorMapPositionId list.");
+                    return false;
                 }
 
-                pendingUpdateRequests += anchorMapPositionIds.Count;
+                pendingUpdateRequests.Add(pendingFuture);
 
-                return xrCallSucceeded;
+                var savedUpdateData = new AnchorsStorageData
+                {
+                    Count = anchorMapPositionIds.Count,
+                    Uuid = anchorMapPositionIds
+                };
+
+                pendingStorageAnchorsUpdateData.Add(pendingFuture, savedUpdateData);
+
+                return true;
             }
+        }
+
+        public bool UpdateExpirationForStoredSpatialAnchor(List<ARAnchor> anchors, ulong expiration)
+        {
+            if (!startedSpatialAnchorStorage)
+            {
+                return false;
+            }
+
+            if (activeSubsystem == null)
+            {
+                return false;
+            }
+
+            List<string> anchorMapPositionIds = new List<string>();
+
+            foreach (ARAnchor anchor in anchors)
+            {
+                if (anchor.trackingState != TrackingState.Tracking)
+                {
+                    continue;
+                }
+
+                string anchorMapPositionId = activeSubsystem.GetAnchorMapPositionId(anchor);
+                if (!String.IsNullOrEmpty(anchorMapPositionId))
+                {
+                    anchorMapPositionIds.Add(anchorMapPositionId);
+                }
+                else
+                {
+                    Debug.LogWarning($"UpdateExpirationForStoredSpatialAnchor is unable to locate an AnchorMapPositionId for {anchor.trackableId} and will be excluded from the list to delete.");
+                }
+            }
+
+            return UpdateExpirationForStoredSpatialAnchor(anchorMapPositionIds, expiration);
         }
 
         private void AnchorsStoragePlayerLoop()
         {
             if(!startedSpatialAnchorStorage)
             {
-                var result = NativeBindings.MLOpenXRCreateSpatialAnchorStorage();
-                if (result != XrResult.Success)
+                unsafe
                 {
-                    Debug.LogError($"XR_ML_spatial_anchors_storage will not function properly due to failure to start Spatial Anchor Storage.");
-                    return;
-                }
+                    var createInfo = new XrSpatialAnchorsCreateStorageInfo
+                    {
+                        Type = XrSpatialAnchorsStorageStructTypes.XrTypeSpatialAnchorsCreateStorageInfo
+                    };
 
-                startedSpatialAnchorStorage = true;
+                    XrResult createResult = spatialAnchorsStorageNativeFunctions.XrCreateSpatialAnchorsStorage(AppSession, &createInfo, out storageHandle);
+
+                    if (!Utils.DidXrCallSucceed(createResult, nameof(spatialAnchorsStorageNativeFunctions.XrCreateSpatialAnchorsStorage)))
+                    {
+                        return;
+                    }
+
+                    startedSpatialAnchorStorage = true;
+                }
             }
 
-            if (pendingStorageAnchors > 0)
+            if(activeSubsystem == null)
             {
-                int completedLength = 0;
+                var activeLoader = XRGeneralSettings.Instance.Manager.activeLoader;
+                activeSubsystem = activeLoader.GetLoadedSubsystem<XRAnchorSubsystem>() as MLXrAnchorSubsystem;
+                if (activeSubsystem == null) return;
+            }
+
+            if (pendingStorageAnchors.Count > 0)
+            {
+                HashSet<ulong> readyStorageAnchors = new HashSet<ulong>();
+                HashSet<ulong> failedStorageAnchors = new HashSet<ulong>();
+
+                foreach (ulong future in pendingStorageAnchors)
+                {
+                    spatialAnchorsStorageNativeFunctions.PollFuture(future, out XrFutureState pollState, out XrResult futureResult);
+
+                    if (futureResult == (XrResult)MLXrResult.FutureInvalidEXT)
+                    {
+                        failedStorageAnchors.Add(future);
+                        Debug.LogError($"CreateSpatialAnchorsFromStorage request failed with an invalid XrFuture.");
+                        continue;
+                    }
+
+                    if(pollState == XrFutureState.Ready)
+                    {
+                        readyStorageAnchors.Add(future);
+                    }
+                }
+
+                pendingStorageAnchors.ExceptWith(failedStorageAnchors);
+
+                foreach (ulong failedFuture in failedStorageAnchors)
+                {
+                    pendingStorageAnchorsData.Remove(failedFuture);
+                }
+
+                pendingStorageAnchors.ExceptWith(readyStorageAnchors);
 
                 unsafe
                 {
-                    NativeBindings.MLOpenXRGetSpatialAnchorStorageCompletionCount(&completedLength);
-
-                    if (completedLength > 0)
+                    if (readyStorageAnchors.Count > 0)
                     {
-                        using NativeArray<MLXrAnchorSubsystem.AnchorCompletionStatus> completed = new NativeArray<MLXrAnchorSubsystem.AnchorCompletionStatus>(completedLength, Allocator.Temp);
-
-                        NativeBindings.MLOpenXRCheckSpatialAnchorStorageCompletion((MLXrAnchorSubsystem.AnchorCompletionStatus*)completed.GetUnsafePtr(), &completedLength);
-
-                        if (completedLength > 0)
+                        foreach (ulong future in readyStorageAnchors)
                         {
-                            NativeSlice<MLXrAnchorSubsystem.AnchorCompletionStatus> finalComplete = new NativeSlice<MLXrAnchorSubsystem.AnchorCompletionStatus>(completed, 0, completedLength);
+                            int count = pendingStorageAnchorsData[future].Count;
 
-                            foreach (MLXrAnchorSubsystem.AnchorCompletionStatus status in finalComplete)
+                            NativeArray<ulong> allSpaces = new NativeArray<ulong>(count, Allocator.Temp);
+
+                            var completionInfo = new XrCreateSpatialAnchorsCompletion
                             {
-                                pendingStorageAnchors--;
-                                OnCreationCompleteFromStorage?.Invoke(status.Pose, status.Id, status.AnchorStorageId.ToString(), status.Result);
+                                Type = XrSpatialAnchorsStructTypes.XrTypeCreateSpatialAnchorsCompletion,
+                                SpaceCount = (uint)count,
+                                Spaces = (ulong*)allSpaces.GetUnsafePtr()
+                            };
+
+                            XrResult resultCode = anchorsFeature.SpatialAnchorsNativeFunctions.XrCreateSpatialAnchorsComplete(AppSession, future, out completionInfo);
+                            if (!Utils.DidXrCallSucceed(resultCode, nameof(anchorsFeature.SpatialAnchorsNativeFunctions.XrCreateSpatialAnchorsComplete)))
+                            {
+                                pendingStorageAnchorsData.Remove(future);
+                                continue;
                             }
 
-                            if (pendingStorageAnchors < 0)
+                            XrPose[] poses = locateSpacesNativeFunctions.LocateSpaces(AppSpace, NextPredictedDisplayTime, AppSession, allSpaces.ToArray());
+
+                            for (int i = 0; i < count; i++)
                             {
-                                pendingStorageAnchors = 0;
+                                Pose unityPose = XrPose.GetUnityPose(poses[i]);
+                                ulong anchorId = allSpaces[i];
+                                string anchorMapPositionId = pendingStorageAnchorsData[future].Uuid[i];
+
+                                activeSubsystem.AddStorageAnchorToSubsystem(unityPose, anchorId, anchorMapPositionId);
+                                OnCreationCompleteFromStorage?.Invoke(unityPose, anchorId, anchorMapPositionId, completionInfo.FutureResult);
                             }
+
+                            pendingStorageAnchorsData.Remove(future);
                         }
                     }
                 }
             }
 
-            if (pendingPublishRequests > 0)
+            if (pendingPublishRequests.Count > 0)
             {
-                int completedLength = 0;
-                unsafe
+                HashSet<ulong> readyPublishAnchors = new HashSet<ulong>();
+                HashSet<ulong> failedPublishAnchors = new HashSet<ulong>();
+
+                foreach (ulong future in pendingPublishRequests)
                 {
-                    NativeBindings.MLOpenXRGetSpatialAnchorPublishCount(&completedLength);
-                    if (completedLength > 0)
+                    spatialAnchorsStorageNativeFunctions.PollFuture(future, out XrFutureState pollState, out XrResult futureResult);
+
+                    if (futureResult == (XrResult)MLXrResult.FutureInvalidEXT)
                     {
-                        using NativeArray<XrUUID> completedUuids = new NativeArray<XrUUID>(completedLength, Allocator.Temp);
-                        using NativeArray<ulong> completedIds = new NativeArray<ulong>(completedLength, Allocator.Temp);
-
-                        NativeBindings.MLOpenXRCheckPublishSpatialAnchorsCompletion((XrUUID*)completedUuids.GetUnsafePtr(), (ulong*)completedIds.GetUnsafePtr(), &completedLength);
-
-                        if (completedLength > 0)
-                        {
-                            // NativeSlice contrains the number of values to the actual amount of anchors that have completed Publishing.
-                            NativeSlice<XrUUID> finalCompleteUuids = new NativeSlice<XrUUID>(completedUuids, 0, completedLength);
-                            NativeSlice<ulong> finalCompleteIds = new NativeSlice<ulong>(completedIds, 0, completedLength);
-
-                            for (int i = 0; i < completedLength; i++)
-                            {
-                                OnPublishComplete?.Invoke(finalCompleteIds[i], finalCompleteUuids[i].ToString());
-
-                                pendingPublishRequests--;
-                            }
-                        }
+                        failedPublishAnchors.Add(future);
+                        Debug.LogError($"PublishSpatialAnchorsToStorage request failed with an invalid XrFuture.");
+                        continue;
                     }
 
-                    if(pendingPublishRequests<0)
+                    if (pollState == XrFutureState.Ready)
                     {
-                        pendingPublishRequests = 0;
+                        readyPublishAnchors.Add(future);
+                    }
+                }
+
+                pendingPublishRequests.ExceptWith(failedPublishAnchors);
+
+                foreach (ulong failedFuture in failedPublishAnchors)
+                {
+                    pendingStorageAnchorsPublishData.Remove(failedFuture);
+                }
+
+                pendingPublishRequests.ExceptWith(readyPublishAnchors);
+
+                unsafe
+                {
+                    if(readyPublishAnchors.Count > 0)
+                    {
+                        foreach (ulong future in readyPublishAnchors)
+                        {
+                            int count = pendingStorageAnchorsPublishData[future].Count;
+
+                            using NativeArray<XrUUID> completedUuids = new NativeArray<XrUUID>(count, Allocator.Temp);
+
+                            var completionInfo = new XrSpatialAnchorsPublishCompletion
+                            {
+                                Type = XrSpatialAnchorsStorageStructTypes.XrTypeSpatialAnchorsPublishCompletion,
+                                UuidCount = (uint)count,
+                                Uuids = (XrUUID*)completedUuids.GetUnsafePtr()
+                            };
+
+                            XrResult resultCode = spatialAnchorsStorageNativeFunctions.XrPublishSpatialAnchorsComplete(storageHandle, future, out completionInfo);
+                            if (!Utils.DidXrCallSucceed(resultCode, nameof(spatialAnchorsStorageNativeFunctions.XrPublishSpatialAnchorsComplete)))
+                            {
+                                pendingStorageAnchorsPublishData.Remove(future);
+                                continue;
+                            }
+
+                            if (completedUuids.Length != pendingStorageAnchorsPublishData[future].Count)
+                            {
+                                Debug.LogError($"PublishSpatialAnchorsToStorage completed with an Unexpected number of results.");
+                            }
+
+                            for (int i = 0; i < completedUuids.Length; i++)
+                            {
+                                ulong anchorId = pendingStorageAnchorsPublishData[future].AnchorIds[i];
+                                string anchorMapPositionId = completedUuids[i].ToString();
+                                activeSubsystem.PublishLocalAnchor(anchorId, anchorMapPositionId);
+                                OnPublishComplete?.Invoke(anchorId, anchorMapPositionId);
+                            }
+
+                            pendingStorageAnchorsPublishData.Remove(future);
+                        }
                     }
                 }
             }
 
-            if(pendingQueries > 0)
+            if(pendingQueries.Count > 0)
             {
-                int completedQueriesLength = 0;
+                HashSet<ulong> readyQueryAnchors = new HashSet<ulong>();
+                HashSet<ulong> failedQueryAnchors = new HashSet<ulong>();
+
+                foreach (ulong future in pendingQueries)
+                {
+                    spatialAnchorsStorageNativeFunctions.PollFuture(future, out XrFutureState pollState, out XrResult futureResult);
+
+                    if (futureResult == (XrResult)MLXrResult.FutureInvalidEXT)
+                    {
+                        failedQueryAnchors.Add(future);
+                        Debug.LogError($"QueryStoredSpatialAnchors request failed with an invalid XrFuture.");
+                        continue;
+                    }
+
+                    if (pollState == XrFutureState.Ready)
+                    {
+                        readyQueryAnchors.Add(future);
+                    }
+                }
+
+                pendingQueries.ExceptWith(failedQueryAnchors);
+                pendingQueries.ExceptWith(readyQueryAnchors);
+
                 unsafe
                 {
-                    NativeBindings.MLOpenXRGetSpatialAnchorQueryCount(&completedQueriesLength);
-                    if (completedQueriesLength > 0)
+                    if (readyQueryAnchors.Count > 0)
                     {
-                        using NativeArray<XrUUID> QueriedUuids = new NativeArray<XrUUID>(completedQueriesLength, Allocator.Temp);
-
-                        NativeBindings.MLOpenXRCheckQuerySpatialAnchorCompletion((XrUUID*)QueriedUuids.GetUnsafePtr(), &completedQueriesLength);
-
-                        if (completedQueriesLength > 0)
+                        foreach (ulong future in readyQueryAnchors)
                         {
-                            NativeSlice<XrUUID> finalQueriedUuids = new NativeSlice<XrUUID>(QueriedUuids, 0, completedQueriesLength);
+                            var completion = new XrSpatialAnchorsQueryCompletion
+                            {
+                                Type = XrSpatialAnchorsStorageStructTypes.XrTypeSpatialAnchorsQueryCompletion,
+                                UuidCapacityInput = 0,
+                                Uuids = default
+                            };
 
+                            XrResult resultCode = spatialAnchorsStorageNativeFunctions.XrQuerySpatialAnchorsComplete(storageHandle, future, out completion);
+                            if (!Utils.DidXrCallSucceed(resultCode, nameof(spatialAnchorsStorageNativeFunctions.XrQuerySpatialAnchorsComplete)))
+                            {
+                                continue;
+                            }
+
+                            uint count = completion.UuidCountOutput;
                             List<string> returnedUuids = new List<string>();
 
-                            foreach (XrUUID uuid in finalQueriedUuids)
+                            if (count > 0)
                             {
-                                returnedUuids.Add(uuid.ToString());
+                                using NativeArray<XrUUID> completedUuids = new NativeArray<XrUUID>((int)count, Allocator.Temp);
+
+                                completion.UuidCapacityInput = count;
+                                completion.Uuids = (XrUUID*)completedUuids.GetUnsafePtr();
+
+                                resultCode = spatialAnchorsStorageNativeFunctions.XrQuerySpatialAnchorsComplete(storageHandle, future, out completion);
+                                if (!Utils.DidXrCallSucceed(resultCode, nameof(spatialAnchorsStorageNativeFunctions.XrQuerySpatialAnchorsComplete)))
+                                {
+                                    continue;
+                                }
+
+                                foreach (XrUUID uuid in completedUuids)
+                                {
+                                    returnedUuids.Add(uuid.ToString());
+                                }
+
                             }
 
                             OnQueryComplete?.Invoke(returnedUuids);
-
-                            pendingQueries--;
                         }
                     }
-                }
-
-                if (pendingQueries < 0)
-                {
-                    pendingQueries = 0;
                 }
             }
 
-            if(pendingDeleteRequests > 0)
+            if(pendingDeleteRequests.Count > 0)
             {
-                int completedDeletedLength = 0;
-                unsafe
+                HashSet<ulong> readyDeleteAnchors = new HashSet<ulong>();
+                HashSet<ulong> failedDeleteAnchors = new HashSet<ulong>();
+
+                foreach (ulong future in pendingDeleteRequests)
                 {
-                    NativeBindings.MLOpenXRGetSpatialAnchorDeleteCount(&completedDeletedLength);
-                    if (completedDeletedLength > 0)
+                    spatialAnchorsStorageNativeFunctions.PollFuture(future, out XrFutureState pollState, out XrResult futureResult);
+
+                    if (futureResult == (XrResult)MLXrResult.FutureInvalidEXT)
                     {
-                        using NativeArray<XrUUID> deletedUuids = new NativeArray<XrUUID>(completedDeletedLength, Allocator.Temp);
+                        failedDeleteAnchors.Add(future);
+                        Debug.LogError($"DeleteStoredSpatialAnchor request failed with an invalid XrFuture.");
+                        continue;
+                    }
 
-                        NativeBindings.MLOpenXRCheckDeleteSpatialAnchorsCompletion((XrUUID*)deletedUuids.GetUnsafePtr(), &completedDeletedLength);
-
-                        if (completedDeletedLength > 0)
-                        {
-                            NativeSlice<XrUUID> finalDeletedUuids = new NativeSlice<XrUUID>(deletedUuids, 0, completedDeletedLength);
-
-                            List<string> returnedDeletedUuids = new List<string>();
-
-                            foreach (XrUUID uuid in finalDeletedUuids)
-                            {
-                                returnedDeletedUuids.Add(uuid.ToString());
-                                pendingDeleteRequests--;
-                            }
-
-                            OnDeletedComplete?.Invoke(returnedDeletedUuids);
-                        }
+                    if (pollState == XrFutureState.Ready)
+                    {
+                        readyDeleteAnchors.Add(future);
                     }
                 }
-                if(pendingDeleteRequests < 0)
+
+                pendingDeleteRequests.ExceptWith(failedDeleteAnchors);
+
+                foreach (ulong failedFuture in failedDeleteAnchors)
                 {
-                    pendingDeleteRequests = 0;
+                    pendingStorageAnchorsDeleteData.Remove(failedFuture);
+                }
+
+                pendingDeleteRequests.ExceptWith(readyDeleteAnchors);
+
+                unsafe
+                {
+                    if(readyDeleteAnchors.Count > 0)
+                    {
+                        foreach (ulong future in readyDeleteAnchors)
+                        {
+                            var completion = new XrSpatialAnchorsDeleteCompletion
+                            {
+                                Type = XrSpatialAnchorsStorageStructTypes.XrTypeSpatialAnchorsDeleteCompletion
+                            };
+
+                            XrResult resultCode = spatialAnchorsStorageNativeFunctions.XrDeleteSpatialAnchorsComplete(storageHandle, future, out completion);
+                            if (!Utils.DidXrCallSucceed(resultCode, nameof(spatialAnchorsStorageNativeFunctions.XrDeleteSpatialAnchorsComplete)))
+                            {
+                                pendingStorageAnchorsDeleteData.Remove(future);
+                                continue;
+                            }
+
+                            if (Utils.DidXrCallSucceed(completion.FutureResult, nameof(spatialAnchorsStorageNativeFunctions.XrDeleteSpatialAnchorsComplete)))
+                            {
+                                activeSubsystem.DeleteStoredAnchors(pendingStorageAnchorsDeleteData[future].Uuid);
+                                OnDeletedComplete?.Invoke(pendingStorageAnchorsDeleteData[future].Uuid);
+                            }
+
+                            pendingStorageAnchorsDeleteData.Remove(future);
+                        }
+                    }
                 }
             }
 
-            if(pendingUpdateRequests > 0)
+            if(pendingUpdateRequests.Count > 0)
             {
-                int completedUpdatedLength = 0;
-                unsafe
+                HashSet<ulong> readyUpdateAnchors = new HashSet<ulong>();
+                HashSet<ulong> failedUpdateAnchors = new HashSet<ulong>();
+
+                foreach (ulong future in pendingUpdateRequests)
                 {
-                    NativeBindings.MLOpenXRGetSpatialAnchorUpdateExpirationCount(&completedUpdatedLength);
-                    if (completedUpdatedLength > 0)
+                    spatialAnchorsStorageNativeFunctions.PollFuture(future, out XrFutureState pollState, out XrResult futureResult);
+
+                    if (futureResult == (XrResult)MLXrResult.FutureInvalidEXT)
                     {
-                        using NativeArray<XrUUID> updatedUuids = new NativeArray<XrUUID>(completedUpdatedLength, Allocator.Temp);
+                        failedUpdateAnchors.Add(future);
+                        Debug.LogError($"UpdateExpirationForStoredSpatialAnchor request failed with an invalid XrFuture.");
+                        continue;
+                    }
 
-                        NativeBindings.MLOpenXRCheckUpdateSpatialAnchorsExpirationCompletion((XrUUID*)updatedUuids.GetUnsafePtr(), &completedUpdatedLength);
-
-                        if (completedUpdatedLength > 0)
-                        {
-                            NativeSlice<XrUUID> finalUpdatedUuids = new NativeSlice<XrUUID>(updatedUuids, 0, completedUpdatedLength);
-
-                            List<string> returnedUpdatedUuids = new List<string>();
-
-                            foreach (XrUUID uuid in finalUpdatedUuids)
-                            {
-                                returnedUpdatedUuids.Add(uuid.ToString());
-                            }
-
-                            OnUpdateExpirationCompleted?.Invoke(returnedUpdatedUuids);
-
-                            pendingUpdateRequests--;
-                        }
+                    if (pollState == XrFutureState.Ready)
+                    {
+                        readyUpdateAnchors.Add(future);
                     }
                 }
 
-                if (pendingUpdateRequests < 0)
+                pendingUpdateRequests.ExceptWith(failedUpdateAnchors);
+
+                foreach (ulong failedFuture in failedUpdateAnchors)
                 {
-                    pendingUpdateRequests = 0;
+                    pendingStorageAnchorsUpdateData.Remove(failedFuture);
+                }
+
+                pendingUpdateRequests.ExceptWith(readyUpdateAnchors);
+
+                unsafe
+                {
+                    if (readyUpdateAnchors.Count > 0)
+                    {
+                        foreach (ulong future in readyUpdateAnchors)
+                        {
+                            var completion = new XrSpatialAnchorsUpdateExpirationCompletion
+                            {
+                                Type = XrSpatialAnchorsStorageStructTypes.XrTypeSpatialAnchorsUpdateExpirationCompletion
+                            };
+
+                            XrResult resultCode = spatialAnchorsStorageNativeFunctions.XrUpdateSpatialAnchorsExpirationComplete(storageHandle, future, out completion);
+                            if (!Utils.DidXrCallSucceed(resultCode, nameof(spatialAnchorsStorageNativeFunctions.XrUpdateSpatialAnchorsExpirationComplete)))
+                            {
+                                pendingStorageAnchorsUpdateData.Remove(future);
+                                continue;
+                            }
+
+                            if (Utils.DidXrCallSucceed(completion.FutureResult, nameof(spatialAnchorsStorageNativeFunctions.XrUpdateSpatialAnchorsExpirationComplete)))
+                            {
+                                OnUpdateExpirationCompleted?.Invoke(pendingStorageAnchorsUpdateData[future].Uuid);
+                            }
+
+                            pendingStorageAnchorsUpdateData.Remove(future);
+                        }
+                    }
                 }
             }
         }
@@ -519,17 +914,19 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         {
             if (startedSpatialAnchorStorage)
             {
-                var result = NativeBindings.MLOpenXRDestroySpatialAnchorStorage();
-                if (result != XrResult.Success)
+                unsafe
                 {
-                    Debug.LogError($"MagicLeapSpatialAnchorsStorageFeature failed to Destry Spatial Anchor Storage.");
-                }
-                else
-                {
-                    startedSpatialAnchorStorage = false;
+                    XrResult createResult = spatialAnchorsStorageNativeFunctions.XrDestroySpatialAnchorsStorage(storageHandle);
+                    if (Utils.DidXrCallSucceed(createResult, nameof(spatialAnchorsStorageNativeFunctions.XrDestroySpatialAnchorsStorage)))
+                    {
+                        startedSpatialAnchorStorage = false;
+                    }
                 }
             }
+            base.OnSessionDestroy(AppSession);
         }
+#if UNITY_EDITOR
+        protected override IEnumerable<Type> DependsOn => base.DependsOn.Append(typeof(MagicLeapSpatialAnchorsFeature));
+#endif
     }
 }
-#endif // UNITY_OPENXR_1_9_0_OR_NEWER

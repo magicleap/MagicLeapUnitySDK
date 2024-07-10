@@ -1,18 +1,22 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// Copyright (c) (2019-2023) Magic Leap, Inc. All Rights Reserved.
+// Copyright (c) (2024) Magic Leap, Inc. All Rights Reserved.
 // Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
 // Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
+
+
+using UnityEngine;
+using UnityEngine.XR.OpenXR;
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.XR.OpenXR.Features;
 #endif
 
-namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
+namespace MagicLeap.OpenXR.Features.MarkerUnderstanding
 {
 #if UNITY_EDITOR
     [OpenXRFeature(UiName = "Magic Leap 2 Marker Understanding",
@@ -43,7 +47,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                 return false;
             }
 
-            nativeFunctions = CreateNativeFunctions<MagicLeapMarkerUnderstandingNativeFunctions>();
+            nativeFunctions = CreateNativeFunctions<MarkerUnderstandingNativeFunctions>();
             return true;
         }
 

@@ -1,10 +1,21 @@
+// %BANNER_BEGIN%
+// ---------------------------------------------------------------------
+// %COPYRIGHT_BEGIN%
+// Copyright (c) (2024) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
+// %COPYRIGHT_END%
+// ---------------------------------------------------------------------
+// %BANNER_END%
+// Disabling deprecated warning for the internal project
+#pragma warning disable 618
+
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.XR.MagicLeap;
-using UnityEngine.XR.OpenXR.Features.MagicLeapSupport;
 
 namespace UnitySDKPlayTests
 {
@@ -14,8 +25,6 @@ namespace UnitySDKPlayTests
         private const float minPlaneArea = 0.25f;
 
         private readonly MLPermissions.Callbacks permissionCallbacks = new MLPermissions.Callbacks();
-        private bool callbackReceived = false;
-        private bool permissionGranted = false;
 
         [Test]
         public void Planes_RequestPermission()
@@ -64,13 +73,10 @@ namespace UnitySDKPlayTests
 
         private void OnPermissionGranted(string _)
         {
-            callbackReceived = true;
-            permissionGranted = true;
         }
 
         private void OnPermissionDenied(string _)
         {
-            callbackReceived = true;
         }
 
         private bool CheckPermission()

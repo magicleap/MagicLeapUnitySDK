@@ -1,33 +1,30 @@
 ﻿using System;
 
-namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
+namespace MagicLeap.OpenXR.Features.SystemNotifications
 {
-    namespace MagicLeapOpenXRSystemNotificationNativeTypes
+    internal enum XrSystemNotificationStructTypes : ulong
     {
-        internal enum XrSystemNotificationStructTypes : ulong
-        {
-            XrTypeSystemNotificationsSetInfo = 1000473000U,
-            XrTypeSystemNotificationsProperties = 1000473001U
-        }
+        XrTypeSystemNotificationsSetInfo = 1000473000U,
+        XrTypeSystemNotificationsProperties = 1000473001U
+    }
 
-        [Flags]
-        internal enum XrSystemNotificationsCapabilityFlags : ulong
-        {
-            XrSystemNotificationCapabilitySuppression = 0x00000001
-        }
+    [Flags]
+    internal enum XrSystemNotificationsCapabilityFlags : ulong
+    {
+        XrSystemNotificationCapabilitySuppression = 0x00000001
+    }
 
-        internal struct XrSystemNotificationSetInfo
-        {
-            internal XrSystemNotificationStructTypes Type;
-            internal IntPtr Next;
-            internal uint SuppressNotifications;
-        }
+    internal struct XrSystemNotificationSetInfo
+    {
+        internal XrSystemNotificationStructTypes Type;
+        internal IntPtr Next;
+        internal uint SuppressNotifications;
+    }
 
-        internal struct XrSystemNotificationProperties
-        {
-            internal XrSystemNotificationStructTypes Type;
-            internal IntPtr Next;
-            internal XrSystemNotificationsCapabilityFlags SupportedFeatures;
-        }
+    internal struct XrSystemNotificationProperties
+    {
+        internal XrSystemNotificationStructTypes Type;
+        internal IntPtr Next;
+        internal XrSystemNotificationsCapabilityFlags SupportedFeatures;
     }
 }

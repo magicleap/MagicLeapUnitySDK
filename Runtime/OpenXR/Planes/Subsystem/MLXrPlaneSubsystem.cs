@@ -1,28 +1,31 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// Copyright (c) (2021-2022) Magic Leap, Inc. All Rights Reserved.
+// Copyright (c) (2024) Magic Leap, Inc. All Rights Reserved.
 // Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
 // Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
-using MagicLeap.Android;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MagicLeap.Android;
+using MagicLeap.OpenXR.Constants;
+using MagicLeap.OpenXR.Features.Planes;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
+using UnityEngine;
 using UnityEngine.Scripting;
 using UnityEngine.XR.ARSubsystems;
 using UnityEngine.XR.MagicLeap;
-using UnityEngine.XR.MagicLeap.Native;
+using UnityEngine.XR.OpenXR;
+using UnityEngine.XR.OpenXR.NativeTypes;
 
-namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
+namespace MagicLeap.OpenXR.Subsystems
 {
-    using static MagicLeapPlanesNativeTypes;
-    using MagicLeapPlanesTypes;
     /// <summary>
     ///     The Magic Leap implementation of the <c>XRPlaneSubsystem</c>. Do not create this directly.
     ///     Use <c>PlanesSubsystemDescriptor.Create()</c> instead.
@@ -71,44 +74,30 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             public uint MaxResults;
 
             /// <summary>
-            ///     The minimum area (in squared meters) of planes to be returned. This value
+            ///     The minimum area (in square meters) of planes to be returned. This value
             ///     cannot be lower than 0.04 (lower values will be capped to this minimum).
             /// </summary>
             public float MinPlaneArea;
         }
-
-        private static bool SessionFocusedInternal = false;
-
-        /// <summary>
-        ///     Set with the OnSessionStateChange in the MagicLeapPlanesFeature. Delays plane detection 
-        ///     until the session is in the focused state.
-        /// </summary>
-        public static bool SessionFocused
-        {
-            get => SessionFocusedInternal;
-            set
-            {
-                SessionFocusedInternal = value;
-            }
-        }
-
+        
         private const ulong PlaneTrackableIdSalt = 0xf52b75076e45ad88;
-
+        
         private class MagicLeapProvider : Provider
         {
             private readonly HashSet<TrackableId> currentSet = new();
+            private readonly HashSet<TrackableId> invalidatedPlanes = new();
             private readonly Dictionary<TrackableId, BoundedPlane> planes = new();
             private readonly Dictionary<TrackableId, PlaneBoundary> boundariesTable = new();
             private MLPlanesQueryFlags currentPlaneDetectionModeInternal;
             private MLPlanesQueryFlags defaultQueryFlags = MLPlanesQueryFlags.AllOrientations | MLPlanesQueryFlags.SemanticAll;
             private uint lastNumResults;
             private uint maxResults = 10;
-            private ulong planesTracker = MagicLeapNativeBindings.InvalidHandle;
+            private XrPlaneDetector planesTracker = Values.NullHandle;
             private uint previousLastNumResults;
             private MLPlanesQueryFlags requestedPlaneDetectionModeInternal;
             private ScanState currentScanState = ScanState.Stopped;
 
-            private MagicLeapPlanesNativeFunctions nativeFunctions;
+            private PlanesNativeFunctions nativeFunctions;
             private MagicLeapPlanesFeature planesFeature;
 
             private PlanesQuery DefaultPlanesQuery
@@ -144,18 +133,18 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 
             public override PlaneDetectionMode currentPlaneDetectionMode => currentPlaneDetectionModeInternal.ToPlaneDetectionMode();
             
-            private bool CreateClient()
+            private void CreateClient()
             {
                 unsafe
                 {
-                    if (planesTracker != MagicLeapNativeBindings.InvalidHandle)
+                    if (planesTracker != Values.NullHandle)
                     {
-                        return true;
+                        return;
                     }
 
-                    if (!Permissions.CheckPermission(MLPermission.SpatialMapping))
+                    if (!Permissions.CheckPermission(Permissions.SpatialMapping))
                     {
-                        return false;
+                        return;
                     }
 
                     var createInfo = new XrPlaneDetectorCreateInfo
@@ -164,13 +153,12 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                         Flags = XrPlaneDetectorFlags.XrPlaneDetectorEnableContourBit
                     };
 
-                    var result = nativeFunctions.XrCreatePlaneDetector(planesFeature.XRSession, in createInfo, out planesTracker);
+                    var result = nativeFunctions.XrCreatePlaneDetector(planesFeature.AppSession, in createInfo, out planesTracker);
                     if (!Utils.DidXrCallSucceed(result, nameof(nativeFunctions.XrCreatePlaneDetector)))
                     {
-                        return false;
+                        return;
                     }
                     boundariesTable.Clear();
-                    return true;
                 }
             }
 
@@ -184,12 +172,12 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             public override void Stop()
             {
                 currentScanState = ScanState.Stopped;
-                if (planesTracker != MagicLeapNativeBindings.InvalidHandle)
+                if (planesTracker != Values.NullHandle)
                 {
                     unsafe
                     {
                         nativeFunctions.XrDestroyPlaneDetector(planesTracker);
-                        planesTracker = MagicLeapNativeBindings.InvalidHandle;
+                        planesTracker = Values.NullHandle;
                         boundariesTable.Clear();
                     }
                 }
@@ -241,14 +229,22 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             
             public override unsafe TrackableChanges<BoundedPlane> GetChanges(BoundedPlane defaultPlane, Allocator allocator)
             {
-                if (planesTracker == MagicLeapNativeBindings.InvalidHandle)
+                if(planesFeature.SessionState != XrSessionState.Focused)
                 {
-                    CreateClient();
                     return default;
                 }
 
-                if(!SessionFocusedInternal)
+                if (invalidatedPlanes.Count > 0)
                 {
+                    var invalidPlanes = new TrackableChanges<BoundedPlane>(0, 0, invalidatedPlanes.Count, allocator);
+                    invalidPlanes.removed.CopyFrom(new NativeArray<TrackableId>(invalidatedPlanes.ToArray(), Allocator.Temp));
+                    invalidatedPlanes.Clear();
+                    return invalidPlanes;
+                }
+                
+                if (planesTracker == Values.NullHandle)
+                {
+                    CreateClient();
                     return default;
                 }
                 
@@ -292,21 +288,17 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 
                 }
                 
-
+                
                 //Successfully scanned, so get the results
                 //Get the plane results first
-                var location = new XrPlaneDetectorLocations()
-                {
-                    Type = XrPlaneStructTypes.PlaneDetectorLocations
-                };
-
                 var getInfo = new XrPlaneDetectorGetInfo
                 {
                     Type = XrPlaneStructTypes.PlaneDetectorGetInfo,
-                    Space = planesFeature.XRSpace,
+                    Space = planesFeature.AppSpace,
                     Time = planesFeature.NextPredictedDisplayTime
                 };
-
+                
+                Utils.OpenXRStructHelpers<XrPlaneDetectorLocations>.Create(XrPlaneStructTypes.PlaneDetectorLocations, out var location);
                 var result = nativeFunctions.XrGetPlaneDetections(planesTracker, in getInfo, out location);
                 if (!Utils.DidXrCallSucceed(result, nameof(nativeFunctions.XrGetPlaneDetections)))
                 {
@@ -316,7 +308,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                 var planeTrackableIds = new NativeArray<TrackableId>((int)location.PlaneLocationCountOutput, Allocator.TempJob);
                 if (location.PlaneLocationCountOutput > 0)
                 {
-                    //Now we have the count so we can assign the locations
+                    //Now we have the count and we can assign the locations
                     var locationArray = new NativeArray<XrPlaneDetectorLocation>((int)location.PlaneLocationCountOutput, Allocator.Temp);
                     location.PlaneLocations = (XrPlaneDetectorLocation*)locationArray.GetUnsafePtr();
                     NativeCopyUtility.FillArrayWithValue(locationArray, new XrPlaneDetectorLocation
@@ -340,12 +332,9 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                     {
                         var planeLocation = location.PlaneLocations[i];
                         var planeBoundary = new PlaneBoundary();
+
+                        Utils.OpenXRStructHelpers<XrPlaneDetectorPolygonBuffer>.Create(XrPlaneStructTypes.PlaneDetectorPolygonBuffer, out var polygonBuffer);
                         //Get polygon
-                        var polygonBuffer = new XrPlaneDetectorPolygonBuffer()
-                        {
-                            Type = XrPlaneStructTypes.PlaneDetectorPolygonBuffer,
-                        };
-                        
                         result = nativeFunctions.XrGetPlanePolygonBuffer(planesTracker, planeLocation.PlaneId, 0, out polygonBuffer);
                         if (!Utils.DidXrCallSucceed(result, nameof(nativeFunctions.XrGetPlanePolygonBuffer)))
                         {
@@ -369,11 +358,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                             var holeBuffers = new List<XrPlaneDetectorPolygonBuffer>();
                             for (uint holeIndex = 1; holeIndex < planeLocation.PolygonBufferCount; holeIndex++)
                             {
-                                var holeBuffer = new XrPlaneDetectorPolygonBuffer()
-                                {
-                                    Type = XrPlaneStructTypes.PlaneDetectorPolygonBuffer
-                                };
-                                
+                                Utils.OpenXRStructHelpers<XrPlaneDetectorPolygonBuffer>.Create(XrPlaneStructTypes.PlaneDetectorPolygonBuffer, out var holeBuffer);
                                 result = nativeFunctions.XrGetPlanePolygonBuffer(planesTracker, planeLocation.PlaneId, holeIndex, out holeBuffer);
                                 if (!Utils.DidXrCallSucceed(result, $"{nameof(nativeFunctions.XrGetPlanePolygonBuffer)} Querying Holes Length"))
                                 {
@@ -484,7 +469,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                 var beginInfo = new XrPlaneDetectorBeginInfo
                 {
                     Type = XrPlaneStructTypes.PlaneDetectorBeginInfo,
-                    Space = planesFeature.XRSpace,
+                    Space = planesFeature.AppSpace,
                     Time = planesFeature.NextPredictedDisplayTime,
                     OrientationCount = (uint)orientationsArray.Length,
                     Orientations = (XrPlaneDetectorOrientation*)orientationsArray.GetUnsafePtr(),
@@ -492,7 +477,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                     SemanticTypes = (XrPlaneDetectorSemanticTypes*)semanticArray.GetUnsafePtr(),
                     MaxPlanes = maxResults,
                     MinArea = DefaultPlanesQuery.MinPlaneArea,
-                    BoundingBoxPose = new XrPose { Position = DefaultPlanesQuery.BoundsCenter.ConvertBetweenUnityOpenXr(), Rotation = DefaultPlanesQuery.BoundsRotation.ConvertBetweenUnityOpenXr() },
+                    BoundingBoxPose = new XrPose { Position = DefaultPlanesQuery.BoundsCenter.InvertZ(), Rotation = DefaultPlanesQuery.BoundsRotation.InvertXY() },
                     BoundingBoxExtents = DefaultPlanesQuery.BoundsExtents,
                 };
 
@@ -506,6 +491,12 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                 currentScanState = ScanState.Scanning;
                 currentPlaneDetectionModeInternal = requestedPlaneDetectionModeInternal;
             }
+
+            internal void InvalidateCurrentPlanes()
+            {
+                invalidatedPlanes.Clear();
+                invalidatedPlanes.UnionWith(currentSet);
+            }
             
             private enum ScanState
             {
@@ -513,10 +504,14 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                 Stopped
             }
         }
+
+        internal void InvalidateCurrentPlanes()
+        {
+            (provider as MagicLeapProvider)?.InvalidateCurrentPlanes();
+        }
         
         public static void RegisterDescriptor()
         {
-            Debug.Log("Planes: Registering Planes Subsystem");
             XRPlaneSubsystemDescriptor.Create(new XRPlaneSubsystemDescriptor.Cinfo
             {
                 id = MagicLeapXrProvider.PlanesSubsystemId,
@@ -532,6 +527,84 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                 supportsClassification = true
             });
         }
+    }
+    
+    public static class SubsystemExtensions
+    {
+        public static PlaneDetectionMode ToPlaneDetectionMode(this MLXrPlaneSubsystem.MLPlanesQueryFlags planesQueryFlags)
+        {
+            var outDetectionMode = PlaneDetectionMode.None;
+            if ((planesQueryFlags & MLXrPlaneSubsystem.MLPlanesQueryFlags.Horizontal) != 0)
+            {
+                outDetectionMode |= PlaneDetectionMode.Horizontal;
+            }
 
+            if ((planesQueryFlags & MLXrPlaneSubsystem.MLPlanesQueryFlags.Vertical) != 0)
+            {
+                outDetectionMode |= PlaneDetectionMode.Vertical;
+            }
+
+            return outDetectionMode;
+        }
+
+        public static MLXrPlaneSubsystem.MLPlanesQueryFlags ToMLXrQueryFlags(this PlaneDetectionMode planeDetectionMode)
+        {
+            var outFlags = MLXrPlaneSubsystem.MLPlanesQueryFlags.None;
+            if ((planeDetectionMode & PlaneDetectionMode.Horizontal) != 0)
+            {
+                outFlags |= MLXrPlaneSubsystem.MLPlanesQueryFlags.Horizontal;
+            }
+
+            if ((planeDetectionMode & PlaneDetectionMode.Vertical) != 0)
+            {
+                outFlags |= MLXrPlaneSubsystem.MLPlanesQueryFlags.Vertical;
+            }
+
+            return outFlags;
+        }
+
+        internal static void ToMLXrOrientationsAndSemanticTypes(this MLXrPlaneSubsystem.MLPlanesQueryFlags flags, out IList<XrPlaneDetectorOrientation> orientations, out IList<XrPlaneDetectorSemanticTypes> semanticTypes)
+        {
+            orientations = new List<XrPlaneDetectorOrientation>();
+            semanticTypes = new List<XrPlaneDetectorSemanticTypes>();
+
+            if ((flags & MLXrPlaneSubsystem.MLPlanesQueryFlags.Horizontal) != 0)
+            {
+                orientations.Add(XrPlaneDetectorOrientation.HorizontalDownward);
+                orientations.Add(XrPlaneDetectorOrientation.HorizontalUpward);
+            }
+
+            if ((flags & MLXrPlaneSubsystem.MLPlanesQueryFlags.Arbitrary) != 0)
+            {
+                orientations.Add(XrPlaneDetectorOrientation.Arbitrary);
+            }
+
+            if ((flags & MLXrPlaneSubsystem.MLPlanesQueryFlags.Vertical) != 0)
+            {
+                orientations.Add(XrPlaneDetectorOrientation.Vertical);
+            }
+
+            //Semantic types
+
+            if ((flags & MLXrPlaneSubsystem.MLPlanesQueryFlags.SemanticCeiling) != 0)
+            {
+                semanticTypes.Add(XrPlaneDetectorSemanticTypes.Ceiling);
+            }
+
+            if ((flags & MLXrPlaneSubsystem.MLPlanesQueryFlags.SemanticFloor) != 0)
+            {
+                semanticTypes.Add(XrPlaneDetectorSemanticTypes.Floor);
+            }
+
+            if ((flags & MLXrPlaneSubsystem.MLPlanesQueryFlags.SemanticPlatform) != 0)
+            {
+                semanticTypes.Add(XrPlaneDetectorSemanticTypes.Platform);
+            }
+
+            if ((flags & MLXrPlaneSubsystem.MLPlanesQueryFlags.SemanticWall) != 0)
+            {
+                semanticTypes.Add(XrPlaneDetectorSemanticTypes.Wall);
+            }
+        }
     }
 }

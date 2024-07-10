@@ -8,57 +8,17 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-#if UNITY_OPENXR_1_9_0_OR_NEWER
-using System;
 using System.Runtime.InteropServices;
-using UnityEngine.XR.MagicLeap;
-using UnityEngine.XR.MagicLeap.Native;
+using MagicLeap.OpenXR.Constants;
 
-namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
+namespace MagicLeap.OpenXR.Features
 {
     public partial class MagicLeapFeature
     {
-        internal class NativeBindings : MagicLeapNativeBindings
+        internal abstract class NativeBindings
         {
-            [DllImport(MagicLeapXrProviderNativeBindings.MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
-            public static extern IntPtr MLOpenXRInterceptFunctions(IntPtr loaderFunc);
-
-            [DllImport(MagicLeapXrProviderNativeBindings.MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
-            public static extern bool MLOpenXROnInstanceCreate(IntPtr loaderFunc, ulong instance);
-            
-            [DllImport(MagicLeapXrProviderNativeBindings.MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
-            public static extern void MLOpenXROnInstanceDestroy(ulong instance);
-
-            [DllImport(MagicLeapXrProviderNativeBindings.MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
-            public static extern void MLOpenXROnAppSpaceChange(ulong appSpace);
-
-            [DllImport(MagicLeapXrProviderNativeBindings.MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
-            public static extern void MLOpenXROnSessionCreate(ulong session);
-
-            [DllImport(MagicLeapXrProviderNativeBindings.MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
-            public static extern void MLOpenXROnSessionDestroy(ulong session);
-            
-            [DllImport(MagicLeapXrProviderNativeBindings.MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
-            public static extern void MLOpenXROnFeatureInstanceCreate([MarshalAs(UnmanagedType.LPStr)] string featureId, ulong instance, IntPtr xrGetInstanceProcAddr);
-            
-            [DllImport(MagicLeapXrProviderNativeBindings.MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
-            public static extern void MLOpenXROnFeatureSessionCreate([MarshalAs(UnmanagedType.LPStr)] string featureId, ulong session);
-            
-            [DllImport(MagicLeapXrProviderNativeBindings.MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
-            public static extern void MLOpenXROnFeatureAppSpaceChange([MarshalAs(UnmanagedType.LPStr)] string featureId, ulong space);
-
-            [DllImport(MagicLeapXrProviderNativeBindings.MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
-            public static extern void MLOpenXRFeatureOnInstanceDestroy([MarshalAs(UnmanagedType.LPStr)] string featureId, ulong instance);
-
-            [DllImport(MagicLeapXrProviderNativeBindings.MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
-            public static extern IntPtr MLOpenXRInterceptFunctionsForFeature([MarshalAs(UnmanagedType.LPStr)] string featureId, IntPtr original);
-            
-            [DllImport(MagicLeapXrProviderNativeBindings.MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
-            public static extern bool MLOpenXRGetUnityPoseForFeature([MarshalAs(UnmanagedType.LPStr)] string featureId, ulong space, out Pose pose);
-
-            [DllImport(MagicLeapXrProviderNativeBindings.MagicLeapXrProviderDll, CallingConvention = CallingConvention.Cdecl)]
-            public static extern long MLOpenXRGetNextPredictedDisplayTime();
+            [DllImport(Values.PluginName, CallingConvention = CallingConvention.Cdecl)]
+            public static extern FeatureLifecycleNativeListenerInternal MLOpenXRGetLifecycleListener();
         }
     }
 }
-#endif //UNITY_OPENXR_1_9_0_OR_NEWER

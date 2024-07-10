@@ -9,13 +9,14 @@
 // %BANNER_END%
 
 using System;
+using MagicLeap.OpenXR.Features.Planes;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine;
 using UnityEngine.XR.ARSubsystems;
 
-namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
+namespace MagicLeap.OpenXR.Subsystems
 {
-    using static MagicLeapPlanesNativeTypes;
     public partial class MLXrPlaneSubsystem
     {
         /// <summary>
@@ -28,7 +29,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             /// <summary>
             ///     Whether this <see cref="PlaneBoundary" /> is valid. You should check
             ///     for validity before invoking 
-            ///     <see cref="GetPolygon(Allocator)" />, <see cref="GetHole(int, Allocator)" />, or
+            ///     <see cref="GetPolygon(Allocator)" /> <see cref="GetHole(int, Allocator)" />, or
             /// </summary>
             private bool Valid => Polygon.VertexCountOutput > 0;
             
@@ -58,7 +59,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             ///     Thrown if <paramref name="allocator" /> is <c>Allocator.Temp</c> or
             ///     <c>Allocator.None</c>.
             /// </exception>
-            internal unsafe void GetPolygon(Allocator allocator, ref NativeArray<Vector2> polygonOut)
+            private unsafe void GetPolygon(Allocator allocator, ref NativeArray<Vector2> polygonOut)
             {
                 if (!Valid)
                 {

@@ -11,6 +11,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using MagicLeap.OpenXR.LegacySupport;
 using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.InputSystem.Utilities;
 
@@ -45,7 +46,7 @@ namespace UnityEngine.XR.MagicLeap
                 {
                     if(MLDevice.IsOpenXRLoaderActive())
                     {
-                        return OpenXR.Features.MagicLeapSupport.MLInput.StartBuzz(startHz, endHz, durationMs, amplitude);
+                        return MLInput.StartBuzz(startHz, endHz, durationMs, amplitude);
                     }
                     return Buzz.Create(startHz, endHz, durationMs, amplitude).StartHaptics();
                 }
@@ -57,7 +58,7 @@ namespace UnityEngine.XR.MagicLeap
                 {
                     if(MLDevice.IsOpenXRLoaderActive())
                     {
-                        return OpenXR.Features.MagicLeapSupport.MLInput.StartPredefined((OpenXR.Features.MagicLeapSupport.MLInput.PreDefinedPatternType)type);
+                        return MLInput.StartPredefined((MLInput.PreDefinedPatternType)type);
                     }
                     return PreDefined.Create(type).StartHaptics();
                 }
@@ -69,7 +70,7 @@ namespace UnityEngine.XR.MagicLeap
                 {
                     if(MLDevice.IsOpenXRLoaderActive())
                     {
-                        return OpenXR.Features.MagicLeapSupport.MLInput.Stop();
+                        return MLInput.Stop();
                     }
                     var resultCode = MagicLeapXrProviderNativeBindings.StopHaptics();
                     return MLResult.Create(resultCode);
@@ -191,7 +192,7 @@ namespace UnityEngine.XR.MagicLeap
                     {
                         if(MLDevice.IsOpenXRLoaderActive())
                         {
-                            return OpenXR.Features.MagicLeapSupport.MLInput.StartCustomPattern(customHaptics);
+                            return MLInput.StartCustomPattern(customHaptics);
                         }
 
                         var nativeCommandStruct = new NativeBindings.MLInputCustomHapticsInfo(customHaptics);

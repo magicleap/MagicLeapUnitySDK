@@ -8,6 +8,9 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
+// Disabling deprecated warning for the internal project
+#pragma warning disable 618
+
 using UnityEngine.XR.MagicLeap.Native;
 namespace UnityEngine.XR.MagicLeap
 {

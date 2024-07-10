@@ -1,7 +1,7 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// Copyright (c) (2021-2022) Magic Leap, Inc. All Rights Reserved.
+// Copyright (c) (2021-2024) Magic Leap, Inc. All Rights Reserved.
 // Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
 // Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
@@ -138,6 +138,8 @@ namespace UnityEngine.XR.MagicLeap
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void SetupLoaderLibPathInXRPackage()
         {
+            if (!XRGeneralSettings.Instance.Manager.activeLoaders.Any(l => l is MagicLeapLoader))
+                return;
 #if !UNITY_EDITOR
             // AddLibrarySearchPaths() is only invoked by AppSimShimLibSupport.cs and contains more complex logic to setting the various
             // lib search paths which isnt really required when running on device. On device, we need to simply set a dummy path in the
@@ -154,6 +156,9 @@ namespace UnityEngine.XR.MagicLeap
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void AddSubsystemOverrides()
         {
+            if (!XRGeneralSettings.Instance.Manager.activeLoaders.Any(l => l is MagicLeapLoader))
+                return;
+
             // IMPORTANT!! Override any and all perception related subsystems that are instantiated by
             // the XR package's MagicLeapLoader class, even if we dont actually provide an impl of those
             // subsystems ourselves (stubbed or not). Otherwise the XR package will instantiate its own impl

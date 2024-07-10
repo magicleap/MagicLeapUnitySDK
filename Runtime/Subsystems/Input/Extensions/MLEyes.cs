@@ -7,6 +7,9 @@
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
+
+using MagicLeap.OpenXR.LegacySupport;
+
 namespace UnityEngine.XR.MagicLeap
 {
     using System;
@@ -50,7 +53,7 @@ namespace UnityEngine.XR.MagicLeap
                 {
                     if (MLDevice.IsOpenXRLoaderActive())
                     {
-                        OpenXR.Features.MagicLeapSupport.MLEyeTracking.Start();
+                        MLEyeTracking.Start();
                     }
                     else
                     {
@@ -62,7 +65,7 @@ namespace UnityEngine.XR.MagicLeap
                 {
                     if (MLDevice.IsOpenXRLoaderActive())
                     {
-                        OpenXR.Features.MagicLeapSupport.MLEyeTracking.Stop();
+                        MLEyeTracking.Stop();
                     }
                     else
                     {
@@ -74,7 +77,7 @@ namespace UnityEngine.XR.MagicLeap
                 {
                     if (MLDevice.IsOpenXRLoaderActive())
                     {
-                        return OpenXR.Features.MagicLeapSupport.MLEyeTracking.TryGetState(out state);
+                        return MLEyeTracking.TryGetState(out state);
                     }
                     else
                     {
@@ -187,7 +190,7 @@ namespace UnityEngine.XR.MagicLeap
                 public static void GetStaticData(out StaticData staticData)
                 {
 #if UNITY_OPENXR_1_9_0_OR_NEWER
-                    OpenXR.Features.MagicLeapSupport.MLEyeTracking.GetStaticData(out staticData);
+                    MLEyeTracking.GetStaticData(out staticData);
 #else
                     staticData = new();
                     var eyeHandle = MagicLeapXrProviderNativeBindings.GetEyeTrackerHandle();

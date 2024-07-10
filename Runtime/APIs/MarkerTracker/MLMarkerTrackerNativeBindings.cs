@@ -8,6 +8,9 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
+// Disabling deprecated warning for the internal project
+#pragma warning disable 618
+
 namespace UnityEngine.XR.MagicLeap
 {
     using System;
@@ -260,7 +263,7 @@ namespace UnityEngine.XR.MagicLeap
             /// </returns>
             [DllImport(MLPerceptionClientDll, CallingConvention = CallingConvention.Cdecl)]
             public static extern MLResult.Code MLMarkerTrackerUpdateSettings(ulong scanner_handle, in MLMarkerTrackerSettings scanner_settings);
-            
+
             /// <summary>
             ///     Different Marker Decoders will produce different data. Use this
             ///     structure to find what the data structure is.

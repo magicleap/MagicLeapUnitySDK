@@ -1,32 +1,34 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// Copyright (c) 2023 Magic Leap, Inc. All Rights Reserved.
+// Copyright (c) (2024) Magic Leap, Inc. All Rights Reserved.
 // Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
 // Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
+
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.InputSystem.Controls;
+using UnityEngine.InputSystem.Layouts;
+using UnityEngine.InputSystem.XR;
+using UnityEngine.Scripting;
+using UnityEngine.XR;
+using UnityEngine.XR.ARSubsystems;
+using UnityEngine.XR.OpenXR.Features;
+using UnityEngine.XR.OpenXR.Input;
 
 #if USE_INPUT_SYSTEM_POSE_CONTROL
 using PoseControl = UnityEngine.InputSystem.XR.PoseControl;
 #else
 using PoseControl = UnityEngine.XR.OpenXR.Input.PoseControl;
 #endif
-
-using System.Collections.Generic;
-using UnityEngine.InputSystem.Layouts;
-using UnityEngine.InputSystem.Controls;
-using UnityEngine.InputSystem.XR;
-using UnityEngine.Scripting;
-using UnityEngine.XR.OpenXR.Input;
-using UnityEngine.XR.ARSubsystems;
-using UnityEngine.XR.MagicLeap;
-
-namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
+#if UNITY_EDITOR
+using UnityEditor;
+using UnityEditor.XR.OpenXR.Features;
+#endif
+namespace MagicLeap.OpenXR.InteractionProfiles
 {
     /// <summary>
     /// This <see cref="OpenXRInteractionFeature"/> enables the use of interaction profiles in OpenXR.
@@ -255,7 +257,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         /// </summary>
         protected override void RegisterDeviceLayout()
         {
-            InputSystem.InputSystem.RegisterLayout(typeof(MagicLeapController),
+            UnityEngine.InputSystem.InputSystem.RegisterLayout(typeof(MagicLeapController),
                         matches: new InputDeviceMatcher()
                         .WithInterface(XRUtilities.InterfaceMatchAnyVersion)
                         .WithProduct(kDeviceLocalizedName));
@@ -266,7 +268,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         /// </summary>
         protected override void UnregisterDeviceLayout()
         {
-            InputSystem.InputSystem.RemoveLayout(nameof(MagicLeapController));
+            UnityEngine.InputSystem.InputSystem.RemoveLayout(nameof(MagicLeapController));
         }
 
         protected override string GetDeviceLayoutName()

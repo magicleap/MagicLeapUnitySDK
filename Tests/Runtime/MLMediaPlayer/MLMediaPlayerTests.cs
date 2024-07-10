@@ -1,3 +1,15 @@
+// %BANNER_BEGIN%
+// ---------------------------------------------------------------------
+// %COPYRIGHT_BEGIN%
+// Copyright (c) (2024) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
+// %COPYRIGHT_END%
+// ---------------------------------------------------------------------
+// %BANNER_END%
+// Disabling deprecated warning for the internal project
+#pragma warning disable 618
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -52,10 +64,11 @@ namespace UnitySDKPlayTests
 
             private Media.Player _mediaPlayer;
 
-            private long currentPositionInMiliseconds = 0;
-            private bool hasSetSourceURI = false;
-            private int videoWidth, videoHeight;
+#pragma warning disable CS0414 // Remove unused private members
+            private readonly long currentPositionInMiliseconds = 0;
+            private readonly int videoWidth, videoHeight;
             private bool renderVideo = false;
+#pragma warning restore CS0414 // Remove unused private members
 
             public bool IsBuffering { get; private set; } = false;
             public bool IsSeeking { get; private set; } = false;
@@ -84,7 +97,6 @@ namespace UnitySDKPlayTests
                 {
                     Assert.Fail($"Couldn't set source, reason: {result}");
                 }
-                hasSetSourceURI = true;
                 TearDown();
             }
 
@@ -95,7 +107,6 @@ namespace UnitySDKPlayTests
             private void HandleOnPrepare(Media.Player mediaplayer)
             {
                 DurationInMiliseconds = MediaPlayer.GetDurationMilliseconds();
-                hasSetSourceURI = false;
             }
 
             /// <summary>

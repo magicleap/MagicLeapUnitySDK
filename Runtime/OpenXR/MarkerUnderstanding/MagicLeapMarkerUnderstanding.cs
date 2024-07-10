@@ -1,12 +1,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using UnityEngine;
 
-namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
+namespace MagicLeap.OpenXR.Features.MarkerUnderstanding
 {
     public partial class MagicLeapMarkerUnderstandingFeature
     {
         private readonly List<MarkerDetector> markerDetectors = new();
+        
+        /// <summary>
+        /// The maximum number of marker detectors allowed at once.
+        /// </summary>
+        public const int MarkerDetectorsLimit = 64;
 
         /// <summary>
         /// The active marker detectors tracked by the marker understanding feature.
@@ -14,7 +20,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         /// <returns>A readonly list of the active marker detectors.</returns>
         public IReadOnlyList<MarkerDetector> MarkerDetectors => markerDetectors;
 
-        private MagicLeapMarkerUnderstandingNativeFunctions nativeFunctions;
+        private MarkerUnderstandingNativeFunctions nativeFunctions;
         
         /// <summary>
         /// Creates a marker detector with predefined settings.

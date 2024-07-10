@@ -1,3 +1,6 @@
+// Disabling deprecated warning for the internal project
+#pragma warning disable 618
+
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
@@ -39,7 +42,7 @@ namespace UnitySDKPlayTests
         }
 
         [Test]
-        public void MLNotifications_SetNotifications_False() 
+        public void MLNotifications_SetNotifications_False()
         {
             CheckPermissions();
             if (!hasPermission)
@@ -67,6 +70,6 @@ namespace UnitySDKPlayTests
             MLPermissions.RequestPermission(MLPermission.SystemNotification, permissionCallbacks);
             hasPermission = MLPermissions.CheckPermission(MLPermission.SystemNotification).IsOk;
         }
-        
+
     }
 }

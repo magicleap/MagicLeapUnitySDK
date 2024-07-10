@@ -1,10 +1,19 @@
+// %BANNER_BEGIN%
+// ---------------------------------------------------------------------
+// %COPYRIGHT_BEGIN%
+// Copyright (c) (2019-2024) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
+// %COPYRIGHT_END%
+// ---------------------------------------------------------------------
+// %BANNER_END%
 using UnityEngine;
 using UnityEditor;
 using System.IO;
 using System.Collections.Generic;
 using System;
 
-namespace UnityEditor.XR.MagicLeap
+namespace MagicLeap
 {
     public class APKBuilder
     {
@@ -12,11 +21,8 @@ namespace UnityEditor.XR.MagicLeap
         private static readonly string Arg_OutDir = "--outdir";
         private static readonly string Arg_OneApkPerScene = "--one-apk-per-scene";
         private static readonly string Arg_CheckProLicense = "--check-pro-license";
-        private static readonly string Arg_ForceSDKPathFromEnvVar = "--force_sdk_path_from_env_var";
         private static readonly string Arg_AppVersionCodeValue = "--version-code";
         private static readonly string Arg_EnableFPSlogging = "--log-fps";
-
-        private bool didSetSDKPathFromEnvVar = false;
 
         private class BuildSettingsCache
         {
@@ -116,7 +122,7 @@ namespace UnityEditor.XR.MagicLeap
             int index = 0;
             foreach (EditorBuildSettingsScene scene in scenes)
             {
-                if(string.IsNullOrEmpty(scene.path) || scene == null)
+                if (string.IsNullOrEmpty(scene.path) || scene == null)
                 {
                     Debug.LogWarningFormat("[BuildAllScenes] A scene in BuildSettings seems to have been deleted. It should be removed from the BuildSettings list. It won't be included in this build.");
                     continue;

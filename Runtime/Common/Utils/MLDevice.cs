@@ -11,11 +11,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MagicLeap.OpenXR;
+using MagicLeap.OpenXR.Features;
 using UnityEngine.XR.MagicLeap.Native;
 using UnityEngine.XR.Management;
+using Utils = MagicLeap.OpenXR.Utils;
 #if UNITY_OPENXR_1_9_0_OR_NEWER
 using UnityEngine.XR.OpenXR;
-using UnityEngine.XR.OpenXR.Features.MagicLeapSupport;
 #endif
 namespace UnityEngine.XR.MagicLeap
 {

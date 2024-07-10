@@ -1,3 +1,15 @@
+// %BANNER_BEGIN%
+// ---------------------------------------------------------------------
+// %COPYRIGHT_BEGIN%
+// Copyright (c) (2024) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
+// %COPYRIGHT_END%
+// ---------------------------------------------------------------------
+// %BANNER_END%
+// Disabling deprecated warning for the internal project
+#pragma warning disable 618
+
 using NUnit.Framework;
 using System;
 using System.Collections;
@@ -12,13 +24,11 @@ namespace UnitySDKPlayTests
     {
         private const uint Width = 640;
         private const uint Height = 320;
-        private const String HomeUrl = "https://www.magicleap.com/en-us/";
-        private const String ExampleUrl = "https://www.example.com/";
+        private const string HomeUrl = "https://www.magicleap.com/en-us/";
+        private const string ExampleUrl = "https://www.example.com/";
 
         WebView webView = null;
         private bool callbackReceived = false;
-        private bool loadEnded = false;
-        private bool errorLoaded = false;
 
         // [Test]
         public void MLWebView_CheckPermission()
@@ -411,8 +421,6 @@ namespace UnitySDKPlayTests
         private void ResetFlags()
         {
             callbackReceived = false;
-            loadEnded = false;
-            errorLoaded = false;
         }
 
         private void OnBeforeResourceLoaded(WebView webView, string resourceURL)
@@ -431,7 +439,6 @@ namespace UnitySDKPlayTests
         {
             Assert.Fail($"OnErrorLoaded: {errorStr} for URL: {failedUrl}");
             callbackReceived = true;
-            errorLoaded = true;
         }
 
         void OnKeyboardDismissed(WebView webView)
@@ -450,7 +457,6 @@ namespace UnitySDKPlayTests
         {
             Debug.Log("OnLoadEnded");
             callbackReceived = true;
-            loadEnded = true;
         }
 
         void OnServiceConnected(WebView webView)

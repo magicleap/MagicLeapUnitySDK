@@ -9,15 +9,15 @@
 // %BANNER_END%
 
 using System;
+using MagicLeap.OpenXR.Features.Planes;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
+using UnityEngine;
 using UnityEngine.XR.ARSubsystems;
 
-namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
+namespace MagicLeap.OpenXR.Subsystems
 {
-    using static MagicLeapPlanesNativeTypes;
-    using MagicLeapPlanesTypes;
     public partial class MLXrPlaneSubsystem
     {
         internal unsafe struct CopyPlaneResultsJob : IJobParallelFor
@@ -65,7 +65,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 
                 PlanesOut[index] = new BoundedPlane(PlaneTrackableIds[index], // trackableId
                     TrackableId.invalidId, // subsumedBy
-                    new Pose(position.ConvertBetweenUnityOpenXr(), rotation.ConvertBetweenUnityOpenXr()), Vector3.zero, // center
+                    new Pose(position.InvertZ(), rotation.InvertXY()), Vector3.zero, // center
                     plane.Extents, // size
                     ToUnityAlignment(plane.Orientation), // alignment
                     TrackingState.Tracking, // tracking state

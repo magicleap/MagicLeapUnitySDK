@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MagicLeap.OpenXR;
+using MagicLeap.OpenXR.Features;
 using UnityEngine.XR.OpenXR;
-using UnityEngine.XR.OpenXR.Features.MagicLeapSupport;
+using Utils = MagicLeap.OpenXR.Utils;
 #if UNITY_XR_MAGICLEAP_PROVIDER
 using MagicLeapXRRenderSettings = UnityEngine.XR.MagicLeap.Rendering.RenderingSettings;
 using MagicLeapXRRenderUtility = UnityEngine.XR.MagicLeap.Rendering.RenderingUtility;

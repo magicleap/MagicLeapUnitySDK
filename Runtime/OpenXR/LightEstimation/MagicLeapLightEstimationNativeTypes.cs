@@ -1,79 +1,68 @@
 using System;
-using System.Runtime.InteropServices;
-using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
-using UnityEngine.XR.MagicLeap.Unsafe;
-using UnityEngine.XR.OpenXR.NativeTypes;
+using UnityEngine;
 
-namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
+namespace MagicLeap.OpenXR.Features.LightEstimation
 {
-    public partial class MagicLeapLightEstimationFeature
+    internal enum XrLightEstimationHDRCubemapFaceResolution
     {
-        internal const int TotalHarmonics = 27;
+        Resolution_64x64,
+        Resolution_128x128,
+        Resolution_256x256
+    }
 
-        internal const int SpecVersion = 1;
+    internal enum XrLightEstimationObjectTypes : ulong
+    {
+        XrObjectTypeLightEstimationML = 1000481000U,
+        XrObjectTypeLightEstimationEstimate = 1000481001U
+    }
 
-        internal enum XrLightEstimationHDRCubemapFaceResolution
-        {
-            Resolution_64x64,
-            Resolution_128x128,
-            Resolution_256x256
-        }
+    internal enum XrLightEstimationStructTypes : ulong
+    {
+        XrTypeLightEstimationCreateInfoML = 1000481000U,
+        XrTypeLightEstimationStateML = 1000481001U,
+        XrTypeLightEstimationHDRCubemapML = 1000481002U,
+        XrTypeLightEstimationMainDirectionalLightML = 1000481003U,
+        XrTypeLightEstimationSphericalHarmonicsML = 1000481004U
+    }
 
-        internal enum XrLightEstimationObjectTypes : ulong
-        {
-            XrObjectTypeLightEstimationML = 1000481000U,
-            XrObjectTypeLightEstimationEstimate = 1000481001U
-        }
+    internal struct XrLightEstimationCreateInfo
+    {
+        internal XrLightEstimationStructTypes Type;
+        internal IntPtr Next;
+        internal ulong BaseSpace;
+        internal long Time;
+        internal XrLightEstimationHDRCubemapFaceResolution CubemapFaceResolution;
+    }
 
-        internal enum XrLightEstimationStructTypes : ulong
-        {
-            XrTypeLightEstimationCreateInfoML = 1000481000U,
-            XrTypeLightEstimationStateML = 1000481001U,
-            XrTypeLightEstimationHDRCubemapML = 1000481002U,
-            XrTypeLightEstimationMainDirectionalLightML = 1000481003U,
-            XrTypeLightEstimationSphericalHarmonicsML = 1000481004U
-        }
+    internal struct XrLightEstimationState
+    {
+        internal XrLightEstimationStructTypes Type;
+        internal IntPtr Next;
+        internal long LastUpdate;
+    }
 
-        internal struct XrLightEstimationCreateInfo
-        {
-            internal XrLightEstimationStructTypes Type;
-            internal IntPtr Next;
-            internal ulong BaseSpace;
-            internal long Time;
-            internal XrLightEstimationHDRCubemapFaceResolution CubemapFaceResolution;
-        }
+    internal unsafe struct XrLightEstimationHDRCubemap
+    {
+        internal XrLightEstimationStructTypes Type;
+        internal IntPtr Next;
+        internal uint PixelCountInput;
+        internal uint PixelCountOutput;
+        internal float* Pixels;
+        internal uint FaceDim;
+    }
 
-        internal struct XrLightEstimationState
-        {
-            internal XrLightEstimationStructTypes Type;
-            internal IntPtr Next;
-            internal long LastUpdate;
-        }
+    internal struct XrLightEstimationMainDirectionalLight
+    {
+        internal XrLightEstimationStructTypes Type;
+        internal IntPtr Next;
+        internal Vector3 Direction;
+        internal Color Color;
+    }
 
-        internal unsafe struct XrLightEstimationHDRCubemap
-        {
-            internal XrLightEstimationStructTypes Type;
-            internal IntPtr Next;
-            internal uint PixelCountInput;
-            internal uint PixelCountOutput;
-            internal float* Pixels;
-            internal uint FaceDim;
-        }
-
-        internal struct XrLightEstimationMainDirectionalLight
-        {
-            internal XrLightEstimationStructTypes Type;
-            internal IntPtr Next;
-            internal Vector3 Direction;
-            internal Color Color;
-        }
-
-        internal unsafe struct XrLightEstimationSphericalHarmonics
-        {
-            internal XrLightEstimationStructTypes Type;
-            internal IntPtr Next;
-            internal fixed float HarmonicsCoefficients[TotalHarmonics];
-        }
+    internal unsafe struct XrLightEstimationSphericalHarmonics
+    {
+        internal XrLightEstimationStructTypes Type;
+        internal IntPtr Next;
+        internal fixed float HarmonicsCoefficients[MagicLeapLightEstimationFeature.TotalHarmonics];
     }
 }

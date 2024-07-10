@@ -8,6 +8,9 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
+// Disabling deprecated warning for the internal project
+#pragma warning disable 618
+
 using System;
 using System.Runtime.InteropServices;
 using UnityEngine.XR.MagicLeap.Native;
@@ -123,7 +126,7 @@ namespace UnityEngine.XR.MagicLeap
             {
                 spaceList = Array.Empty<Space>();
             }
-            
+
             return resultCode;
         }
 
@@ -155,7 +158,7 @@ namespace UnityEngine.XR.MagicLeap
             {
                 result = LocalizationResult.CreateFromSpaceLocalizationResult(localizationResult);
             }
-            
+
             return resultCode;
         }
 

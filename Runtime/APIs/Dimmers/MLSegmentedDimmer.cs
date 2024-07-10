@@ -1,9 +1,21 @@
+// %BANNER_BEGIN%
+// ---------------------------------------------------------------------
+// %COPYRIGHT_BEGIN%
+// <copyright file="MLSegmentedDimmer.cs" company="Magic Leap, Inc">
+//
+// Copyright (c) 2018 Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by your Early Access Terms and Conditions.
+// This software is an Early Access Product.
+//
+// </copyright>
+// %COPYRIGHT_END%
+// ---------------------------------------------------------------------
+// %BANNER_END%
 using System;
+using MagicLeap.OpenXR.Features;
 using UnityEngine.Rendering;
-using UnityEngine.XR.OpenXR.Features.MagicLeapSupport;
 #if URP_14_0_0_OR_NEWER
 using UnityEngine.Rendering.Universal;
-using UnityEngine.XR.OpenXR.Features.MagicLeapSupport;
 using UnityEngine.XR.OpenXR;
 #if UNITY_XR_MAGICLEAP_PROVIDER
 using SegmentedDimmerFeature = URP.SegmentedDimmer.SegmentedDimmer;

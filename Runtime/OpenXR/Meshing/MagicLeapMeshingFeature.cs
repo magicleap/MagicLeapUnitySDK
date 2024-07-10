@@ -1,17 +1,29 @@
-#if UNITY_OPENXR_1_9_0_OR_NEWER
-
+// %BANNER_BEGIN%
+// ---------------------------------------------------------------------
+// %COPYRIGHT_BEGIN%
+// Copyright (c) (2024) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
+// %COPYRIGHT_END%
+// ---------------------------------------------------------------------
+// %BANNER_END%
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using MagicLeap.OpenXR.Subsystems;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine;
+using UnityEngine.XR;
 using UnityEngine.XR.ARSubsystems;
 using UnityEngine.XR.MagicLeap;
+using UnityEngine.XR.OpenXR;
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.XR.OpenXR.Features;
 #endif
 
-namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
+namespace MagicLeap.OpenXR.Features.Meshing
 {
     /// <summary>
     ///     Enables the Magic Leap OpenXR Loader for Android, and modifies the AndroidManifest to be compatible with ML2.
@@ -27,7 +39,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         OpenxrExtensionStrings = MeshingExtensionName
     )]
 #endif
-    public partial class MagicLeapMeshingFeature : MagicLeapOpenXRFeatureBase
+    public class MagicLeapMeshingFeature : MagicLeapOpenXRFeatureBase
     {
         public const string FeatureId = "com.magicleap.openxr.feature.ml2_mesh_detection";
         private const string MeshingExtensionName = "XR_ML_world_mesh_detection XR_EXT_future";
@@ -36,6 +48,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         private Vector3 meshBoundsOrigin;
         private Vector3 meshBoundsScale;
         private Quaternion meshBoundsRotation;
+        private FeatureLifecycleNativeListener meshingLifecycleListener;
         
         /// <summary>
         /// The origin of the meshing volume bounds
@@ -59,7 +72,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             set
             {
                 meshBoundsScale = value;
-                MagicLeapXrMeshingNativeBindings.MLOpenXRSetMeshBoundsScale(value);
+               MagicLeapXrMeshingNativeBindings.MLOpenXRSetMeshBoundsScale(value);
             }
         }
         
@@ -93,11 +106,23 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             set => MagicLeapXrMeshingNativeBindings.MLOpenXRSetMeshDensity(value);
         }
 
-        protected override string GetFeatureId()
+        protected override bool UsesExperimentalExtensions => true;
+
+        protected override IntPtr HookGetInstanceProcAddr(IntPtr func)
         {
-            return FeatureId;
+            meshingLifecycleListener = MagicLeapXrMeshingNativeBindings.MLOpenXRGetMeshingFeatureListener();;
+            return base.HookGetInstanceProcAddr(func);
         }
 
+        public MeshId CreateMeshId(string meshIdStr)
+        {
+            var trackableId = new TrackableId(meshIdStr);
+            unsafe
+            {
+                return *(MeshId*)&trackableId;
+            }
+        }
+        
         protected override bool OnInstanceCreate(ulong xrInstance)
         {
             var extensions = MeshingExtensionName.Split(' ');
@@ -107,12 +132,39 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                 {
                     continue;
                 }
-                
+                    
                 Debug.LogError($"{extension} is not enabled. Disabling {nameof(MagicLeapMeshingFeature)}");
                 return false;
             }
 
-            return base.OnInstanceCreate(xrInstance);
+            var instanceCreationResult = base.OnInstanceCreate(xrInstance);
+            if (!instanceCreationResult)
+            {
+                return false;
+            }
+            
+            MLXrPointCloudSubsystem.RegisterDescriptor();
+                
+            meshingLifecycleListener.InstanceCreated(xrInstance, xrGetInstanceProcAddr);
+            return true;
+        }
+
+        protected override void OnSessionCreate(ulong xrSession)
+        {
+            base.OnSessionCreate(xrSession);
+            meshingLifecycleListener.SessionCreated(xrSession);
+        }
+
+        protected override void OnAppSpaceChange(ulong xrSpace)
+        {
+            base.OnAppSpaceChange(xrSpace);
+            meshingLifecycleListener.AppSpaceChanged(xrSpace);
+        }
+
+        protected override void OnInstanceDestroy(ulong xrInstance)
+        {
+            base.OnInstanceDestroy(xrInstance);
+            meshingLifecycleListener.InstanceDestroyed(xrInstance);
         }
 
         protected override void OnSubsystemCreate()
@@ -189,35 +241,69 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             meshBoundsRotation = rotation;
             MagicLeapXrMeshingNativeBindings.MLOpenXRSetMeshQueryBounds(in position,in rotation,in scale);
         }
-
+        
+        [Obsolete("GetMeshIds(out TrackableId[]) will be deprecated. Please use GetMeshIds(out MeshId[]) instead.")]
         public void GetMeshIds(out TrackableId[] trackableIds)
         {
             trackableIds = Array.Empty<TrackableId>();
+            GetMeshIds(out XrMeshId[] meshIds);
+            trackableIds = meshIds.Select(meshId => meshId.Convert<TrackableId>()).ToArray();
+        }
+
+        public void GetMeshIds(out MeshId[] meshIds)
+        {
+            meshIds = Array.Empty<MeshId>();
+            GetMeshIds(out XrMeshId[] xrMeshIds);
+            meshIds = xrMeshIds.Select(meshId => meshId.Convert<MeshId>()).ToArray();
+        }
+
+        private void GetMeshIds(out XrMeshId[] meshIds)
+        {
+            meshIds = Array.Empty<XrMeshId>();
             unsafe
             {
-                var buffer = (TrackableId*)IntPtr.Zero;
+                var buffer = (XrMeshId*)IntPtr.Zero;
                 MagicLeapXrMeshingNativeBindings.MLOpenXRAcquireMeshIds(ref buffer, out var trackableCount);
                 if (trackableCount == 0)
                 {
                     return;
                 }
 
-                trackableIds = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<TrackableId>(buffer, trackableCount, Allocator.None).ToArray();
+                meshIds = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<XrMeshId>(buffer, trackableCount, Allocator.None).ToArray();
             }
         }
-
+        
+        [Obsolete("GetMeshData(in TrackableId) will be deprecated. Please use GetMeshData(in MeshId) instead")]
         public bool GetMeshData(in TrackableId meshId, out Vector3[] positions, out Vector3[] normals, out float[] confidence)
         {
             positions = Array.Empty<Vector3>();
             normals = Array.Empty<Vector3>();
             confidence = Array.Empty<float>();
+            var xrMeshId = XrMeshId.CreateFrom(meshId);
+            return GetMeshData(in xrMeshId, out positions, out normals, out confidence);
+        }
+
+        public bool GetMeshData(in MeshId meshId, out Vector3[] positions, out Vector3[] normals, out float[] confidence)
+        {
+            positions = Array.Empty<Vector3>();
+            normals = Array.Empty<Vector3>();
+            confidence = Array.Empty<float>();
+            var xrMeshId = XrMeshId.CreateFrom(meshId);
+            return GetMeshData(in xrMeshId, out positions, out normals, out confidence);
+        }
+
+        private bool GetMeshData(in XrMeshId xrMeshId, out Vector3[] positions, out Vector3[] normals, out float[] confidences)
+        {
+            positions = Array.Empty<Vector3>();
+            normals = Array.Empty<Vector3>();
+            confidences = Array.Empty<float>();
             unsafe
             {
                 var positionsBuffer = (Vector3*)IntPtr.Zero;
                 var normalBuffer = (Vector3*)IntPtr.Zero;
                 var confidenceBuffer = (float*)IntPtr.Zero;
 
-                var result = MagicLeapXrMeshingNativeBindings.MLOpenXRAcquireMeshData(in meshId, ref positionsBuffer, out var positionCount, ref normalBuffer, out var normalCount, ref confidenceBuffer, out var confidenceCount);
+                var result = MagicLeapXrMeshingNativeBindings.MLOpenXRAcquireMeshData(in xrMeshId, ref positionsBuffer, out var positionCount, ref normalBuffer, out var normalCount, ref confidenceBuffer, out var confidenceCount);
                 if (!result)
                 {
                     return false;
@@ -225,15 +311,14 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 
                 positions = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<Vector3>(positionsBuffer, positionCount, Allocator.None).ToArray();
                 normals = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<Vector3>(normalBuffer, normalCount, Allocator.None).ToArray();
-                confidence = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<float>(confidenceBuffer, confidenceCount, Allocator.None).ToArray();
+                confidences = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<float>(confidenceBuffer, confidenceCount, Allocator.None).ToArray();
                 return true;
             }
         }
-        
+
         public void InvalidateMeshes()
         {
             MagicLeapXrMeshingNativeBindings.MLOpenXRInvalidateMeshes();
         }
     }
 }
-#endif

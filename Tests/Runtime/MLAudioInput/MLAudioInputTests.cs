@@ -1,3 +1,6 @@
+// Disabling deprecated warning for the internal project
+#pragma warning disable 618
+
 using NUnit.Framework;
 using System.Collections;
 using UnityEngine;
@@ -46,7 +49,7 @@ namespace UnitySDKPlayTests
             TearDown();
         }
 
-       // [UnityTest]
+        // [UnityTest]
         public IEnumerator MLAudioInput_GetStreamingData()
         {
             SetUp();
@@ -55,7 +58,7 @@ namespace UnitySDKPlayTests
             mlAudioStreamingClip = new MLAudioInput.StreamingClip(MLAudioInput.MicCaptureType.VoiceCapture, 3, MLAudioInput.GetSampleRate(captureType));
             Assert.IsNotNull(mlAudioStreamingClip.UnityAudioClip);
             yield return new WaitForSeconds(1);
-            if(hasPermission)
+            if (hasPermission)
             {
                 var result = mlAudioStreamingClip.UnityAudioClip.GetData(playbackSamples, 0);
                 Assert.IsTrue(result);
@@ -92,7 +95,7 @@ namespace UnitySDKPlayTests
 
         private void OnPermissionGranted(string permission)
         {
-            if(permission == MLPermission.RecordAudio)
+            if (permission == MLPermission.RecordAudio)
             {
                 callbackReceived = true;
                 hasPermission = true;

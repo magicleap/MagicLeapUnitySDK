@@ -1,22 +1,21 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// Copyright (c) (2019-2024) Magic Leap, Inc. All Rights Reserved.
+// Copyright (c) (2024) Magic Leap, Inc. All Rights Reserved.
 // Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
 // Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine.XR.MagicLeap;
+
+using UnityEngine;
+using UnityEngine.XR.OpenXR;
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.XR.OpenXR.Features;
 #endif
 
-namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
+namespace MagicLeap.OpenXR.Features.LightEstimation
 {
 #if UNITY_EDITOR
     [OpenXRFeature(UiName = "Magic Leap 2 Light Estimation",
@@ -34,7 +33,9 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         public const string FeatureId = "com.magicleap.openxr.feature.ml2_lightestimation";
         public const string ExtensionName = "XR_ML_light_estimation";
 
-        private MagicLeapLightEstimationNativeFunctions nativeFunctions;
+        private LightEstimationNativeFunctions nativeFunctions;
+
+        protected override bool UsesExperimentalExtensions => true;
 
         protected override bool OnInstanceCreate(ulong xrInstance)
         {
@@ -43,18 +44,13 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                 var result = base.OnInstanceCreate(xrInstance);
                 if (result)
                 {
-                    nativeFunctions = MagicLeapNativeFunctionsBase.Create<MagicLeapLightEstimationNativeFunctions>(InstanceProcAddr, XRInstance);
+                    nativeFunctions = NativeFunctionsBase.Create<LightEstimationNativeFunctions>(InstanceProcAddr, AppInstance);
                 }
                 return result;
             }
             Debug.LogError($"{ExtensionName} is not enabled. Disabling {nameof(MagicLeapLightEstimationFeature)}");
             return false;
 
-        }
-
-        protected override void OnSessionCreate(ulong xrSession)
-        {
-            base.OnSessionCreate(xrSession);
         }
     }
 }

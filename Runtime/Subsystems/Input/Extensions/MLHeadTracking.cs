@@ -154,7 +154,7 @@ namespace UnityEngine.XR.MagicLeap
                 {
                     if(MLDevice.IsOpenXRLoaderActive())
                     {
-                        return OpenXR.Features.MagicLeapSupport.MLHeadTracking.TryGetStateEx(out headTrackingState);
+                        return global::MagicLeap.OpenXR.LegacySupport.MLHeadTracking.TryGetStateEx(out headTrackingState);
                     }
                     else
                     {
@@ -165,7 +165,7 @@ namespace UnityEngine.XR.MagicLeap
                 {
                     if (MLDevice.IsOpenXRLoaderActive())
                     {
-                        return OpenXR.Features.MagicLeapSupport.MLHeadTracking.TryGetMapEvents(out mapEvents);
+                        return global::MagicLeap.OpenXR.LegacySupport.MLHeadTracking.TryGetMapEvents(out mapEvents);
                     }
                     else
                     {

@@ -1,107 +1,142 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// Copyright (c) 2023 Magic Leap, Inc. All Rights Reserved.
+// Copyright (c) (2024) Magic Leap, Inc. All Rights Reserved.
 // Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
 // Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
-
-#if UNITY_OPENXR_1_9_0_OR_NEWER
 using System;
-using System.Runtime.InteropServices;
 using System.Text;
+using UnityEngine;
+using UnityEngine.XR.OpenXR.NativeTypes;
 
-namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport.NativeInterop
+namespace MagicLeap.OpenXR
 {
-    internal enum BlendMode : ulong
+    internal unsafe struct XrBaseOutStructure<T> where T: unmanaged
     {
-        Additive = 2,
-        AlphaBlend = 3 
-    }
-    
-    [Flags]
-    internal enum FrameInfoFlags : ulong
-    {
-        None = 0,
-        Protected = 1 << 0,
-        Vignette = 1 << 1,
+        internal T Type;
+        internal XrBaseOutStructure<T>* Next;
     }
 
-    public sealed class XrTime
+    internal struct XrTime
     {
-        public long Value { get; private set; }
-        internal XrTime(long val) { Value = val; }
-
-        public static implicit operator long(XrTime xrTime) => xrTime.Value;
-        public static implicit operator XrTime(long val) => new(val);
-        public override string ToString() => Value.ToString();
-    }
-    
-    // By default, [StructLayout(LayoutKind.Sequential)] is applied to structs
-    internal unsafe struct FrameEndInfo
-    {
-        // OpenXR structure type constant (from OpenXR headers)
-        internal const ulong StructType = 1000135000;
-#pragma warning disable 0414
-        private ulong type;
-        internal void* Next;
-        internal float FocusDistance;
-        internal FrameInfoFlags Flags;
-#pragma warning restore 0414
-
-        internal static FrameEndInfo Init()
-            => new FrameEndInfo
+        private long value;
+        public static implicit operator long(XrTime time) => time.value;
+        public static implicit operator XrTime(long time) =>
+            new()
             {
-                type = StructType,
-                Next = null,
-                FocusDistance = 0.0f,
-                Flags = FrameInfoFlags.None,
+                value = time
+            };
+    }
+    
+    internal struct XrBool32
+    {
+        private uint value;
+        public static implicit operator bool(XrBool32 input) => input.value > 0;
+
+        public static implicit operator XrBool32(bool value) =>
+            new()
+            {
+                value = value ? 1U : 0
             };
     }
 
-    internal static class FunctionPrototypes
+    internal struct XrSpace
     {
-#if PLATFORM_STANDALONE_WIN || UNITY_EDITOR_WIN
-        private const CallingConvention callConv = CallingConvention.StdCall;
-#else
-        private const CallingConvention callConv = CallingConvention.Cdecl;
-#endif
-        [UnmanagedFunctionPointer(callConv, CharSet = CharSet.Ansi)]
-        public delegate Result XRGetInstanceProcAddr(ulong instance, string name, ref IntPtr function);
-    }
-
-    [Flags]
-    internal enum GlobalDimmerFlags : ulong
-    {
-        Disabled = 0,
-        Enabled = 1,
-    }
-
-    // By default, [StructLayout(LayoutKind.Sequential)] is applied to structs
-    internal unsafe struct GlobalDimmerFrameEndInfo
-    {
-        // OpenXR structure type constant (from OpenXR headers)
-        internal const ulong StructType = 1000136000;
-
-#pragma warning disable 0414
-        private ulong type;
-        internal void* Next;
-        internal float DimmerValue;
-        internal GlobalDimmerFlags Flags;
-#pragma warning restore 0414
-
-        internal static GlobalDimmerFrameEndInfo Init()
-            => new GlobalDimmerFrameEndInfo()
+        private ulong handle;
+        public static implicit operator ulong(XrSpace xrSpace) => xrSpace.handle;
+        public static implicit operator XrSpace(ulong handle) =>
+            new()
             {
-                type = StructType,
-                Next = null,
-                DimmerValue = 0.0f,
-                Flags = GlobalDimmerFlags.Disabled,
+                handle = handle
             };
     }
 
+    internal struct XrInstance
+    {
+        private ulong handle;
+        public static implicit operator ulong(XrInstance xrInstance) => xrInstance.handle;
+        public static implicit operator XrInstance(ulong handle) =>
+            new()
+            {
+                handle = handle
+            };
+    }
+
+    internal struct XrPath
+    {
+        private ulong path;
+        public static implicit operator ulong(XrPath xrPath) => xrPath.path;
+
+        public static implicit operator XrPath(ulong path) =>
+            new()
+            {
+                path = path
+            };
+    }
+
+    internal struct XrSession
+    {
+        private ulong handle;
+        public static implicit operator ulong(XrSession xrSession) => xrSession.handle;
+        public static implicit operator XrSession(ulong handle) =>
+            new()
+            {
+                handle = handle
+            };
+    }
+
+    internal struct XrRect2Di
+    {
+        internal Vector2Int Offset;
+        internal Vector2Int Extent;
+    }
+
+    internal struct XrFovf
+    {
+        internal float AngleLeft;
+        internal float AngleRight;
+        internal float AngleUp;
+        internal float AngleDown;
+    }
+
+    internal struct XrEventDataBuffer
+    {
+        internal ulong Type;
+        internal IntPtr Next;
+        internal IntPtr Varying;
+    }
+
+    internal struct XrPose
+    {
+        internal Quaternion Rotation;
+        internal Vector3 Position;
+
+        internal static XrPose GetFromPose(Pose pose, bool shouldConvert = true)
+        {
+            var result = new XrPose
+            {
+                Position = shouldConvert ? pose.position.InvertZ() : pose.position,
+                Rotation = shouldConvert ? pose.rotation.InvertXY() : pose.rotation
+            };
+            return result;
+        }
+
+        internal static Pose GetUnityPose(in XrPose pose, bool shouldConvert = true)
+        {
+            var result = new Pose
+            {
+                position = shouldConvert ? pose.Position.InvertZ() : pose.Position,
+                rotation = shouldConvert ? pose.Rotation.InvertXY() : pose.Rotation
+            };
+            return result;
+        }
+
+        internal static XrPose IdentityPose => GetFromPose(Pose.identity);
+    }
+    
     internal struct Result
     {
 #pragma warning disable 0414
@@ -115,9 +150,9 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport.NativeInterop
 
     internal unsafe struct XrUUID
     {
-        private static readonly int[] hyphenIndices = new int[] { 8, 13, 18, 23 };
+        private static readonly int[] HyphenIndices = { 8, 13, 18, 23 };
 
-        public fixed byte Data[16];
+        private fixed byte data[16];
 
         public override string ToString()
         {
@@ -125,10 +160,10 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport.NativeInterop
 
             for (int i = 0; i < 16; i++)
             {
-                idString.AppendFormat("{0:x2}", this.Data[i]);
+                idString.AppendFormat("{0:x2}", this.data[i]);
             }
 
-            foreach (int i in hyphenIndices)
+            foreach (int i in HyphenIndices)
                 idString.Insert(i, "-");
 
             return idString.ToString();
@@ -137,7 +172,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport.NativeInterop
         internal XrUUID(string id)
         {
             id = id.Replace("-", string.Empty);
-            fixed (byte* b = this.Data)
+            fixed (byte* b = this.data)
             {
                StringToByteArray(id, b);
             }
@@ -150,5 +185,167 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport.NativeInterop
                 bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
         }
     }
+    
+    internal struct XrFrameWaitInfo
+    {
+        internal XrStructureType Type;
+        internal IntPtr Next;
+    }
+
+    internal struct XrFrameBeginInfo
+    {
+        internal XrStructureType Type;
+        internal IntPtr Next;
+    }
+
+    internal struct XrFrameState
+    {
+        internal XrStructureType Type;
+        internal IntPtr Next;
+        internal long PredictedDisplayTime;
+        internal ulong PredictedDisplayPeriod;
+        internal XrBool32 ShouldRender;
+    }
+
+    internal struct XrCompositionLayerBaseHeader
+    {
+        internal XrStructureType Type;
+        internal IntPtr Next;
+        internal XrCompositionLayerFlags LayerFlags;
+        internal ulong Space;
+    }
+
+    internal struct XrFrameEndInfo
+    {
+        internal XrStructureType Type;
+        internal IntPtr Next;
+        internal long DisplayTime;
+        internal XrEnvironmentBlendMode EnvironmentBlendMode;
+        internal uint LayerCount;
+        internal IntPtr Layers;
+    }
+
+    internal struct FeatureLifecycleNativeListenerInternal
+    {
+        internal IntPtr InstanceCreatedIntPtr;
+        internal IntPtr InstanceDestroyedIntPtr;
+        internal IntPtr SessionCreateIntPtr;
+        internal IntPtr SessionDestroyIntPtr;
+        internal IntPtr AppSpaceChangedIntPtr;
+        internal IntPtr PredictedDisplayTimeChangedIntPtr;
+    }
+
+    internal unsafe struct FeatureLifecycleNativeListener
+    {
+        private delegate* unmanaged [Cdecl] <XrInstance, IntPtr, void> instanceCreated;
+        private delegate* unmanaged [Cdecl] <XrInstance, void> instanceDestroyed;
+        private delegate* unmanaged [Cdecl] <XrSession, void> sessionCreate;
+        private delegate* unmanaged [Cdecl] <XrSession, void> sessionDestroy;
+        private delegate* unmanaged [Cdecl] <XrSpace, void> appSpaceChanged;
+        private delegate* unmanaged [Cdecl] <long, void> predictedDisplayTimeChanged;
+
+        private void Initialize(FeatureLifecycleNativeListenerInternal featureLifecycleNativeListenerInternal)
+        {
+            instanceCreated = (delegate* unmanaged[Cdecl]<XrInstance, IntPtr, void>)featureLifecycleNativeListenerInternal.InstanceCreatedIntPtr;
+            instanceDestroyed = (delegate* unmanaged[Cdecl]<XrInstance, void>)featureLifecycleNativeListenerInternal.InstanceDestroyedIntPtr;
+            sessionCreate = (delegate* unmanaged[Cdecl]<XrSession, void>)featureLifecycleNativeListenerInternal.SessionCreateIntPtr;
+            sessionDestroy = (delegate* unmanaged[Cdecl]<XrSession, void>)featureLifecycleNativeListenerInternal.SessionDestroyIntPtr;
+            appSpaceChanged = (delegate* unmanaged[Cdecl]<XrSpace, void>)featureLifecycleNativeListenerInternal.AppSpaceChangedIntPtr;
+            predictedDisplayTimeChanged = (delegate* unmanaged[Cdecl]<long, void>)featureLifecycleNativeListenerInternal.PredictedDisplayTimeChangedIntPtr;
+        }
+
+        public static implicit operator FeatureLifecycleNativeListener(FeatureLifecycleNativeListenerInternal listenerInternal)
+        {
+            var result = new FeatureLifecycleNativeListener();
+            result.Initialize(listenerInternal);
+            return result;
+        }
+        
+        public void InstanceCreated(XrInstance instance, IntPtr hookAddr)
+        {
+            if (instanceCreated != null)
+            {
+                instanceCreated(instance, hookAddr);
+            }
+        }
+
+        public void InstanceDestroyed(XrInstance instance)
+        {
+            if (instanceDestroyed != null)
+            {
+                instanceDestroyed(instance);
+            }
+        }
+
+        public void SessionCreated(XrSession session)
+        {
+            if (sessionCreate != null)
+            {
+                sessionCreate(session);
+            }
+        }
+
+        public void SessionDestroyed(XrSession session)
+        {
+            if (sessionDestroy != null)
+            {
+                sessionDestroy(session);
+            }
+        }
+
+        public void AppSpaceChanged(XrSpace space)
+        {
+            if (appSpaceChanged != null)
+            {
+                appSpaceChanged(space);
+            }
+        }
+
+        public void PredictedDisplayTimeChanged(long time)
+        {
+            if (predictedDisplayTimeChanged != null)
+            {
+                predictedDisplayTimeChanged(time);
+            }
+        }
+    }
+
+    internal struct XrSwapChainSubImage
+    {
+        internal ulong SwapChain;
+        internal XrRect2Di ImageRect;
+        internal uint ImageArrayIndex;
+    }
+
+    internal struct XrCompositionLayerProjectionView
+    {
+        internal XrStructureType Type;
+        internal IntPtr Next;
+        internal XrPose Pose;
+        internal XrFovf FOV;
+    }
+
+    internal unsafe struct XrCompositionLayerProjection
+    {
+        internal XrStructureType Type;
+        internal IntPtr Next;
+        internal XrCompositionLayerFlags LayerFlags;
+        internal ulong Space;
+        internal uint ViewCount;
+        internal XrCompositionLayerProjectionView* Views;
+    }
+
+    internal enum XrStructureType : ulong
+    {
+        XrTypeFrameEndInfo = 12,
+        XrTypeCompositionLayerProjectionView = 48,
+        XrTypeCompositionLayerProjection = 35,
+    }
+
+    internal enum XrCompositionLayerFlags : ulong
+    {
+        CorrectChomaticAberrationBit = 0x00001,
+        BlendTextureSourceAlpha = 2,
+        UnPreMultipliedAlpha = 4,
+    }
 }
-#endif

@@ -1,23 +1,25 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// Copyright (c) (2019-2022) Magic Leap, Inc. All Rights Reserved.
+// Copyright (c) (2024) Magic Leap, Inc. All Rights Reserved.
 // Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
 // Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
+
 using System;
-using UnityEngine.XR.OpenXR.Features.MagicLeapSupport.MagicLeapOpenXRSystemNotificationNativeTypes;
+using MagicLeap.OpenXR.SystemInfo;
+using UnityEngine;
+using UnityEngine.XR.OpenXR;
 using UnityEngine.XR.OpenXR.NativeTypes;
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.XR.OpenXR.Features;
-#endif // UNITY_EDITOR
+#endif
 
-namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
+namespace MagicLeap.OpenXR.Features.SystemNotifications
 {
-    using MagicLeapSystemInfoNativeTypes;
 #if UNITY_EDITOR
     [OpenXRFeature(UiName = "Magic Leap 2 System Notification Control",
         Desc = "Enable/Disable the suppression of system notifications.",
@@ -33,9 +35,11 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         public const string FeatureId = "com.magicleap.openxr.feature.ml2_systemnotification";
         private const string ExtensionName = "XR_ML_system_notifications";
 
-        private MagicLeapSystemNotificationNativeFunctions systemNotificationNativeFunctions;
-        private MagicLeapSystemInfoNativeFunctions systemInfoNativeFunctions;
+        private SystemNotificationNativeFunctions systemNotificationNativeFunctions;
+        private SystemInfoNativeFunctions systemInfoNativeFunctions;
         private ulong systemId;
+
+        protected override bool UsesExperimentalExtensions => true;
 
         protected override bool OnInstanceCreate(ulong xrInstance)
         {
@@ -44,8 +48,8 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                 var instanceResult = base.OnInstanceCreate(xrInstance);
                 if (instanceResult)
                 {
-                    systemNotificationNativeFunctions = CreateNativeFunctions<MagicLeapSystemNotificationNativeFunctions>();
-                    systemInfoNativeFunctions = CreateNativeFunctions<MagicLeapSystemInfoNativeFunctions>();
+                    systemNotificationNativeFunctions = CreateNativeFunctions<SystemNotificationNativeFunctions>();
+                    systemInfoNativeFunctions = CreateNativeFunctions<SystemInfoNativeFunctions>();
                     return true;
                 }
             }
@@ -70,7 +74,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                     SuppressNotifications = suppressNotifications ? 1 : 0U
                 };
             
-                var xrResult = systemNotificationNativeFunctions.XrSetSystemNotifications(XRInstance, in enableInfo);
+                var xrResult = systemNotificationNativeFunctions.XrSetSystemNotifications(AppInstance, in enableInfo);
                 Utils.DidXrCallSucceed(xrResult, nameof(systemNotificationNativeFunctions.XrSetSystemNotifications));
                 return xrResult;
             }
@@ -99,7 +103,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                     Type = XrSystemNotificationStructTypes.XrTypeSystemNotificationsProperties,
                 };
                 systemProperties.Next = new IntPtr(&systemNotificationProperties);
-                var xrResult = systemInfoNativeFunctions.XrGetSystemProperties(XRInstance, systemId, out systemProperties);
+                var xrResult = systemInfoNativeFunctions.XrGetSystemProperties(AppInstance, systemId, out systemProperties);
                 if(!Utils.DidXrCallSucceed(xrResult, nameof(systemInfoNativeFunctions.XrGetSystemProperties)))
                 {
                     return xrResult;

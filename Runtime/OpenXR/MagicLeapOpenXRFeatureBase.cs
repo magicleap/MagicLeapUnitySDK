@@ -1,54 +1,47 @@
-﻿// %BANNER_BEGIN%
+// %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// Copyright (c) 2023 Magic Leap, Inc. All Rights Reserved.
+// Copyright (c) (2024) Magic Leap, Inc. All Rights Reserved.
 // Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
 // Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
-#if UNITY_OPENXR_1_9_0_OR_NEWER
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using AOT;
-using UnityEngine.XR.OpenXR.Features.MagicLeapSupport.MagicLeapOpenXRFeatureNativeTypes;
+using MagicLeap.OpenXR.Constants;
+using MagicLeap.OpenXR.NativeDelegates;
+using UnityEngine;
+using UnityEngine.XR.OpenXR;
+using UnityEngine.XR.OpenXR.Features;
 using UnityEngine.XR.OpenXR.NativeTypes;
-
 #if UNITY_EDITOR
 using UnityEditor;
+using UnityEditor.XR.OpenXR.Features;
 #endif
-
-namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
+namespace MagicLeap.OpenXR.Features
 {
     public abstract class MagicLeapOpenXRFeatureBase : OpenXRFeature
     {
-        internal ulong XRSession { get; private set; }
-        internal ulong XRInstance { get; private set; }
-        internal ulong XRSpace { get; private set; }
-        internal long NextPredictedDisplayTime => MagicLeapFeature.NativeBindings.MLOpenXRGetNextPredictedDisplayTime();
+        internal XrSession AppSession { get; private set; } = Values.NullHandle;
+        internal XrInstance AppInstance { get; private set; } = Values.NullHandle;
+        internal XrSpace AppSpace { get; private set; } = Values.NullHandle;
+
+        internal XrSessionState SessionState
+        {
+            get;
+            private set;
+        }
+
+        internal static long PredictedDisplayTime;
+
+        internal long NextPredictedDisplayTime => PredictedDisplayTime;
+
+        internal XrGetInstanceProcAddr InstanceProcAddr;
         
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-        internal delegate XrResult XrPollEvent(ulong instance, IntPtr eventBuffer);
-
-        protected virtual string GetFeatureId()
-        {
-            return "";
-        }
-
-
-        internal GetInstanceProcAddr InstanceProcAddr;
-
-        protected override IntPtr HookGetInstanceProcAddr(IntPtr func)
-        {
-            var featureId = GetFeatureId();
-            if (string.IsNullOrEmpty(featureId))
-            {
-                return base.HookGetInstanceProcAddr(func);
-            }
-            return MagicLeapFeature.NativeBindings.MLOpenXRInterceptFunctionsForFeature(featureId, func);
-        }
 
         protected override bool OnInstanceCreate(ulong xrInstance)
         {
@@ -58,57 +51,40 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                 return false;
             }
             
-            XRInstance = xrInstance;
-            InstanceProcAddr = Marshal.GetDelegateForFunctionPointer<GetInstanceProcAddr>(xrGetInstanceProcAddr);
-            
-            var featureId = GetFeatureId();
-            if (string.IsNullOrEmpty(featureId))
-            {
-                return true;
-            }
-            MagicLeapFeature.NativeBindings.MLOpenXROnFeatureInstanceCreate(featureId, xrInstance, xrGetInstanceProcAddr);
+            AppInstance = xrInstance;
+            InstanceProcAddr = Marshal.GetDelegateForFunctionPointer<XrGetInstanceProcAddr>(xrGetInstanceProcAddr);
             return true;
         }
-
-        protected override void OnInstanceDestroy(ulong xrInstance)
-        {
-            base.OnInstanceDestroy(xrInstance);
-            var featureId = GetFeatureId();
-            if (string.IsNullOrEmpty(featureId))
-            {
-                return;
-            }
-            MagicLeapFeature.NativeBindings.MLOpenXRFeatureOnInstanceDestroy(featureId, xrInstance);
-        }
+        
 
         protected override void OnSessionCreate(ulong xrSession)
         {
             base.OnSessionCreate(xrSession);
-            XRSession = xrSession;
-            var featureId = GetFeatureId();
-            if (string.IsNullOrEmpty(featureId))
-            {
-                return;
-            }
-            MagicLeapFeature.NativeBindings.MLOpenXROnFeatureSessionCreate(featureId, xrSession);
+            AppSession = xrSession;
+        }
+
+        protected override void OnSessionStateChange(int oldState, int newState)
+        {
+            base.OnSessionStateChange(oldState, newState);
+            SessionState = (XrSessionState)newState;
         }
 
         protected override void OnSessionBegin(ulong xrSession)
         {
             base.OnSessionBegin(xrSession);
-            XRSession = xrSession;
+            AppSession = xrSession;
         }
-        
+
+        protected override void OnSessionDestroy(ulong xrSession)
+        {
+            base.OnSessionDestroy(xrSession);
+            AppSession = 0u;
+        }
+
         protected override void OnAppSpaceChange(ulong xrSpace)
         {
             base.OnAppSpaceChange(xrSpace);
-            XRSpace = xrSpace;
-            var featureId = GetFeatureId();
-            if (string.IsNullOrEmpty(featureId))
-            {
-                return;
-            }
-            MagicLeapFeature.NativeBindings.MLOpenXROnFeatureAppSpaceChange(featureId, xrSpace);
+            AppSpace = xrSpace;
         }
         
         protected void CheckEnabledExtension(string extensionName, bool required = false)
@@ -123,18 +99,16 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         }
         
         protected virtual IEnumerable<Type> DependsOn => Enumerable.Empty<Type>();
-
-        public bool GetUnityPose(ulong space, out Pose pose)
+        
+        internal T CreateNativeFunctions<T>() where T : NativeFunctionsBase, new()
         {
-            pose = default;
-            var featureId = GetFeatureId();
-            return !string.IsNullOrEmpty(featureId) && MagicLeapFeature.NativeBindings.MLOpenXRGetUnityPoseForFeature(featureId, space, out pose);
+            return NativeFunctionsBase.Create<T>(InstanceProcAddr, AppInstance);
         }
 
-        internal T CreateNativeFunctions<T>() where T : MagicLeapNativeFunctionsBase, new()
-        {
-            return MagicLeapNativeFunctionsBase.Create<T>(InstanceProcAddr, XRInstance);
-        }
+        /// <summary>
+        /// Are any of the extensions used by this feature NOT yet included in the OpenXR Spec (1.0 or 1.1)?
+        /// </summary>
+        protected virtual bool UsesExperimentalExtensions { get; } = false;
 
 #if UNITY_EDITOR
         protected override void GetValidationChecks(List<ValidationRule> rules, BuildTargetGroup targetGroup)
@@ -142,6 +116,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             base.GetValidationChecks(rules, targetGroup);
             
             rules.Add(GetDependencyRule<MagicLeapFeature>(targetGroup));
+            rules.Add(ExperimentalStatus);
             
             foreach (var depends in DependsOn)
             {
@@ -155,7 +130,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                 checkPredicate = ()=> Utils.IsFeatureEnabled(group, featureType),
                 fixIt = () => Utils.TryEnableFeature(group, featureType),
                 error = true,
-                message = $"{Utils.GetNiceTypeName(GetType())} depends on the {Utils.GetNiceTypeName(featureType)}, which is not enabled. Please enable this feature"
+                message = $"{Utils.GetNiceTypeName(GetType())} depends on Feature \"{Utils.GetNiceTypeName(featureType)}\", which is not enabled."
             };
         
         protected ValidationRule GetDependencyRule<TFeature>(BuildTargetGroup group) where TFeature : OpenXRFeature
@@ -164,71 +139,17 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                 checkPredicate = ()=> Utils.IsFeatureEnabled<TFeature>(group),
                 fixIt = () => Utils.TryEnableFeature<TFeature>(group),
                 error = true,
-                message = $"{Utils.GetNiceTypeName(GetType())} depends on the {Utils.GetNiceTypeName<TFeature>()}, which is not enabled. Please enable this feature"
+                message = $"{Utils.GetNiceTypeName(GetType())} depends on Feature \"{Utils.GetNiceTypeName<TFeature>()}\", which is not enabled."
+            };
+
+        protected ValidationRule ExperimentalStatus =>
+            new ValidationRule(this)
+            {
+                checkPredicate = ()=> !UsesExperimentalExtensions,
+                error = false,
+                message = $"NOTE: This feature relies on one or more experimental extensions not part of the OpenXR Specification."
             };
         
 #endif
     }
-    
-    /// <summary>
-    ///  The abstract base class of OpenXR features that needs to intercept OpenXR functions
-    /// <para>Note: The static fields in generics are shared based on the type (T). This way each feature gets its own set of interception pointers and callbacks </para>
-    /// </summary>
-    /// <typeparam name="T">The type of the feature implemented</typeparam>
-    public abstract class MagicLeapOpenXRFeatureWithEvents<T> : MagicLeapOpenXRFeatureBase where T : MagicLeapOpenXRFeatureBase
-    {
-        private static GetInstanceProcAddr OrigProcAddr;
-        private static GetInstanceProcAddr InterceptedProcAddr;
-        private static XrPollEvent OrigPollEvent;
-        private static XrPollEvent InterceptedPollEvent;
-        
-        private static event Action<IntPtr> OnPollEventReceived;
-        
-        protected override IntPtr HookGetInstanceProcAddr(IntPtr func)
-        {
-            var orig = base.HookGetInstanceProcAddr(func);
-            OrigProcAddr = Marshal.GetDelegateForFunctionPointer<GetInstanceProcAddr>(orig);
-            InterceptedProcAddr = InterceptedInstanceProcAddr;
-            OnPollEventReceived += OnPollEvent;
-            return Marshal.GetFunctionPointerForDelegate(InterceptedProcAddr);
-        }
-        
-        [MonoPInvokeCallback(typeof(GetInstanceProcAddr))]
-        private static XrResult InterceptedInstanceProcAddr(ulong instance, [MarshalAs(UnmanagedType.LPStr)] string functionName, ref IntPtr pointer)
-        {
-            var result = OrigProcAddr(instance, functionName, ref pointer);
-            if (functionName != "xrPollEvent")
-            {
-                return result;
-            }
-            Debug.Log($"{typeof(T)} intercepted xrPollEvent");
-            OrigPollEvent = Marshal.GetDelegateForFunctionPointer<XrPollEvent>(pointer);
-            InterceptedPollEvent = PollEventImpl;
-            pointer = Marshal.GetFunctionPointerForDelegate(InterceptedPollEvent);
-            return result;
-        }
-        
-        [MonoPInvokeCallback(typeof(XrPollEvent))]
-        private static XrResult PollEventImpl(ulong instance, IntPtr eventBuffer)
-        {
-            var result = OrigPollEvent(instance, eventBuffer);
-            if (result != XrResult.Success)
-            {
-                return result;
-            }
-            OnPollEventReceived?.Invoke(eventBuffer);
-            return result;
-        }
-        
-        internal virtual void OnPollEvent(IntPtr eventBuffer)
-        {
-        }
-
-        protected override void OnInstanceDestroy(ulong xrInstance)
-        {
-            base.OnInstanceDestroy(xrInstance);
-            OnPollEventReceived -= OnPollEvent;
-        }
-    }
 }
-#endif

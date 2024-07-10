@@ -1,26 +1,25 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// Copyright (c) 2023 Magic Leap, Inc. All Rights Reserved.
+// Copyright (c) (2024) Magic Leap, Inc. All Rights Reserved.
 // Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
 // Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
-#if UNITY_OPENXR_1_9_0_OR_NEWER
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.XR.OpenXR.Features;
 #endif
 
-namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
+namespace MagicLeap.OpenXR.Features
 {
 #if UNITY_EDITOR
     [OpenXRFeature(UiName = "Magic Leap 2 Reference Spaces",
         Desc="Support for additional XR reference spaces supported by Magic Leap 2",
         Company = "Magic Leap",
         Version = "1.0.0",
-        BuildTargetGroups = new []{ BuildTargetGroup.Android, BuildTargetGroup.Standalone },
+        BuildTargetGroups = new []{ UnityEditor.BuildTargetGroup.Android, UnityEditor.BuildTargetGroup.Standalone },
         FeatureId = FeatureId,
         OpenxrExtensionStrings = "XR_MSFT_unbounded_reference_space " +
                                  "XR_EXT_local_floor "
@@ -31,4 +30,3 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         public const string FeatureId = "com.magicleap.openxr.feature.reference_spaces";
     }
 }
-#endif

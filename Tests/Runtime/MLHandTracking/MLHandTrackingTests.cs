@@ -1,3 +1,6 @@
+// Disabling deprecated warning for the internal project
+#pragma warning disable 618
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -23,7 +26,7 @@ namespace UnitySDKPlayTests
         [SetUp]
         public void HandTracking_StartTracking()
         {
-           // CheckPermission();
+            // CheckPermission();
             try
             {
                 InputSubsystem.Extensions.MLHandTracking.StartTracking();
@@ -50,7 +53,7 @@ namespace UnitySDKPlayTests
         [Test]
         public void HandTracking_SetPreRenderHandUpdate()
         {
-          //  CheckPermission();
+            //  CheckPermission();
             try
             {
                 //InputSubsystem.Extensions.MLHandTracking.StartTracking();
@@ -65,10 +68,10 @@ namespace UnitySDKPlayTests
         [Test]
         public void HandTracking_FindMagicLeapDevice()
         {
-          //  CheckPermission();
+            //  CheckPermission();
             try
             {
-               // InputSubsystem.Extensions.MLHandTracking.StartTracking();
+                // InputSubsystem.Extensions.MLHandTracking.StartTracking();
                 InputSubsystem.Extensions.MLHandTracking.SetPreRenderHandUpdate(true);
                 if (!leftHandDevice.isValid || !rightHandDevice.isValid)
                 {
@@ -86,10 +89,10 @@ namespace UnitySDKPlayTests
         [Test]
         public void HandTracking_TryGetFeatureValue()
         {
-          //  CheckPermission();
+            //  CheckPermission();
             try
             {
-               // InputSubsystem.Extensions.MLHandTracking.StartTracking();
+                // InputSubsystem.Extensions.MLHandTracking.StartTracking();
                 InputSubsystem.Extensions.MLHandTracking.SetPreRenderHandUpdate(true);
                 if (!leftHandDevice.isValid || !rightHandDevice.isValid)
                 {

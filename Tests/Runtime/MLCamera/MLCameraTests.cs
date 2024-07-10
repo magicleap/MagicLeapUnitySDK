@@ -1,3 +1,6 @@
+// Disabling deprecated warning for the internal project
+#pragma warning disable 618
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -39,7 +42,7 @@ namespace UnitySDKPlayTests
         [OneTimeTearDown]
         public void RemoveRigFromScene()
         {
-            if(rig != null)
+            if (rig != null)
             {
                 UnityEngine.Object.Destroy(rig);
             }
@@ -118,8 +121,8 @@ namespace UnitySDKPlayTests
 
         [UnityTest]
         public IEnumerator MLCamera_PrepareCaptureForCapturePreview(
-            [ValueSource(nameof(FrameRatesToTest))]    MLCameraBase.CaptureFrameRate frameRate,
-            [ValueSource(nameof(ConnectFlagsToTest))]  MLCameraBase.ConnectFlag connectFlag,
+            [ValueSource(nameof(FrameRatesToTest))] MLCameraBase.CaptureFrameRate frameRate,
+            [ValueSource(nameof(ConnectFlagsToTest))] MLCameraBase.ConnectFlag connectFlag,
             [ValueSource(nameof(OutputFormatsToTest))] MLCameraBase.OutputFormat outputFormat)
         {
             FrameRate = frameRate;
@@ -260,7 +263,7 @@ namespace UnitySDKPlayTests
             if (CaptureType == MLCameraBase.CaptureType.Image && OutputFormat != MLCameraBase.OutputFormat.RGBA_8888)
             {
                 ConnectCamera(ConnectFlag, MLCameraBase.MRQuality._960x720, MLCameraBase.CaptureFrameRate._30FPS, false);
-                
+
                 Assert.IsTrue(GetImageStreamCapabilities(), "failed to get image stream capabilities");
             }
             else

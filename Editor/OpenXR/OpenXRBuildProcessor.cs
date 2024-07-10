@@ -1,24 +1,24 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// Copyright (c) 2023 Magic Leap, Inc. All Rights Reserved.
+// Copyright (c) (2023-2024) Magic Leap, Inc. All Rights Reserved.
 // Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
 // Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
-#if UNITY_OPENXR_1_9_0_OR_NEWER
+using MagicLeap.Settings;
 using System;
 using System.IO;
 using System.Linq;
 using System.Xml;
+using UnityEditor;
 using UnityEditor.Build.Reporting;
-using UnityEditor.XR.MagicLeap;
 using UnityEditor.XR.Management;
+using UnityEditor.XR.OpenXR.Features;
 using UnityEngine.XR.OpenXR;
-using UnityEngine.XR.OpenXR.Features.MagicLeapSupport;
 
-namespace UnityEditor.XR.OpenXR.Features.MagicLeapSupport
+namespace MagicLeap.OpenXR.Features
 {
     internal class OpenXRBuildProcessor : OpenXRFeatureBuildHooks
     {
@@ -91,4 +91,3 @@ namespace UnityEditor.XR.OpenXR.Features.MagicLeapSupport
         }
     }
 }
-#endif

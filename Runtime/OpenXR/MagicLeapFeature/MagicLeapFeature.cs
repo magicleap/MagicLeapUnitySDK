@@ -1,20 +1,26 @@
 // %BANNER_BEGIN%
 // ---------------------------------------------------------------------
 // %COPYRIGHT_BEGIN%
-// Copyright (c) (2019-2022) Magic Leap, Inc. All Rights Reserved.
+// Copyright (c) (2024) Magic Leap, Inc. All Rights Reserved.
 // Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
 // Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
 // %COPYRIGHT_END%
 // ---------------------------------------------------------------------
 // %BANNER_END%
-#if UNITY_OPENXR_1_9_0_OR_NEWER
+
+using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Threading;
+using MagicLeap.OpenXR.Constants;
+using MagicLeap.OpenXR.SystemInfo;
+using MagicLeap.OpenXR.NativeDelegates;
+using MagicLeap.OpenXR.Time;
+using MagicLeap.OpenXR.ViewConfiguration;
+using UnityEngine;
+using UnityEngine.LowLevel;
 using UnityEngine.XR.ARSubsystems;
 using UnityEngine.XR.MagicLeap;
-using System;
-using System.Runtime.InteropServices;
-using UnityEngine.LowLevel;
-using MagicLeap;
 using UnityEngine.XR.MagicLeap.Native;
 using UnityEngine.XR.OpenXR.NativeTypes;
 #if UNITY_EDITOR
@@ -22,13 +28,8 @@ using UnityEditor;
 using UnityEditor.XR.OpenXR.Features;
 #endif
 
-namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
+namespace MagicLeap.OpenXR.Features
 {
-    using MagicLeapConvertTimeSpecNativeTypes;
-    using MagicLeapViewConfigurationNativeTypes;
-    using MagicLeapOpenXRFeatureNativeTypes;
-    using NativeInterop;
-
     /// <summary>
     /// Enables the Magic Leap OpenXR Loader for Android, and modifies the AndroidManifest to be compatible with ML2.
     /// </summary>
@@ -39,10 +40,10 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         Version = "1.0.0",
         BuildTargetGroups = new []{ BuildTargetGroup.Android, BuildTargetGroup.Standalone },
         FeatureId = FeatureId,
-        OpenxrExtensionStrings = "XR_ML_compat XR_KHR_convert_timespec_time XR_EXT_view_configuration_depth_range XR_ML_view_configuration_depth_range_change"
+        OpenxrExtensionStrings = "XR_ML_compat XR_KHR_convert_timespec_time XR_EXT_view_configuration_depth_range"
     )]
 #endif
-    public partial class MagicLeapFeature : OpenXRFeature
+    public partial class MagicLeapFeature : MagicLeapOpenXRFeatureWithInterception<Features.MagicLeapFeature>
     {
         private struct MLPerceptionSnapshotUpdate { }
 
@@ -104,6 +105,23 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         public NearClipMode NearClipPolicy => nearClipPolicy;
 
 		private IntPtr mlSnapshot = IntPtr.Zero;
+        
+        public bool EnablePerceptionSnapshots
+        {
+            get => perceptionSnapshots;
+            set
+            {
+                perceptionSnapshots = value;
+                if (perceptionSnapshots)
+                {
+                    RegisterSnapshotPlayerLoop();
+                }
+                else
+                {
+                    UnregisterSnapshotPlayerLoop();
+                }
+            }
+        }
 
         public float MinNearZ => viewConfigurationDepthRange.MinNearZ;
         public float RecommendedNearZ => viewConfigurationDepthRange.RecommendedNearZ;
@@ -117,42 +135,74 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         private static readonly List<XRSessionSubsystemDescriptor> SessionSubsystemDesc = new();
 
         private XrSessionState sessionState = XrSessionState.Unknown;
-        private GetInstanceProcAddr getInstanceProcAddr;
+        private XrGetInstanceProcAddr getInstanceProcAddr;
 
-        private MagicLeapConvertTimeSpecNativeFunctions timeSpecNativeFunctions;
+        private TimeSpecNativeFunctions timeSpecNativeFunctions;
 
-        private MagicLeapSystemInfoNativeFunctions systemInfoNativeFunctions;
-        private MagicLeapViewConfigurationNativeFunctions magicLeapViewConfigurationNativeFunctions;
+        private SystemInfoNativeFunctions systemInfoNativeFunctions;
+        private ViewConfigNativeFunctions magicLeapViewConfigurationNativeFunctions;
         private XrViewConfigurationDepthRange viewConfigurationDepthRange;
         private PlayerLoopSystem snapshotUpdatePlayerLoop;
-
-        private ulong XrInstance
-        {
-            get;
-            set;
-        }
         
+        private FeatureLifecycleNativeListener lifecycleNativeListener;
+        
+        private bool playerLoopRegistered;
+
         protected override IntPtr HookGetInstanceProcAddr(IntPtr func)
         {
-            return NativeBindings.MLOpenXRInterceptFunctions(func);
+            lifecycleNativeListener = NativeBindings.MLOpenXRGetLifecycleListener(); ;
+            return base.HookGetInstanceProcAddr(func);
         }
 
         protected override bool OnInstanceCreate(ulong xrInstance)
         {
-            var instanceResult = NativeBindings.MLOpenXROnInstanceCreate(xrGetInstanceProcAddr, xrInstance);
-            if (!instanceResult)
+            var result  = base.OnInstanceCreate(xrInstance);
+            if (!result)
             {
                 return false;
             }
-            
-            getInstanceProcAddr = Marshal.GetDelegateForFunctionPointer<GetInstanceProcAddr>(xrGetInstanceProcAddr);
-            
-            timeSpecNativeFunctions = MagicLeapNativeFunctionsBase.Create<MagicLeapConvertTimeSpecNativeFunctions>(getInstanceProcAddr, xrInstance);
-            magicLeapViewConfigurationNativeFunctions = MagicLeapNativeFunctionsBase.Create<MagicLeapViewConfigurationNativeFunctions>(getInstanceProcAddr, xrInstance);
-            systemInfoNativeFunctions = MagicLeapNativeFunctionsBase.Create<MagicLeapSystemInfoNativeFunctions>(getInstanceProcAddr, xrInstance);
-            XrInstance = xrInstance;
+            getInstanceProcAddr = Marshal.GetDelegateForFunctionPointer<XrGetInstanceProcAddr>(xrGetInstanceProcAddr);
+            timeSpecNativeFunctions = NativeFunctionsBase.Create<TimeSpecNativeFunctions>(getInstanceProcAddr, xrInstance);
+            magicLeapViewConfigurationNativeFunctions = NativeFunctionsBase.Create<ViewConfigNativeFunctions>(getInstanceProcAddr, xrInstance);
+            systemInfoNativeFunctions = NativeFunctionsBase.Create<SystemInfoNativeFunctions>(getInstanceProcAddr, xrInstance);
             EnumerateViewConfigurationViews();
+            lifecycleNativeListener.InstanceCreated(xrInstance, xrGetInstanceProcAddr);
             return true;
+        }
+
+        internal override unsafe XrResult OnWaitFrame(ulong session, XrFrameWaitInfo* frameWaitInfo, XrFrameState* frameState, XrWaitFrame origWaitFrame)
+        {
+            var result = base.OnWaitFrame(session, frameWaitInfo, frameState, origWaitFrame);
+            if (result != XrResult.Success)
+            {
+                return result;
+            }
+
+            if (frameState->PredictedDisplayPeriod != Values.InfiniteDuration)
+            {
+                Interlocked.Exchange(ref PredictedDisplayTime, (frameState->PredictedDisplayTime + (long)frameState->PredictedDisplayPeriod));
+            }
+            else
+            {
+                Interlocked.Exchange(ref PredictedDisplayTime, frameState->PredictedDisplayTime);
+            }
+            lifecycleNativeListener.PredictedDisplayTimeChanged(PredictedDisplayTime);
+
+            MLXrSecondaryViewState.IsActive = false;
+            if (frameState->Next != IntPtr.Zero)
+            {
+                var secondaryFrameState = Marshal.PtrToStructure<XrSecondaryViewConfigurationFrameStateMSFT>(frameState->Next);
+                for (int i = 0; i < secondaryFrameState.ViewConfigurationCount; i++)
+                {
+                    var viewState = secondaryFrameState.ViewConfigurationStates[i];
+                    if (viewState.Active)
+                    {
+                        MLXrSecondaryViewState.IsActive = true;
+                        break;
+                    }
+                }
+            }
+            return result;
         }
 
         private void EnumerateViewConfigurationViews()
@@ -163,30 +213,46 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                 return;
             }
             
-            xrResult = magicLeapViewConfigurationNativeFunctions.EnumerateConfigurationViews(XrInstance, systemId, out viewConfigurationDepthRange);
+            xrResult = magicLeapViewConfigurationNativeFunctions.EnumerateConfigurationViews(AppInstance, systemId, out viewConfigurationDepthRange);
             Utils.DidXrCallSucceed(xrResult, nameof(magicLeapViewConfigurationNativeFunctions.EnumerateConfigurationViews));
         }
 
         protected override void OnInstanceDestroy(ulong xrInstance)
         {
-            NativeBindings.MLOpenXROnInstanceDestroy(xrInstance);
+            base.OnInstanceDestroy(xrInstance);
+            lifecycleNativeListener.InstanceDestroyed(xrInstance);
+        }
+
+        protected override void MarkFunctionsToIntercept()
+        {
+            InterceptWaitFrame = true;
         }
 
         protected override void OnAppSpaceChange(ulong xrSpace)
         {
-            NativeBindings.MLOpenXROnAppSpaceChange(xrSpace);
+            base.OnAppSpaceChange(xrSpace);
+            lifecycleNativeListener.AppSpaceChanged(xrSpace);
         }
 
         protected override void OnSessionCreate(ulong xrSession)
         {
-            NativeBindings.MLOpenXROnSessionCreate(xrSession);
-
+            base.OnSessionCreate(xrSession);
+            lifecycleNativeListener.SessionCreated(xrSession);
             if (Application.isEditor)
             {
                 return;
             }
 
             if (!perceptionSnapshots)
+            {
+                return;
+            }
+            RegisterSnapshotPlayerLoop();
+        }
+
+        private void RegisterSnapshotPlayerLoop()
+        {
+            if (playerLoopRegistered)
             {
                 return;
             }
@@ -197,17 +263,30 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                 updateDelegate = PerformMLPerceptionSnapshot,
                 type = typeof(MLPerceptionSnapshotUpdate)
             };
-            var playerLoop = LowLevel.PlayerLoop.GetCurrentPlayerLoop();
+            var playerLoop = PlayerLoop.GetCurrentPlayerLoop();
             if (!PlayerLoopUtil.InstallIntoPlayerLoop(ref playerLoop, snapshotUpdatePlayerLoop, PlayerLoopUtil.InstallPath))
                 Debug.LogError("Unable to install snapshotting Update delegate into player loop!");
             else
-                LowLevel.PlayerLoop.SetPlayerLoop(playerLoop);
+                PlayerLoop.SetPlayerLoop(playerLoop);
+            
+            playerLoopRegistered = true;
+        }
+
+        private void UnregisterSnapshotPlayerLoop()
+        {
+            if (!playerLoopRegistered)
+            {
+                return;
+            }
+            var playerLoop = PlayerLoop.GetCurrentPlayerLoop();
+            PlayerLoopUtil.RemoveFromPlayerLoop(ref playerLoop, snapshotUpdatePlayerLoop, PlayerLoopUtil.InstallPath);
+
+            playerLoopRegistered = false;
         }
 
         protected override void OnSessionBegin(ulong xrSession)
         {
             base.OnSessionBegin(xrSession);
-
             if (!Application.isEditor)
             {
                 Application.onBeforeRender += EnforceClippingPlanes;
@@ -217,7 +296,6 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         protected override void OnSessionEnd(ulong xrSession)
         {
             base.OnSessionEnd(xrSession);
-
             if (!Application.isEditor)
             {
                 Application.onBeforeRender -= EnforceClippingPlanes;
@@ -226,7 +304,8 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 
         protected override void OnSessionDestroy(ulong xrSession)
         {
-            NativeBindings.MLOpenXROnSessionDestroy(xrSession);
+            base.OnSessionDestroy(xrSession);
+            lifecycleNativeListener.SessionDestroyed(xrSession);
             if (Application.isEditor)
             {
                 return;
@@ -237,12 +316,12 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                 return;
             }
 
-            var playerLoop = LowLevel.PlayerLoop.GetCurrentPlayerLoop();
-            PlayerLoopUtil.RemoveFromPlayerLoop(ref playerLoop, snapshotUpdatePlayerLoop, PlayerLoopUtil.InstallPath);
+            UnregisterSnapshotPlayerLoop();
         }
 
         protected override void OnSessionStateChange(int oldState, int newState)
         {
+            base.OnSessionStateChange(oldState, newState);
             sessionState = (XrSessionState)newState;
         }
 
@@ -250,7 +329,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         {
             base.OnSubsystemCreate();
             
-            CreateSubsystem<XRSessionSubsystemDescriptor, XRSessionSubsystem>(SessionSubsystemDesc, MagicLeapXrProvider.SessionSubsystemId);
+            CreateSubsystem<XRSessionSubsystemDescriptor, XRSessionSubsystem>(SessionSubsystemDesc, "MagicLeapXr-Session");
         }
         
         protected override void OnSubsystemDestroy()
@@ -318,7 +397,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                     break;
 #if DISABLE_MAGICLEAP_CLIP_ENFORCEMENT
                 case NearClipMode.None:
-                    zNear = minimumNearClip;
+                    zNear = MinimumNearClip;
                     break;
 #endif
                 default:
@@ -352,7 +431,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             };
             unsafe
             {
-                var xrResult = timeSpecNativeFunctions.XrConvertTimeSpecTimeToTime(XrInstance, in timeSpec, out var xrTime);
+                var xrResult = timeSpecNativeFunctions.XrConvertTimeSpecTimeToTime(AppInstance, in timeSpec, out var xrTime);
                 Utils.DidXrCallSucceed(xrResult, nameof(timeSpecNativeFunctions.XrConvertTimeSpecTimeToTime));
                 return xrTime;
             }
@@ -362,7 +441,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
         {
             unsafe
             {
-                var xrResult = timeSpecNativeFunctions.XrConvertTimeToTimeSpecTime(XrInstance, xrTime, out var xrTimeSpec);
+                var xrResult = timeSpecNativeFunctions.XrConvertTimeToTimeSpecTime(AppInstance, xrTime, out var xrTimeSpec);
                 if (!Utils.DidXrCallSucceed(xrResult, nameof(timeSpecNativeFunctions.XrConvertTimeToTimeSpecTime)))
                 {
                     return 0;
@@ -370,18 +449,5 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
                 return xrTimeSpec.Seconds * 1000000000 + xrTimeSpec.NanoSeconds;
             }
         }
-        
-        [Obsolete("MagicLeapFeature.ConvertTimestampToXrTime will be deprecated. Use MagicLeapFeature.ConvertTimeStampToXrTime instead")]
-        public static XrTime ConvertTimestampToXrTime(long timestampNs)
-        {
-            return default;
-        }
-        
-        [Obsolete("MagicLeapFeature.ConvertXrTimeToTimestamp will be deprecated. Use MagicLeapFeature.ConvertXRTimeToTimeNanoseconds instead")]
-        public static long ConvertXrTimeToTimestamp(XrTime xrTime)
-        {
-            return 0;
-        }
     }
 }
-#endif

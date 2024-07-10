@@ -1,11 +1,7 @@
-namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
+using UnityEngine;
+
+namespace MagicLeap.OpenXR.Features.MarkerUnderstanding
 {
-    public partial class MagicLeapMarkerUnderstandingFeature
-    {
-        /// <summary>
-        /// The maximum number of marker detectors allowed at once.
-        /// </summary>
-        public const int MarkerDetectorsLimit = 64;
 
         /// <summary>
         /// Represents the different tracker profiles used to optimize marker tracking in difference use cases.
@@ -488,6 +484,5 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
             /// The estimated length of the QR marker in meters.
             /// </summary>
             public float QRLength;
-        }        
-    }
+        }      
 }
