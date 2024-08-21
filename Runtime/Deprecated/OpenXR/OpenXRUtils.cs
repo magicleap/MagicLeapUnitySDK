@@ -94,16 +94,16 @@ namespace UnityEngine.XR.OpenXR
             LightEstimationPermissionDeniedML = -1000481000,
             LightEstimationRGBSensorNotAvailableML = -1000481001
         }
-        
+
         [System.Obsolete("Type has been relocated to new namespace. Update reference to MagicLeap.OpenXR.Features.XrConstants")]
-        
+
         internal static class XrConstants
         {
             internal const ulong NullHandle = 0U;
             internal const long NoDuration = 0U;
             internal const long InfiniteDuration = 0x7fffffffffffffffL;
         }
-        
+
         /// <summary>
         /// Finds an appropriate Magic Leap Controller registered through OpenXR which is properly named and is valid.
         /// </summary>

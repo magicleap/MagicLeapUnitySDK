@@ -25,7 +25,7 @@ using UnityEditor.XR.OpenXR.Features;
 
 namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 {
-    [System.Obsolete("Type has been relocated to new namespace. Update reference to the location within MagicLeap.OpenXR.Features.LocalizationMaps", true)]
+    [System.Obsolete("Type has been relocated to new namespace. Update reference to MagicLeap.OpenXR.Features.LocalizationMaps")]
     public partial class MagicLeapLocalizationMapFeature : MagicLeapOpenXRFeatureWithInterception<MagicLeapLocalizationMapFeature>
     {
         public const string FeatureId = "com.magicleap.openxr.feature.ml2_localizationmap";

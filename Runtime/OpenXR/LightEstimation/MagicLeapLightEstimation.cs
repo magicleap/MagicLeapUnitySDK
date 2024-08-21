@@ -1,11 +1,20 @@
+// %BANNER_BEGIN%
+// ---------------------------------------------------------------------
+// %COPYRIGHT_BEGIN%
+// Copyright (c) (2024) Magic Leap, Inc. All Rights Reserved.
+// Use of this file is governed by the Software License Agreement, located here: https://www.magicleap.com/software-license-agreement-ml2
+// Terms and conditions applicable to third-party materials accompanying this distribution may also be found in the top-level NOTICE file appearing herein.
+// %COPYRIGHT_END%
+// ---------------------------------------------------------------------
+// %BANNER_END%
 using System;
 using System.Threading.Tasks;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine;
-using UnityEngine.XR.MagicLeap.Native;
 using Unity.Burst;
+using UnityEngine.XR.OpenXR.NativeTypes;
 
 namespace MagicLeap.OpenXR.Features.LightEstimation
 {
@@ -157,14 +166,20 @@ namespace MagicLeap.OpenXR.Features.LightEstimation
         public EstimateData GetLightEstimationEstimateData()
         {
             EstimateData estimateData;
-            
+
+            var lastUpdate = GetLastUpdateTime();
+            if (lastUpdate == 0)
+            {
+                return default;
+            }
             ulong lightEstimationEstimate = CreateLightEstimationEstimate();
-            
+
             lastUpdateTime = DateTime.Now;
 
             estimateData.CubeMap = GetHDRCubemapData(lightEstimationEstimate);
             estimateData.DirectionalLight = GetMainDirectionalLight(lightEstimationEstimate);
             estimateData.TimeStampNanoSeconds = GetTimestamp(lightEstimationEstimate);
+            estimateData.HarmonicsCoefficients = GetSphericalHarmonics(lightEstimationEstimate);
 
             DestroyLightEstimationEstimate(lightEstimationEstimate);
 
@@ -290,7 +305,7 @@ namespace MagicLeap.OpenXR.Features.LightEstimation
             }
 
             MainDirectionalLight lightOutput;
-            lightOutput.Direction = mainDirectionalLight.Direction;
+            lightOutput.Direction = new Vector3(mainDirectionalLight.Direction.x, mainDirectionalLight.Direction.y, -mainDirectionalLight.Direction.z);
             lightOutput.Color = mainDirectionalLight.Color;
 
             return lightOutput;

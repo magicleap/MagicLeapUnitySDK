@@ -141,19 +141,97 @@ namespace UnityEngine.XR.MagicLeap.Native
         }
 
         private static byte[] ToRawBytes<T>(this NativeArray<T> arr) where T : struct
-        {
-            var slice = new NativeSlice<T>(arr).SliceConvert<byte>();
-            var bytes = new byte[slice.Length];
-            slice.CopyTo(bytes);
-            return bytes;
-        }
+            => arr.Reinterpret<byte>().ToArray();
 
         private static void CopyFromRawBytes<T>(this NativeArray<T> arr, byte[] bytes) where T : struct
-        {
-            var byteArr = new NativeArray<byte>(bytes, Allocator.Temp);
-            var slice = new NativeSlice<byte>(byteArr).SliceConvert<T>();
+            => arr.Reinterpret<byte>().CopyFrom(bytes);
 
-            slice.CopyTo(arr);
+        internal struct Color2x2
+        {
+            public Color topLeft;
+            public Color topRight;
+            public Color bottomLeft;
+            public Color bottomRight;
+        }
+
+        internal static Color BilinearFilter(in Color2x2 inSample, float x, float y)
+        {
+            var top = Color.Lerp(inSample.topLeft, inSample.topRight, x);
+            var bottom = Color.Lerp(inSample.bottomLeft, inSample.bottomRight, x);
+            return Color.Lerp(top, bottom, y);
+        }
+
+        private static Color GetColorUnchecked(this NativeArray<Color> self, int stride, int x, int y)
+            => self[stride * y + x];
+
+        private static void SetColorUnchecked(this NativeArray<Color> self, int stride, int x, int y, Color newColor)
+            => self[stride * y + x] = newColor;
+
+        internal static Color2x2 ExtractColor2x2(this NativeArray<Color> self, int width, int height, int x, int y)
+        {
+            bool IsInRange(int min, int max, int t)
+                => t >= min && t <= max;
+
+            if (width < 2)
+                throw new ArgumentOutOfRangeException($"{nameof(width)} must be at least 2");
+            if (height < 2)
+                throw new ArgumentOutOfRangeException($"{nameof(height)} must be at least 2");
+            if (!IsInRange(0, width - 2, x))
+                throw new ArgumentOutOfRangeException($"{nameof(x)} must be between 0 and ${nameof(width)} - 1, exclusive");
+            if (!IsInRange(0, height - 2, y))
+                throw new ArgumentOutOfRangeException($"{nameof(y)} must be between 0 and ${nameof(height)} - 1, exclusive");
+
+            return self.ExtractColor2x2Unchecked(width, x, y);
+        }
+
+        internal static Color2x2 ExtractColor2x2Unchecked(this NativeArray<Color> self, int width, int x, int y)
+            => new Color2x2{
+                topLeft = self.GetColorUnchecked(width, x, y),
+                topRight = self.GetColorUnchecked(width, x + 1, y),
+                bottomLeft = self.GetColorUnchecked(width, x, y + 1),
+                bottomRight = self.GetColorUnchecked(width, x + 1, y + 1),
+            };
+
+        /// <summary>
+        /// NOTE: This job requires the source stride to be 2x the destination
+        /// stride; likewise, the source array must be 4x the size of the destination
+        /// array.
+        /// </summary>
+        internal struct BilinearFilteringDownSamplingJob : IJobParallelFor
+        {
+            private struct CoordinateMap
+            {
+                public Vector2Int Destination;
+                public Vector2Int Source;
+
+                public CoordinateMap(int index, int destStride)
+                {
+                    var destY = index / destStride;
+                    var destX = index - destY;
+                    var srcY = destY * 2;
+                    var srcX = destX * 2;
+                    Destination = new Vector2Int(destX, destY);
+                    Source = new Vector2Int(srcX, srcY);
+                }
+            }
+
+            [NativeDisableParallelForRestriction]
+            [ReadOnly]
+            public NativeArray<Color> Source;
+
+            [WriteOnly]
+            public NativeArray<Color> Destination;
+
+            public int SourceStride;
+            public int DestinationStride;
+
+            public void Execute(int index)
+            {
+                var map = new CoordinateMap(index, DestinationStride);
+                var block = Source.ExtractColor2x2Unchecked(SourceStride, map.Source.x, map.Source.y);
+                var c = BilinearFilter(block, 0.5f, 0.5f);
+                Destination.SetColorUnchecked(DestinationStride, map.Destination.x, map.Destination.y, c);
+            }
         }
     }
 }

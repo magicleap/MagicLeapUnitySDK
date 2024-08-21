@@ -18,7 +18,7 @@ using UnityEditor.XR.OpenXR.Features;
 namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 {
     using MagicLeapSystemInfoNativeTypes;
-    [System.Obsolete("Type has been relocated to new namespace. Update reference to the location within MagicLeap.OpenXR.Features", true)]
+    [System.Obsolete("Type has been relocated to new namespace. Update reference to MagicLeap.OpenXR.Features.SystemNotifications")]
     public class MagicLeapSystemNotificationsFeature : MagicLeapOpenXRFeatureBase
     {
         public const string FeatureId = "com.magicleap.openxr.feature.ml2_systemnotification";

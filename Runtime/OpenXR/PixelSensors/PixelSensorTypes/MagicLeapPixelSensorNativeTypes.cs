@@ -133,7 +133,7 @@ namespace MagicLeap.OpenXR.Features.PixelSensors
     /// <summary>
     /// The status of the depth frame projector when the frame is obtained
     /// </summary>
-    public enum PixelSensorDepthFrameIlluminationType : ulong
+    public enum PixelSensorDepthFrameIlluminationType
     {
         /// <summary>
         /// Depth camera frame projector is on
@@ -145,7 +145,26 @@ namespace MagicLeap.OpenXR.Features.PixelSensors
         /// </summary>
         Off
     }
-
+    
+    /// <summary>
+    /// The pixel sensor's reality mode
+    /// </summary>
+    public enum PixelSensorRealityMode
+    {
+        /// <summary>
+        /// Camera frame and digital content will be blended into a single frame
+        /// </summary>
+        Mixed,
+        /// <summary>
+        /// Only camera frame will be captured
+        /// </summary>
+        Camera,
+        /// <summary>
+        /// Only virtual content will be captured
+        /// </summary>
+        Virtual
+    }
+    
     /// <summary>
     /// <para>The frame format capabilities of a sensor.</para>
     /// Note: This is not the same as PixelSensorFrameType.

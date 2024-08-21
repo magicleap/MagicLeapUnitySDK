@@ -12,7 +12,7 @@ namespace MagicLeap.OpenXR.Features.PixelSensors
         internal delegate* unmanaged [Cdecl] <XrPixelSensor, XrResult> XrDestroyPixelSensor;
         internal delegate* unmanaged [Cdecl] <XrPixelSensor, out uint, XrResult> XrGetPixelSensorStreamCount;
         internal delegate* unmanaged [Cdecl] <XrPixelSensor, uint, uint, out uint, XrPixelSensorCapability*, XrResult> XrEnumeratePixelSensorCapabilities;
-        internal delegate* unmanaged [Cdecl] <XrPixelSensor, ref XrPixelSensorCapabilityQueryInfo, uint, IntPtr*, IntPtr, XrResult> XrQueryPixelSensorCapabilities;
+        internal delegate* unmanaged [Cdecl] <XrPixelSensor, ref XrPixelSensorCapabilityQueryInfo, uint, IntPtr*, IntPtr, XrResult> XrQueryPixelSensorCapabilityRange;
         internal delegate* unmanaged [Cdecl] <XrPixelSensor, ref XrPixelSensorConfigInfo, out XrFuture, XrResult> XrConfigurePixelSensorAsync;
         internal delegate* unmanaged [Cdecl] <XrPixelSensor, XrFuture, out XrPixelSensorConfigureCompletion, XrResult> XrConfigurePixelSensorComplete;
         internal delegate* unmanaged [Cdecl] <XrPixelSensor, uint, uint, out uint, PixelSensorMetaDataType*, XrResult> XrEnumeratePixelSensorMetadata;
@@ -52,9 +52,9 @@ namespace MagicLeap.OpenXR.Features.PixelSensors
                 Debug.LogError("Unable to find XrEnumeratePixelSensorCapabilities");
             }
 
-            if (XrQueryPixelSensorCapabilities == null)
+            if (XrQueryPixelSensorCapabilityRange == null)
             {
-                Debug.LogError("Unable to find XrQueryPixelSensorCapabilities");
+                Debug.LogError("Unable to find XrQueryPixelSensorCapabilityRange");
             }
 
             if (XrConfigurePixelSensorAsync == null)
@@ -121,7 +121,7 @@ namespace MagicLeap.OpenXR.Features.PixelSensors
             XrDestroyPixelSensor = (delegate* unmanaged[Cdecl]<XrPixelSensor, XrResult>)LocateNativeFunction(SanitizeFunctionName(nameof(XrDestroyPixelSensor)));
             XrGetPixelSensorStreamCount = (delegate* unmanaged[Cdecl]<XrPixelSensor, out uint, XrResult>)LocateNativeFunction(SanitizeFunctionName(nameof(XrGetPixelSensorStreamCount)));
             XrEnumeratePixelSensorCapabilities = (delegate* unmanaged[Cdecl]<XrPixelSensor, uint, uint, out uint, XrPixelSensorCapability*, XrResult>)LocateNativeFunction(SanitizeFunctionName(nameof(XrEnumeratePixelSensorCapabilities)));
-            XrQueryPixelSensorCapabilities = (delegate* unmanaged[Cdecl]<XrPixelSensor, ref XrPixelSensorCapabilityQueryInfo, uint, IntPtr*, IntPtr, XrResult>)LocateNativeFunction(SanitizeFunctionName(nameof(XrQueryPixelSensorCapabilities)));
+            XrQueryPixelSensorCapabilityRange = (delegate* unmanaged[Cdecl]<XrPixelSensor, ref XrPixelSensorCapabilityQueryInfo, uint, IntPtr*, IntPtr, XrResult>)LocateNativeFunction(SanitizeFunctionName(nameof(XrQueryPixelSensorCapabilityRange)));
             XrConfigurePixelSensorAsync = (delegate* unmanaged[Cdecl]<XrPixelSensor, ref XrPixelSensorConfigInfo, out XrFuture, XrResult>)LocateNativeFunction(SanitizeFunctionName(nameof(XrConfigurePixelSensorAsync)));
             XrConfigurePixelSensorComplete = (delegate* unmanaged[Cdecl]<XrPixelSensor, XrFuture, out XrPixelSensorConfigureCompletion, XrResult>)LocateNativeFunction(SanitizeFunctionName(nameof(XrConfigurePixelSensorComplete)));
             XrEnumeratePixelSensorMetadata = (delegate* unmanaged[Cdecl]<XrPixelSensor, uint, uint, out uint, PixelSensorMetaDataType*, XrResult>)LocateNativeFunction(SanitizeFunctionName(nameof(XrEnumeratePixelSensorMetadata)));

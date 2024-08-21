@@ -30,7 +30,8 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
     using MagicLeapSpatialAnchorsNativeTypes;
     using MagicLeapSpatialAnchorsStorageNativeTypes;
 
-    [System.Obsolete("Type has been relocated to new namespace. Update reference to the location within MagicLeap.OpenXR.Features.SpatialAnchors", true)]
+    [System.Obsolete("Type has been relocated to new namespace. Update reference to MagicLeap.OpenXR.Features.MagicLeapSpatialAnchorsStorageFeature")]
+
     public partial class MagicLeapSpatialAnchorsStorageFeature : MagicLeapOpenXRFeatureBase
     {
         public const string FeatureId = "com.magicleap.openxr.feature.ml2_spatialanchorstorage";

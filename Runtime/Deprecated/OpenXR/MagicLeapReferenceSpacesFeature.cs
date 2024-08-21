@@ -15,7 +15,7 @@ using UnityEditor.XR.OpenXR.Features;
 
 namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 {
-    [System.Obsolete("Type has been relocated to new namespace. Update reference to the location within MagicLeap.OpenXR.Features", true)]
+    [System.Obsolete("Type has been relocated to new namespace. Update reference to MagicLeap.OpenXR.Features")]
     public class MagicLeapReferenceSpacesFeature : MagicLeapOpenXRFeatureBase
     {
         public const string FeatureId = "com.magicleap.openxr.feature.reference_spaces";

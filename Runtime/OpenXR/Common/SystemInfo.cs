@@ -49,15 +49,15 @@ namespace MagicLeap.OpenXR.SystemInfo
     
     internal unsafe class SystemInfoNativeFunctions : NativeFunctionsBase
     {
-        internal delegate* unmanaged [Cdecl] <ulong, in XrSystemGetInfo, out ulong, XrResult> XrGetSystem;
+        internal delegate* unmanaged [Cdecl] <ulong, in XrSystemGetInfo, out XrSystemId, XrResult> XrGetSystem;
         internal delegate* unmanaged [Cdecl] <ulong, ulong, out XrSystemProperties, XrResult> XrGetSystemProperties;
         protected override void LocateNativeFunctions()
         {
-            XrGetSystem = (delegate* unmanaged[Cdecl]<ulong, in XrSystemGetInfo, out ulong, XrResult>)LocateNativeFunction("xrGetSystem");
+            XrGetSystem = (delegate* unmanaged[Cdecl]<ulong, in XrSystemGetInfo, out XrSystemId, XrResult>)LocateNativeFunction("xrGetSystem");
             XrGetSystemProperties = (delegate* unmanaged[Cdecl]<ulong, ulong, out XrSystemProperties, XrResult>)LocateNativeFunction("xrGetSystemProperties");
         }
 
-        internal XrResult GetSystemId(out ulong systemId, XrSystemFormFactor formFactor = XrSystemFormFactor.HeadMountedDisplay)
+        internal XrResult GetSystemId(out XrSystemId systemId, XrSystemFormFactor formFactor = XrSystemFormFactor.HeadMountedDisplay)
         {
             systemId = 0;
             var systemGetInfo = new XrSystemGetInfo

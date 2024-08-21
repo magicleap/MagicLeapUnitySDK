@@ -148,9 +148,28 @@ namespace MagicLeap.OpenXR
       
         
 #if UNITY_EDITOR
-        internal static string GetNiceTypeName(System.Type type)
-            => UnityEditor.ObjectNames.NicifyVariableName(type.Name);
+        internal static string GetNiceTypeName(Type type)
+            => ObjectNames.NicifyVariableName(type.Name);
 
+        internal static OpenXRFeature.ValidationRule GetDepthSubmissionValidationRule(OpenXRFeature feature, BuildTargetGroup targetGroup, OpenXRSettings.DepthSubmissionMode validDepthSubmissionMode = OpenXRSettings.DepthSubmissionMode.Depth16Bit)
+        {
+            var depthSubmissionModeValidationRule = new OpenXRFeature.ValidationRule(feature)
+            {
+                message = $"{nameof(OpenXRSettings.DepthSubmissionMode)} must be set to {validDepthSubmissionMode} to support {GetNiceTypeName(feature.GetType())}",
+                checkPredicate = () =>
+                {
+                    var settings = GetSettings(targetGroup);
+                    return settings.depthSubmissionMode == validDepthSubmissionMode;
+                },
+                fixIt = () =>
+                {
+                    var settings = GetSettings(targetGroup);
+                    settings.depthSubmissionMode = validDepthSubmissionMode;
+                },
+                error = true,
+            };
+            return depthSubmissionModeValidationRule;
+        }
         internal static string GetNiceTypeName<T>()
             => GetNiceTypeName(typeof(T));
         
@@ -188,13 +207,13 @@ namespace MagicLeap.OpenXR
         internal static bool TryEnableFeature(BuildTargetGroup group, Type featureType)
         {
             var feature = GetFeatureForBuildTarget(group, featureType);
-            return feature != null && (feature.enabled = true) || false;
+            return feature != null && (feature.enabled = true);
         }
 
         internal static bool TryEnableFeature<TFeature>(BuildTargetGroup group) where TFeature : OpenXRFeature
         {
             var feature = GetFeatureForBuildTarget<TFeature>(group);
-            return feature != null && (feature.enabled = true) || false;
+            return feature != null && (feature.enabled = true);
         }
 #endif // UNITY_EDITOR
     }

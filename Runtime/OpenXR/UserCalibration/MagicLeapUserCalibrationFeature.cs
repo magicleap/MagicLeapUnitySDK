@@ -123,15 +123,15 @@ namespace MagicLeap.OpenXR.Features.UserCalibration
             unsafe
             {
                 var eventBufferPtr = (XrEventDataBuffer*)eventBuffer;
-                switch (eventBufferPtr->Type)
+                switch ((uint)eventBufferPtr->Type)
                 {
-                    case (ulong)XrUserCalibrationStructTypes.EventDataHeadsetFitChanged:
+                    case (uint)XrUserCalibrationStructTypes.EventDataHeadsetFitChanged:
                         {
                             headsetFit = *(XrEventDataHeadsetFitChanged*)eventBuffer;
                             break;
                         }
 
-                    case (ulong)XrUserCalibrationStructTypes.EventDataEyeCalibrationChanged:
+                    case (uint)XrUserCalibrationStructTypes.EventDataEyeCalibrationChanged:
                         {
                             eyeCalibration = *(XrEventDataEyeCalibrationChanged*)eventBuffer;
                             break;

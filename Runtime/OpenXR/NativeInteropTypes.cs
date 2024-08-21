@@ -76,7 +76,18 @@ namespace MagicLeap.OpenXR
                 path = path
             };
     }
-
+    
+    internal struct XrSystemId
+    {
+        private ulong handle;
+        public static implicit operator ulong(XrSystemId xrInstance) => xrInstance.handle;
+        public static implicit operator XrSystemId(ulong handle) =>
+            new()
+            {
+                handle = handle
+            };
+    }
+    
     internal struct XrSession
     {
         private ulong handle;
@@ -94,7 +105,7 @@ namespace MagicLeap.OpenXR
         internal Vector2Int Extent;
     }
 
-    internal struct XrFovf
+    internal struct XrFov
     {
         internal float AngleLeft;
         internal float AngleRight;
@@ -212,7 +223,30 @@ namespace MagicLeap.OpenXR
         internal XrStructureType Type;
         internal IntPtr Next;
         internal XrCompositionLayerFlags LayerFlags;
-        internal ulong Space;
+        internal XrSpace Space;
+
+        internal unsafe void AppendToLayer(IntPtr nativePtr, int index)
+        {
+            fixed (XrCompositionLayerBaseHeader* layer = &this)
+            {
+                var currentIndex = 0;
+                var currentChain = (XrBaseOutStructure<uint>*)layer;
+                while (currentIndex < index && currentChain->Next != null)
+                {
+                    currentChain = currentChain->Next;
+                    currentIndex++;
+                }
+
+                var targetStruct = (XrBaseOutStructure<uint>*)nativePtr;
+                var targetNext = targetStruct;
+                while (targetNext->Next != null)
+                {
+                    targetNext = targetNext->Next;
+                }
+                targetNext->Next = currentChain->Next;
+                currentChain->Next = targetStruct;
+            }
+        }
     }
 
     internal struct XrFrameEndInfo
@@ -223,6 +257,56 @@ namespace MagicLeap.OpenXR
         internal XrEnvironmentBlendMode EnvironmentBlendMode;
         internal uint LayerCount;
         internal IntPtr Layers;
+
+        internal unsafe void AppendToProjectionLayer(IntPtr nativePtr, int index = 0, bool includeSecondaryViews = false)
+        {
+            var layers = (XrCompositionLayerBaseHeader**)Layers;
+            if (layers != null)
+            {
+                for (var i = 0; i < LayerCount; i++)
+                {
+                    var layer = layers[i];
+                    if (layer->Type != XrStructureType.XrTypeCompositionLayerProjection)
+                    {
+                        continue;
+                    }
+                    layer->AppendToLayer(nativePtr, index);
+                }
+            }
+
+            if (!includeSecondaryViews)
+            {
+                return;
+            }
+
+            if (Next == IntPtr.Zero)
+            {
+                return;
+            }
+
+            var secondaryView = (XrSecondaryViewConfigurationFrameEndInfoMSFT*)Next;
+            if (secondaryView == null || secondaryView->ViewConfigurationLayersInfo == null)
+            {
+                return;
+            }
+
+            var secondaryLayerInfo = secondaryView->ViewConfigurationLayersInfo;
+            var secondaryLayers = (XrCompositionLayerBaseHeader**)secondaryLayerInfo->Layers;
+            if (secondaryLayers == null)
+            {
+                return;
+            }
+
+            for (var i = 0; i < secondaryLayerInfo->LayerCount; i++)
+            {
+                var layer = secondaryLayers[i];
+                if (layer == null || layer->Type != XrStructureType.XrTypeCompositionLayerProjection)
+                {
+                    continue;
+                }
+                layer->AppendToLayer(nativePtr, index);
+            }
+        }
     }
 
     internal struct FeatureLifecycleNativeListenerInternal
@@ -322,7 +406,7 @@ namespace MagicLeap.OpenXR
         internal XrStructureType Type;
         internal IntPtr Next;
         internal XrPose Pose;
-        internal XrFovf FOV;
+        internal XrFov FOV;
     }
 
     internal unsafe struct XrCompositionLayerProjection
@@ -335,7 +419,7 @@ namespace MagicLeap.OpenXR
         internal XrCompositionLayerProjectionView* Views;
     }
 
-    internal enum XrStructureType : ulong
+    internal enum XrStructureType
     {
         XrTypeFrameEndInfo = 12,
         XrTypeCompositionLayerProjectionView = 48,
@@ -347,5 +431,23 @@ namespace MagicLeap.OpenXR
         CorrectChomaticAberrationBit = 0x00001,
         BlendTextureSourceAlpha = 2,
         UnPreMultipliedAlpha = 4,
+    }
+
+    internal struct XrSecondaryViewConfigurationLayerInfoMSFT
+    {
+        internal uint Type;
+        internal IntPtr Next;
+        internal XrViewConfigurationType ViewConfigurationType;
+        internal XrEnvironmentBlendMode EnvironmentBlendMode;
+        internal uint LayerCount;
+        internal IntPtr Layers;
+    }
+
+    internal unsafe struct XrSecondaryViewConfigurationFrameEndInfoMSFT
+    {
+        internal uint Type;
+        internal IntPtr Next;
+        internal uint ViewConfigurationCount;
+        internal XrSecondaryViewConfigurationLayerInfoMSFT* ViewConfigurationLayersInfo;
     }
 }

@@ -1,5 +1,31 @@
 # Changelog
 
+## [2.4.0]
+
+### Bugfixes 
+- Fixed an issue with `MagicLeapMarkerUnderstandingFeature` where a marker's pose reverts to a default value instead of null.
+- Fixed an issue with `MagicLeapLightEstimationFeature` where a crash occurs when switching between cube map resolutions.
+- Fixed an issue with `MagicLeapPixelSensorFeature.ConfigureSensorWithDefaultCapabilities` function where it would fail for sensors with AutoExposure capabilities.
+- Fixed a crash when using `Magic Leap 2 Physical Occlusion` with editor versions starting from `2022.3.25f1` onward.
+- Fixed an issue with `MagicLeapUserCalibrationFeature` where it reports incorrect `EyeCalibrationData.Status`.
+
+### Deprecations & Removals
+- Deprecated `YcbcrRenderer` and its associated classes. Please use `YCbCrRenderer` instead.
+
+### Features
+- Added `Magic Leap 2 Physical Occlusion` OpenXR feature.
+- Added `Magic Leap 2 Reprojection` OpenXR feature.
+- Samples have been added for select OpenXR features.
+- Added `Magic Leap 2 Eye Tracker` OpenXR feature.
+- Added `com.magicleap.permission.USB_SIPSOP` to the `MagicLeap/Permissions` section of Project Settings. 
+- Added `YCbCrHardwareBufferRenderer` that uses `AHardwareBuffer` as its input.
+- Added `MagicLeapPixelSensorRealityMode` enum to the Pixel Sensor API.
+- Undeprecated `MLCamera` API. 
+- Added `EstimateData.HarmonicsCoefficients` to the Light Estimation feature.
+
+### Misc.
+- Changed default value for Blend Mode in `Magic Leap 2 Rendering Extensions` to `Additive`. 
+
 ## [2.3.0]
 
 ### Features
@@ -11,7 +37,7 @@
 
 ### Improvements
 - Updated Magic Leap Feature sets to visually distinguish in the UI between experimental and non-experimental OpenXR extensions. 
-- Reorganized classes and types into new `MagicLeap.OpenXR` namespaces, separating Magic Leap code from `UnityEngine` and `UnityEditor` code. See `Deprecation & Removals` note below.
+- Reorganized classes and types into new `MagicLeap.OpenXR` namespaces, separating Magic Leap code from `UnityEngine` and `UnityEditor` code.
 - Adjusted `MagicLeapSpatialAnchorsStorageFeature` to work with the `XRAnchorSubsystem` automatically and no longer depends on manual adding and deleting. All code that currently does this should be adjusted and it is encouraged to use the built in `ARAnchorManager.anchorsChanged` event.
 - Added `CaptureTime` to `PixelSensorFrame` to get the capture time of the corresponding frame for `MagicLeapPixelSensorFeature`.
 
@@ -21,7 +47,7 @@
 - Fixed issue of potentially corrupted Cubemap for `MagicLeapLightEstimationFeature.GetEstimateCubemap`
 
 ### Deprecations & Removals
-- All `OpenXRFeature` classes inside the `UnityEngine.XR.OpenXR.Features.MagicLeapSupport` namespace have been marked Obsolete, as they have been relocated to new `MagicLeap` namespaces. Updating existing code to use this release of the Magic Leap SDK will create compiler errors in the console for any references to these classes. Manual changes will be required due to how OpenXR Settings data is serialized by the Editor. 
+- All classes inside `UnityEngine.XR.OpenXR.Features.MagicLeapSupport` namespaces have been marked Obsolete
 - Deprecated `MagicLeapMeshingFeature.GetMeshIds(out TrackableId[])`. Use `MagicLeapMeshingFeature.GetMeshIds(out MeshId[])` instead.
 - Deprecated `MagicLeapMeshingFeature.GetMeshData(in TrackableId,...)`. Use `MagicLeapMeshingFeature.GetMeshData(in MeshId,...)` instead.
 - Deprecated `MLXrAnchorSubsystem.GetAnchorPoseFromID`. Use `MLXrAnchorSubsystem.GetAnchorPoseFromId` instead.

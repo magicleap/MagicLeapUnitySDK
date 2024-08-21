@@ -19,8 +19,8 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 {
     using MagicLeapUserCalibrationNativeTypes;
     using MagicLeapOpenXRFeatureNativeTypes;
-
-    [System.Obsolete("Type has been relocated to new namespace. Update reference to the location within MagicLeap.OpenXR.Features.UserCalibration", true)]
+    
+    [System.Obsolete("Type has been relocated to new namespace. Update reference to MagicLeap.OpenXR.Features.UserCalibration")]
     public class MagicLeapUserCalibrationFeature : MagicLeapOpenXRFeatureWithInterception<MagicLeapUserCalibrationFeature>
     {
         public const string FeatureId = "com.magicleap.openxr.feature.ml2_usercalibration";

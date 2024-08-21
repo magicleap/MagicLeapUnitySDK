@@ -63,7 +63,9 @@ namespace MagicLeap.OpenXR.Features.PixelSensors
         /// The array of frame formats
         /// </summary>
         public PixelSensorFrameFormat[] FrameFormats { get; internal set; }
-
+        
+        //The array of Reality Modes
+        public PixelSensorRealityMode[] RealityModes { get; internal set; }
         /// <summary>
         /// The array of auto exposure modes
         /// </summary>
@@ -88,6 +90,7 @@ namespace MagicLeap.OpenXR.Features.PixelSensors
             CheckAndAppendArr(ExtentValues);
             CheckAndAppendArr(ExposureModes);
             CheckAndAppendArr(FrameFormats);
+            CheckAndAppendArr(RealityModes);
 
             if (IntRange != null)
             {
@@ -127,6 +130,7 @@ namespace MagicLeap.OpenXR.Features.PixelSensors
             SetDefaultValue(out result.VectorValue, ExtentValues);
             SetDefaultValue(out result.ExposureMode, ExposureModes);
             SetDefaultValue(out result.FrameFormat, FrameFormats);
+            SetDefaultValue(out result.RealityMode, RealityModes);
 
             if (FloatRange != null)
             {

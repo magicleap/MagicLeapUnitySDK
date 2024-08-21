@@ -1,7 +1,7 @@
 {
     "name": "com.magicleap.unitysdk",
     "displayName": "Magic Leap SDK",
-    "version": "2.3.0",
+    "version": "2.4.0",
     "unity": "2022.3",
     "description": "Provides implementations of Magic Leap OpenXR extension APIs and XR subsystems for building and running on the Magic Leap 2.",
     "keywords": [
@@ -31,6 +31,36 @@
             "displayName": "ML Rig & OpenXR Input",
             "description": "These sample assets are designed for use with OpenXR. Contains an ML Rig prefab with XROrigin and TrackedPoseDrivers for the HMD and Controller, as well as a sample InputActions asset with ML Controller Actions bound to OpenXR action paths.",
             "path": "Samples~/Rig&Inputs"
+        },
+        {
+            "displayName": "Eye Gaze sample",
+            "description": "This sample uses the Gaze Interaction profile to track your eye gaze around the scene.",
+            "path": "Samples~/EyeGaze"
+        },
+        {
+            "displayName": "Global Dimmer sample",
+            "description": "This sample uses the Global Dimmer to dim the environment around you, allowing for adjusting the value or toggling dimmer on/off.",
+            "path": "Samples~/GlobalDimmer"
+        },
+        {
+            "displayName": "Marker Understanding sample",
+            "description": "This sample uses the Marker Understanding feature to retrieve information on QR codes.",
+            "path": "Samples~/MarkerUnderstanding"
+        },
+        {
+            "displayName": "Planes sample",
+            "description": "This sample detects surfaces and displays planes in your environment with the Planes subsystem feature.",
+            "path": "Samples~/Planes"
+        },
+        {
+            "displayName": "Segmented Dimmer sample",
+            "description": "This sample demonstrates the effects of Segmented Dimmer via AlphaBlend mode.",
+            "path": "Samples~/SegmentedDimmer"
+        },
+        {
+            "displayName": "Meshing sample [EXPERIMENTAL]",
+            "description": "This sample demonstrates viewing and switching between different meshing modes.",
+            "path": "Samples~/Meshing"
         }
     ]
 }

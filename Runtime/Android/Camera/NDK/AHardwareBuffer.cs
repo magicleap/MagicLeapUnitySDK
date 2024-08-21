@@ -143,10 +143,11 @@ namespace MagicLeap.Android.NDK.NativeWindow
             public Usage Usage;
             public uint Stride;
             private uint reserved0;
-            private uint reserved1;
+            private ulong reserved1;
 
             public bool HasMultiplePlanes
-                => Format == Format.Y8Cb8Cr8_420 || Format == Format.YCbCrP010;
+                => Format is Format.Y8Cb8Cr8_420 or Format.YCbCrP010;
+
         }
 
         public enum Format
@@ -290,6 +291,27 @@ namespace MagicLeap.Android.NDK.NativeWindow
 
             public int PlaneCount => planeCount;
 
+
+            public Plane this[int index]
+            {
+                get
+                {
+                    CheckPlaneIndexAndThrow(index);
+                    fixed (byte* start = planesRaw)
+                    {
+                        return UnsafeUtility.ReadArrayElement<Plane>(start, index);
+                    }
+                }
+                set
+                {
+                    CheckPlaneIndexAndThrow(index);
+                    fixed (byte* start = planesRaw)
+                    {
+                        UnsafeUtility.WriteArrayElement(start, index, value);
+                    }
+                }
+            }
+            
             public Plane PlaneFor(int planeIdx)
             {
                 CheckPlaneIndexAndThrow(planeIdx);
@@ -547,6 +569,8 @@ namespace MagicLeap.Android.NDK.NativeWindow
 
         internal void ReleaseUnchecked()
             => AHardwareBuffer_release(this);
+
+        internal IntPtr GetNativeHandle() => value;
 
 
         [Conditional("DEVELOPMENT_BUILD")]

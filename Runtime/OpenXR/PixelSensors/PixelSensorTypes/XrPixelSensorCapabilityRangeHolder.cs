@@ -97,8 +97,10 @@ namespace MagicLeap.OpenXR.Features.PixelSensors
                                 case PixelSensorCapabilityType.AutoExposureMode:
                                     result.ExposureModes = result.IntValues.Select(val => (PixelSensorAutoExposureMode)val).ToArray();
                                     break;
+                                case PixelSensorCapabilityType.MixedReality:
+                                    result.RealityModes = result.IntValues.Select(val => (PixelSensorRealityMode)val).ToArray();
+                                    break;
                             }
-
                             break;
                         }
                         case PixelSensorCapabilityDataType.Extent2D:

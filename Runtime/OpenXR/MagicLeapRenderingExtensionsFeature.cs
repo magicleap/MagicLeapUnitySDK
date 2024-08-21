@@ -15,6 +15,8 @@ using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.XR.MagicLeap.Unsafe;
 using UnityEngine.XR.OpenXR.NativeTypes;
+using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.XR.OpenXR.Features;
@@ -36,15 +38,32 @@ namespace MagicLeap.OpenXR.Features
     public unsafe partial class MagicLeapRenderingExtensionsFeature : MagicLeapOpenXRFeatureWithInterception<MagicLeapRenderingExtensionsFeature>
     {   
         public const string FeatureId = "com.magicleap.openxr.feature.rendering_extensions";
+
+        [SerializeField, FormerlySerializedAs("BlendMode")]
+        private XrEnvironmentBlendMode defaultBlendModeSelection = XrEnvironmentBlendMode.Additive;
         public float FocusDistance;
         public bool UseProtectedSurface;
         public bool UseVignetteMode;
-
         public bool GlobalDimmerEnabled;
         public float GlobalDimmerValue;
 
-        public XrEnvironmentBlendMode BlendMode = XrEnvironmentBlendMode.AlphaBlend;
+        // This is the value which will actually be set in the onEndFrame interception
+        private XrEnvironmentBlendMode requestedBlendMode = XrEnvironmentBlendMode.Additive;
 
+        /// <summary>
+        /// Controls alpha passthrough behavior and determines whether Segmented Dimming will be visible in the scene
+        /// </summary>
+        public XrEnvironmentBlendMode BlendMode
+        {
+            get => requestedBlendMode;
+            set
+            {
+                if (value == XrEnvironmentBlendMode.Opaque)
+                    Debug.LogError($"XrEnvironmentBlendMode.Opaque is not currently supported on Magic Leap.");
+                else
+                    requestedBlendMode = value;
+            }
+        }
 
         private XrFrameEndInfoML* frameEndInfoML;
         private XrGlobalDimmerFrameEndInfoML* globalDimmerFrameInfo;
@@ -56,6 +75,13 @@ namespace MagicLeap.OpenXR.Features
             InitializeOpenXRState();
 
             Application.onBeforeRender += SynchronizeRenderState;
+            SceneManager.sceneLoaded += OnSceneLoaded;
+        }
+
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            requestedBlendMode = defaultBlendModeSelection;
+            SceneManager.sceneLoaded -= OnSceneLoaded;
         }
 
         protected override void OnSessionEnd(ulong xrSession)
@@ -84,14 +110,6 @@ namespace MagicLeap.OpenXR.Features
             globalDimmerFrameInfo->Type = XrRenderingStructTypes.XrTypeGlobalDimmerFrameEndInfo;
             frameEndInfoML->Next = new IntPtr(globalDimmerFrameInfo);
         }
-        
-        private void ValidateBlendMode()
-        {
-            if (BlendMode == XrEnvironmentBlendMode.Opaque)
-            {
-                throw new NotSupportedException($"XrEnvironmentBlendMode.Opaque is not supported on Magic Leap 2");
-            }
-        }
 
         private void SynchronizeRenderState()
         {
@@ -101,13 +119,12 @@ namespace MagicLeap.OpenXR.Features
                 (UseVignetteMode ? XrFrameEndInfoFlagsML.Vignette : 0);
             globalDimmerFrameInfo->DimmerValue = GlobalDimmerValue;
             globalDimmerFrameInfo->Flags = (GlobalDimmerEnabled) ? XrGlobalDimmerFrameEndInfoFlags.Enabled : 0;
-            ValidateBlendMode();
         }
 
         internal override XrResult OnEndFrame(ulong session, XrFrameEndInfo* origFrameEndInfo, XrEndFrame origEndFrame)
         {
             var frameEndInfo = *origFrameEndInfo;
-            frameEndInfo.EnvironmentBlendMode = BlendMode;
+            frameEndInfo.EnvironmentBlendMode = requestedBlendMode;
             
             var end = (XrBaseOutStructure<uint>*)&frameEndInfo;
             while (end->Next != null)

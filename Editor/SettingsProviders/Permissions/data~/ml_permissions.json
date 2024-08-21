@@ -88,6 +88,11 @@
         "description": "Permission to obtain facial expression data.",
         "level": "dangerous",
         "min_api_level": 29
+    },
+    {
+        "name": "com.magicleap.permission.USB_SIPSOP",
+        "description": "Permission to control USB SIP/SOP flows for Medical SKUs.",
+        "level": "normal",
+        "min_api_level": 31
     }
-
 ]

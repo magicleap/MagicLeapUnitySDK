@@ -23,7 +23,8 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 {
     using NativeInterop;
 
-    [System.Obsolete("Type has been relocated to new namespace. Update reference to the location within MagicLeap.OpenXR.Features.Meshing", true)]
+    [System.Obsolete("Type has been relocated to new namespace. Update reference to MagicLeap.OpenXR.Features.Meshing")]
+
     public partial class MagicLeapMeshingFeature : MagicLeapOpenXRFeatureBase
     {
         public const string FeatureId = "com.magicleap.openxr.feature.ml2_mesh_detection";

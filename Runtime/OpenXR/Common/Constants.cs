@@ -78,6 +78,8 @@ namespace MagicLeap.OpenXR.Constants
         PixelSensorCapabilityNotSupportedML = 1000475003,
         PixelSensorSpaceNotSupportedML = 1000475004,
         LightEstimationPermissionDeniedML = -1000481000,
-        LightEstimationRGBSensorNotAvailableML = -1000481001
+        LightEstimationRGBSensorNotAvailableML = -1000481001,
+        EyeTrackerPermissionDeniedML = -1000484000,
+        PupilSizePermissionDeniedML = -1000484001
     }
 }

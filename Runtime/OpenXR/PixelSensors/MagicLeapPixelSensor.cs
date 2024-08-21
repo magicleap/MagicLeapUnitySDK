@@ -339,14 +339,14 @@ namespace MagicLeap.OpenXR.Features.PixelSensors
                     }
                 }
 
-                var xrResult = NativeFunctions.XrQueryPixelSensorCapabilities(Handle, ref queryInfo, (uint)configArray.Length, (IntPtr*)configHeaders.GetUnsafePtr(), rangeHolder.GetBaseHeader());
-                if (Utils.DidXrCallSucceed(xrResult, $"{nameof(PixelSensorNativeFunctions.XrQueryPixelSensorCapabilities)}WithoutBuffer"))
+                var xrResult = NativeFunctions.XrQueryPixelSensorCapabilityRange(Handle, ref queryInfo, (uint)configArray.Length, (IntPtr*)configHeaders.GetUnsafePtr(), rangeHolder.GetBaseHeader());
+                if (Utils.DidXrCallSucceed(xrResult, $"{nameof(PixelSensorNativeFunctions.XrQueryPixelSensorCapabilityRange)}WithoutBuffer"))
                 {
                     if (MagicLeapPixelSensorFeature.IsRangeTypeDiscrete(capabilityRangeType))
                     {
                         //If it is a discrete type then we have to call the buffer again
-                        xrResult = NativeFunctions.XrQueryPixelSensorCapabilities(Handle, ref queryInfo, (uint)configArray.Length, (IntPtr*)configHeaders.GetUnsafePtr(), rangeHolder.GetBaseHeaderForDiscreteValues());
-                        if (!Utils.DidXrCallSucceed(xrResult, nameof(PixelSensorNativeFunctions.XrQueryPixelSensorCapabilities)))
+                        xrResult = NativeFunctions.XrQueryPixelSensorCapabilityRange(Handle, ref queryInfo, (uint)configArray.Length, (IntPtr*)configHeaders.GetUnsafePtr(), rangeHolder.GetBaseHeaderForDiscreteValues());
+                        if (!Utils.DidXrCallSucceed(xrResult, nameof(PixelSensorNativeFunctions.XrQueryPixelSensorCapabilityRange)))
                         {
                         }
                     }

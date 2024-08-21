@@ -24,7 +24,7 @@ using UnityEngine.XR.ARSubsystems;
 
 namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 {
-    [System.Obsolete("Type has been relocated to new namespace. Update reference to the location within MagicLeap.OpenXR.InteractionProfiles", true)]
+    [System.Obsolete("Type has been relocated to new namespace. Update reference to MagicLeap.OpenXR.InteractionProfiles")]
     public class MagicLeapControllerProfile : OpenXRInteractionFeature
     {
         /// <summary>

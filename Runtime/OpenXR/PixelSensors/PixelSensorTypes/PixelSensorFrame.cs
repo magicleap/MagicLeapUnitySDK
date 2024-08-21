@@ -86,10 +86,10 @@ namespace MagicLeap.OpenXR.Features.PixelSensors
                 outputPlane.NativePlane = inputPlane;
                 outputPlane.ByteData = new NativeArray<byte>((int)inputPlane.BufferSize, allocator);
                 var byteArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<byte>(inputPlane.Buffer, (int)inputPlane.BufferSize, Allocator.None);
-                if (!shouldFlipTexture)
+                if (!shouldFlipTexture || FrameType == PixelSensorFrameType.Jpeg)
                 {
                     outputPlane.ByteData.CopyFrom(byteArray);
-                    return;
+                    continue;
                 }
 
                 new FlipTextureJob

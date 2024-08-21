@@ -31,7 +31,7 @@ namespace MagicLeap.OpenXR.Features.PixelSensors
         {
             if (!IncomingValidStatus.Contains(Sensor.Status) && Sensor.Status != OperationFinishStatus)
             {
-                throw new InvalidOperationException($"{Sensor.SensorType}'s streams does not have the right status (Expected Status: [{string.Join(',', IncomingValidStatus)}]");
+                throw new InvalidOperationException($"{Sensor.SensorType}'s streams does not have the right status (Expected Status: [{string.Join(',', IncomingValidStatus)}], Current Status: {Sensor.Status}");
             }
 
             ProcessedStreams.Clear();

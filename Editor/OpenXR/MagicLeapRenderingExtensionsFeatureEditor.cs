@@ -30,7 +30,7 @@ namespace MagicLeap.OpenXR.Features
 
         private void OnEnable()
         {
-            blendModeProperty = serializedObject.FindProperty("BlendMode");
+            blendModeProperty = serializedObject.FindProperty("defaultBlendModeSelection");
             protectedSurfaceProperty = serializedObject.FindProperty("UseProtectedSurface");
             vignetteProperty = serializedObject.FindProperty("UseVignetteMode");
             globalDimmerProperty = serializedObject.FindProperty("GlobalDimmerEnabled");

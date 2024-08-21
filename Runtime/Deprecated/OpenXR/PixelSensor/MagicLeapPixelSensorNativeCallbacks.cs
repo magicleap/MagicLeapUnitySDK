@@ -54,7 +54,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 
                 if (XrQueryPixelSensorCapabilities == null)
                 {
-                    Debug.LogError("Unable to find XrQueryPixelSensorCapabilities");
+                    Debug.LogError("Unable to find XrQueryPixelSensorCapabilityRange");
                 }
 
                 if (XrConfigurePixelSensorAsync == null)

@@ -25,8 +25,8 @@ using UnityEditor.XR.OpenXR.Features;
 namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
 {
     using global::MagicLeap;
-
-    [System.Obsolete("Type has been relocated to new namespace. Update reference to the location within MagicLeap.OpenXR.Features.PixelSensors", true)]
+    
+    [System.Obsolete("Type has been relocated to new namespace. Update reference to MagicLeap.OpenXR.Features.PixelSensors")]
     public partial class MagicLeapPixelSensorFeature : MagicLeapOpenXRFeatureWithInterception<MagicLeapPixelSensorFeature>
     {
         public event Action<PixelSensorId, bool> OnSensorAvailabilityChanged;

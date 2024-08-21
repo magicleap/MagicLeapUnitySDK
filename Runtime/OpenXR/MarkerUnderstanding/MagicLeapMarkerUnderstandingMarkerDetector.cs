@@ -133,11 +133,13 @@ namespace MagicLeap.OpenXR.Features.MarkerUnderstanding
         {
             Status = GetMarkerDetectorState();
 
-            if (Status == MarkerDetectorStatus.Ready)
+            if (Status != MarkerDetectorStatus.Ready)
             {
-                activeSnapshot = false;
-                data = GetMarkersData();
+                return;
             }
+
+            activeSnapshot = false;
+            data = GetMarkersData();
         }
 
         /// <summary>
@@ -168,7 +170,6 @@ namespace MagicLeap.OpenXR.Features.MarkerUnderstanding
             {
                 Type = XrMarkerUnderstandingStructTypes.XrTypeMarkerDetectorState,
             };
-
             var resultCode = NativeFunctions.XrGetMarkerDetectorState(handle, out xrMarkerState);
             Utils.DidXrCallSucceed(resultCode, nameof(NativeFunctions.XrGetMarkerDetectorState));
             return (MarkerDetectorStatus)xrMarkerState.Status;
@@ -263,15 +264,7 @@ namespace MagicLeap.OpenXR.Features.MarkerUnderstanding
                 markerData.MarkerString = null;
             }
 
-            if (Settings.MarkerType == MarkerType.Aruco || Settings.MarkerType == MarkerType.QR || Settings.MarkerType == MarkerType.AprilTag)
-            {
-                markerData.MarkerPose = CreateMarkerSpace(marker);
-            }
-            else
-            {
-                markerData.MarkerPose = null;
-            }
-
+            markerData.MarkerPose = Settings.MarkerType is MarkerType.Aruco or MarkerType.QR or MarkerType.AprilTag ? CreateMarkerSpace(marker) : null;
             return markerData;
         }
 
@@ -315,17 +308,15 @@ namespace MagicLeap.OpenXR.Features.MarkerUnderstanding
             return result;
         }
 
-        private unsafe Pose CreateMarkerSpace(ulong marker)
+        private unsafe Pose? CreateMarkerSpace(ulong marker)
         {
-            Pose pose = default;
-
             // a marker space is not created if one already exists for that marker
             if (markerSpaces.TryGetValue(marker, out var space))
             {
-                pose = NativeFunctions.GetUnityPose(space, MarkerUnderstandingFeature.AppSpace, MarkerUnderstandingFeature.NextPredictedDisplayTime);
+                var pose = NativeFunctions.GetUnityPose(space, MarkerUnderstandingFeature.AppSpace, MarkerUnderstandingFeature.NextPredictedDisplayTime);
                 return pose;
             }
-
+            
             var markerCreateSpaceInfo = new XrMarkerSpaceCreateInfo
             {
                 Type = XrMarkerUnderstandingStructTypes.XrTypeMarkerSpaceCreateInfo,
@@ -339,8 +330,7 @@ namespace MagicLeap.OpenXR.Features.MarkerUnderstanding
             {
                 markerSpaces.Add(marker, xrSpace);
             }
-
-            return pose;
+            return null;
         }
     }
 }

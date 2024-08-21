@@ -152,6 +152,11 @@ namespace MagicLeap.OpenXR.Features.PixelSensors
         /// The frame format value
         /// </summary>
         public PixelSensorFrameFormat? FrameFormat;
+        
+        /// <summary>
+        /// The Reality Mode value
+        /// </summary>
+        public PixelSensorRealityMode? RealityMode;
 
         /// <summary>
         /// The integer value
@@ -199,7 +204,7 @@ namespace MagicLeap.OpenXR.Features.PixelSensors
                     return PixelSensorCapabilityDataType.Float;
                 }
 
-                if (IntValue.HasValue || FrameFormat.HasValue || ExposureMode.HasValue)
+                if (IntValue.HasValue || FrameFormat.HasValue || ExposureMode.HasValue || RealityMode.HasValue)
                 {
                     return PixelSensorCapabilityDataType.UnsignedInt32;
                 }
@@ -224,6 +229,7 @@ namespace MagicLeap.OpenXR.Features.PixelSensors
             IntValue = null;
             FrameFormat = null;
             ExposureMode = null;
+            RealityMode = null;
         }
         
         internal static XrPixelSensorStructTypes GetStructTypeFromRangeAndData(PixelSensorCapabilityRangeType rangeType, PixelSensorCapabilityDataType dataType)

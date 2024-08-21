@@ -8,13 +8,16 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
+using MagicLeap.OpenXR.Features.EyeTracker;
 using MagicLeap.OpenXR.Features.FacialExpressions;
 using MagicLeap.OpenXR.Features.LightEstimation;
 using MagicLeap.OpenXR.Features.LocalizationMaps;
 using MagicLeap.OpenXR.Features.MarkerUnderstanding;
 using MagicLeap.OpenXR.Features.Meshing;
+using MagicLeap.OpenXR.Features.PhysicalOcclusion;
 using MagicLeap.OpenXR.Features.PixelSensors;
 using MagicLeap.OpenXR.Features.Planes;
+using MagicLeap.OpenXR.Features.Reprojection;
 using MagicLeap.OpenXR.Features.SpatialAnchors;
 using MagicLeap.OpenXR.Features.SystemNotifications;
 using MagicLeap.OpenXR.Features.UserCalibration;
@@ -67,7 +70,10 @@ namespace MagicLeap.OpenXR.Features
             MagicLeapLightEstimationFeature.FeatureId,
             MagicLeapPixelSensorFeature.FeatureId,
             MagicLeapDepthRangeChangeFeature.FeatureId,
-            MagicLeapSystemNotificationsFeature.FeatureId
+            MagicLeapSystemNotificationsFeature.FeatureId,
+            MagicLeapPhysicalOcclusionFeature.FeatureId,
+            MagicLeapReprojectionFeature.FeatureId,
+            MagicLeapEyeTrackerFeature.FeatureId,
         },
         DefaultFeatureIds = new[] {
             MagicLeapSpatialAnchorsFeature.FeatureId,
@@ -77,7 +83,10 @@ namespace MagicLeap.OpenXR.Features
             MagicLeapLightEstimationFeature.FeatureId,
             MagicLeapPixelSensorFeature.FeatureId,
             MagicLeapDepthRangeChangeFeature.FeatureId,
-            MagicLeapSystemNotificationsFeature.FeatureId
+            MagicLeapSystemNotificationsFeature.FeatureId,
+            MagicLeapPhysicalOcclusionFeature.FeatureId,
+            MagicLeapReprojectionFeature.FeatureId,
+            MagicLeapEyeTrackerFeature.FeatureId,
         }
     )]
     public class MagicLeapExperimentalFeatureGroup { }

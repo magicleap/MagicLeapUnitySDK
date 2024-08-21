@@ -239,6 +239,7 @@ namespace MagicLeap.OpenXR.Subsystems
                     var invalidPlanes = new TrackableChanges<BoundedPlane>(0, 0, invalidatedPlanes.Count, allocator);
                     invalidPlanes.removed.CopyFrom(new NativeArray<TrackableId>(invalidatedPlanes.ToArray(), Allocator.Temp));
                     invalidatedPlanes.Clear();
+                    planes.Clear();
                     return invalidPlanes;
                 }
                 

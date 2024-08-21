@@ -111,6 +111,22 @@ namespace MagicLeap.OpenXR.Features
         protected virtual bool UsesExperimentalExtensions { get; } = false;
 
 #if UNITY_EDITOR
+        internal string DisplayName
+        {
+            get
+            {
+                var attr = GetFeatureAttribute();
+                if (attr == null)
+                {
+                    return Utils.GetNiceTypeName(GetType());
+                }
+                return attr.UiName;
+            }
+        }
+
+        internal OpenXRFeatureAttribute GetFeatureAttribute() =>
+            (OpenXRFeatureAttribute)Attribute.GetCustomAttribute(GetType(), typeof(OpenXRFeatureAttribute));
+
         protected override void GetValidationChecks(List<ValidationRule> rules, BuildTargetGroup targetGroup)
         {
             base.GetValidationChecks(rules, targetGroup);
@@ -130,7 +146,7 @@ namespace MagicLeap.OpenXR.Features
                 checkPredicate = ()=> Utils.IsFeatureEnabled(group, featureType),
                 fixIt = () => Utils.TryEnableFeature(group, featureType),
                 error = true,
-                message = $"{Utils.GetNiceTypeName(GetType())} depends on Feature \"{Utils.GetNiceTypeName(featureType)}\", which is not enabled."
+                message = $"{DisplayName} depends on Feature \"{Utils.GetNiceTypeName(featureType)}\", which is not enabled."
             };
         
         protected ValidationRule GetDependencyRule<TFeature>(BuildTargetGroup group) where TFeature : OpenXRFeature
@@ -139,7 +155,7 @@ namespace MagicLeap.OpenXR.Features
                 checkPredicate = ()=> Utils.IsFeatureEnabled<TFeature>(group),
                 fixIt = () => Utils.TryEnableFeature<TFeature>(group),
                 error = true,
-                message = $"{Utils.GetNiceTypeName(GetType())} depends on Feature \"{Utils.GetNiceTypeName<TFeature>()}\", which is not enabled."
+                message = $"{DisplayName} depends on Feature \"{Utils.GetNiceTypeName<TFeature>()}\", which is not enabled."
             };
 
         protected ValidationRule ExperimentalStatus =>
@@ -147,7 +163,7 @@ namespace MagicLeap.OpenXR.Features
             {
                 checkPredicate = ()=> !UsesExperimentalExtensions,
                 error = false,
-                message = $"NOTE: This feature relies on one or more experimental extensions not part of the OpenXR Specification."
+                message = $"NOTE: The OpenXR Feature \"{DisplayName}\" relies on one or more experimental extensions not part of the OpenXR Specification."
             };
         
 #endif

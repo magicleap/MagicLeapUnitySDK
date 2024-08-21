@@ -37,7 +37,7 @@ namespace MagicLeap.OpenXR.Features.SystemNotifications
 
         private SystemNotificationNativeFunctions systemNotificationNativeFunctions;
         private SystemInfoNativeFunctions systemInfoNativeFunctions;
-        private ulong systemId;
+        private XrSystemId systemId;
 
         protected override bool UsesExperimentalExtensions => true;
 

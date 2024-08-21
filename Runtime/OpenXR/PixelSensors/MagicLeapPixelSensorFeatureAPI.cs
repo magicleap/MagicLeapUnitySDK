@@ -281,6 +281,12 @@ namespace MagicLeap.OpenXR.Features.PixelSensors
         /// <returns>An async operation object for this operation (See: <see cref="PixelSensorAsyncOperationResult"/>)</returns>
         public PixelSensorAsyncOperationResult ConfigureSensorWithDefaultCapabilities(PixelSensorId sensorType, params uint[] streams)
         {
+            if (streams.Length == 0)
+            {
+                Debug.LogError($"At least one stream must be specified.");
+                return PixelSensorAsyncOperationResult.FailedOperationResult;
+            }
+            
             if (!IsSensorConnected(sensorType, out var sensorOperation))
             {
                 return PixelSensorAsyncOperationResult.FailedOperationResult;
@@ -295,9 +301,9 @@ namespace MagicLeap.OpenXR.Features.PixelSensors
                     Debug.LogError($"Invalid stream index {streamIndex}");
                     return PixelSensorAsyncOperationResult.FailedOperationResult;
                 }
-
                 sensorOperation.EnumerateSensorCapabilities(streamIndex, out var capabilities);
-                foreach (var capability in capabilities)
+                var capabilitiesToConfigure = capabilities.Where(capability => IsCapabilityRequired(capability.CapabilityType));
+                foreach (var capability in capabilitiesToConfigure)
                 {
                     if (sensorOperation.QuerySensorCapability(capability.CapabilityType, streamIndex, out var range))
                     {
@@ -396,7 +402,7 @@ namespace MagicLeap.OpenXR.Features.PixelSensors
         /// <param name="metaData">The metadata for this frame</param>
         /// <param name="allocator">An allocator handle that will be used to allocate the memory for the underlying raw data</param>
         /// <param name="timeOut">The expected timeout for the data fetch</param>
-        /// <param name="shouldFlipTexture"> Whether to fip the obtained texture. The data stored in the sensor could be flipped. Pass in false if the raw data is needed</param>
+        /// <param name="shouldFlipTexture"> Whether to fip the obtained texture. The data stored in the sensor could be flipped. Pass in false if the raw data is needed (NOTE: This flag will be a no-op if the format does not support flipping (for example, Jpeg)</param>
         /// <returns>True if a frame was obtained</returns>
         public bool GetSensorData(PixelSensorId sensorType, uint streamIndex, out PixelSensorFrame frame, out PixelSensorMetaData[] metaData, Allocator allocator, long timeOut = 10, bool shouldFlipTexture = true)
         {
