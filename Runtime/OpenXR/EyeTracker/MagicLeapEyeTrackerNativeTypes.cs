@@ -8,8 +8,16 @@ namespace MagicLeap.OpenXR.Features.EyeTracker
         Left = 1,
         Right = 2
     }
+    
+    internal enum XrEyeTrackerPoseType
+    {
+        Gaze = 0,
+        Left = 1,
+        Right = 2,
+        Fixation = 3,
+    }
 
-    internal enum XrEyeTrackerConfidence
+    internal enum XrEyeTrackerConfidence : uint
     {
         Low = 0,
         Medium = 1,
@@ -28,12 +36,21 @@ namespace MagicLeap.OpenXR.Features.EyeTracker
         Saccade = 7
     }
 
-    internal enum XrEyeTrackerObjectTypes : ulong
+    [Flags]
+    internal enum XrEyeTrackerPoseFlags : ulong
+    {
+        Gaze = 0x00000001,
+        Left = 0x00000002,
+        Right = 0x00000004,
+        Fixation = 0x00000008
+    }
+
+    internal enum XrEyeTrackerObjectTypes : uint
     {
         XrObjectTypeEyeTracker = 1000484000U
     }
 
-    internal enum XrEyeTrackerStructTypes : ulong
+    internal enum XrEyeTrackerStructTypes : uint
     {
         XrTypeEyeTrackerCreateInfo = 1000484001U,
         XrTypeEyeTrackerStaticDataGetInfo = 1000484002U,
@@ -45,8 +62,10 @@ namespace MagicLeap.OpenXR.Features.EyeTracker
         XrTypeEyeTrackerGeometricData = 1000484008U,
         XrTypeEyeTrackerPupilDataGetInfo = 1000484009U,
         XrTypeEyeTrackerPupilData = 1000484010U,
-        XrTypeEyeTrackerMetaData = 1000484011U,
-        XrTypeSystemEyeTrackerProperties = 1000484012U
+        XrTypeSystemEyeTrackerProperties = 1000484011U,
+        XrTypeEyeTrackerPosesGetInfo = 1000484012U,
+        XrTypeEyeTrackerPoses = 1000484013U,
+        XrTypeEyeTrackerPose = 1000484014U,
     }
 
     internal struct XrSystemEyeTrackerProperties
@@ -132,16 +151,55 @@ namespace MagicLeap.OpenXR.Features.EyeTracker
         internal IntPtr Next;
         internal XrBool32 Valid;
         internal float Amplitude;
-        internal float Direction;
+        internal float Angle;
         internal float Velocity;
     }
 
-    internal struct XrEyeTrackerMetadata
+    internal struct XrEyeTrackerPosesGetInfo
+    {
+        internal XrEyeTrackerStructTypes Type;
+        internal IntPtr Next;
+        internal XrSpace BaseSpace;
+        internal long Time;
+        internal XrEyeTrackerPoseFlags PoseFlags;
+    }
+
+    internal struct XrEyeTrackerPose
     {
         internal XrEyeTrackerStructTypes Type;
         internal IntPtr Next;
         internal XrBool32 Valid;
+        internal XrPose Pose;
         internal long Time;
         internal XrEyeTrackerConfidence Confidence;
+    }
+
+    internal struct XrEyeTrackerPoses
+    {
+        internal XrEyeTrackerStructTypes Type;
+        internal IntPtr Next;
+        internal XrEyeTrackerPose GazePose;
+        internal XrEyeTrackerPose LeftPose;
+        internal XrEyeTrackerPose RightPose;
+        internal XrEyeTrackerPose FixationPose;
+        
+        internal static XrEyeTrackerPoses Create()
+        {
+            var result = new XrEyeTrackerPoses()
+            {
+                Type = XrEyeTrackerStructTypes.XrTypeEyeTrackerPoses,
+            };
+            var pose = new XrEyeTrackerPose()
+            {
+                Type = XrEyeTrackerStructTypes.XrTypeEyeTrackerPose
+            };
+
+            result.GazePose = pose;
+            result.LeftPose = pose;
+            result.RightPose = pose;
+            result.FixationPose = pose;
+            
+            return result;
+        }
     }
 }

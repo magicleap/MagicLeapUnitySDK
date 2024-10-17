@@ -10,6 +10,7 @@
 
 using System;
 using System.Runtime.InteropServices;
+using MagicLeap.Android.NDK.NativeWindow;
 
 namespace UnityEngine.XR.MagicLeap
 {
@@ -21,14 +22,14 @@ namespace UnityEngine.XR.MagicLeap
         }
         public interface IFrameTransformMatrixProvider
         {
-            internal bool GetFrameTransformMatrix(float[] frameTransformMatColMajor);
+            internal bool GetFrameTransformMatrix(ref Matrix4x4 frameTransformMatColMajor);
         }
         
         public interface IHardwareBufferProvider
         {
-            internal bool AcquireNextAvailableHwBuffer(out IntPtr hwBuffer);
+            public bool AcquireNextAvailableHwBuffer(out AHardwareBuffer hwBuffer);
 
-            internal void ReleaseHwBuffer(IntPtr hwBuffer);
+            public void ReleaseHwBuffer(AHardwareBuffer hwBuffer);
         }
         
         public interface IYCbCrConversionSamplerProvider

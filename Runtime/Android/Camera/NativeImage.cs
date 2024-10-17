@@ -119,6 +119,12 @@ namespace MagicLeap.Android
             this.requestHandle = requestHandle;
         }
 
+        public bool TryGetHardwareBuffer(out AHardwareBuffer hardwareBuffer)
+        {
+            hardwareBuffer = default;
+            return image.IsCreated && image.TryGetHardwareBuffer(out hardwareBuffer);
+        }
+
         public void Dispose()
         {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
@@ -396,6 +402,7 @@ namespace MagicLeap.Android
                 tryGetPlane = &TryGetPlane,
                 tryLockData = &TryLockData,
                 tryUnlockData = &TryUnlockData,
+                tryGetHardwareBuffer = &TryGetHardwareBuffer
             };
 
             return new UnsafeImage(vtable, allocator);
@@ -414,6 +421,12 @@ namespace MagicLeap.Android
         private static long GetTimestamp(void* obj) => CheckPointerAndThrow(obj)->timestamp;
 
         private static int GetWidth(void* obj) => (int)CheckPointerAndThrow(obj)->desc.Width;
+
+        private static bool TryGetHardwareBuffer(void* data, out AHardwareBuffer hardwareBuffer)
+        {
+            hardwareBuffer = CheckPointerAndThrow(data)->buffer;
+            return true;
+        }
 
         private static bool TryGetPlane(void* obj, int planeIdx, UnsafePlane* outPlane)
         {
@@ -505,8 +518,9 @@ namespace MagicLeap.Android
                 tryGetPlane = &TryGetPlane,
                 tryLockData = null,
                 tryUnlockData = null,
+                tryGetHardwareBuffer = &TryGetHardwareBuffer
             };
-
+            
             return new UnsafeImage(vtable, allocator);
         }
 
@@ -539,6 +553,12 @@ namespace MagicLeap.Android
             var layout = new DataLayout(image.Width, image.Height, pixelStride, rowStride,
                 image.Format.BytesPerPixel());
             *outPlane = new UnsafePlane(buffer, layout);
+            return true;
+        }
+
+        private static bool TryGetHardwareBuffer(void* data, out AHardwareBuffer hardwareBuffer)
+        {
+            hardwareBuffer = CheckPointerAndThrow(data)->image.HardwareBuffer;
             return true;
         }
 

@@ -172,6 +172,7 @@ namespace MagicLeap.OpenXR.Subsystems
                 public ulong AnchorId;
                 public string AnchorMapPositionId;
                 public XRAnchor AnchorObject;
+                public ulong AnchorFuture;
             }
 
             private HashSet<ulong> pendingFutures = new HashSet<ulong>();
@@ -262,17 +263,18 @@ namespace MagicLeap.OpenXR.Subsystems
                             if (result)
                             {
                                 Pose currentPose = GetAnchorPoseFromID(currentSpace);
-
                                 bool found = false;
                                 for (int i = 0; i < currentAnchors.Count; i++)
                                 {
-                                    if (currentAnchors[i].AnchorObject.pose == currentPose)
+                                    if (currentAnchors[i].AnchorFuture == future)
                                     {
-                                        var updatedAnchor = new AnchorSubsystemAnchorData();
-                                        updatedAnchor.AnchorId = currentSpace;
-                                        updatedAnchor.AnchorObject = new XRAnchor(currentAnchors[i].AnchorObject.trackableId, currentPose, TrackingState.Tracking, IntPtr.Zero);
+                                        var updatedAnchor = new AnchorSubsystemAnchorData
+                                        {
+                                            AnchorId = currentSpace,
+                                            AnchorObject = new XRAnchor(currentAnchors[i].AnchorObject.trackableId, currentPose, TrackingState.Tracking, IntPtr.Zero),
+                                            AnchorFuture = Values.InvalidHandle
+                                        };
                                         currentAnchors[i] = updatedAnchor;
-
                                         updatedAnchors.Add(updatedAnchor.AnchorObject);
                                         found = true;
                                         break;
@@ -387,7 +389,7 @@ namespace MagicLeap.OpenXR.Subsystems
                         AnchorSubsystemAnchorData newAnchor = new AnchorSubsystemAnchorData();
                         newAnchor.AnchorId = 0u;
                         newAnchor.AnchorObject = new XRAnchor(newId, pose, TrackingState.None, IntPtr.Zero);
-
+                        newAnchor.AnchorFuture = pendingFuture;
                         xrAnchor = newAnchor.AnchorObject;
 
                         currentAnchors.Add(newAnchor);

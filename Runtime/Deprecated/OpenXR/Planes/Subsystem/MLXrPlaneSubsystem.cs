@@ -29,7 +29,7 @@ namespace UnityEngine.XR.OpenXR.Features.MagicLeapSupport
     ///     The Magic Leap implementation of the <c>XRPlaneSubsystem</c>. Do not create this directly.
     ///     Use <c>PlanesSubsystemDescriptor.Create()</c> instead.
     /// </summary>
-    [Preserve]
+    [Preserve, Obsolete("Type has been relocated to new namespace. Update reference to MagicLeap.OpenXR.Subsystems")]
     public sealed partial class MLXrPlaneSubsystem : XRPlaneSubsystem
     {
         private static PlanesQuery QueryInternal;

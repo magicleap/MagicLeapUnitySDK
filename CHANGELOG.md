@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.5.0]
+
+### Bugfixes
+- Fixed an issue with `MagicLeapSpatialAnchorsFeature` where anchor creation would sometimes fail.
+
+### Deprecations & Removals
+- Deprecated `UnityEngine.XR.OpenXR.Features.MagicLeapSupport.MLXrPlaneSubsystem`. Use `MagicLeap.OpenXR.Subsystems.MLXrPlaneSubsystem` instead.
+
+### Features
+- Removed interaction profile data from `MagicLeapEyeTrackerFeature` and added ability to query tracker metadata.
+
 ## [2.4.0]
 
 ### Bugfixes 
@@ -8,6 +19,7 @@
 - Fixed an issue with `MagicLeapPixelSensorFeature.ConfigureSensorWithDefaultCapabilities` function where it would fail for sensors with AutoExposure capabilities.
 - Fixed a crash when using `Magic Leap 2 Physical Occlusion` with editor versions starting from `2022.3.25f1` onward.
 - Fixed an issue with `MagicLeapUserCalibrationFeature` where it reports incorrect `EyeCalibrationData.Status`.
+
 
 ### Deprecations & Removals
 - Deprecated `YcbcrRenderer` and its associated classes. Please use `YCbCrRenderer` instead.

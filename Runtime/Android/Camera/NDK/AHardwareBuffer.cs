@@ -569,10 +569,7 @@ namespace MagicLeap.Android.NDK.NativeWindow
 
         internal void ReleaseUnchecked()
             => AHardwareBuffer_release(this);
-
-        internal IntPtr GetNativeHandle() => value;
-
-
+        
         [Conditional("DEVELOPMENT_BUILD")]
         internal void CheckMultiPlanarAndThrow(bool expectedMultiPlanar = true)
         {

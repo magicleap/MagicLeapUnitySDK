@@ -11,7 +11,7 @@
 using System;
 using System.Runtime.InteropServices;
 using AOT;
-using UnityEngine.XR.MagicLeap.Native;
+using MagicLeap.Android.NDK.NativeWindow;
 
 namespace UnityEngine.XR.MagicLeap
 {
@@ -74,14 +74,14 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="success">Whether a new native buffer handle was acquired</param>
             /// <param name="hwBuffer">Acquired native buffer handle</param>
             /// <param name="context">User context passed during instance creation</param>
-            public delegate void AcquireNextAvailableHwBufferDelegate([MarshalAs(UnmanagedType.I1)][In][Out] ref bool success, [In][Out] ref IntPtr hwBuffer, IntPtr context);
+            public delegate void AcquireNextAvailableHwBufferDelegate([MarshalAs(UnmanagedType.I1)][In][Out] ref bool success, [In][Out] ref AHardwareBuffer hwBuffer, IntPtr context);
             
             /// <summary>
             /// Delegate signature for the callback invoked by the native rendering plugin, requesting the
             /// given AHardwareBuffer to be released.
             /// </summary>
             /// <param name="context">User context passed during instance creation</param>
-            public delegate void ReleaseHwBufferDelegate(IntPtr hwBuffer, IntPtr context);
+            public delegate void ReleaseHwBufferDelegate(AHardwareBuffer hwBuffer, IntPtr context);
 
             /// <summary>
             /// Delegate signature for the callback invoked by the native rendering plugin, requesting the
@@ -90,7 +90,7 @@ namespace UnityEngine.XR.MagicLeap
             /// <param name="success">Whether a valid frame transform matrix was provided</param>
             /// <param name="frameMat">Frame transform matrix</param>
             /// <param name="context">User context passed during instance creation</param>
-            public delegate void GetFrameTransformMatrixDelegate([MarshalAs(UnmanagedType.I1)][In][Out] ref bool success, [In][Out] ref MagicLeapNativeBindings.MLMat4f frameMat, IntPtr context);
+            public delegate void GetFrameTransformMatrixDelegate([MarshalAs(UnmanagedType.I1)][In][Out] ref bool success, [In][Out] ref Matrix4x4 frameMat, IntPtr context);
 
             public delegate void IsNewFrameAvailableDelegate([MarshalAs(UnmanagedType.I1)][In][Out] ref bool success, IntPtr context);
 
@@ -101,7 +101,7 @@ namespace UnityEngine.XR.MagicLeap
             public delegate void OverrideYCbCrConversionSamplerDelegate([In] ref VkAndroidHardwareBufferFormatPropertiesAndroid hwBufferFormatProperties, [MarshalAs(UnmanagedType.I1)][In][Out] ref bool samplerChanged, [In][Out] ref VkSamplerYCbCrConversionCreateInfo sampler, IntPtr context);
             
             [MonoPInvokeCallback(typeof(AcquireNextAvailableHwBufferDelegate))]
-            private static void AcquireNextAvailableHwBuffer([MarshalAs(UnmanagedType.I1)][In][Out] ref bool success, [In][Out] ref IntPtr hwBuffer, IntPtr context)
+            private static void AcquireNextAvailableHwBuffer([MarshalAs(UnmanagedType.I1)][In][Out] ref bool success, [In][Out] ref AHardwareBuffer hwBuffer, IntPtr context)
             {
                 var gCHandle = GCHandle.FromIntPtr(context);
                 if (gCHandle.Target is not IHardwareBufferProvider provider)
@@ -113,7 +113,7 @@ namespace UnityEngine.XR.MagicLeap
             }
             
             [MonoPInvokeCallback(typeof(ReleaseHwBufferDelegate))]
-            private static void ReleaseHwBuffer(IntPtr hwBuffer, IntPtr context)
+            private static void ReleaseHwBuffer(AHardwareBuffer hwBuffer, IntPtr context)
             {
                 var gCHandle = GCHandle.FromIntPtr(context);
                 var provider = gCHandle.Target as IHardwareBufferProvider;
@@ -121,14 +121,14 @@ namespace UnityEngine.XR.MagicLeap
             }
 
             [MonoPInvokeCallback(typeof(GetFrameTransformMatrixDelegate))]
-            private static void GetFrameTransformMatrix([MarshalAs(UnmanagedType.I1)][In][Out] ref bool success, [In][Out] ref MagicLeapNativeBindings.MLMat4f frameMat, IntPtr context)
+            private static void GetFrameTransformMatrix([MarshalAs(UnmanagedType.I1)][In][Out] ref bool success, [In][Out] ref Matrix4x4 frameMat, IntPtr context)
             {
                 var gCHandle = GCHandle.FromIntPtr(context);
                 if (gCHandle.Target is not IFrameTransformMatrixProvider provider)
                 {
                     return;
                 }
-                success = provider.GetFrameTransformMatrix(frameMat.MatrixColmajor);
+                success = provider.GetFrameTransformMatrix(ref frameMat);
             }
 
             [MonoPInvokeCallback(typeof(IsNewFrameAvailableDelegate))]

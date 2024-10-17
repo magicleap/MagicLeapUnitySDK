@@ -8,25 +8,10 @@
 // ---------------------------------------------------------------------
 // %BANNER_END%
 
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
+using System;
 using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.OpenXR;
-using UnityEngine.XR.OpenXR.Features;
-using UnityEngine.XR.OpenXR.Features.Interactions;
-using UnityEngine.XR.OpenXR.Features.MagicLeapSupport;
-using UnityEngine.InputSystem.Layouts;
-using UnityEngine.InputSystem.XR;
-using UnityEngine.Scripting;
-using UnityEngine.XR.OpenXR.Input;
-using MagicLeap.OpenXR.NativeDelegates;
-
-#if USE_INPUT_SYSTEM_POSE_CONTROL
-using PoseControl = UnityEngine.InputSystem.XR.PoseControl;
-#else
-using PoseControl = UnityEngine.XR.OpenXR.Input.PoseControl;
-#endif
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -46,47 +31,17 @@ namespace MagicLeap.OpenXR.Features.EyeTracker
         OpenxrExtensionStrings = "XR_ML_eye_tracker"
     )]
 #endif
-    public partial class MagicLeapEyeTrackerFeature : MagicLeapOpenXRInteractionFeatureBase
+    public partial class MagicLeapEyeTrackerFeature : MagicLeapOpenXRFeatureBase
     {
         public const string FeatureId = "com.magicleap.openxr.feature.ml2_eyetracker";
         public const string ExtensionName = "XR_ML_eye_tracker";
+
+        [Obsolete("DeviceLocalizedName is no longer applicable since MagicLeapEyeTrackerFeature is no longer an interaction profile. Therefore it is no longer an InputDevice and Eye Tracking Data must be received through MagicLeapEyeTrackerFeature.GetEyeTrackerData().")]
         public const string DeviceLocalizedName = "Magic Leap Eye Tracker OpenXR";
-        private const string UserPath = "/user/eyes_ml";
-        private const string Profile = "/interaction_profiles/ml/eye_tracker_interaction_ml";
-        private const string GazePose = "/input/gaze_ml/pose";
-        private const string LeftPose = "/input/left_center_ml/pose";
-        private const string RightPose = "/input/right_center_ml/pose";
-        private const string VergencePose = "/input/vergence_ml/pose";
 
         private EyeTrackerNativeFunctions nativeFunctions;
 
         protected override bool UsesExperimentalExtensions => true;
-        protected override string LayoutName => "EyeTracker";
-
-        [Preserve, InputControlLayout(displayName = "Eye Tracker (Magic Leap)", isGenericTypeOfDevice = true)]
-        public class EyeTrackerDevice : OpenXRDevice
-        {
-            [Preserve, InputControl(offset = 0, usages = new[] { "gaze", "gazePose" })]
-            public PoseControl gazePose { get; private set; }
-
-            [Preserve, InputControl(offset = 1, usages = new[] { "left", "leftPose" })]
-            public PoseControl leftPose { get; private set; }
-
-            [Preserve, InputControl(offset = 2, usages = new[] { "right", "rightPose" })]
-            public PoseControl rightPose { get; private set; }
-
-            [Preserve, InputControl(offset = 3, usages = new[] { "vergence", "vergencePose" })]
-            public PoseControl vergencePose { get; private set; }
-
-            protected override void FinishSetup()
-            {
-                base.FinishSetup();
-                gazePose = GetChildControl<PoseControl>("gazePose");
-                leftPose = GetChildControl<PoseControl>("leftPose");
-                rightPose = GetChildControl<PoseControl>("rightPose");
-                vergencePose = GetChildControl<PoseControl>("vergencePose");
-            }
-        }
 
         protected override bool OnInstanceCreate(ulong xrInstance)
         {
@@ -97,138 +52,16 @@ namespace MagicLeap.OpenXR.Features.EyeTracker
                 {
                     nativeFunctions = CreateNativeFunctions<EyeTrackerNativeFunctions>();
                 }
+
                 return result;
             }
+
             Debug.LogError($"{ExtensionName} is not enabled. Disabling {nameof(MagicLeapEyeTrackerFeature)}");
             return false;
         }
-
-        protected override void RegisterDeviceLayout()
-        {
-            base.RegisterDeviceLayout();
-
-            UnityEngine.InputSystem.InputSystem.RegisterLayout(typeof(EyeTrackerDevice),
-                LayoutName,
-                matches: new InputDeviceMatcher()
-                    .WithInterface(XRUtilities.InterfaceMatchAnyVersion)
-                    .WithProduct(DeviceLocalizedName));
-        }
-
-        protected override InteractionProfileType GetInteractionProfileType()
-        {
-            base.GetInteractionProfileType();
-
-            return typeof(EyeTrackerDevice).IsSubclassOf(typeof(XRController)) ? InteractionProfileType.XRController : InteractionProfileType.Device;
-        }
-
-        protected override void RegisterActionMapsWithRuntime()
-        {
-            base.RegisterActionMapsWithRuntime();
-
-            ActionMapConfig actionMap = new ActionMapConfig()
-            {
-                name = "eyetracker",
-                localizedName = DeviceLocalizedName,
-                desiredInteractionProfile = Profile,
-                manufacturer = "",
-                serialNumber = "",
-                deviceInfos = new List<DeviceConfig>()
-                {
-                    new DeviceConfig()
-                    {
-                        characteristics = InputDeviceCharacteristics.TrackedDevice | InputDeviceCharacteristics.EyeTracking | InputDeviceCharacteristics.HeadMounted,
-                        userPath = UserPath
-                    }
-                },
-                actions = new List<ActionConfig>()
-                {
-                    // Gaze Pose
-                    new ActionConfig()
-                    {
-                        name = "gazePose",
-                        localizedName = "GazePose",
-                        type = ActionType.Pose,
-                        usages = new List<string>()
-                        {
-                            "gaze",
-                            "gazePose"
-                        },
-                        bindings = new List<ActionBinding>()
-                        {
-                            new ActionBinding()
-                            {
-                                interactionPath = GazePose,
-                                interactionProfileName = Profile
-                            }
-                        }
-                    },
-                    // Left Pose
-                    new ActionConfig()
-                    {
-                        name = "leftPose",
-                        localizedName = "LeftPose",
-                        type = ActionType.Pose,
-                        usages = new List<string>()
-                        {
-                            "left",
-                            "leftPose"
-                        },
-                        bindings = new List<ActionBinding>()
-                        {
-                            new ActionBinding()
-                            {
-                                interactionPath = LeftPose,
-                                interactionProfileName = Profile
-                            }
-                        }
-                    },
-                    // Right Pose
-                    new ActionConfig()
-                    {
-                        name = "rightPose",
-                        localizedName = "RightPose",
-                        type = ActionType.Pose,
-                        usages = new List<string>()
-                        {
-                            "right",
-                            "rightPose"
-                        },
-                        bindings = new List<ActionBinding>()
-                        {
-                            new ActionBinding()
-                            {
-                                interactionPath = RightPose,
-                                interactionProfileName = Profile
-                            }
-                        }
-                    },
-                    // Vergence Pose
-                    new ActionConfig()
-                    {
-                        name = "vergencePose",
-                        localizedName = "VergencePose",
-                        type = ActionType.Pose,
-                        usages = new List<string>()
-                        {
-                            "vergence",
-                            "vergencePose"
-                        },
-                        bindings = new List<ActionBinding>()
-                        {
-                            new ActionBinding()
-                            {
-                                interactionPath = VergencePose,
-                                interactionProfileName = Profile
-                            }
-                        }
-                    }
-                }
-            };
-
-            AddActionMap(actionMap);
-        }
     }
-
+    
+    [Obsolete("EyeTrackerUsages is no longer applicable since MagicLeapEyeTrackerFeature is no longer an interaction profile. Therefore it is no longer an InputDevice and Eye Tracking Data must be received through MagicLeapEyeTrackerFeature.GetEyeTrackerData().")]
     public static class EyeTrackerUsages
     {
         public static InputFeatureUsage<Vector3> gazePosition = new InputFeatureUsage<Vector3>("gazePosition");

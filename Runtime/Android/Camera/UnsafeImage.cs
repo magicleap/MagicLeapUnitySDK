@@ -37,6 +37,8 @@
             public delegate*<void*, bool> tryLockData;
             [NativeDisableUnsafePtrRestriction]
             public delegate*<void*, bool> tryUnlockData;
+            [NativeDisableUnsafePtrRestriction] 
+            public delegate*<void*, out AHardwareBuffer, bool> tryGetHardwareBuffer;
         }
 
         private VTable* vTable;
@@ -117,6 +119,18 @@
             vTable = null;
             allocator = Allocator.Invalid;
         }
+
+        public bool TryGetHardwareBuffer(out AHardwareBuffer hardwareBuffer)
+        {
+            CheckVTableAndThrow();
+            if (vTable->tryGetHardwareBuffer != null)
+            {
+                return vTable->tryGetHardwareBuffer(vTable->data, out hardwareBuffer);
+            }
+            hardwareBuffer = default;
+            return false;
+        }
+        
 
         public bool TryGetPlane(int planeIdx, out UnsafePlane outPlane)
         {

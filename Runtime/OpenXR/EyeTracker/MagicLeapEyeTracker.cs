@@ -1,10 +1,8 @@
 using System;
-using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
-using UnityEngine;
-using UnityEngine.XR.MagicLeap.Native;
+using UnityEngine.XR.OpenXR;
 
 namespace MagicLeap.OpenXR.Features.EyeTracker
 {
@@ -32,15 +30,26 @@ namespace MagicLeap.OpenXR.Features.EyeTracker
         {
             EyeTrackerData eyeTrackerData = new EyeTrackerData();
 
-            eyeTrackerData.StaticData = GetStaticData();
-            eyeTrackerData.GeometricData = GetGeometricData();
-            eyeTrackerData.PupilData = GetPupilData();
-            eyeTrackerData.GazeBehaviorData = GetGazeBehavior();
+            eyeTrackerData.StaticData = GetStaticDataInternal();
+            eyeTrackerData.GeometricData = GetGeometricDataInternal();
+            eyeTrackerData.PupilData = GetPupilDataInternal();
+            eyeTrackerData.GazeBehaviorData = GetGazeBehaviorInternal();
+            eyeTrackerData.PosesData = GetPosesDataInternal();
 
             return eyeTrackerData;
         }
 
-        private unsafe StaticData GetStaticData()
+        public StaticData GetStaticData() => GetStaticDataInternal();
+        
+        public GeometricData[] GetGeometricData() => GetGeometricDataInternal();
+        
+        public PupilData[] GetPupilData() => GetPupilDataInternal();
+
+        public GazeBehavior GetGazeBehavior() => GetGazeBehaviorInternal();
+
+        public PosesData GetPosesData() => GetPosesDataInternal();
+
+        private unsafe StaticData GetStaticDataInternal()
         {
             Utils.OpenXRStructHelpers<XrEyeTrackerStaticDataGetInfo>.Create(XrEyeTrackerStructTypes.XrTypeEyeTrackerStaticDataGetInfo, out var staticDataGetInfo);
             Utils.OpenXRStructHelpers<XrEyeTrackerStaticData>.Create(XrEyeTrackerStructTypes.XrTypeEyeTrackerStaticData, out var eyeTrackerStaticData);
@@ -56,7 +65,7 @@ namespace MagicLeap.OpenXR.Features.EyeTracker
             return staticData;
         }
 
-        private unsafe GeometricData[] GetGeometricData()
+        private unsafe GeometricData[] GetGeometricDataInternal()
         {
             Utils.OpenXRStructHelpers<XrEyeTrackerGeometricDataGetInfo>.Create(XrEyeTrackerStructTypes.XrTypeEyeTrackerGeometricDataGetInfo, out var geometricDataGetInfo);
 
@@ -86,7 +95,7 @@ namespace MagicLeap.OpenXR.Features.EyeTracker
             return geometricData;
         }
 
-        private unsafe PupilData[] GetPupilData()
+        private unsafe PupilData[] GetPupilDataInternal()
         {
             Utils.OpenXRStructHelpers<XrEyeTrackerPupilDataGetInfo>.Create(XrEyeTrackerStructTypes.XrTypeEyeTrackerPupilDataGetInfo, out var pupilDataGetInfo);
 
@@ -115,7 +124,7 @@ namespace MagicLeap.OpenXR.Features.EyeTracker
             return pupilData;
         }
 
-        private unsafe GazeBehavior GetGazeBehavior()
+        private unsafe GazeBehavior GetGazeBehaviorInternal()
         {
             Utils.OpenXRStructHelpers<XrEyeTrackerGazeBehaviorGetInfo>.Create(XrEyeTrackerStructTypes.XrTypeEyeTrackerGazeBehaviorGetInfo, out var gazeGetInfo);
             Utils.OpenXRStructHelpers<XrEyeTrackerGazeBehaviorMetaData>.Create(XrEyeTrackerStructTypes.XrTypeEyeTrackerGazeBehaviorMetaData, out var gazeMetaDataNative);
@@ -132,7 +141,7 @@ namespace MagicLeap.OpenXR.Features.EyeTracker
             {
                 Valid = gazeMetaDataNative.Valid,
                 Amplitude = gazeMetaDataNative.Amplitude,
-                Direction = gazeMetaDataNative.Direction,
+                Direction = gazeMetaDataNative.Angle,
                 Velocity = gazeMetaDataNative.Velocity
             };
 
@@ -148,6 +157,43 @@ namespace MagicLeap.OpenXR.Features.EyeTracker
             };
 
             return gazeData;
+        }
+
+        private unsafe PosesData GetPosesDataInternal()
+        {
+            Utils.OpenXRStructHelpers<XrEyeTrackerPosesGetInfo>.Create(XrEyeTrackerStructTypes.XrTypeEyeTrackerPosesGetInfo, out var posesGetInfo);
+
+            posesGetInfo.BaseSpace = AppSpace;
+            posesGetInfo.Time = NextPredictedDisplayTime;
+
+            posesGetInfo.PoseFlags = XrEyeTrackerPoseFlags.Gaze | XrEyeTrackerPoseFlags.Left |
+                                     XrEyeTrackerPoseFlags.Right | XrEyeTrackerPoseFlags.Fixation;
+
+            var poses = XrEyeTrackerPoses.Create();
+            
+            var resultCode = nativeFunctions.XrGetEyeTrackerPoses(eyeTracker, in posesGetInfo, ref poses);
+            Utils.DidXrCallSucceed(resultCode, nameof(nativeFunctions.XrGetEyeTrackerPoses));
+            
+            var posesOutput = new PosesData()
+            {
+                Result = resultCode
+            };
+            
+            ConvertPoseData(poses.GazePose, ref posesOutput.GazePose);
+            ConvertPoseData(poses.LeftPose, ref posesOutput.LeftPose);
+            ConvertPoseData(poses.RightPose, ref posesOutput.RightPose);
+            ConvertPoseData(poses.FixationPose, ref posesOutput.FixationPose);
+            
+            return posesOutput;
+        }
+
+        private void ConvertPoseData(XrEyeTrackerPose nativePoseData, ref PoseData outputPoseData)
+        {
+            outputPoseData.Valid = nativePoseData.Valid;
+            outputPoseData.Pose.position = nativePoseData.Pose.Position.ConvertBetweenUnityOpenXr();
+            outputPoseData.Pose.rotation = nativePoseData.Pose.Rotation.ConvertBetweenUnityOpenXr();
+            outputPoseData.Time = nativePoseData.Time;
+            outputPoseData.Confidence = (Confidence)nativePoseData.Confidence;
         }
     }
 }

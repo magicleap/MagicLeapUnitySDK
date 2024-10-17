@@ -289,22 +289,24 @@ namespace MagicLeap.OpenXR
             {
                 return;
             }
-
-            var secondaryLayerInfo = secondaryView->ViewConfigurationLayersInfo;
-            var secondaryLayers = (XrCompositionLayerBaseHeader**)secondaryLayerInfo->Layers;
-            if (secondaryLayers == null)
+            for (var i = 0; i < secondaryView->ViewConfigurationCount; i++)
             {
-                return;
-            }
-
-            for (var i = 0; i < secondaryLayerInfo->LayerCount; i++)
-            {
-                var layer = secondaryLayers[i];
-                if (layer == null || layer->Type != XrStructureType.XrTypeCompositionLayerProjection)
+                var secondaryLayerInfo = secondaryView->ViewConfigurationLayersInfo[i];
+                var secondaryLayers = (XrCompositionLayerBaseHeader**)secondaryLayerInfo.Layers;
+                if (secondaryLayers == null)
                 {
                     continue;
                 }
-                layer->AppendToLayer(nativePtr, index);
+
+                for (var j = 0; j < secondaryLayerInfo.LayerCount; j++)
+                {
+                    var layer = secondaryLayers[j];
+                    if (layer == null || layer->Type != XrStructureType.XrTypeCompositionLayerProjection)
+                    {
+                        continue;
+                    }
+                    layer->AppendToLayer(nativePtr, index);
+                }
             }
         }
     }

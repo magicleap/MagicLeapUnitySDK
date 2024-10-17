@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.XR.OpenXR.NativeTypes;
 
@@ -97,15 +98,28 @@ namespace MagicLeap.OpenXR.Features.EyeTracker
         public float Direction;
         public float Velocity;
     }
-
+    
     /// <summary>
-    /// Metadata about the eye tracker, such as the confidence.
+    /// Pose data associated with a pose (e.g. gaze, left, right, vergence).
     /// </summary>
-    public struct Metadata
+    public struct PoseData
     {
         public bool Valid;
+        public Pose Pose;
         public long Time;
         public Confidence Confidence;
+    }
+
+    /// <summary>
+    /// Poses data of an eye tracker.
+    /// </summary>
+    public struct PosesData
+    {
+        public XrResult Result;
+        public PoseData GazePose;
+        public PoseData LeftPose;
+        public PoseData RightPose;
+        public PoseData FixationPose;
     }
 
     /// <summary>
@@ -113,10 +127,10 @@ namespace MagicLeap.OpenXR.Features.EyeTracker
     /// </summary>
     public struct EyeTrackerData
     {
-        public Metadata Metadata;
         public StaticData StaticData;
         public GeometricData[] GeometricData;
         public PupilData[] PupilData;
         public GazeBehavior GazeBehaviorData;
+        public PosesData PosesData;
     }
 }
